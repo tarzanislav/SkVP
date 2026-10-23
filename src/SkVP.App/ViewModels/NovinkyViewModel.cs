@@ -94,6 +94,12 @@ public sealed class PolozkaNovinkyVM
 
     public bool JeOdporucanie => Polozka.Druh == NovinkyService.DruhOdporucanie;
 
+    /// <summary>Vybraná informácia – dôležitá alebo odporúčaná; v bloku je hore.</summary>
+    public bool JeVybrana => Dolezite || JeOdporucanie;
+
+    /// <summary>Dôležitá (nie odporúčanie) – zvýraznená inak ako odporúčania.</summary>
+    public bool JeDolezitaNieOdporucanie => Dolezite && !JeOdporucanie;
+
     /// <summary>Text na skopírovanie (nadpis, termín, text, poznámka, zdroje).</summary>
     public string TextNaKopirovanie => string.Join(Environment.NewLine, new[]
     {
@@ -159,19 +165,77 @@ public sealed class PolozkaNovinkyVM
 }
 
 /// <summary>
-/// Blok jednej témy: odporúčania hore, pod nimi najnovších <see cref="NovinkyService.NaStranu"/> informácií; staršie
-/// a uplynulé informácie sa nemažú – sú v histórii bloku na ďalších stranách.
+/// Blok jednej témy rozdelený na strany po <see cref="NovinkyService.NaStranu"/> informácií. Hore na každej strane sú
+/// vybrané informácie – najprv dôležité, potom odporúčané – najviac polovica strany; ostatné miesta zaberú najnovšie
+/// informácie. Keď príde novšia dôležitá (odporúčaná) informácia, staršia sa posunie na ďalšiu stranu (do histórie bloku),
+/// kde je opäť hore. Uplynulé termíny a informácie z predchádzajúcich údajov sú v histórii; nič sa nemaže.
 /// </summary>
 public sealed partial class BlokNoviniekVM : ObservableObject
 {
-    private readonly List<PolozkaNovinkyVM> _odporucania;
-    private readonly List<PolozkaNovinkyVM> _zoznam;
+    /// <summary>Najviac vybraných (dôležitých a odporúčaných) informácií na strane – polovica strany.</summary>
+    public const int MaxVybranychNaStranu = NovinkyService.NaStranu / 2;
 
-    public BlokNoviniekVM(KategoriaNoviniek kategoria, List<PolozkaNovinkyVM> odporucania, List<PolozkaNovinkyVM> zoznam)
+    private readonly List<List<PolozkaNovinkyVM>> _strany;
+
+    public BlokNoviniekVM(KategoriaNoviniek kategoria, IEnumerable<PolozkaNovinkyVM> polozky)
     {
         Kategoria = kategoria;
-        _odporucania = odporucania;
-        _zoznam = zoznam;
+        var vsetky = polozky.ToList();
+        Vsetky = vsetky;
+
+        // vybrané: aktuálne pred historickými, dôležité pred odporúčanými, novšie pred staršími
+        var vybrane = vsetky.Where(p => p.JeVybrana)
+            .OrderBy(p => p.JeVHistorii)
+            .ThenBy(p => p.Dolezite ? 0 : 1)
+            .ThenByDescending(p => p.Polozka.DatumPridania)
+            .ThenBy(Poradie)
+            .ThenBy(p => p.Polozka.Zaciatok ?? DateOnly.MaxValue)
+            .ToList();
+        // ostatné: aktuálne (najnovšie, novinky pred termínmi, termíny podľa dátumu), potom história
+        var bezne = vsetky.Where(p => !p.JeVybrana)
+            .OrderBy(p => p.JeVHistorii)
+            .ThenByDescending(p => p.JeVHistorii ? (p.Polozka.Koniec ?? p.Polozka.DatumPridania) : p.Polozka.DatumPridania)
+            .ThenBy(Poradie)
+            .ThenBy(p => p.Polozka.Zaciatok ?? DateOnly.MaxValue)
+            .ToList();
+        _strany = Rozdel(vybrane, bezne);
+    }
+
+    private static int Poradie(PolozkaNovinkyVM p) => p.Polozka.Druh == NovinkyService.DruhNovinka ? 0 : p.Polozka.Druh == NovinkyService.DruhTermin ? 1 : 2;
+
+    /// <summary>Rozdelenie na strany: najviac polovica strany vybraných hore, zvyšok bežné (ak bežné chýbajú, doplnia sa vybrané).</summary>
+    public static List<List<PolozkaNovinkyVM>> Rozdel(List<PolozkaNovinkyVM> vybrane, List<PolozkaNovinkyVM> bezne)
+    {
+        var strany = new List<List<PolozkaNovinkyVM>>();
+        int i = 0, j = 0;
+        while (i < vybrane.Count || j < bezne.Count)
+        {
+            var strana = new List<PolozkaNovinkyVM>();
+            while (strana.Count < MaxVybranychNaStranu && i < vybrane.Count)
+            {
+                strana.Add(vybrane[i++]);
+            }
+
+            while (strana.Count < NovinkyService.NaStranu && j < bezne.Count)
+            {
+                strana.Add(bezne[j++]);
+            }
+
+            while (strana.Count < NovinkyService.NaStranu && i < vybrane.Count)
+            {
+                strana.Add(vybrane[i++]);
+            }
+
+            // vybrané vždy hore (aj keď doplnili stranu)
+            strany.Add(strana.Where(p => p.JeVybrana).Concat(strana.Where(p => !p.JeVybrana)).ToList());
+        }
+
+        if (strany.Count == 0)
+        {
+            strany.Add(new List<PolozkaNovinkyVM>());
+        }
+
+        return strany;
     }
 
     public KategoriaNoviniek Kategoria { get; }
@@ -184,21 +248,22 @@ public sealed partial class BlokNoviniekVM : ObservableObject
     [NotifyPropertyChangedFor(nameof(Polozky), nameof(MaDalsiu), nameof(MaPredchadzajucu), nameof(JeHistoria), nameof(StranaText), nameof(DalsiaText))]
     private int _strana = 1;
 
-    /// <summary>Informácie na aktuálnej strane (na prvej aj odporúčania).</summary>
-    public List<PolozkaNovinkyVM> Polozky => Strana == 1
-        ? _odporucania.Concat(_zoznam.Take(NovinkyService.NaStranu)).ToList()
-        : _zoznam.Skip((Strana - 1) * NovinkyService.NaStranu).Take(NovinkyService.NaStranu).ToList();
+    /// <summary>Informácie na aktuálnej strane.</summary>
+    public List<PolozkaNovinkyVM> Polozky => _strany[Math.Clamp(Strana, 1, PocetStran) - 1];
 
     /// <summary>Všetky informácie bloku (všetky strany).</summary>
-    public IEnumerable<PolozkaNovinkyVM> Vsetky => _odporucania.Concat(_zoznam);
+    public IReadOnlyList<PolozkaNovinkyVM> Vsetky { get; }
 
-    public int PocetStran => Math.Max(1, (int)Math.Ceiling(_zoznam.Count / (double)NovinkyService.NaStranu));
+    /// <summary>Strany bloku (na kontrolu a pre samotest).</summary>
+    public IReadOnlyList<List<PolozkaNovinkyVM>> Strany => _strany;
+
+    public int PocetStran => _strany.Count;
     public bool MaDalsiu => Strana < PocetStran;
     public bool MaPredchadzajucu => Strana > 1;
     public bool JeHistoria => Strana > 1;
     public bool MaStrany => PocetStran > 1;
-    public int Pocet => _odporucania.Count + _zoznam.Count;
-    public int PocetVHistorii => Math.Max(0, _zoznam.Count - NovinkyService.NaStranu);
+    public int Pocet => Vsetky.Count;
+    public int PocetVHistorii => Pocet - _strany[0].Count;
     public string PocetText => Pocet switch { 1 => "1 informácia", <= 4 => $"{Pocet} informácie", _ => $"{Pocet} informácií" };
     public string StranaText => $"strana {Strana} z {PocetStran}";
 
@@ -584,19 +649,9 @@ public sealed partial class NovinkyViewModel : ObservableObject
 
         var podlaTemy = viditelne.Where(p => VybranaTema is null || p.Polozka.Kategoria == VybranaTema).ToList();
 
-        // v bloku: odporúčania hore, potom najnovšie informácie (dôležité novinky, novinky, termíny podľa dátumu), história na koniec
-        static int Poradie(PolozkaNovinkyVM p) => p.Polozka.Druh == NovinkyService.DruhNovinka ? (p.Dolezite ? 0 : 1) : 2;
+        // v bloku: hore dôležité a odporúčané (najviac polovica strany), potom najnovšie informácie, staršie v histórii bloku
         Bloky = kategorie
-            .Select(k =>
-            {
-                var vBloku = podlaTemy.Where(p => p.Polozka.Kategoria == k.Id).ToList();
-                var odporucania = vBloku.Where(p => p.JeOdporucanie && !p.JeVHistorii).ToList();
-                var aktualne = vBloku.Where(p => !p.JeOdporucanie && !p.JeVHistorii)
-                    .OrderByDescending(p => p.Polozka.DatumPridania).ThenBy(Poradie).ThenBy(p => p.Polozka.Zaciatok ?? DateOnly.MaxValue);
-                var historia = vBloku.Where(p => p.JeVHistorii)
-                    .OrderByDescending(p => p.Polozka.Koniec ?? p.Polozka.DatumPridania).ThenByDescending(p => p.Polozka.DatumPridania);
-                return new BlokNoviniekVM(k, odporucania, aktualne.Concat(historia).ToList());
-            })
+            .Select(k => new BlokNoviniekVM(k, podlaTemy.Where(p => p.Polozka.Kategoria == k.Id)))
             .Where(b => b.Pocet > 0)
             .ToList();
 

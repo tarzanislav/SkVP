@@ -1370,14 +1370,43 @@ internal static class Samotest
         Over(model.Bloky.SelectMany(b => b.Vsetky).Any(p => p.Polozka.Id == "ms-ematurita"), "hľadanie v Novinkách (bez diakritiky)");
         model.Hladat = "";
 
-        // blok: odporúčania hore, 6 najnovších informácií, staršie v histórii bloku (ďalšie strany)
+        // blok: hore dôležité, potom odporúčané (najviac polovica strany), 6 informácií na strane, staršie v histórii bloku
+        bool PravidlaStrany(List<PolozkaNovinkyVM> strana)
+        {
+            var vybrane = strana.TakeWhile(p => p.JeVybrana).Count();
+            var dolezitePredOdporucanymi = strana.Where(p => p.JeVybrana).Select(p => p.Dolezite ? 0 : 1).Zip(strana.Where(p => p.JeVybrana).Select(p => p.Dolezite ? 0 : 1).Skip(1))
+                .All(d => d.First <= d.Second);
+            return strana.Count <= NovinkyService.NaStranu && strana.Skip(vybrane).All(p => !p.JeVybrana)
+                   && (vybrane <= BlokNoviniekVM.MaxVybranychNaStranu || strana.All(p => p.JeVybrana)) && dolezitePredOdporucanymi;
+        }
+
+        Over(model.Bloky.All(b => b.Strany.All(PravidlaStrany) && b.Strany.Sum(st => st.Count) == b.Pocet),
+            "Novinky: na každej strane bloku sú hore dôležité, potom odporúčané – najviac polovica strany; nič nechýba");
         var maturita = model.Bloky.Single(b => b.Kategoria.Id == "maturita");
-        Over(maturita.Polozky[0].JeOdporucanie && maturita.Polozky.Count(p => !p.JeOdporucanie) == NovinkyService.NaStranu
-             && maturita.PocetStran >= 2 && maturita.MaDalsiu && !maturita.JeHistoria,
-            $"Novinky: blok Maturita – odporúčanie hore, {NovinkyService.NaStranu} informácií na strane, {maturita.PocetStran} strany");
+        Over(maturita.Polozky.Count == NovinkyService.NaStranu && maturita.Polozky[0].Dolezite && maturita.PocetStran >= 2 && maturita.MaDalsiu && !maturita.JeHistoria,
+            $"Novinky: blok Maturita – dôležité hore, {NovinkyService.NaStranu} informácií na strane, {maturita.PocetStran} strany");
         maturita.DalsiaCommand.Execute(null);
-        Over(maturita.Strana == 2 && maturita.JeHistoria && maturita.Polozky.Count is > 0 and <= NovinkyService.NaStranu && !maturita.Polozky.Any(p => p.JeOdporucanie),
-            "Novinky: odkaz na ďalšiu stranu bloku (história)");
+        Over(maturita.Strana == 2 && maturita.JeHistoria && maturita.Polozky.Count is > 0 and <= NovinkyService.NaStranu && maturita.Polozky[0].JeVybrana,
+            "Novinky: ďalšia strana bloku (história) – staršie dôležité a odporúčané sú opäť hore");
+
+        // novšia dôležitá informácia posunie staršiu do histórie; odporúčané rovnako
+        var kat = data.Kategorie.First();
+        PolozkaNovinkyVM Umela(string id, bool dolezite, string druh, string pridane) => new(new PolozkaNoviniek
+        {
+            Id = id, Kategoria = kat.Id, Druh = druh, Nazov = id, Text = id, Dolezite = dolezite, Pridane = pridane,
+            Zdroje = new() { new ZdrojNovinky { Nazov = "MŠVVaM SR", Url = "https://www.minedu.sk/" } },
+        }, kat, null, den);
+        var umele = new List<PolozkaNovinkyVM>
+        {
+            Umela("d1", true, NovinkyService.DruhNovinka, "2026-09-01"), Umela("d2", true, NovinkyService.DruhNovinka, "2026-09-10"),
+            Umela("d3", true, NovinkyService.DruhNovinka, "2026-09-20"), Umela("d4", true, NovinkyService.DruhNovinka, "2026-10-01"),
+            Umela("o1", false, NovinkyService.DruhOdporucanie, "2026-09-05"), Umela("o2", false, NovinkyService.DruhOdporucanie, "2026-10-02"),
+        };
+        umele.AddRange(Enumerable.Range(1, 7).Select(i => Umela($"b{i}", false, NovinkyService.DruhNovinka, $"2026-10-{i:00}")));
+        var umelyBlok = new BlokNoviniekVM(kat, umele);
+        string Ids(int strana) => string.Join(",", umelyBlok.Strany[strana].Select(p => p.Polozka.Id));
+        Over(Ids(0) == "d4,d3,d2,b7,b6,b5" && Ids(1) == "d1,o2,o1,b4,b3,b2" && Ids(2) == "b1",
+            $"Novinky: dôležité sa držia hore, kým nepríde novšia – staršie (aj odporúčané) idú do histórie hore ({Ids(0)} | {Ids(1)} | {Ids(2)})");
         maturita.PredchadzajucaCommand.Execute(null);
         Over(maturita.Strana == 1, "Novinky: návrat na novšie informácie");
         var kopia = maturita.Polozky[1].TextNaKopirovanie;

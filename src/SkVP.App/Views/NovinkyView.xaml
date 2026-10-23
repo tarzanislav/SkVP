@@ -133,6 +133,11 @@
                 <DataTrigger Binding="{Binding JeMinule}" Value="True">
                     <Setter TargetName="Karta" Property="Opacity" Value="0.7" />
                 </DataTrigger>
+                <!-- dôležité sú hore v bloku, zvýraznené hrubším okrajom a jemným podfarbením -->
+                <DataTrigger Binding="{Binding JeDolezitaNieOdporucanie}" Value="True">
+                    <Setter TargetName="Karta" Property="Background" Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=1C}" />
+                    <Setter TargetName="Karta" Property="BorderThickness" Value="7,2,2,2" />
+                </DataTrigger>
                 <!-- odporúčania sú hore v bloku, jemne podfarbené farbou bloku -->
                 <DataTrigger Binding="{Binding JeOdporucanie}" Value="True">
                     <Setter TargetName="Karta" Property="Background" Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}" />
