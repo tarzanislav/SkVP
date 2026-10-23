@@ -145,8 +145,8 @@ public sealed partial class DashboardViewModel
                                                               && p.Nazov.Contains("prázdniny", StringComparison.OrdinalIgnoreCase)
                                                               && p.Zaciatok <= dnes && p.Koniec >= dnes && JeVKraji(p));
             StavSkolskehoRoka = prazdniny is not null
-                ? $"Dnes: {prazdniny.Nazov.ToLower(Sk)} ({prazdniny.TerminText})"
-                : JeDnesVolno || dnes.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? "" : $"Školský rok {data.SkolskyRok} – vyučovací deň";
+                ? $"Dnes sú {prazdniny.Nazov.ToLower(Sk)} ({prazdniny.TerminText})"
+                : JeDnesVolno || dnes.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday ? "" : $"{data.SkolskyRok} – vyučovací deň";
             var termin = NovinkyService.NajblizsieTerminy(data, dnes, 10, lenDolezite: true).FirstOrDefault(p => JeVKraji(p) && p.Zaciatok > dnes)
                          ?? NovinkyService.NajblizsieTerminy(data, dnes, 10).FirstOrDefault(JeVKraji);
             NajblizsiTermin = termin is null ? "" : $"{termin.Nazov} – {termin.TerminText} ({NovinkyService.Odpocet(termin, dnes)})";

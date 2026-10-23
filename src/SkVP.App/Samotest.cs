@@ -1479,7 +1479,7 @@ internal static class Samotest
 
         var dashboard = new DashboardViewModel(new MainViewModel());
         dashboard.AktualizujDen(new DateOnly(2026, 10, 29));
-        Over(dashboard.MeninyDnes.Length > 0 && dashboard.StavSkolskehoRoka.StartsWith("Dnes: jesenné prázdniny", StringComparison.Ordinal)
+        Over(dashboard.MeninyDnes.Length > 0 && dashboard.StavSkolskehoRoka.StartsWith("Dnes sú jesenné prázdniny", StringComparison.Ordinal)
              && dashboard.NajblizsiTermin.Length > 0, "dashboard: meniny, prázdniny v školskom roku, najbližší termín z Noviniek");
         dashboard.AktualizujDen(new DateOnly(2026, 11, 17));
         Over(dashboard.JeDnesVolno || dashboard.Sviatky.Count > 0, "dashboard: sviatok 17. 11.");

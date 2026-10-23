@@ -63,7 +63,7 @@
 
                     <StackPanel Margin="0,0,20,0">
                         <TextBlock Text="{Binding DenVTyzdni}" FontSize="15" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        <TextBlock Text="{Binding DatumVelky}" FontFamily="{StaticResource PismoNadpisov}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap"
+                        <TextBlock Text="{Binding DatumVelky}" FontFamily="{StaticResource PismoNadpisov}" FontSize="27" FontWeight="SemiBold" TextWrapping="Wrap"
                                    Foreground="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                         <TextBlock Text="{Binding TyzdenText}" FontSize="14" Margin="0,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
@@ -82,11 +82,11 @@
                     <Border Grid.Column="2" BorderThickness="1,0,0,0" Padding="20,0,20,0"
                             BorderBrush="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}">
                         <StackPanel>
-                            <TextBlock Text="Sviatky a pamätné dni" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="Sviatky a pamätné dni" FontSize="14" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <Border CornerRadius="6" Padding="9,3" Margin="0,4,0,2" HorizontalAlignment="Left"
                                     Background="{Binding Source='#F7D774', Converter={StaticResource FarbaNaStetec}}"
                                     Visibility="{Binding JeDnesVolno, Converter={StaticResource BoolNaViditelnost}}">
-                                <TextBlock Text="Dnes je deň pracovného pokoja" FontSize="14" FontWeight="SemiBold" Foreground="#1F2933" />
+                                <TextBlock Text="Dnes je deň pracovného pokoja" FontSize="14" FontWeight="SemiBold" Foreground="#1F2933" TextWrapping="Wrap" />
                             </Border>
                             <ItemsControl ItemsSource="{Binding Sviatky}" Margin="0,4,0,0" Focusable="False"
                                           Visibility="{Binding MaSviatky, Converter={StaticResource BoolNaViditelnost}}">
@@ -100,7 +100,7 @@
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
-                            <TextBlock Text="Dnes nie je sviatok ani pamätný deň." FontSize="14.5" Margin="0,4,0,0"
+                            <TextBlock Text="Dnes nie je sviatok ani pamätný deň." FontSize="14.5" Margin="0,4,0,0" TextWrapping="Wrap"
                                        Visibility="{Binding MaSviatky, Converter={StaticResource InverzBoolNaViditelnost}}" />
                             <TextBlock Text="{Binding NajblizsiVolnyDen}" FontSize="13.5" TextWrapping="Wrap" Margin="0,8,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
@@ -133,7 +133,7 @@
                                     </ControlTemplate>
                                 </Button.Template>
                                 <StackPanel>
-                                    <TextBlock Text="Najbližší termín (Novinky)" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="Najbližší termín (Novinky)" FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                     <TextBlock Text="{Binding NajblizsiTermin}" FontSize="14.5" TextWrapping="Wrap" FontWeight="SemiBold" />
                                 </StackPanel>
                             </Button>
@@ -276,8 +276,9 @@
             <Border Style="{StaticResource Karta}" Padding="22,18" Margin="0,0,0,16"
                     Visibility="{Binding UkazPrazdniny, Converter={StaticResource BoolNaViditelnost}}">
                 <StackPanel>
-                    <DockPanel Margin="0,0,0,4">
-                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <WrapPanel Margin="0,0,0,6">
+                        <TextBlock Text="Prázdniny v školskom roku" Style="{StaticResource Podnadpis}" FontSize="19" Margin="0,0,24,6" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
                             <TextBlock Text="Školský rok:" FontSize="13.5" VerticalAlignment="Center" Margin="0,0,8,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <ComboBox ItemsSource="{Binding SkolskeRoky}" SelectedItem="{Binding VybranyRok}" MinWidth="120" Margin="0,0,16,0" />
@@ -286,8 +287,7 @@
                             <ComboBox ItemsSource="{Binding KrajePrazdnin}" SelectedItem="{Binding VybranyKrajPrazdnin}" MinWidth="140"
                                       ToolTip="Kraj školy – jarné prázdniny sa líšia podľa kraja" />
                         </StackPanel>
-                        <TextBlock Text="Prázdniny v školskom roku" Style="{StaticResource Podnadpis}" FontSize="19" Margin="0" VerticalAlignment="Center" />
-                    </DockPanel>
+                    </WrapPanel>
                     <TextBlock Text="{Binding ObdobieVyucovania}" FontSize="14" Margin="0,0,0,12" TextWrapping="Wrap"
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
 
