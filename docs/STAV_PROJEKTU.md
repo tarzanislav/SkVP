@@ -1,6 +1,6 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.24** (vetva `main` = `vyvoj/etapa1`)
+Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.37** (vetva `main` = `vyvoj/etapa1`)
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
@@ -61,7 +61,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Samotest `TestLogaAHlavicky`: hľadá body skúšobného loga na vykreslených stranách, kontroluje hlavičky a obrázky vo Worde,
   snímky `uvodna_strana_logo.png`, `hlavicka_*.png` na vetve `vystupy`.
 
-## Oprava názvu predmetu (23. 10. 2026, na vetve vyvoj/etapa1)
+## Oprava názvu predmetu (vydané vo v0.1.37)
 - V zozname predmetov oblasti je pri názve ceruzka (a F2) – oprava názvu priamo v riadku.
 - Nový názov predmetu alebo oblasti sa prenesie aj do textov dokumentov Word v programe (`PremenovanieVDokumentoch`):
   len celé výskyty, nie časť dlhšieho názvu iného predmetu/oblasti; formátovanie zostane; predtým sa zarchivuje verzia
@@ -69,7 +69,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - „Konverzácia z nemeckého jazyka“ → „Konverzácia v nemeckom jazyku“ (učebný plán, testovacia sada) + jednorazová úprava
   existujúcich databáz pri spustení (`Migracie`, značka `migracia.konverzacia_nj`).
 
-## Tlač, Import a export, Servis, Nastavenia (23. 10. 2026, na vetve vyvoj/etapa1)
+## Tlač, Import a export, Servis, Nastavenia (vydané vo v0.1.37)
 - Tlač ako v EviTA: vlastné okno tlače (`Views/TlacWindow`, `Pomocne/RozvrhTlace`, `ObojstrannaTlac`, `ObojstrannaWindow`)
   – náhľad listu, tlačiareň, kópie, obojstranná tlač so sprievodcom, 1/2/4/8 strán na list, opakovanie, brožúra,
   zväčšenie, rámik, sivá, zosvetlenie, bez pozadia, dierovač. Tlač ide priamo na tlačiareň (XPS), nie cez okno Windows
@@ -92,7 +92,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Cieľová platforma `net10.0-windows10.0.19041.0` (súčasti Windows na PDF a OCR, schválené používateľom).
 - OCR na GitHube má len angličtinu (diakritika sa stráca) – kvalitu importu PDF treba overiť na počítači používateľa.
 
-## Jazykové osnovy a úroveň (23. 10. 2026, na vetve vyvoj/etapa1)
+## Jazykové osnovy a úroveň (vydané vo v0.1.37)
 - Pri importe osnovy cudzieho jazyka sa sprievodca pýta na úroveň (B1, B2, bez úrovne); úroveň ide do názvu predmetu
   „Ruský jazyk – úroveň B1“ (aj B2) a do `objekt.vlastnosti` (uroven). Existujúci predmet sa pri importe premenuje na
   názov zo sprievodcu (aj v textoch dokumentov).
@@ -104,7 +104,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   súborom v zozname sa znova nepoužije (druhá profilácia KAJ = nový predmet).
 - Import celého priečinka (Import a export → Z priečinka…, v sprievodcovi Pridať priečinok…), súbory sa len čítajú.
 
-## Údaje z úvodnej tabuľky a archív školského roka (23. 10. 2026, na vetve vyvoj/etapa1)
+## Údaje z úvodnej tabuľky a archív školského roka (vydané vo v0.1.37)
 - Pod názvom predmetu v zozname oblasti (aj na stránke predmetu) profilácie vľavo a platnosť vpravo – čítajú sa
   z úvodnej tabuľky dokumentu osnovy (`Services/UvodnaTabulka`: bunka „Profilácia/Profilácie“, „Platnosť“, hodnota vedľa
   alebo za dvojbodkou; platnosť aj podľa textu „od d.m.rrrr“). Políčko „opraviť údaje“ → úprava a „Uložiť do osnovy“
