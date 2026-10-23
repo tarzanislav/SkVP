@@ -51,6 +51,11 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   jednotlivé voľby sa pritom pamätajú). Okno ukazuje živú ukážku hlavičky.
 - PDF/tlač: hlavička je tabuľka (MigraDoc) s čiarou dole; Word: tabuľka v hlavičke + prázdny odsek, obrázok v časti hlavičky;
   pri vypnutej hlavičke sa časť hlavičky do Wordu nepridá.
+- Testovacia sada obsahuje vymyslenú školu (nikde neexistuje): Gymnázium Javorová, Javorová 21, 999 01 Hviezdany;
+  ŠkVP „Hviezdy na dosah“, platnosť od 1. 9. 2026, schvaľovacie riadky, text hlavičky, text dole s tabuľkou podpisov
+  (vymyslené mená) a logo kreslené v programe (`TestovaciaSada.VytvorLogo`). Zapíše sa len do programu bez vlastnej školy a loga;
+  zápis sa zaznamená v `testovacia_sada.skola` (pôvodná a nová hodnota, hash loga, text päty). Vymazanie sady (osnovy aj všetko)
+  vráti pôvodný stav; čo používateľ medzitým zmenil, zostane.
 - Samotest `TestLogaAHlavicky`: hľadá body skúšobného loga na vykreslených stranách, kontroluje hlavičky a obrázky vo Worde,
   snímky `uvodna_strana_logo.png`, `hlavicka_*.png` na vetve `vystupy`.
 

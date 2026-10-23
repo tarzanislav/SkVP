@@ -69,6 +69,12 @@ public partial class UvodnaStranaWindow : Window
         ObnovUkazku();
     }
 
+    private void AktualnyStupen_Click(object sender, RoutedEventArgs e)
+    {
+        Typ.Text = TitulnaStrana.AktualnyStupenGymnazia;
+        TypZobrazit.IsChecked = true;
+    }
+
     // ---- logo ----
 
     private void ZobrazLogo()

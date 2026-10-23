@@ -196,6 +196,10 @@ public sealed class TitulnaStrana
         return vytvorit ? new ObjektService().Pridaj(TypPaty, null, "Text dole na úvodnej strane").Id : null;
     }
 
+    /// <summary>Uloží len text dole na úvodnej strane (bez ostatných nastavení).</summary>
+    public static void UlozPatu(List<Blok> bloky, string dovod) =>
+        new DokumentService().UlozBloky(IdPaty(vytvorit: true)!.Value, bloky, dovod);
+
     public void Uloz()
     {
         // škola, adresa a druh školy sú spoločné s nastaveniami programu

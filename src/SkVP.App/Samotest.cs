@@ -556,7 +556,42 @@ internal static class Samotest
         TitulnaStrana.Predvolene();
         UlozObrazokStrany(NahladDokumentu.Priprav(PdfVystup.Vytvor(Zostava())), 2, Path.Combine(export, "hlavicka_predvolena.png"));
 
+        // upratať – testovacia sada neskôr nahrá údaje vymyslenej školy len do programu bez vlastnej školy a loga
+        NastaveniaSkoly.OdstranLogo();
+        Databaza.Zapis(UdajeSkVP.KlucSkola, "");
         Krok("logo a hlavička v poriadku");
+    }
+
+    /// <summary>Po vymazaní testovacej sady nesmú zostať údaje vymyslenej školy.</summary>
+    private static void OverBezSkolySady(string popis)
+    {
+        var t = TitulnaStrana.Nacitaj();
+        var zvysky = new List<string>();
+        foreach (var (kluc, hodnota) in TestovaciaSada.NastaveniaSady)
+        {
+            if (Databaza.Citaj(kluc) == hodnota)
+            {
+                zvysky.Add(kluc);
+            }
+        }
+
+        if (NastaveniaSkoly.CestaLoga() is not null)
+        {
+            zvysky.Add("logo");
+        }
+
+        if (Databaza.Citaj(TestovaciaSada.KlucUdajeSkoly) is not null)
+        {
+            zvysky.Add(TestovaciaSada.KlucUdajeSkoly);
+        }
+
+        if (t.Skola.Length > 0 || t.Adresa.Length > 0 || t.Nadpis != UdajeSkVP.PredvolenyNazov || t.PataBloky.OfType<Tabulka>().Any()
+            || t.TextHlavickyVysledny != "Školský vzdelávací program – Učebné osnovy")
+        {
+            zvysky.Add("úvodná strana");
+        }
+
+        Over(zvysky.Count == 0, $"{popis}: bez zvyškov vymyslenej školy ({string.Join(", ", zvysky)})");
     }
 
     /// <summary>Skúšobné logo – purpurový kruh s modrým štvorcom (farba sa dá nájsť na vykreslenej strane).</summary>
@@ -802,6 +837,12 @@ internal static class Samotest
         Over(model.Oblasti.SelectMany(o => o.Predmety).Count(p => p.Stav != StavOsnovy.Prazdna) == 43, "všetkých 43 predmetov má osnovu");
         Over(model.Oblasti.SelectMany(o => o.Predmety).Count(p => p.Stav == StavOsnovy.Hotova) >= 10, "testovacia sada obsahuje hotové osnovy");
         Over(new ObjektService().Suvislosti(model.Oblasti[2].Predmety.First(p => p.Nazov == "Seminár z biológie").Id).Count >= 2, "testovacia sada obsahuje súvislosti");
+        var titulSady = TitulnaStrana.Nacitaj();
+        Over(titulSady.Skola == TestovaciaSada.SkolaSady && titulSady.Adresa == TestovaciaSada.AdresaSady
+             && titulSady.Nadpis == TestovaciaSada.ProgramSady && titulSady.TextHlavickyVysledny == TestovaciaSada.HlavickaSady
+             && titulSady.RiadkyPodNadpisom().Count() >= 4 && titulSady.PataBloky.OfType<Tabulka>().Count() == 1,
+            "testovacia sada: vymyslená škola, názov programu, texty úvodnej strany a hlavičky");
+        Over(NastaveniaSkoly.Rozmer(NastaveniaSkoly.CestaLoga()) == (480, 480), "testovacia sada: logo školy");
         Snimka(okno, "19_sada_dashboard");
         model.OtvorOblast(model.Oblasti[2]);
         Pumpuj();
@@ -821,15 +862,29 @@ internal static class Samotest
         var stranaOsnovy = Enumerable.Range(1, NahladDokumentu.PocetStran(vykreslenieSady)).Skip(8).First();
         UlozObrazokStrany(vykreslenieSady, stranaOsnovy, Path.Combine(Databaza.PriecinokDokumentov, "sada_strana_a.png"));
         UlozObrazokStrany(vykreslenieSady, stranaOsnovy + 1, Path.Combine(Databaza.PriecinokDokumentov, "sada_strana_b.png"));
+        UlozObrazokStrany(vykreslenieSady, 1, Path.Combine(Databaza.PriecinokDokumentov, "sada_uvodna_strana.png"));
+        UlozObrazokStrany(vykreslenieSady, 2, Path.Combine(Databaza.PriecinokDokumentov, "sada_hlavicka.png"));
 
         var zalohyPred = new ZalohaService().Zalohy().Count;
         model.Vymaz(vsetko: false);
         Over(!model.JeTestovaciaSada && model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "vymazanie osnov – oblasti a predmety zostali");
         Over(model.Oblasti.SelectMany(o => o.Predmety).All(p => p.Stav == StavOsnovy.Prazdna) && new DokumentService().Verzie(sjl.Id).Count == 0, "osnovy aj archív sú vymazané");
         Over(new ZalohaService().Zalohy().Count == zalohyPred + 1, "pred vymazaním sa vytvorila záloha");
+        OverBezSkolySady("vymazanie osnov");
         model.NahrajTestovaciuSadu();
+        Over(TitulnaStrana.Nacitaj().Skola == TestovaciaSada.SkolaSady && NastaveniaSkoly.CestaLoga() is not null, "opätovné nahratie sady doplní školu aj logo");
         model.Vymaz(vsetko: true);
         Over(model.Oblasti.Count == 0 && !model.JeTestovaciaSada, "vymazanie všetkého");
+        OverBezSkolySady("vymazanie všetkého");
+
+        // vlastné údaje, ktoré používateľ zadal počas skúšania, vymazanie sady nezmaže
+        model.NahrajTestovaciuSadu();
+        Databaza.Zapis(UdajeSkVP.KlucSkola, "Moja škola");
+        model.Vymaz(vsetko: false);
+        Over(Databaza.Citaj(UdajeSkVP.KlucSkola) == "Moja škola" && NastaveniaSkoly.CestaLoga() is null
+             && Databaza.Citaj(UdajeSkVP.KlucAdresa) is null, "vymazanie sady ponechá vlastný názov školy, ostatné údaje sady zmaže");
+        Databaza.Zapis(UdajeSkVP.KlucSkola, "");
+        model.Vymaz(vsetko: true);
         model.NahrajTestovaciuSadu();
         Over(model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "testovacia sada do prázdneho programu doplní aj oblasti a predmety");
         Pumpuj();

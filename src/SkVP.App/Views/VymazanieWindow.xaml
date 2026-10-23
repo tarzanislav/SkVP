@@ -11,13 +11,13 @@
         <RadioButton x:Name="LenOsnovy" GroupName="Rozsah" IsChecked="True" Margin="0,0,0,10">
             <StackPanel>
                 <TextBlock Text="Vymazať osnovy, oblasti a predmety ponechať" FontWeight="SemiBold" />
-                <TextBlock Style="{StaticResource Popis}" Text="Vymažú sa texty osnov, charakteristiky oblastí, archív verzií a súvislosti. Štruktúra oblastí a predmetov zostane – vhodné, keď idete vkladať reálne osnovy." />
+                <TextBlock Style="{StaticResource Popis}" Text="Vymažú sa texty osnov, charakteristiky oblastí, archív verzií, súvislosti a údaje vymyslenej školy z testovacej sady (názov, logo, texty úvodnej strany). Štruktúra oblastí a predmetov zostane – vhodné, keď idete vkladať reálne osnovy." />
             </StackPanel>
         </RadioButton>
         <RadioButton x:Name="Vsetko" GroupName="Rozsah">
             <StackPanel>
                 <TextBlock Text="Vymazať všetko vrátane oblastí a predmetov" FontWeight="SemiBold" />
-                <TextBlock Style="{StaticResource Popis}" Text="Program bude prázdny a znova sa opýta, s čím chcete začať. Nastavenia (škola, logo, vzhľad) zostanú." />
+                <TextBlock Style="{StaticResource Popis}" Text="Program bude prázdny a znova sa opýta, s čím chcete začať. Údaje vymyslenej školy z testovacej sady sa vymažú; vaša vlastná škola, logo a vzhľad zostanú." />
             </StackPanel>
         </RadioButton>
 
