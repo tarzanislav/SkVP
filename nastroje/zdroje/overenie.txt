@@ -1,0 +1,22 @@
+# overenie údajov sekcie Novinky na ďalších oficiálnych stránkach – názov|URL
+minedu_t9_2026_2027.html|https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/
+nucem_t9.html|https://www2.nucem.sk/sk/merania/narodne-merania/testovanie-9
+eprihlasky_ss.html|https://eprihlasky.iedu.sk/Pomoc-a-podpora/Stredne-skoly
+slovlex_245_a.pdf|https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260101.pdf
+slovlex_245_b.pdf|https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf
+minedu_terminy_ps.html|https://www.minedu.sk/terminy-konania-prijimacich-skusok-a-terminy-zverejnenia-zoznamu-uchadzacov-podla-vysledkov-prijimacieho-konania/
+statpedu_gym.html|https://www.statpedu.sk/sk/svp/inovovany-statny-vzdelavaci-program/inovovany-svp-gymnazia-so-stvorrocnym-patrocnym-vzdelavacim-programom/
+minedu_gymnazia.html|https://www.minedu.sk/38696-sk/gymnazia/
+nucem_ms_rok.html|https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027
+minedu_pop.html|https://www.minedu.sk/38037-sk/pedagogicko-organizacne-pokyny/
+minedu_terminy_prazdnin.html|https://www.minedu.sk/terminy-prazdnin/
+nivam_maturitne.html|https://nivam.sk/pre-skoly/maturitne-skusky/
+minedu_ai.html|https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/
+minedu_pre_2027_2028.html|https://www.minedu.sk/pre-skolsky-rok-20272028/
+minedu_ss_faq.html|https://www.minedu.sk/44151-sk/stredne-skoly/
+reforma_iedu.html|https://reforma.iedu.sk/
+minedu_kurikularna.html|https://www.minedu.sk/kurikularna-reforma/
+minedu_rss.xml|https://www.minedu.sk/rss/
+nivam_feed.xml|https://nivam.sk/feed/
+nucem_rss.xml|https://www2.nucem.sk/sk/rss
+statpedu_rss.xml|https://www.statpedu.sk/sk/rss/

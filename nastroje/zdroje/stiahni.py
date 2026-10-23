@@ -37,7 +37,8 @@ def text(cesta):
         odkazy = [f"{a.get_text(' ', strip=True)} -> {a['href']}" for a in s.find_all("a", href=True)]
         open(cesta + ".txt", "w", encoding="utf-8").write(s.get_text("\n", strip=True) + "\n\n=== ODKAZY ===\n" + "\n".join(odkazy))
 
-for riadok in open(os.path.join(os.path.dirname(__file__), "zoznam.txt"), encoding="utf-8"):
+zoznam = os.environ.get("ZOZNAM", "zoznam.txt")
+for riadok in open(os.path.join(os.path.dirname(__file__), zoznam), encoding="utf-8"):
     riadok = riadok.strip()
     if not riadok or riadok.startswith("#"):
         continue

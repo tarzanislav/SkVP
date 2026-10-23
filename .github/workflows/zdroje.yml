@@ -28,8 +28,8 @@ jobs:
       - name: Oficiálne zdroje pre Novinky a citáty
         run: |
           python -m pip install --quiet python-docx beautifulsoup4
-          BEZ_CITATOV=1 python repo/nastroje/zdroje/stiahni.py zdroje/novinky2
-          ls -la zdroje/novinky2
+          BEZ_CITATOV=1 ZOZNAM=overenie.txt python repo/nastroje/zdroje/stiahni.py zdroje/novinky3
+          ls -la zdroje/novinky3
       - name: Zverejniť na vetve zdroje
         env:
           GH_TOKEN: ${{ github.token }}
