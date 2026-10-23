@@ -185,7 +185,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Databáza: rýchla kontrola pri spustení (upozornenie pri chybe), optimalizácia pri zatvorení programu.
 - Web/HTML/XML: kódovanie z BOM, `<meta charset>` alebo deklarácie XML (windows-1250, iso-8859-2).
 
-## Sekcia Novinky a dashboard (23. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Sekcia Novinky a dashboard (vydané vo v0.1.70)
 - **Novinky** (`Services/NovinkyService`, `ViewModels/NovinkyViewModel`, `Views/NovinkyView`, menu pod Dashboardom):
   overené informácie v 6 farebných témach – Učebné osnovy a ŠVP, Tematické plány, Cieľové požiadavky, Maturitná skúška,
   Prijímacie skúšky, Prázdniny a školský rok; druhy Termín / Novinka / Odporúčanie (farebné štítky), odpočet, poznámky
@@ -218,6 +218,18 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   výrok dňa podľa dátumu, „Ďalší“ a „Skryť“ (`citaty.skryte`, s vrátením späť).
 - Nástroj zdrojov: `.github/workflows/zdroje.yml` + `nastroje/zdroje/stiahni.py` (`zoznam.txt`, `overenie.txt`, premenná
   ZOZNAM) – stiahne oficiálne dokumenty na runneri do vetvy `zdroje` (shell session nemá prístup na tieto stránky).
+
+## Pastelové farby, nový dashboard, prázdniny (23. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+- Pastelové farby v celom programe: `Pomocne/Pastel.cs` + `FarbaNaStetec` – každá zobrazená farba sa zjemní (pôvodné sýte
+  farby oblastí sa mapujú na novú paletu `Pastel.Oblasti`, ostatné: sýtosť ≤ 0,62, svetlosť 0,60–0,82); jemné podklady
+  (parameter priehľadnosti) sú o 60 % sýtejšie; parameter „T“ = čitateľný odtieň na text a ikony (svetlý vzhľad tmavší,
+  tmavý vzhľad svetlejší). Paleta nových oblastí je pastelová. Výstupné dokumenty (Word, PDF) farby nemenia.
+- Dashboard: blok Dnes (dátum, meniny, sviatky, školský rok a najbližší termín) cez celú šírku, pod ním Počasie a Výrok
+  dňa, potom tabuľka Prázdniny v školskom roku (`ViewModels/DashboardPrazdniny.cs`: výber školského roka a kraja, posledný
+  deň vyučovania, termín, nástup, odpočet, zvýraznené najbližšie prázdniny); väčšie písmo; prepínač „Prázdniny“.
+- Téma Prázdniny a školský rok sa v Novinkách nezobrazuje (`NovinkyService.TemaSkolskyRok`), údaje zostávajú v
+  `novinky.json` (polia `posledny`, `nastup`); export .ics z Noviniek ich obsahuje. Nástroje `nastroje/zdroje/novinky.py`
+  (generovanie JSON) a `over.py` (kontrola textov `overit` v stiahnutých stránkach).
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
