@@ -446,7 +446,12 @@ public static class DocxVystup
 
                 case Tabulka t:
                     vysledok.Add(Tabulka(t, farba, stav));
-                    vysledok.Add(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = "60" })));
+                    if (stav.PosunNadpisov > 0)
+                    {
+                        // v celom dokumente malá medzera za tabuľkou
+                        vysledok.Add(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { After = "60" })));
+                    }
+
                     break;
             }
         }
@@ -601,8 +606,9 @@ public static class DocxVystup
                 telo.Append(prvok);
             }
 
-            if (!telo.HasChildren)
+            if (!telo.HasChildren || telo.LastChild is Table)
             {
+                // Word chce za tabuľkou na konci dokumentu ešte odsek
                 telo.Append(new Paragraph());
             }
 

@@ -198,7 +198,12 @@ public sealed class DocxCitac
                     }
                     else
                     {
-                        vysledok.Add(Odsek(p));
+                        var odsek = Odsek(p);
+                        // prázdny odsek hneď za tabuľkou je len medzera (Word ho za tabuľku pridáva sám)
+                        if (!(odsek.JePrazdny && vysledok.Count > 0 && vysledok[^1] is SkVP.Services.Tabulka))
+                        {
+                            vysledok.Add(odsek);
+                        }
                     }
 
                     break;
