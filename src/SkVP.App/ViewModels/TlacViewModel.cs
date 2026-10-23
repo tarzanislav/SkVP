@@ -212,7 +212,7 @@ public sealed partial class TlacViewModel : ObservableObject
 
         if (_vykreslenie is not null)
         {
-            NahladDokumentu.Vytlac(_vykreslenie, $"{_dokument?.Titul.Podnadpis ?? TitulnaStrana.PredvolenyPodnadpis} – SkVP");
+            NahladDokumentu.Vytlac(_vykreslenie, $"{_dokument?.Titul.Podnadpis ?? Services.TitulnaStrana.PredvolenyPodnadpis} – SkVP");
         }
     }
 
