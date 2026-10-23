@@ -219,7 +219,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Nástroj zdrojov: `.github/workflows/zdroje.yml` + `nastroje/zdroje/stiahni.py` (`zoznam.txt`, `overenie.txt`, premenná
   ZOZNAM) – stiahne oficiálne dokumenty na runneri do vetvy `zdroje` (shell session nemá prístup na tieto stránky).
 
-## Pastelové farby, nový dashboard, prázdniny (23. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Pastelové farby, nový dashboard, prázdniny (vydané vo v0.1.75)
 - Pastelové farby v celom programe: `Pomocne/Pastel.cs` + `FarbaNaStetec` – každá zobrazená farba sa zjemní (pôvodné sýte
   farby oblastí sa mapujú na novú paletu `Pastel.Oblasti`, ostatné: sýtosť ≤ 0,62, svetlosť 0,60–0,82); jemné podklady
   (parameter priehľadnosti) sú o 60 % sýtejšie; parameter „T“ = čitateľný odtieň na text a ikony (svetlý vzhľad tmavší,
