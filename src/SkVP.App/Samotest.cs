@@ -588,7 +588,10 @@ internal static class Samotest
         var sluzba = new ObjektService();
         var dokumenty = new DokumentService();
         var jazyk = sluzba.Oblasti()[0];
-        var stary = sluzba.Pridaj(TypObjektu.Predmet, jazyk.Id, "Konverzácia z nemeckého jazyka");
+        // stará databáza: predmet má ešte pôvodný názov
+        var stary = sluzba.Deti(jazyk.Id).First(p => p.Nazov == "Konverzácia v nemeckom jazyku");
+        sluzba.Premenuj(stary.Id, "Konverzácia z nemeckého jazyka");
+        var malOsnovu = dokumenty.Existuje(stary.Id);
         dokumenty.UlozBloky(stary.Id, new List<Blok>
         {
             new Odsek(new[] { new Usek("Konverzácia z nemeckého jazyka rozvíja ústny prejav.") }),
@@ -615,7 +618,12 @@ internal static class Samotest
             Databaza.Vykonaj(db, "DELETE FROM verzia WHERE objekt_id = $id; DELETE FROM dokument WHERE objekt_id = $id;", ("$id", jazyk.Id));
         }
 
-        sluzba.Odstran(stary.Id);
+        if (!malOsnovu)
+        {
+            using var db = Databaza.Otvor();
+            Databaza.Vykonaj(db, "DELETE FROM verzia WHERE objekt_id = $id; DELETE FROM dokument WHERE objekt_id = $id;", ("$id", stary.Id));
+        }
+
         Krok("premenovanie v dokumentoch v poriadku");
     }
 
