@@ -152,7 +152,11 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Import a export → Vzdelávacie oblasti a predmety: zo súboru (aj HTML, XML, JSON, TXT), z webovej stránky (HttpClient, aj
   PDF/Word/Excel/JSON/XML na webe), diktovaním (hlasové písanie Windows Win+H, `Pomocne/HlasovePisanie` z EviTA) s náhľadom
   (`Views/ImportStrukturyWindow`); export aj do HTML, XML, JSON (`Services/ImportStruktury`, vlastný jednoduchý HTML parser
-  bez knižnice). Prepis bez internetu (whisper.cpp ako v EviTA) zatiaľ nie – nová knižnica, čaká na súhlas používateľa.
+  bez knižnice). Prepis bez internetu (schválené používateľom 23. 10. 2026): whisper.cpp v1.9.5 (commit d1be6fde…, MIT),
+  `nastroje/hlas/` (CMake + `skvp_hlas.c`) → `SkvpHlas.dll` zostavená v CI zo zdrojov, kontrola importov (len kernel32,
+  advapi32) a exportov, `LICENSE-whisper.cpp.txt` pri programe. Kód z EviTA: `Services/Diktovanie` (modely small/turbo/base
+  z Hugging Face s overením SHA-256, priečinok Modely vedľa dát), `Services/PrepisHlasu`, `Pomocne/Mikrofon` (winmm),
+  `Pomocne/DiktovanieDoPola`, `Views/DiktovanieWindow` (ozubené koliesko v okne diktovania). Kľúče `diktovanie.sposob/model`.
 - Servis: „Zálohovať učebné osnovy (Word, PDF)“ – pri každom .docx v ZIP aj .pdf (`ZalohaService.PdfDokumentu`).
   Správa databázy ako v EviTA (`Services/DiagnostikaService`): rýchla/úplná kontrola, kontrola väzieb, kontrola dát
   (čitateľnosť a SHA dokumentov, duplicitné predmety…), optimalizácia, obnova indexov, kompaktovanie, oprava väzieb
