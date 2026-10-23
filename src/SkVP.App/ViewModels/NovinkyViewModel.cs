@@ -36,11 +36,11 @@ public sealed class ZdrojNovinkyVM
 
     public string Farba => Overenie?.Stav switch
     {
-        StavOverenia.Potvrdene => "#16A34A",
-        StavOverenia.Dostupne => "#0284C7",
-        StavOverenia.Nenajdene => "#D97706",
-        StavOverenia.Nedostupne => "#DC2626",
-        _ => "#64748B",
+        StavOverenia.Potvrdene => "#7CBF8E",
+        StavOverenia.Dostupne => "#74AEE0",
+        StavOverenia.Nenajdene => "#EDB06B",
+        StavOverenia.Nedostupne => "#EE9A9A",
+        _ => "#9AA5B1",
     };
 
     public string Popis => Overenie is null
@@ -96,9 +96,9 @@ public sealed class PolozkaNovinkyVM
     /// <summary>Farba štítka druhu – termíny, novinky a odporúčania sa farebne odlišujú.</summary>
     public string DruhFarba => Polozka.Druh switch
     {
-        NovinkyService.DruhTermin => "#D97706",
-        NovinkyService.DruhOdporucanie => "#059669",
-        _ => "#2563EB",
+        NovinkyService.DruhTermin => "#E0A458",
+        NovinkyService.DruhOdporucanie => "#6DBE9A",
+        _ => "#7FA6E0",
     };
 
     public string DruhIkona => Polozka.Druh switch
@@ -200,7 +200,7 @@ public sealed class SpravaVM
     public bool MaPopis => Sprava.Popis.Length > 0;
     public string Odkaz => Sprava.Odkaz;
     public string Zdroj => Sprava.Zdroj;
-    public string Farba => Kategoria?.Farba ?? "#64748B";
+    public string Farba => Kategoria?.Farba ?? "#9AA5B1";
     public string KategoriaNazov => Kategoria?.Nazov ?? "";
     public string DatumText => Sprava.Datum is { } d ? NovinkyService.Datum(DateOnly.FromDateTime(d)) : "";
     public bool JePotvrdena => Sprava.PotvrdeneInde.Count > 0;
@@ -477,17 +477,20 @@ public sealed partial class NovinkyViewModel : ObservableObject
         bool PodlaKraja(PolozkaNovinkyVM p) => VybranyKraj == VsetkyKraje || !p.MaSkupinu || p.Skupina == VybranyKraj;
         bool PodlaHladania(PolozkaNovinkyVM p) => hladane.Length == 0 || p.Hladany.Contains(hladane, StringComparison.Ordinal);
 
-        var viditelne = _vsetky.Where(p => PodlaKraja(p) && PodlaHladania(p) && (AjUplynule || !p.JeMinule)).ToList();
+        // prázdniny a organizácia školského roka sú na dashboarde (tabuľka prázdnin)
+        bool VNovinkach(PolozkaNovinkyVM p) => p.Polozka.Kategoria != NovinkyService.TemaSkolskyRok;
+        var kategorie = _data.Kategorie.Where(k => k.Id != NovinkyService.TemaSkolskyRok).ToList();
+        var viditelne = _vsetky.Where(p => VNovinkach(p) && PodlaKraja(p) && PodlaHladania(p) && (AjUplynule || !p.JeMinule)).ToList();
 
-        Temy = new[] { new FilterTemyVM(null, "Všetky témy", "#475569", "\uE80F", viditelne.Count) { Vybrany = VybranaTema is null } }
-            .Concat(_data.Kategorie.Select(k => new FilterTemyVM(k.Id, k.Nazov, k.Farba, k.Ikona, viditelne.Count(p => p.Polozka.Kategoria == k.Id))
+        Temy = new[] { new FilterTemyVM(null, "Všetky témy", "#9AA5B1", "\uE80F", viditelne.Count) { Vybrany = VybranaTema is null } }
+            .Concat(kategorie.Select(k => new FilterTemyVM(k.Id, k.Nazov, k.Farba, k.Ikona, viditelne.Count(p => p.Polozka.Kategoria == k.Id))
                 { Vybrany = VybranaTema == k.Id }))
             .ToList();
 
         var podlaTemy = viditelne.Where(p => VybranaTema is null || p.Polozka.Kategoria == VybranaTema).ToList();
 
         // v bloku: najprv dôležité novinky, potom termíny podľa dátumu, odporúčania na koniec
-        Bloky = _data.Kategorie
+        Bloky = kategorie
             .Select(k => new BlokNoviniekVM(k, podlaTemy.Where(p => p.Polozka.Kategoria == k.Id)
                 .OrderBy(p => p.Polozka.Druh == NovinkyService.DruhOdporucanie ? 2 : p.Polozka.Druh == NovinkyService.DruhNovinka ? 0 : 1)
                 .ThenByDescending(p => p.Polozka.Druh == NovinkyService.DruhNovinka && p.Dolezite)
@@ -496,7 +499,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
             .Where(b => b.Pocet > 0)
             .ToList();
 
-        Najblizsie = _vsetky.Where(p => p.Polozka.Druh == NovinkyService.DruhTermin && !p.JeMinule && PodlaKraja(p) && p.Dolezite)
+        Najblizsie = _vsetky.Where(p => VNovinkach(p) && p.Polozka.Druh == NovinkyService.DruhTermin && !p.JeMinule && p.Dolezite)
             .OrderBy(p => p.Polozka.Zaciatok).Take(6).ToList();
 
         var sk = CultureInfo.GetCultureInfo("sk-SK");

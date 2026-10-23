@@ -197,11 +197,11 @@
                                             <Border DockPanel.Dock="Left" Width="38" Height="38" CornerRadius="10" Margin="0,0,14,0" VerticalAlignment="Top"
                                                     Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}">
                                                 <TextBlock Style="{StaticResource Ikona}" Text="{Binding Ikona}" FontSize="17" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                                           Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                             </Border>
                                             <StackPanel>
                                                 <TextBlock Text="{Binding Hodnota}" FontFamily="{StaticResource PismoNadpisov}" FontSize="26" FontWeight="SemiBold"
-                                                           Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                                           Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                 <TextBlock Text="{Binding Popis}" FontWeight="SemiBold" />
                                                 <TextBlock Text="{Binding Doplnok}" Style="{StaticResource Popis}" FontSize="11.5" TextWrapping="Wrap" />
                                             </StackPanel>
@@ -223,18 +223,18 @@
                                             <ColumnDefinition Width="{Binding SirkaRozpracovane}" />
                                             <ColumnDefinition Width="{Binding SirkaNezacate}" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Background="#2F9E44" />
-                                        <Border Grid.Column="1" Background="#F08C00" />
-                                        <Border Grid.Column="2" Background="#74C0FC" />
+                                        <Border Grid.Column="0" Background="{Binding Source='#2F9E44', Converter={StaticResource FarbaNaStetec}}" />
+                                        <Border Grid.Column="1" Background="{Binding Source='#F08C00', Converter={StaticResource FarbaNaStetec}}" />
+                                        <Border Grid.Column="2" Background="{Binding Source='#74C0FC', Converter={StaticResource FarbaNaStetec}}" />
                                         <Border Grid.Column="3" Background="{DynamicResource ControlStrongFillColorDisabledBrush}" />
                                     </Grid>
                                 </Border>
                                 <WrapPanel Margin="0,8,0,0">
-                                    <Border Width="12" Height="12" CornerRadius="3" Background="#2F9E44" />
+                                    <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Source='#2F9E44', Converter={StaticResource FarbaNaStetec}}" />
                                     <TextBlock Text="hotové" Style="{StaticResource Popis}" Margin="6,0,16,0" VerticalAlignment="Center" />
-                                    <Border Width="12" Height="12" CornerRadius="3" Background="#F08C00" />
+                                    <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Source='#F08C00', Converter={StaticResource FarbaNaStetec}}" />
                                     <TextBlock Text="na kontrolu" Style="{StaticResource Popis}" Margin="6,0,16,0" VerticalAlignment="Center" />
-                                    <Border Width="12" Height="12" CornerRadius="3" Background="#74C0FC" />
+                                    <Border Width="12" Height="12" CornerRadius="3" Background="{Binding Source='#74C0FC', Converter={StaticResource FarbaNaStetec}}" />
                                     <TextBlock Text="rozpracované" Style="{StaticResource Popis}" Margin="6,0,16,0" VerticalAlignment="Center" />
                                     <Border Width="12" Height="12" CornerRadius="3" Background="{DynamicResource ControlStrongFillColorDisabledBrush}" />
                                     <TextBlock Text="nezačaté" Style="{StaticResource Popis}" Margin="6,0,16,0" VerticalAlignment="Center" />
@@ -276,12 +276,12 @@
                                                             Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
                                                     <StackPanel VerticalAlignment="Center">
                                                         <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" FontSize="14"
-                                                                   Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                                                   Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                         <TextBlock Text="{Binding HotoveText}" Style="{StaticResource Popis}" FontSize="11.5" />
                                                     </StackPanel>
                                                 </DockPanel>
                                                 <ProgressBar Height="5" Margin="15,6,0,4" Minimum="0" Maximum="1" Value="{Binding Podiel, Mode=OneWay}"
-                                                             Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}"
+                                                             Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                                              Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}" />
                                                 <ItemsControl ItemsSource="{Binding Predmety}" Focusable="False" Margin="7,0,0,0">
                                                     <ItemsControl.ItemTemplate>
@@ -294,19 +294,19 @@
                                                                         <TextBlock Text="{Binding StavText}" FontSize="11.5" />
                                                                     </Border>
                                                                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                                                        <Border Style="{StaticResource Odznak}" Margin="6,0,0,0" Background="#26AE3EC9"
+                                                                        <Border Style="{StaticResource Odznak}" Margin="6,0,0,0" Background="{Binding Source='#AE3EC9', Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}"
                                                                                 Visibility="{Binding ZmenenaVRoku, Converter={StaticResource BoolNaViditelnost}}"
                                                                                 ToolTip="Osnova sa počas školského roka upravila, naimportovala alebo obnovila">
-                                                                            <TextBlock Text="zmenená v roku" FontSize="11.5" Foreground="#AE3EC9" />
+                                                                            <TextBlock Text="zmenená v roku" FontSize="11.5" Foreground="{Binding Source='#AE3EC9', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                                         </Border>
-                                                                        <Border Style="{StaticResource Odznak}" Margin="6,0,0,0" Background="#262F9E44"
+                                                                        <Border Style="{StaticResource Odznak}" Margin="6,0,0,0" Background="{Binding Source='#2F9E44', Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}"
                                                                                 Visibility="{Binding Nova, Converter={StaticResource BoolNaViditelnost}}">
-                                                                            <TextBlock Text="nový predmet" FontSize="11.5" Foreground="#2F9E44" />
+                                                                            <TextBlock Text="nový predmet" FontSize="11.5" Foreground="{Binding Source='#2F9E44', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                                         </Border>
-                                                                        <Border Style="{StaticResource Odznak}" Margin="6,0,0,0" Background="#261098AD"
+                                                                        <Border Style="{StaticResource Odznak}" Margin="6,0,0,0" Background="{Binding Source='#1098AD', Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}"
                                                                                 Visibility="{Binding Zmenena, Converter={StaticResource BoolNaViditelnost}}"
                                                                                 ToolTip="Osnova je iná ako v predchádzajúcom archivovanom školskom roku">
-                                                                            <TextBlock Text="iná ako minulý rok" FontSize="11.5" Foreground="#1098AD" />
+                                                                            <TextBlock Text="iná ako minulý rok" FontSize="11.5" Foreground="{Binding Source='#1098AD', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                                         </Border>
                                                                     </StackPanel>
                                                                     <Border Style="{StaticResource ZnackaStavu}" Margin="0,0,10,0" VerticalAlignment="Center" />

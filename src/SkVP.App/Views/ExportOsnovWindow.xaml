@@ -61,7 +61,7 @@
                                                 <DataTemplate DataType="{x:Type vm:VolbaPredmetuExportu}">
                                                     <CheckBox IsChecked="{Binding Zahrnut}" Margin="0,1">
                                                         <TextBlock>
-                                                            <Run Text="{Binding Predmet.Cislo, Mode=OneWay}" Foreground="{Binding Predmet.Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                                            <Run Text="{Binding Predmet.Cislo, Mode=OneWay}" Foreground="{Binding Predmet.Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                             <Run Text="  " /><Run Text="{Binding Predmet.Nazov, Mode=OneWay}" />
                                                         </TextBlock>
                                                     </CheckBox>

@@ -37,114 +37,136 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-        <Style x:Key="BieleTlacidlo" TargetType="Button" BasedOn="{StaticResource IkonoveTlacidlo}">
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Width" Value="30" />
-            <Setter Property="Height" Value="28" />
-            <Setter Property="FontSize" Value="13" />
-        </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="44,34,44,40" MaxWidth="1180">
-            <TextBlock Text="{Binding Datum}" Style="{StaticResource Popis}" FontSize="13.5" />
+            <TextBlock Text="{Binding Datum}" Style="{StaticResource Popis}" FontSize="14.5"
+                       Visibility="{Binding UkazDnes, Converter={StaticResource InverzBoolNaViditelnost}}" />
             <TextBlock Style="{StaticResource Nadpis}" Margin="0,2,0,4">
                 <Run Text="{Binding Pozdrav, Mode=OneWay}" /><Run Text=", tu je stav učebných osnov" />
             </TextBlock>
-            <TextBlock Text="{Binding Zhrnutie}" Style="{StaticResource Popis}" FontSize="14" Margin="0,0,0,22" />
+            <TextBlock Text="{Binding Zhrnutie}" Style="{StaticResource Popis}" FontSize="15" Margin="0,0,0,20" />
 
-            <!-- horné panely: dnes (dátum, meniny, sviatky), počasie, výrok dňa -->
-            <UniformGrid Rows="1" Margin="0,0,0,18" Visibility="{Binding MaHornePanely, Converter={StaticResource BoolNaViditelnost}}">
-                <!-- dnes -->
-                <Border CornerRadius="12" Padding="20,16" Margin="0,0,9,0" Visibility="{Binding UkazDnes, Converter={StaticResource BoolNaViditelnost}}">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#4F46E5" Offset="0" />
-                            <GradientStop Color="#7C3AED" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <StackPanel>
-                        <TextBlock Text="{Binding DenVTyzdni}" Foreground="White" Opacity="0.85" FontSize="13" />
-                        <TextBlock Text="{Binding DatumVelky}" Foreground="White" FontFamily="{StaticResource PismoNadpisov}" FontSize="24"
-                                   FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding TyzdenText}" Foreground="White" Opacity="0.8" FontSize="12" Margin="0,1,0,10" />
+            <!-- Dnes: dátum, meniny, sviatky a školský rok – jeden blok cez celú šírku -->
+            <Border CornerRadius="12" Padding="24,18" Margin="0,0,0,16" BorderThickness="1"
+                    Background="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}"
+                    BorderBrush="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}"
+                    Visibility="{Binding UkazDnes, Converter={StaticResource BoolNaViditelnost}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.05*" />
+                        <ColumnDefinition Width="0.9*" />
+                        <ColumnDefinition Width="1.25*" />
+                        <ColumnDefinition Width="1.2*" />
+                    </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="Meniny" Foreground="White" Opacity="0.8" FontSize="12" />
-                        <TextBlock Text="{Binding MeninyDnes}" Foreground="White" FontSize="19" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Foreground="White" Opacity="0.85" FontSize="12" TextWrapping="Wrap">
-                            <Run Text="Zajtra:" /> <Run Text="{Binding MeninyZajtra, Mode=OneWay}" />
-                        </TextBlock>
-
-                        <Border CornerRadius="6" Padding="8,3" Margin="0,10,0,0" HorizontalAlignment="Left" Background="#33FFFFFF"
-                                Visibility="{Binding JeDnesVolno, Converter={StaticResource BoolNaViditelnost}}">
-                            <TextBlock Text="Dnes je deň pracovného pokoja" Foreground="White" FontWeight="SemiBold" />
-                        </Border>
-                        <ItemsControl ItemsSource="{Binding Sviatky}" Margin="0,8,0,0" Focusable="False"
-                                      Visibility="{Binding MaSviatky, Converter={StaticResource BoolNaViditelnost}}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <DockPanel Margin="0,1">
-                                        <TextBlock DockPanel.Dock="Left" Text="★" Foreground="#FDE68A" Margin="0,0,7,0" />
-                                        <TextBlock Text="{Binding}" Foreground="White" TextWrapping="Wrap" FontSize="12.5" />
-                                    </DockPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock Text="{Binding NajblizsiVolnyDen}" Foreground="White" Opacity="0.85" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
-                                   Visibility="{Binding NajblizsiVolnyDen, Converter={StaticResource NieJePrazdne}}" />
-
-                        <Border Height="1" Background="#40FFFFFF" Margin="0,12,0,10" />
-                        <TextBlock Text="{Binding StavSkolskehoRoka}" Foreground="White" FontSize="12.5" FontWeight="SemiBold" TextWrapping="Wrap"
-                                   Visibility="{Binding StavSkolskehoRoka, Converter={StaticResource NieJePrazdne}}" />
-                        <Button Padding="0" Margin="0,4,0,0" HorizontalAlignment="Left" Cursor="Hand" Command="{Binding OtvorNovinkyCommand}"
-                                ToolTip="Otvoriť sekciu Novinky – termínovník" Visibility="{Binding NajblizsiTermin, Converter={StaticResource NieJePrazdne}}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="Pozadie" CornerRadius="8" Padding="10,6" Background="#26FFFFFF">
-                                        <ContentPresenter />
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Pozadie" Property="Background" Value="#40FFFFFF" />
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <StackPanel>
-                                <TextBlock Text="Najbližší termín (Novinky)" Foreground="White" Opacity="0.8" FontSize="11.5" />
-                                <TextBlock Text="{Binding NajblizsiTermin}" Foreground="White" FontSize="12.5" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button>
+                    <StackPanel Margin="0,0,20,0">
+                        <TextBlock Text="{Binding DenVTyzdni}" FontSize="15" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="{Binding DatumVelky}" FontFamily="{StaticResource PismoNadpisov}" FontSize="28" FontWeight="SemiBold" TextWrapping="Wrap"
+                                   Foreground="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                        <TextBlock Text="{Binding TyzdenText}" FontSize="14" Margin="0,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
-                </Border>
 
+                    <Border Grid.Column="1" BorderThickness="1,0,0,0" Padding="20,0,20,0"
+                            BorderBrush="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}">
+                        <StackPanel>
+                            <TextBlock Text="Meniny" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding MeninyDnes}" FontSize="24" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock FontSize="14" TextWrapping="Wrap" Margin="0,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                <Run Text="Zajtra:" /> <Run Text="{Binding MeninyZajtra, Mode=OneWay}" />
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="2" BorderThickness="1,0,0,0" Padding="20,0,20,0"
+                            BorderBrush="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}">
+                        <StackPanel>
+                            <TextBlock Text="Sviatky a pamätné dni" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <Border CornerRadius="6" Padding="9,3" Margin="0,4,0,2" HorizontalAlignment="Left"
+                                    Background="{Binding Source='#F7D774', Converter={StaticResource FarbaNaStetec}}"
+                                    Visibility="{Binding JeDnesVolno, Converter={StaticResource BoolNaViditelnost}}">
+                                <TextBlock Text="Dnes je deň pracovného pokoja" FontSize="14" FontWeight="SemiBold" Foreground="#1F2933" />
+                            </Border>
+                            <ItemsControl ItemsSource="{Binding Sviatky}" Margin="0,4,0,0" Focusable="False"
+                                          Visibility="{Binding MaSviatky, Converter={StaticResource BoolNaViditelnost}}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <DockPanel Margin="0,1">
+                                            <TextBlock DockPanel.Dock="Left" Text="★" Margin="0,0,7,0" FontSize="14"
+                                                       Foreground="{Binding Source='#EDB06B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                                            <TextBlock Text="{Binding}" TextWrapping="Wrap" FontSize="14.5" />
+                                        </DockPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Text="Dnes nie je sviatok ani pamätný deň." FontSize="14.5" Margin="0,4,0,0"
+                                       Visibility="{Binding MaSviatky, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                            <TextBlock Text="{Binding NajblizsiVolnyDen}" FontSize="13.5" TextWrapping="Wrap" Margin="0,8,0,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                       Visibility="{Binding NajblizsiVolnyDen, Converter={StaticResource NieJePrazdne}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Column="3" BorderThickness="1,0,0,0" Padding="20,0,0,0"
+                            BorderBrush="{Binding Source='#A592E0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}">
+                        <StackPanel>
+                            <TextBlock Text="Školský rok" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding StavSkolskehoRoka}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,2,0,0"
+                                       Visibility="{Binding StavSkolskehoRoka, Converter={StaticResource NieJePrazdne}}" />
+                            <Button Padding="0" Margin="0,8,0,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Cursor="Hand"
+                                    Command="{Binding OtvorNovinkyCommand}" ToolTip="Otvoriť sekciu Novinky"
+                                    Visibility="{Binding NajblizsiTermin, Converter={StaticResource NieJePrazdne}}">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Pozadie" CornerRadius="8" Padding="12,8" BorderThickness="1"
+                                                Background="{Binding NajblizsiTerminFarba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}"
+                                                BorderBrush="{Binding NajblizsiTerminFarba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=80}">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Pozadie" Property="Background"
+                                                        Value="{Binding NajblizsiTerminFarba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=50}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                                <StackPanel>
+                                    <TextBlock Text="Najbližší termín (Novinky)" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding NajblizsiTermin}" FontSize="14.5" TextWrapping="Wrap" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Počasie a výrok dňa pod blokom Dnes -->
+            <UniformGrid Rows="1" Margin="0,0,0,16" Visibility="{Binding MaSpodnePanely, Converter={StaticResource BoolNaViditelnost}}">
                 <!-- počasie -->
-                <Border CornerRadius="12" Padding="20,16" Margin="9,0,9,0" Visibility="{Binding UkazPocasie, Converter={StaticResource BoolNaViditelnost}}">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#0EA5E9" Offset="0" />
-                            <GradientStop Color="#2563EB" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
+                <Border CornerRadius="12" Padding="22,16" Margin="0,0,8,0" BorderThickness="1"
+                        Background="{Binding Source='#74AEE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}"
+                        BorderBrush="{Binding Source='#74AEE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}"
+                        Visibility="{Binding UkazPocasie, Converter={StaticResource BoolNaViditelnost}}">
                     <DockPanel>
                         <DockPanel DockPanel.Dock="Top">
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                <Button Style="{StaticResource BieleTlacidlo}" Content="&#xE72C;" ToolTip="Obnoviť počasie" Command="{Binding ObnovitPocasieCommand}"
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE72C;" ToolTip="Obnoviť počasie" Command="{Binding ObnovitPocasieCommand}"
                                         Visibility="{Binding JeMiestoPocasia, Converter={StaticResource BoolNaViditelnost}}" />
-                                <Button Style="{StaticResource BieleTlacidlo}" Content="&#xE707;" ToolTip="Zmeniť mesto alebo obec" Command="{Binding ZmenitMiestoCommand}" />
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE707;" ToolTip="Zmeniť mesto alebo obec" Command="{Binding ZmenitMiestoCommand}" />
                             </StackPanel>
-                            <TextBlock Text="Počasie" Foreground="White" Opacity="0.85" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="Počasie" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </DockPanel>
 
-                        <!-- výber miesta -->
                         <StackPanel DockPanel.Dock="Top" Margin="0,8,0,0" Visibility="{Binding UpravaMiesta, Converter={StaticResource BoolNaViditelnost}}">
-                            <TextBlock Text="Mesto alebo obec:" Foreground="White" FontSize="12.5" />
+                            <TextBlock Text="Mesto alebo obec:" FontSize="14" />
                             <DockPanel Margin="0,4,0,0">
                                 <Button DockPanel.Dock="Right" Content="Hľadať" Padding="12,4" Margin="6,0,0,0" IsDefault="{Binding UpravaMiesta}"
                                         Command="{Binding HladatMiestoCommand}" />
-                                <TextBox Text="{Binding HladaneMiesto, UpdateSourceTrigger=PropertyChanged}" />
+                                <TextBox Text="{Binding HladaneMiesto, UpdateSourceTrigger=PropertyChanged}" FontSize="14" />
                             </DockPanel>
-                            <ItemsControl ItemsSource="{Binding NajdeneMiesta}" Margin="0,6,0,0" Focusable="False" MaxHeight="150">
+                            <ItemsControl ItemsSource="{Binding NajdeneMiesta}" Margin="0,6,0,0" Focusable="False" MaxHeight="160">
                                 <ItemsControl.Template>
                                     <ControlTemplate TargetType="ItemsControl">
                                         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -157,7 +179,7 @@
                                         <Button Padding="8,4" Margin="0,0,0,3" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
                                                 Command="{Binding DataContext.VybratMiestoCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}">
-                                            <TextBlock Text="{Binding Popis}" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Popis}" TextTrimming="CharacterEllipsis" FontSize="13.5" />
                                         </Button>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -166,18 +188,21 @@
                         </StackPanel>
 
                         <StackPanel DockPanel.Dock="Top" Visibility="{Binding JePocasie, Converter={StaticResource BoolNaViditelnost}}">
-                            <TextBlock Text="{Binding Pocasie.Miesto.Nazov}" Foreground="White" FontWeight="SemiBold" FontSize="15" Margin="0,2,0,0"
+                            <TextBlock Text="{Binding Pocasie.Miesto.Nazov}" FontWeight="SemiBold" FontSize="17" Margin="0,2,0,0"
                                        TextTrimming="CharacterEllipsis" ToolTip="{Binding Pocasie.Miesto.Popis}" />
                             <DockPanel Margin="0,2,0,0">
-                                <TextBlock DockPanel.Dock="Left" Text="{Binding Pocasie.Symbol}" FontSize="44" Margin="0,0,14,0" VerticalAlignment="Center"
-                                           Foreground="White" FontFamily="Segoe UI Emoji, Segoe UI Symbol" />
+                                <TextBlock DockPanel.Dock="Left" Text="{Binding Pocasie.Symbol}" FontSize="46" Margin="0,0,16,0" VerticalAlignment="Center"
+                                           Foreground="{Binding Source='#74AEE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
+                                           FontFamily="Segoe UI Emoji, Segoe UI Symbol" />
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Pocasie.TeplotaText}" Foreground="White" FontSize="32" FontWeight="SemiBold" />
-                                    <TextBlock Text="{Binding Pocasie.Popis}" Foreground="White" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Pocasie.TeplotaText}" FontSize="34" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding Pocasie.Popis}" FontSize="15" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                             </DockPanel>
-                            <TextBlock Text="{Binding Pocasie.Podrobnosti}" Foreground="White" Opacity="0.85" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
-                            <Border CornerRadius="8" Background="#26FFFFFF" Padding="4,8" Margin="0,12,0,0">
+                            <TextBlock Text="{Binding Pocasie.Podrobnosti}" FontSize="13.5" Margin="0,4,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <Border CornerRadius="8" Padding="4,8" Margin="0,12,0,0"
+                                    Background="{Binding Source='#74AEE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}">
                                 <ItemsControl ItemsSource="{Binding Pocasie.Dni}" Focusable="False">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -187,62 +212,148 @@
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
                                             <StackPanel HorizontalAlignment="Center" ToolTip="{Binding Popis}">
-                                                <TextBlock Text="{Binding Den}" FontSize="11.5" HorizontalAlignment="Center" Foreground="White" Opacity="0.85" />
-                                                <TextBlock Text="{Binding Symbol}" FontSize="20" HorizontalAlignment="Center" Foreground="White"
+                                                <TextBlock Text="{Binding Den}" FontSize="13" HorizontalAlignment="Center"
+                                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                                <TextBlock Text="{Binding Symbol}" FontSize="22" HorizontalAlignment="Center"
+                                                           Foreground="{Binding Source='#74AEE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                                            FontFamily="Segoe UI Emoji, Segoe UI Symbol" />
-                                                <TextBlock HorizontalAlignment="Center" FontSize="12" Foreground="White">
+                                                <TextBlock HorizontalAlignment="Center" FontSize="13.5">
                                                     <Run Text="{Binding MaxText, Mode=OneWay}" FontWeight="SemiBold" />
-                                                    <Run Text="{Binding MinText, Mode=OneWay}" />
+                                                    <Run Text="{Binding MinText, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                                 </TextBlock>
-                                                <TextBlock Text="{Binding ZrazkyText}" FontSize="10.5" HorizontalAlignment="Center" Foreground="#BAE6FD" />
+                                                <TextBlock Text="{Binding ZrazkyText}" FontSize="12" HorizontalAlignment="Center"
+                                                           Foreground="{Binding Source='#74AEE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Border>
-                            <TextBlock Text="{Binding Pocasie.Aktualizovane}" Foreground="White" Opacity="0.75" FontSize="11" Margin="0,8,0,0" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Pocasie.Aktualizovane}" FontSize="12" Margin="0,8,0,0" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>
 
-                        <TextBlock Text="{Binding PocasieStav}" Foreground="White" Opacity="0.9" FontSize="12.5" Margin="0,8,0,0" TextWrapping="Wrap"
+                        <TextBlock Text="{Binding PocasieStav}" FontSize="14" Margin="0,8,0,0" TextWrapping="Wrap"
                                    Visibility="{Binding PocasieStav, Converter={StaticResource NieJePrazdne}}" />
                     </DockPanel>
                 </Border>
 
                 <!-- výrok dňa -->
-                <Border CornerRadius="12" Padding="20,16" Margin="9,0,0,0" Visibility="{Binding UkazCitat, Converter={StaticResource BoolNaViditelnost}}">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Color="#E11D48" Offset="0" />
-                            <GradientStop Color="#C2410C" Offset="1" />
-                        </LinearGradientBrush>
-                    </Border.Background>
+                <Border CornerRadius="12" Padding="22,16" Margin="8,0,0,0" BorderThickness="1"
+                        Background="{Binding Source='#EE9A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=20}"
+                        BorderBrush="{Binding Source='#EE9A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}"
+                        Visibility="{Binding UkazCitat, Converter={StaticResource BoolNaViditelnost}}">
                     <DockPanel>
                         <DockPanel DockPanel.Dock="Top">
                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
-                                <Button Style="{StaticResource BieleTlacidlo}" Content="&#xE72A;" ToolTip="Ďalší výrok" Command="{Binding DalsiCitatCommand}" />
-                                <Button Style="{StaticResource BieleTlacidlo}" Content="&#xED1A;" ToolTip="Tento výrok už nezobrazovať" Command="{Binding SkrytCitatCommand}" />
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE72A;" ToolTip="Ďalší výrok" Command="{Binding DalsiCitatCommand}" />
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xED1A;" ToolTip="Tento výrok už nezobrazovať" Command="{Binding SkrytCitatCommand}" />
                             </StackPanel>
-                            <TextBlock Text="Výrok dňa" Foreground="White" Opacity="0.85" FontSize="13" VerticalAlignment="Center" />
+                            <TextBlock Text="Výrok dňa" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </DockPanel>
-                        <Button DockPanel.Dock="Bottom" Padding="0" HorizontalAlignment="Left" Cursor="Hand" Margin="0,10,0,0"
+                        <Button DockPanel.Dock="Bottom" Padding="0" HorizontalAlignment="Left" Cursor="Hand" Margin="0,12,0,0"
                                 Command="{Binding OtvoritZdrojCitatovCommand}" ToolTip="Otvoriť citaty-slavnych.sk">
                             <Button.Template>
                                 <ControlTemplate TargetType="Button">
                                     <ContentPresenter />
                                 </ControlTemplate>
                             </Button.Template>
-                            <TextBlock Text="{Binding CitatyZdroj}" Foreground="White" Opacity="0.75" FontSize="11" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding CitatyZdroj}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </Button>
                         <StackPanel>
-                            <TextBlock Text="“" Foreground="White" Opacity="0.35" FontSize="56" FontFamily="Georgia" Height="44" Margin="0,-6,0,-10" />
-                            <TextBlock Text="{Binding CitatText}" Foreground="White" FontSize="17" FontWeight="SemiBold" LineHeight="25" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding CitatAutor}" Foreground="White" FontSize="13" Margin="0,10,0,0" TextWrapping="Wrap" />
-                            <TextBlock Text="{Binding CitatPopis}" Foreground="White" Opacity="0.8" FontSize="12" TextWrapping="Wrap"
+                            <TextBlock Text="“" FontSize="58" FontFamily="Georgia" Height="44" Margin="0,-6,0,-10"
+                                       Foreground="{Binding Source='#EE9A7A', Converter={StaticResource FarbaNaStetec}}" />
+                            <TextBlock Text="{Binding CitatText}" FontSize="19" FontWeight="SemiBold" LineHeight="28" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding CitatAutor}" FontSize="15" Margin="0,12,0,0" TextWrapping="Wrap"
+                                       Foreground="{Binding Source='#EE9A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                            <TextBlock Text="{Binding CitatPopis}" FontSize="13.5" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                        Visibility="{Binding CitatPopis, Converter={StaticResource NieJePrazdne}}" />
                         </StackPanel>
                     </DockPanel>
                 </Border>
             </UniformGrid>
+
+            <!-- prázdniny v školskom roku (pastelová tabuľka) -->
+            <Border Style="{StaticResource Karta}" Padding="22,18" Margin="0,0,0,16"
+                    Visibility="{Binding UkazPrazdniny, Converter={StaticResource BoolNaViditelnost}}">
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,4">
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Školský rok:" FontSize="13.5" VerticalAlignment="Center" Margin="0,0,8,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ComboBox ItemsSource="{Binding SkolskeRoky}" SelectedItem="{Binding VybranyRok}" MinWidth="120" Margin="0,0,16,0" />
+                            <TextBlock Text="Kraj:" FontSize="13.5" VerticalAlignment="Center" Margin="0,0,8,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <ComboBox ItemsSource="{Binding KrajePrazdnin}" SelectedItem="{Binding VybranyKrajPrazdnin}" MinWidth="140"
+                                      ToolTip="Kraj školy – jarné prázdniny sa líšia podľa kraja" />
+                        </StackPanel>
+                        <TextBlock Text="Prázdniny v školskom roku" Style="{StaticResource Podnadpis}" FontSize="19" Margin="0" VerticalAlignment="Center" />
+                    </DockPanel>
+                    <TextBlock Text="{Binding ObdobieVyucovania}" FontSize="14" Margin="0,0,0,12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                    <!-- záhlavie tabuľky -->
+                    <Grid Margin="14,0,14,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.15*" />
+                            <ColumnDefinition Width="1.15*" />
+                            <ColumnDefinition Width="1.35*" />
+                            <ColumnDefinition Width="1.15*" />
+                            <ColumnDefinition Width="0.9*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Prázdniny" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="Posledný deň vyučovania" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="2" Text="Termín prázdnin" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="3" Text="Vyučovanie sa začína" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Grid.Column="4" Text="Kedy" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding RiadkyPrazdnin}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:RiadokPrazdninVM}">
+                                <Border x:Name="Riadok" CornerRadius="8" Padding="14,9" Margin="0,0,0,5" BorderThickness="1"
+                                        Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}"
+                                        BorderBrush="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=50}">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="1.15*" />
+                                            <ColumnDefinition Width="1.15*" />
+                                            <ColumnDefinition Width="1.35*" />
+                                            <ColumnDefinition Width="1.15*" />
+                                            <ColumnDefinition Width="0.9*" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Border Width="12" Height="12" CornerRadius="6" Margin="0,0,10,0" VerticalAlignment="Center"
+                                                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Nazov}" FontSize="15" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Kraje}" FontSize="12.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                           Visibility="{Binding MaKraje, Converter={StaticResource BoolNaViditelnost}}" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding Posledny}" FontSize="14.5" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Termin}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock Grid.Column="3" Text="{Binding Nastup}" FontSize="14.5" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                        <TextBlock x:Name="Kedy" Grid.Column="4" Text="{Binding Odpocet}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    </Grid>
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding JeMinule}" Value="True">
+                                        <Setter TargetName="Riadok" Property="Opacity" Value="0.5" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Zvyrazneny}" Value="True">
+                                        <Setter TargetName="Riadok" Property="BorderThickness" Value="2" />
+                                        <Setter TargetName="Riadok" Property="BorderBrush" Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                                        <Setter TargetName="Kedy" Property="FontWeight" Value="SemiBold" />
+                                        <Setter TargetName="Kedy" Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="{Binding ZdrojPrazdnin}" FontSize="12" Margin="2,8,0,0" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+            </Border>
 
             <!-- stena osnov: každý predmet jedna dlaždica vo farbe svojej oblasti -->
             <Border Style="{StaticResource Karta}" Padding="24,20,18,14">
@@ -259,9 +370,9 @@
                                             Command="{Binding DataContext.Hlavny.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}">
                                         <StackPanel>
-                                            <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextWrapping="Wrap"
-                                                       Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
-                                            <TextBlock Text="{Binding HotoveText}" Style="{StaticResource Popis}" FontSize="11.5" />
+                                            <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" FontSize="14.5" TextWrapping="Wrap"
+                                                       Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                                            <TextBlock Text="{Binding HotoveText}" Style="{StaticResource Popis}" FontSize="12.5" />
                                         </StackPanel>
                                     </Button>
                                     <ItemsControl Grid.Column="1" ItemsSource="{Binding Predmety}" Focusable="False" VerticalAlignment="Center">
@@ -321,10 +432,10 @@
                                             <TextBlock DockPanel.Dock="Right" Style="{StaticResource Popis}">
                                                 <Run Text="{Binding PocetHotovych, Mode=OneWay}" /><Run Text=" / " /><Run Text="{Binding Pocet, Mode=OneWay}" />
                                             </TextBlock>
-                                            <TextBlock Text="{Binding Nazov}" FontSize="13" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Nazov}" FontSize="14" TextTrimming="CharacterEllipsis" />
                                         </DockPanel>
                                         <ProgressBar Height="6" Margin="0,5,0,0" Minimum="0" Maximum="1" Value="{Binding Podiel, Mode=OneWay}"
-                                                     Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}"
+                                                     Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                                      Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}" />
                                     </StackPanel>
                                 </DataTemplate>
@@ -337,7 +448,7 @@
                     <StackPanel>
                         <TextBlock Text="Naposledy upravené" Style="{StaticResource Podnadpis}" />
                         <TextBlock Text="Zatiaľ ste neupravili žiadnu osnovu. Otvorte predmet v sekcii Osnovy a zapnite úpravu."
-                                   Style="{StaticResource Popis}" FontSize="13"
+                                   Style="{StaticResource Popis}" FontSize="14"
                                    Visibility="{Binding NicNebolo, Converter={StaticResource BoolNaViditelnost}}" />
                         <ItemsControl ItemsSource="{Binding Naposledy}" Focusable="False">
                             <ItemsControl.ItemTemplate>
@@ -351,8 +462,8 @@
                                             <TextBlock DockPanel.Dock="Right" Text="{Binding UpraveneText}" Style="{StaticResource Popis}"
                                                        VerticalAlignment="Center" Margin="12,0,0,0" />
                                             <StackPanel>
-                                                <TextBlock Text="{Binding Nazov}" TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Text="{Binding StavText}" Style="{StaticResource Popis}" FontSize="11.5" />
+                                                <TextBlock Text="{Binding Nazov}" FontSize="14.5" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Text="{Binding StavText}" Style="{StaticResource Popis}" FontSize="12.5" />
                                             </StackPanel>
                                         </DockPanel>
                                     </Button>
@@ -373,7 +484,8 @@
                 <TextBlock Text="Zobraziť na dashboarde:" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,0,14,0" VerticalAlignment="Center" />
                 <CheckBox Content="Dátum, meniny a sviatky" IsChecked="{Binding UkazDnes}" Margin="0,0,16,0" />
                 <CheckBox Content="Počasie" IsChecked="{Binding UkazPocasie}" Margin="0,0,16,0" />
-                <CheckBox Content="Výrok dňa" IsChecked="{Binding UkazCitat}" />
+                <CheckBox Content="Výrok dňa" IsChecked="{Binding UkazCitat}" Margin="0,0,16,0" />
+                <CheckBox Content="Prázdniny" IsChecked="{Binding UkazPrazdniny}" />
             </WrapPanel>
         </StackPanel>
     </ScrollViewer>

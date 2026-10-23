@@ -45,7 +45,7 @@
 
             <Style x:Key="Popis" TargetType="TextBlock">
                 <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
-                <Setter Property="FontSize" Value="12.5" />
+                <Setter Property="FontSize" Value="13" />
                 <Setter Property="TextWrapping" Value="Wrap" />
             </Style>
 

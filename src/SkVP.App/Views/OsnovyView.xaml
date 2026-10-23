@@ -56,7 +56,7 @@
                                                 <TextBlock DockPanel.Dock="Right" Text="{Binding HotoveText}" Style="{StaticResource Popis}" FontSize="11.5"
                                                            Margin="12,0,0,0" />
                                                 <ProgressBar Height="5" Minimum="0" Maximum="1" Value="{Binding Podiel, Mode=OneWay}" VerticalAlignment="Center"
-                                                             Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}"
+                                                             Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                                              Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}" />
                                             </DockPanel>
                                         </StackPanel>

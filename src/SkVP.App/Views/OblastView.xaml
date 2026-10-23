@@ -147,7 +147,7 @@
                                                        Margin="0,0,10,0" Opacity="0" Cursor="SizeAll" ToolTip="Potiahnite a presuňte predmet" />
                                             <TextBlock DockPanel.Dock="Left" Text="{Binding Cislo}" Width="46" FontFamily="{StaticResource PismoNadpisov}"
                                                        FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"
-                                                       Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                                       Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                             <StackPanel VerticalAlignment="Center">
                                                 <StackPanel Orientation="Horizontal"
                                                             Visibility="{Binding Premenuva, Converter={StaticResource InverzBoolNaViditelnost}}">
@@ -258,7 +258,7 @@
                     <!-- nový predmet -->
                     <DockPanel Margin="10,16,10,0">
                         <TextBlock DockPanel.Dock="Left" Text="&#xE710;" Style="{StaticResource Ikona}" Width="46" FontSize="18"
-                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                         <Button DockPanel.Dock="Right" Content="Pridať predmet" Margin="10,0,0,0" Padding="16,6"
                                 Style="{DynamicResource AccentButtonStyle}" Command="{Binding PridajPredmetCommand}" />
                         <Grid>

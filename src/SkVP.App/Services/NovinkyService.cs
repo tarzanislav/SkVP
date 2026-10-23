@@ -36,6 +36,12 @@ public sealed class PolozkaNoviniek
     [JsonPropertyName("do")] public string? Do { get; set; }
     [JsonPropertyName("dolezite")] public bool Dolezite { get; set; }
     [JsonPropertyName("skupina")] public string? Skupina { get; set; }
+
+    /// <summary>Pri prázdninách: posledný deň vyučovania pred prázdninami.</summary>
+    [JsonPropertyName("posledny")] public string? Posledny { get; set; }
+
+    /// <summary>Pri prázdninách: začiatok vyučovania po prázdninách.</summary>
+    [JsonPropertyName("nastup")] public string? Nastup { get; set; }
     [JsonPropertyName("poznamka")] public string? Poznamka { get; set; }
     [JsonPropertyName("zdroje")] public List<ZdrojNovinky> Zdroje { get; set; } = new();
     [JsonPropertyName("overene")] public string? Overene { get; set; }
@@ -168,6 +174,9 @@ public static partial class NovinkyService
     public const string KlucSpravy = "novinky.spravy";
     public const string KlucOverenie = "novinky.overenie";
     public const string KlucKraj = "novinky.kraj";
+
+    /// <summary>Téma Prázdniny a školský rok – zobrazuje sa na dashboarde (tabuľka prázdnin), nie v Novinkách.</summary>
+    public const string TemaSkolskyRok = "skolskyrok";
 
     public const string AdresaAktualizacie =
         "https://raw.githubusercontent.com/tarzanislav/SkVP/main/src/SkVP.App/Zdroje/novinky.json";

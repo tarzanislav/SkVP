@@ -43,13 +43,13 @@
     <DockPanel>
         <!-- farebné záložky oblastí ako v šanóne -->
         <UniformGrid DockPanel.Dock="Top" Rows="1" Height="8">
-            <Border Background="#3B5BDB" />
-            <Border Background="#0C8599" />
-            <Border Background="#2F9E44" />
-            <Border Background="#E67700" />
-            <Border Background="#C2255C" />
-            <Border Background="#7048E8" />
-            <Border Background="#D9480F" />
+            <Border Background="{Binding Source='#3B5BDB', Converter={StaticResource FarbaNaStetec}}" />
+            <Border Background="{Binding Source='#0C8599', Converter={StaticResource FarbaNaStetec}}" />
+            <Border Background="{Binding Source='#2F9E44', Converter={StaticResource FarbaNaStetec}}" />
+            <Border Background="{Binding Source='#E67700', Converter={StaticResource FarbaNaStetec}}" />
+            <Border Background="{Binding Source='#C2255C', Converter={StaticResource FarbaNaStetec}}" />
+            <Border Background="{Binding Source='#7048E8', Converter={StaticResource FarbaNaStetec}}" />
+            <Border Background="{Binding Source='#D9480F', Converter={StaticResource FarbaNaStetec}}" />
         </UniformGrid>
 
         <DockPanel DockPanel.Dock="Bottom" Margin="40,0,40,24">

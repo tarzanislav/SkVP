@@ -1360,18 +1360,15 @@ internal static class Samotest
         // obrazovka bez siete
         var model = new NovinkyViewModel(new MainViewModel()) { Dnes = den };
         model.Obnov();
-        Over(model.Bloky.Count == 6 && model.Najblizsie.Count > 0 && model.Terminovnik.Count >= 6 && model.Temy.Count == 7,
-            "obrazovka Novinky: 6 blokov, najbližšie termíny, termínovník po mesiacoch, filtre tém");
+        Over(model.Bloky.Count == 5 && model.Najblizsie.Count > 0 && model.Terminovnik.Count >= 5 && model.Temy.Count == 6
+             && !model.Bloky.Any(b => b.Kategoria.Id == NovinkyService.TemaSkolskyRok) && !model.Najblizsie.Any(p => p.Polozka.Kategoria == NovinkyService.TemaSkolskyRok),
+            "obrazovka Novinky: 5 blokov (prázdniny sú na dashboarde), najbližšie termíny, termínovník po mesiacoch, filtre tém");
         model.VybranaTema = "maturita";
         Over(model.Bloky.Count == 1 && model.Bloky[0].Kategoria.Id == "maturita", "filter témy");
         model.VybranaTema = null;
         model.Hladat = "ematurita";
         Over(model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Polozka.Id == "ms-ematurita"), "hľadanie v Novinkách (bez diakritiky)");
         model.Hladat = "";
-        model.VybranyKraj = "KE, PO";
-        Over(!model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Skupina is "BB, ZA, TN" or "BA, NR, TT")
-             && model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Skupina == "KE, PO"), "jarné prázdniny podľa kraja");
-        model.VybranyKraj = NovinkyViewModel.VsetkyKraje;
 
         // skutočné overenie na oficiálnych stránkach (informatívne – bez siete sa preskočí)
         try
@@ -1422,6 +1419,14 @@ internal static class Samotest
         Over(kalendar.Cesta.StartsWith(Databaza.Priecinok, StringComparison.OrdinalIgnoreCase), "Kalendárium samotestu je v dočasnom priečinku");
         Over(kalendar.Meniny(new DateOnly(2026, 10, 23)).Contains("Alojzia") && kalendar.SviatkyDna(new DateOnly(2026, 1, 1)).Any(s => s.DenPracovnehoPokoja),
             "Kalendárium: meniny (23. 10. Alojzia) a sviatky (1. 1.)");
+
+        // pastelové farby
+        Color C(string hex) => (Color)ColorConverter.ConvertFromString(hex);
+        double Jas(Color c) => (0.299 * c.R + 0.587 * c.G + 0.114 * c.B) / 255;
+        Over(Pastel.Zjemni(C("#3B5BDB")) == C("#7B93DB") && Jas(Pastel.Zjemni(C("#DC2626"))) > 0.5 && Pastel.Zjemni(C("#808080")) == C("#808080")
+             && Jas(Pastel.Text(C("#7B93DB"), false)) < 0.4 && Jas(Pastel.Text(C("#7B93DB"), true)) > 0.65
+             && UcebnyPlanService.FarbaOblasti(0) == "#7B93DB",
+            "pastelové farby: zjemnenie sýtych farieb, čitateľný text vo svetlom aj tmavom vzhľade, paleta oblastí");
 
         var citaty = CitatyService.Zbierka;
         var zakazani = new[] { "Danko", "Kiska", "Schwarzenegger", "Slota", "Čaputová", "Harabin", "Dalajláma", "Fico", "Pellegrini", "Matovič", "Orbán", "Putin", "Trump" };
@@ -1480,6 +1485,24 @@ internal static class Samotest
         Over(dashboard.JeDnesVolno || dashboard.Sviatky.Count > 0, "dashboard: sviatok 17. 11.");
         dashboard.AktualizujDen();
         Over(dashboard.JePocasie && dashboard.Citat is not null, "dashboard: počasie a výrok dňa");
+
+        // tabuľka prázdnin
+        dashboard.DnesPrazdnin = new DateOnly(2026, 10, 23);
+        dashboard.VybranyKrajPrazdnin = NovinkyViewModel.VsetkyKraje;
+        dashboard.VybranyRok = "2026/2027";
+        dashboard.ZostavPrazdniny();
+        var riadky = dashboard.RiadkyPrazdnin;
+        Over(dashboard.SkolskeRoky.SequenceEqual(new[] { "2026/2027", "2027/2028" }) && riadky.Count == 8
+             && riadky[0].Nazov == "Jesenné" && riadky[0].Posledny == "28. 10. 2026 (st)" && riadky[0].Nastup == "2. 11. 2026 (po)"
+             && riadky[0].Termin == "29. – 30. 10. 2026" && riadky[0].JeNajblizsi && riadky.Count(r => r.Nazov == "Jarné") == 3
+             && riadky[^1].Nazov == "Letné" && dashboard.ObdobieVyucovania.Contains("1. 9. 2026"),
+            "dashboard: tabuľka prázdnin 2026/2027 (posledný deň, termín, nástup, najbližšie prázdniny)");
+        dashboard.VybranyKrajPrazdnin = "KE, PO";
+        Over(dashboard.RiadkyPrazdnin.Count == 6 && dashboard.RiadkyPrazdnin.Single(r => r.Nazov == "Jarné").Kraje == "KE, PO",
+            "dashboard: jarné prázdniny podľa kraja");
+        dashboard.VybranyRok = "2027/2028";
+        Over(dashboard.RiadkyPrazdnin.Count == 6 && dashboard.RiadkyPrazdnin[0].Termin == "28. – 29. 10. 2027", "dashboard: prázdniny 2027/2028");
+        dashboard.VybranyKrajPrazdnin = NovinkyViewModel.VsetkyKraje;
         Krok("dashboard – dátum, meniny, sviatky, počasie a výroky v poriadku");
     }
 

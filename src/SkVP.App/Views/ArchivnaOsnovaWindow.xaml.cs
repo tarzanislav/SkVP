@@ -22,7 +22,7 @@ public partial class ArchivnaOsnovaWindow : Window
         InitializeComponent();
         Title = $"{nazov} – archív {skolskyRok}";
         Rok.Text = $"Archív školského roka {skolskyRok}  •  {oblast}";
-        Rok.Foreground = FarbaNaStetec.Stetec(farba);
+        Rok.Foreground = FarbaNaStetec.Text(farba);
         Pozadie.Color = FarbaNaStetec.Stetec(farba, 0x16).Color;
         Nadpis.Text = nazov;
         Popis.Text = popis;

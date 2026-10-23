@@ -8,42 +8,42 @@
       "id": "osnovy",
       "nazov": "Učebné osnovy a ŠVP",
       "popis": "Štátny vzdelávací program, dodatky a revízia učebných osnov",
-      "farba": "#4F46E5",
+      "farba": "#8E9BE0",
       "ikona": ""
     },
     {
       "id": "tematicke",
       "nazov": "Tematické plány",
       "popis": "Čo zohľadniť pri tvorbe a úprave tematických výchovno-vzdelávacích plánov",
-      "farba": "#0D9488",
+      "farba": "#6CC2B5",
       "ikona": ""
     },
     {
       "id": "ciele",
       "nazov": "Cieľové požiadavky",
       "popis": "Cieľové požiadavky na vedomosti a zručnosti maturantov, špecifikácie testov",
-      "farba": "#7C3AED",
+      "farba": "#B49BE3",
       "ikona": ""
     },
     {
       "id": "maturita",
       "nazov": "Maturitná skúška",
       "popis": "Termíny, novinky a odporúčania k maturite 2027",
-      "farba": "#DC2626",
+      "farba": "#EE9A9A",
       "ikona": ""
     },
     {
       "id": "prijimacky",
       "nazov": "Prijímacie skúšky",
       "popis": "Prihlášky, prijímacie skúšky a Testovanie 9",
-      "farba": "#EA580C",
+      "farba": "#F2B27A",
       "ikona": ""
     },
     {
       "id": "skolskyrok",
       "nazov": "Prázdniny a školský rok",
       "popis": "Organizácia školského roka, prázdniny a termínovník",
-      "farba": "#16A34A",
+      "farba": "#8CCB98",
       "ikona": ""
     }
   ],
@@ -927,6 +927,8 @@
       "od": "2026-10-29",
       "do": "2026-10-30",
       "dolezite": true,
+      "posledny": "2026-10-28",
+      "nastup": "2026-11-02",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -948,6 +950,8 @@
       "od": "2026-12-23",
       "do": "2027-01-07",
       "dolezite": true,
+      "posledny": "2026-12-22",
+      "nastup": "2027-01-08",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -982,6 +986,8 @@
       "nazov": "Polročné prázdniny",
       "text": "Posledný deň vyučovania 29. 1. 2027 (piatok), vyučovanie sa začína 2. 2. 2027 (utorok).",
       "od": "2027-02-01",
+      "posledny": "2027-01-29",
+      "nastup": "2027-02-02",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1003,6 +1009,8 @@
       "od": "2027-02-15",
       "do": "2027-02-19",
       "skupina": "BB, ZA, TN",
+      "posledny": "2027-02-12",
+      "nastup": "2027-02-22",
       "poznamka": "Tabuľka v .docx na stránke ministerstva uvádza pri tomto termíne len BB a ZA kraj; Trenčiansky kraj je uvedený v POP 2026/2027 (Tabuľka 1).",
       "zdroje": [
         {
@@ -1025,6 +1033,8 @@
       "od": "2027-02-22",
       "do": "2027-02-26",
       "skupina": "KE, PO",
+      "posledny": "2027-02-19",
+      "nastup": "2027-03-01",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1046,6 +1056,8 @@
       "od": "2027-03-01",
       "do": "2027-03-05",
       "skupina": "BA, NR, TT",
+      "posledny": "2027-02-26",
+      "nastup": "2027-03-08",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1067,6 +1079,8 @@
       "od": "2027-03-25",
       "do": "2027-03-30",
       "dolezite": true,
+      "posledny": "2027-03-24",
+      "nastup": "2027-03-31",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1119,6 +1133,8 @@
       "od": "2027-07-01",
       "do": "2027-08-31",
       "dolezite": true,
+      "posledny": "2027-06-30",
+      "nastup": "2027-09-01",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1139,6 +1155,8 @@
       "text": "Posledný deň vyučovania 27. 10. 2027 (streda), vyučovanie sa začína 2. 11. 2027 (utorok).",
       "od": "2027-10-28",
       "do": "2027-10-29",
+      "posledny": "2027-10-27",
+      "nastup": "2027-11-02",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1155,6 +1173,8 @@
       "text": "Posledný deň vyučovania 22. 12. 2027 (streda), vyučovanie sa začína 10. 1. 2028 (pondelok).",
       "od": "2027-12-23",
       "do": "2028-01-07",
+      "posledny": "2027-12-22",
+      "nastup": "2028-01-10",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1170,6 +1190,8 @@
       "nazov": "Polročné prázdniny 2027/2028",
       "text": "Posledný deň vyučovania 3. 2. 2028 (štvrtok), vyučovanie sa začína 7. 2. 2028 (pondelok).",
       "od": "2028-02-04",
+      "posledny": "2028-02-03",
+      "nastup": "2028-02-07",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1187,6 +1209,8 @@
       "od": "2028-02-21",
       "do": "2028-02-25",
       "skupina": "KE, PO",
+      "posledny": "2028-02-18",
+      "nastup": "2028-02-28",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1204,6 +1228,8 @@
       "od": "2028-02-28",
       "do": "2028-03-03",
       "skupina": "BA, NR, TT",
+      "posledny": "2028-02-25",
+      "nastup": "2028-03-06",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1221,6 +1247,8 @@
       "od": "2028-03-06",
       "do": "2028-03-10",
       "skupina": "BB, ZA, TN",
+      "posledny": "2028-03-03",
+      "nastup": "2028-03-13",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1237,6 +1265,8 @@
       "text": "Posledný deň vyučovania 12. 4. 2028 (streda), vyučovanie sa začína 19. 4. 2028 (streda).",
       "od": "2028-04-13",
       "do": "2028-04-18",
+      "posledny": "2028-04-12",
+      "nastup": "2028-04-19",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
@@ -1253,6 +1283,8 @@
       "text": "Posledný deň vyučovania 30. 6. 2028 (piatok), vyučovanie sa začína 4. 9. 2028 (pondelok).",
       "od": "2028-07-03",
       "do": "2028-09-01",
+      "posledny": "2028-06-30",
+      "nastup": "2028-09-04",
       "zdroje": [
         {
           "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",

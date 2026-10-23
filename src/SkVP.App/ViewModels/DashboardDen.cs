@@ -27,18 +27,18 @@ public sealed partial class DashboardViewModel
     // ------------------------------------------------------------------ viditeľnosť panelov
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(MaHornePanely))]
     private bool _ukazDnes = true;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(MaHornePanely))]
+    [NotifyPropertyChangedFor(nameof(MaSpodnePanely))]
     private bool _ukazPocasie = true;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(MaHornePanely))]
+    [NotifyPropertyChangedFor(nameof(MaSpodnePanely))]
     private bool _ukazCitat = true;
 
-    public bool MaHornePanely => UkazDnes || UkazPocasie || UkazCitat;
+    /// <summary>Počasie a výrok dňa pod blokom Dnes.</summary>
+    public bool MaSpodnePanely => UkazPocasie || UkazCitat;
 
     partial void OnUkazDnesChanged(bool value) => UlozPanel(KlucDnes, value);
 
@@ -69,6 +69,7 @@ public sealed partial class DashboardViewModel
         AktualizujDen();
         AktualizujCitat(CitatyService.CitatDna(DateOnly.FromDateTime(DateTime.Today)));
         PripravPocasie();
+        PripravPrazdniny();
         _panelyPripravene = true;
         if (!BezSiete && !Dialogy.TichyRezim && UkazPocasie)
         {

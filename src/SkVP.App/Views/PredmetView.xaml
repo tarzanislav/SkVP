@@ -14,7 +14,7 @@
                     <TextBlock Text="&#xE76C;" Style="{StaticResource Ikona}" FontSize="10" Margin="4,0" Opacity="0.6" />
                     <Button Style="{StaticResource RiadokTlacidlo}" Padding="6,2" Command="{Binding Hlavny.OtvorOblastCommand}" CommandParameter="{Binding Oblast}">
                         <TextBlock Text="{Binding Oblast.Nazov}" FontSize="13" FontWeight="SemiBold"
-                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                     </Button>
                 </StackPanel>
 
@@ -23,7 +23,7 @@
                             Background="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
                     <TextBlock DockPanel.Dock="Left" Text="{Binding Predmet.Cislo}" FontFamily="{StaticResource PismoNadpisov}" FontSize="30"
                                FontWeight="SemiBold" Margin="0,0,14,0" VerticalAlignment="Top"
-                               Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
+                               Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                     <TextBox Style="{StaticResource NadpisovePole}" Text="{Binding Nazov, UpdateSourceTrigger=LostFocus}"
                              ToolTip="Kliknite a premenujte predmet" KeyDown="Nazov_KeyDown" />
                 </DockPanel>
@@ -57,7 +57,7 @@
                             <TextBlock Text="{Binding Predmet.TextPlatnosti}" FontSize="12.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </WrapPanel>
                         <TextBlock Text="{Binding PoznamkaOsnovy}" FontSize="12.5" Margin="0,2,0,0" TextWrapping="Wrap"
-                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}"
+                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                    Visibility="{Binding PoznamkaOsnovy, Converter={StaticResource NieJePrazdne}}" />
                         <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                             <Button Padding="10,3" Command="{Binding ImportovatOsnovuCommand}"

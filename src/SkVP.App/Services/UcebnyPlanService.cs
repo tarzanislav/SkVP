@@ -34,10 +34,8 @@ public sealed class UcebnyPlanService
 {
     public const string KlucTypSkoly = "skvp.typ";
 
-    private static readonly string[] PaletaOblasti =
-    {
-        "#3B5BDB", "#0C8599", "#2F9E44", "#E67700", "#C2255C", "#7048E8", "#D9480F", "#1971C2", "#5C940D", "#862E9C",
-    };
+    /// <summary>Pastelové farby oblastí (<see cref="SkVP.Pomocne.Pastel.Oblasti"/>).</summary>
+    private static readonly string[] PaletaOblasti = SkVP.Pomocne.Pastel.Oblasti;
 
     public static IReadOnlyList<string> Paleta => PaletaOblasti;
 
