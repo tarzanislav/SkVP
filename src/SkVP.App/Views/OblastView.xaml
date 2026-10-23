@@ -134,7 +134,11 @@
                             <DataTemplate DataType="{x:Type vm:PredmetVM}">
                                 <Grid x:Name="Riadok" Tag="{Binding}" Background="Transparent" AllowDrop="True"
                                       PreviewMouseLeftButtonDown="Riadok_MouseDown" MouseMove="Riadok_MouseMove">
-                                    <Border Height="1" VerticalAlignment="Bottom" Margin="78,0,0,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <Border Grid.RowSpan="2" Height="1" VerticalAlignment="Bottom" Margin="78,0,0,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
                                     <Button x:Name="Otvorit" Style="{StaticResource RiadokTlacidlo}" Padding="10,13,190,13"
                                             Command="{Binding DataContext.Hlavny.OtvorPredmetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" ToolTip="Otvoriť osnovu predmetu">
@@ -162,6 +166,17 @@
                                                     <TextBlock Text="{Binding UpraveneText}" Style="{StaticResource Popis}" FontSize="11.5"
                                                                VerticalAlignment="Center" Margin="10,0,0,0" />
                                                 </StackPanel>
+                                                <!-- údaje z úvodnej tabuľky osnovy: profilácie vľavo, platnosť vpravo -->
+                                                <DockPanel Margin="0,5,0,0" Visibility="{Binding MaUdajeOsnovy, Converter={StaticResource BoolNaViditelnost}}">
+                                                    <CheckBox DockPanel.Dock="Right" IsChecked="{Binding UpravaUdajov}" MinWidth="0" Margin="14,-4,0,-4"
+                                                              VerticalAlignment="Center" ToolTip="Opraviť profilácie a platnosť – zapíšu sa aj do dokumentu osnovy">
+                                                        <TextBlock Text="opraviť údaje" FontSize="11.5" Style="{StaticResource Popis}" />
+                                                    </CheckBox>
+                                                    <TextBlock DockPanel.Dock="Right" Text="{Binding TextPlatnosti}" FontSize="12" Margin="16,0,0,0"
+                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding TextProfilacii}" FontSize="12" TextWrapping="Wrap"
+                                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                                </DockPanel>
                                             </StackPanel>
                                         </DockPanel>
                                     </Button>
@@ -190,6 +205,37 @@
                                                 CommandParameter="{Binding}" />
                                         <TextBlock Text="&#xE76C;" Style="{StaticResource Ikona}" FontSize="12" Margin="10,0,4,0" Opacity="0.6" />
                                     </StackPanel>
+
+                                    <!-- oprava profilácií a platnosti (zapíše sa do úvodnej tabuľky osnovy) -->
+                                    <Border Grid.Row="1" Margin="88,0,10,12" Padding="12,10" CornerRadius="6"
+                                            Background="{DynamicResource LayerFillColorDefaultBrush}" BorderThickness="1"
+                                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                            Visibility="{Binding UpravaUdajov, Converter={StaticResource BoolNaViditelnost}}">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="12" />
+                                                <ColumnDefinition Width="200" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock Text="Profilácie" Style="{StaticResource Popis}" FontSize="12" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding UpravaProfilacii, UpdateSourceTrigger=PropertyChanged}" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock Text="Platnosť" Style="{StaticResource Popis}" FontSize="12" Margin="0,0,0,2" />
+                                                <TextBox Text="{Binding UpravaPlatnosti, UpdateSourceTrigger=PropertyChanged}" ToolTip="napr. od 1.9.2026" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Bottom" Margin="12,0,0,0">
+                                                <Button Content="Uložiť do osnovy" Padding="12,4" Style="{DynamicResource AccentButtonStyle}"
+                                                        Command="{Binding DataContext.UlozitUdajeCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                                <Button Content="Zrušiť" Padding="12,4" Margin="6,0,0,0"
+                                                        Command="{Binding DataContext.ZrusitUpravuUdajovCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        CommandParameter="{Binding}" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
                                 </Grid>
                                 <DataTemplate.Triggers>
                                     <Trigger SourceName="Riadok" Property="IsMouseOver" Value="True">

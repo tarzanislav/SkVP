@@ -51,6 +51,11 @@
                                        Visibility="{Binding Predmet.UpraveneText, Converter={StaticResource NieJePrazdne}}" />
                             <TextBlock Text="{Binding Predmet.UpraveneText}" Style="{StaticResource Popis}" FontSize="13" />
                         </WrapPanel>
+                        <WrapPanel Margin="0,2,0,0" Visibility="{Binding Predmet.MaUdajeOsnovy, Converter={StaticResource BoolNaViditelnost}}">
+                            <TextBlock Text="{Binding Predmet.TextProfilacii}" FontSize="12.5" Margin="0,0,18,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding Predmet.TextPlatnosti}" FontSize="12.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </WrapPanel>
                         <TextBlock Text="{Binding PoznamkaOsnovy}" FontSize="12.5" Margin="0,2,0,0" TextWrapping="Wrap"
                                    Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}"
                                    Visibility="{Binding PoznamkaOsnovy, Converter={StaticResource NieJePrazdne}}" />

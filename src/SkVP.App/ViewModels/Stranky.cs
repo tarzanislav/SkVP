@@ -96,6 +96,57 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
         Oblast = oblast;
         _nazov = oblast.Nazov;
         Dokument = new DokumentStrankyVM(hlavny, oblast.Id, () => $"Charakteristika – {Oblast.Nazov}", sablonaOsnovy: false);
+        foreach (var predmet in oblast.Predmety)
+        {
+            predmet.NacitajUdajeOsnovy();
+        }
+    }
+
+    /// <summary>Zapíše opravené profilácie a platnosť do úvodnej tabuľky osnovy (doterajšia verzia sa zarchivuje).</summary>
+    [RelayCommand]
+    private void UlozitUdaje(PredmetVM? predmet)
+    {
+        if (predmet is null)
+        {
+            return;
+        }
+
+        if (Hlavny.JeVoWorde(predmet.Id))
+        {
+            Dialogy.Upozornenie("Osnova je práve otvorená vo Worde – údaje opravte vo Worde, alebo Word najprv zatvorte.");
+            return;
+        }
+
+        var dokumenty = new DokumentService();
+        if (dokumenty.NacitajData(predmet.Id) is not { Length: > 0 } data)
+        {
+            Dialogy.Upozornenie("Predmet zatiaľ nemá dokument osnovy.");
+            return;
+        }
+
+        string? Hodnota(string? povodna, string nova) => povodna is null && nova.Trim().Length == 0 ? null : nova.Trim();
+        try
+        {
+            var nove = UvodnaTabulka.Zapis(data, Hodnota(predmet.UdajeOsnovy.Profilacie, predmet.UpravaProfilacii),
+                Hodnota(predmet.UdajeOsnovy.Platnost, predmet.UpravaPlatnosti));
+            dokumenty.Uloz(predmet.Id, nove, "Pred opravou profilácií a platnosti v úvodnej tabuľke");
+            Hlavny.PoZmeneDokumentu(predmet.Id, oznamit: true);
+            predmet.UpravaUdajov = false;
+            Hlavny.Oznam($"Údaje osnovy „{predmet.Nazov}“ sú opravené aj v dokumente.");
+        }
+        catch (SkvpException ex)
+        {
+            Dialogy.Upozornenie(ex.Message);
+        }
+    }
+
+    [RelayCommand]
+    private void ZrusitUpravuUdajov(PredmetVM? predmet)
+    {
+        if (predmet is not null)
+        {
+            predmet.UpravaUdajov = false;
+        }
     }
 
     /// <summary>Charakteristika vzdelávacej oblasti (dokument Word).</summary>
@@ -210,6 +261,7 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
             () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: true);
         NacitajSuvislosti();
         NacitajInfo();
+        predmet.NacitajUdajeOsnovy();
     }
 
     /// <summary>Rok zmeny osnov a import („Osnovy zmenené v roku 2026 • importované …“).</summary>

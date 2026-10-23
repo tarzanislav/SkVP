@@ -86,6 +86,16 @@ public sealed class DokumentService
         return true;
     }
 
+    /// <summary>Uloží kópiu aktuálneho dokumentu do archívu verzií (dokument sa nemení). Vráti false, ak dokument nie je.</summary>
+    public bool ArchivujAktualnu(long objektId, string dovod)
+    {
+        using var db = Databaza.Otvor();
+        return Databaza.Vykonaj(db, """
+            INSERT INTO verzia(objekt_id, data, text, sha256, povodne_upravene, vytvorene, dovod)
+            SELECT objekt_id, data, text, sha256, upravene, $c, $d FROM dokument WHERE objekt_id = $id
+            """, ("$id", objektId), ("$c", Databaza.Teraz()), ("$d", dovod)) > 0;
+    }
+
     /// <summary>Uloží text z editora programu ako dokument Word.</summary>
     public bool UlozBloky(long objektId, IReadOnlyList<Blok> bloky, string? dovodArchivacie) =>
         Uloz(objektId, DocxVystup.Osnova(bloky), dovodArchivacie);

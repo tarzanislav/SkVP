@@ -17,7 +17,7 @@ public static class NastaveniaProgramu
     /// <summary>Kľúče, ktoré sa neprenášajú (stav tohto počítača, testovacia sada, jednorazové úpravy).</summary>
     private static readonly string[] Vynechat =
     {
-        "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.",
+        "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "archiv.",
     };
 
     public sealed class Subor

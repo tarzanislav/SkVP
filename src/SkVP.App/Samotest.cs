@@ -63,6 +63,7 @@ internal static class Samotest
             TestImportuAExportu();
             TestServisu();
             TestJazykovychOsnov(aplikacia);
+            TestUvodnejTabulky();
             TestZaloh();
             TestObrazoviek(aplikacia);
 
@@ -833,6 +834,44 @@ internal static class Samotest
         Krok("jazykové osnovy v poriadku");
     }
 
+    /// <summary>Profilácie a platnosť z úvodnej tabuľky osnovy – čítanie a zápis do dokumentu.</summary>
+    private static void TestUvodnejTabulky()
+    {
+        var docx = DocxVystup.Osnova(new List<Blok> { TestovaciaSada.UvodnaTabulka("Fyzika"), new Nadpis(1, "Charakteristika predmetu") });
+        var udaje = UvodnaTabulka.Precitaj(docx);
+        Over(udaje.Profilacie == TestovaciaSada.ProfilacieSady && udaje.Platnost == "od 1.9.2026", $"úvodná tabuľka: {udaje}");
+        var opravene = UvodnaTabulka.Zapis(docx, "šport, STEAM", "od 1.9.2027");
+        OverDocx(opravene, "osnova po oprave úvodnej tabuľky");
+        Over(UvodnaTabulka.Precitaj(opravene) is { Profilacie: "šport, STEAM", Platnost: "od 1.9.2027" }, "oprava sa zapísala do dokumentu");
+        Over(DokumentOsnovy.Text(DocxCitac.Nacitaj(new MemoryStream(opravene)).Bloky).Contains("Názov predmetu", StringComparison.Ordinal),
+            "ostatné riadky tabuľky zostali");
+
+        // popis a hodnota v jednej bunke, platnosť bez popisu
+        var jednaBunka = DocxVystup.Osnova(new List<Blok>
+        {
+            new Tabulka(new IReadOnlyList<Bunka>[]
+            {
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Profilácie: anglický jazyk, informatika") }) }) },
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Učebné osnovy platné od 1. 9. 2026") }) }) },
+            }, 1),
+        });
+        Over(UvodnaTabulka.Precitaj(jednaBunka) is { Profilacie: "anglický jazyk, informatika", Platnost: "od 1. 9. 2026" }, "údaje v jednej bunke a platnosť bez popisu");
+        Over(UvodnaTabulka.Precitaj(UvodnaTabulka.Zapis(jednaBunka, "anglický jazyk", null)).Profilacie == "anglický jazyk", "oprava v jednej bunke");
+        var bezTabulky = DocxVystup.Osnova(new List<Blok> { new Odsek(new[] { new Usek("Text.") }) });
+        var chyba = false;
+        try
+        {
+            UvodnaTabulka.Zapis(bezTabulky, "x", null);
+        }
+        catch (SkvpException)
+        {
+            chyba = true;
+        }
+
+        Over(!UvodnaTabulka.Precitaj(bezTabulky).MaUdaje && chyba, "osnova bez úvodnej tabuľky");
+        Krok("úvodná tabuľka v poriadku");
+    }
+
     /// <summary>Servis: záloha osnov vo Worde, obnova zo zálohy, kontrola databázy, export a import nastavení.</summary>
     private static void TestServisu()
     {
@@ -1287,6 +1326,38 @@ internal static class Samotest
         model.PremenujPredmet(nemcina, "Konverzácia v nemeckom jazyku");
         Over(DokumentOsnovy.Text(dokumentyUi.Nacitaj(nemcina.Id).Bloky).Contains("Predmet Konverzácia v nemeckom jazyku sa vyučuje", StringComparison.Ordinal),
             "vrátenie názvu späť aj v texte");
+
+        // profilácie a platnosť pod názvom predmetu, oprava do dokumentu a synchronizácia po úprave osnovy
+        model.OtvorOblast(model.Oblasti[2]);
+        Pumpuj();
+        var priroda = (OblastViewModel)model.Stranka!;
+        var fyz = model.Oblasti[2].Predmety.First(p => p.Nazov == "Fyzika");
+        Over(fyz.TextProfilacii == $"Profilácie: {TestovaciaSada.ProfilacieSady}" && fyz.TextPlatnosti == "Platnosť: od 1.9.2026",
+            $"údaje osnovy pod názvom predmetu ({fyz.TextProfilacii} | {fyz.TextPlatnosti})");
+        Snimka(okno, "22d_oblast_udaje_osnov");
+        fyz.UpravaUdajov = true;
+        fyz.UpravaPlatnosti = "od 1.9.2027";
+        Pumpuj();
+        Snimka(okno, "22e_oprava_udajov");
+        priroda.UlozitUdajeCommand.Execute(fyz);
+        Pumpuj();
+        Over(!fyz.UpravaUdajov && fyz.TextPlatnosti == "Platnosť: od 1.9.2027"
+             && UvodnaTabulka.Precitaj(fyz.Id).Platnost == "od 1.9.2027", "oprava údajov sa zapísala do osnovy");
+        Over(dokumentyUi.Verzie(fyz.Id)[0].Dovod!.Contains("úvodnej tabuľke", StringComparison.Ordinal), "pred opravou údajov sa zarchivovala verzia");
+        dokumentyUi.Uloz(fyz.Id, UvodnaTabulka.Zapis(dokumentyUi.NacitajData(fyz.Id)!, "informatika", null), null);
+        model.PoZmeneDokumentu(fyz.Id, oznamit: true);
+        Over(fyz.TextProfilacii == "Profilácie: informatika", "úprava osnovy sa premietne do údajov pod názvom");
+
+        // archív osnov za školský rok
+        var verziePred = dokumentyUi.Verzie(fyz.Id).Count;
+        var archivRoka = ArchivSkolskehoRoka.Archivuj("2025/2026");
+        Over(Directory.Exists(archivRoka.Priecinok) && archivRoka.Dokumentov >= 43
+             && File.Exists(Path.Combine(archivRoka.Priecinok, "Učebné osnovy 2025-2026.pdf"))
+             && File.Exists(Path.Combine(archivRoka.Priecinok, "Učebné osnovy 2025-2026.docx")),
+            $"archív osnov za školský rok ({archivRoka.Dokumentov} dokumentov)");
+        Over(dokumentyUi.Verzie(fyz.Id).Count == verziePred + 1 && dokumentyUi.Verzie(fyz.Id)[0].Dovod == "Archív školského roka 2025/2026",
+            "archív školského roka aj v archíve verzií");
+        Over(ArchivSkolskehoRoka.Zoznam().First().SkolskyRok == "2025/2026", "záznam o archíve školského roka");
         var celaSada = ZostavaOsnov.Zostav(new VolbyZostavy());
         var zhustenie = PdfVystup.StupenZhustenia(celaSada);
         Over(zhustenie > 0 && zhustenie < PdfVystup.MaxZhustenie, $"úvodná strana sady sa zhustením zmestí na jednu stranu (stupeň {zhustenie})");

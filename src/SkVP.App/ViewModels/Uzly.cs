@@ -102,6 +102,39 @@ public sealed partial class PredmetVM : ObservableObject
     [NotifyPropertyChangedFor(nameof(UpraveneText))]
     private DateTime _upravene;
 
+    /// <summary>Profilácie a platnosť z úvodnej tabuľky osnovy (čítajú sa z dokumentu).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TextProfilacii), nameof(TextPlatnosti), nameof(MaUdajeOsnovy))]
+    private UdajeOsnovy _udajeOsnovy = UdajeOsnovy.Prazdne;
+
+    public string TextProfilacii => UdajeOsnovy.Profilacie is { Length: > 0 } p ? $"Profilácie: {p}" : "";
+
+    public string TextPlatnosti => UdajeOsnovy.Platnost is { Length: > 0 } p ? $"Platnosť: {p}" : "";
+
+    public bool MaUdajeOsnovy => UdajeOsnovy.MaUdaje;
+
+    /// <summary>Načíta profilácie a platnosť z dokumentu osnovy (aj po každej zmene dokumentu – synchronizácia).</summary>
+    public void NacitajUdajeOsnovy() => UdajeOsnovy = DlzkaTextu > 0 ? UvodnaTabulka.Precitaj(Id) : UdajeOsnovy.Prazdne;
+
+    /// <summary>Zaškrtnuté políčko „opraviť údaje“ – profilácie a platnosť sa dajú upraviť a zapíšu sa do osnovy.</summary>
+    [ObservableProperty]
+    private bool _upravaUdajov;
+
+    [ObservableProperty]
+    private string _upravaProfilacii = "";
+
+    [ObservableProperty]
+    private string _upravaPlatnosti = "";
+
+    partial void OnUpravaUdajovChanged(bool value)
+    {
+        if (value)
+        {
+            UpravaProfilacii = UdajeOsnovy.Profilacie ?? "";
+            UpravaPlatnosti = UdajeOsnovy.Platnost ?? "";
+        }
+    }
+
     /// <summary>Premenovanie priamo v zozname.</summary>
     [ObservableProperty]
     private bool _premenuva;

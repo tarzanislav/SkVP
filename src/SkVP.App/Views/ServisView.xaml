@@ -4,7 +4,7 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="44,34,44,40" MaxWidth="1100" HorizontalAlignment="Left">
             <TextBlock Text="Servis" Style="{StaticResource Nadpis}" />
-            <TextBlock Text="Zálohy učebných osnov a všetkých dát, obnova, kontrola a údržba databázy." Style="{StaticResource Popis}" FontSize="14" Margin="0,4,0,20" />
+            <TextBlock Text="Zálohy učebných osnov a všetkých dát, archív osnov za školský rok, obnova, kontrola a údržba databázy." Style="{StaticResource Popis}" FontSize="14" Margin="0,4,0,20" />
 
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -89,6 +89,44 @@
                     </DockPanel>
                 </Border>
             </Grid>
+
+            <!-- archív školského roka -->
+            <Border Style="{StaticResource Karta}" Margin="0,16,0,0">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" FontSize="20" Margin="0,0,10,0" />
+                        <TextBlock Text="Archív osnov za školský rok" Style="{StaticResource Podnadpis}" Margin="0" />
+                    </StackPanel>
+                    <TextBlock TextWrapping="Wrap"
+                               Text="Celé učebné osnovy tak, ako platili v školskom roku – do archívu verzií v programe a do priečinka Dokumenty\SkVP\Archív školských rokov: osnovy vo Worde po oblastiach a celé osnovy v jednom dokumente Word a v archívnom PDF/A. Odporúčame na konci každého školského roka." />
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <TextBlock Text="Školský rok" VerticalAlignment="Center" Margin="0,0,10,0" />
+                        <ComboBox ItemsSource="{Binding SkolskeRoky}" SelectedItem="{Binding SkolskyRok}" Width="130" />
+                        <Button Padding="14,6" Margin="12,0,0,0" Style="{DynamicResource AccentButtonStyle}" Command="{Binding ArchivovatRokCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Text="Archivovať osnovy školského roka…" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <ItemsControl ItemsSource="{Binding ArchivyRokov}" Margin="0,12,0,0" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,2">
+                                    <Button DockPanel.Dock="Right" Content="Otvoriť" Padding="10,3"
+                                            Command="{Binding DataContext.OtvoritArchivRokaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                                        <Run Text="{Binding SkolskyRok, Mode=OneWay}" FontWeight="SemiBold" />
+                                        <Run Text="  •  " /><Run Text="{Binding Vytvorene, Mode=OneWay, StringFormat={}{0:d. M. yyyy H:mm}}" />
+                                        <Run Text="  •  dokumentov: " /><Run Text="{Binding Dokumentov, Mode=OneWay}" />
+                                    </TextBlock>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
 
             <Grid Margin="0,16,0,0">
                 <Grid.ColumnDefinitions>

@@ -430,9 +430,28 @@ public static class TestovaciaSada
         return bloky;
     }
 
+    /// <summary>Profilácie vymyslenej školy v úvodnej tabuľke osnov.</summary>
+    public const string ProfilacieSady = "šport, informatika, anglický jazyk, STEAM";
+
+    public const string PlatnostSady = "od 1.9.2026";
+
+    /// <summary>Úvodná tabuľka na začiatku osnovy: predmet, profilácie, platnosť (ako v osnovách školy).</summary>
+    public static Tabulka UvodnaTabulka(string predmet)
+    {
+        Bunka Popis(string text) => new(new Blok[] { new Odsek(new[] { new Usek(text, Tucne: true) }) }, Hlavicka: false);
+        Bunka Hodnota(string text) => new(new Blok[] { new Odsek(new[] { new Usek(text) }) });
+        return new Tabulka(new IReadOnlyList<Bunka>[]
+        {
+            new[] { Popis("Názov predmetu"), Hodnota(predmet) },
+            new[] { Popis("Profilácia"), Hodnota(ProfilacieSady) },
+            new[] { Popis("Platnosť"), Hodnota(PlatnostSady) },
+            new[] { Popis("Stupeň vzdelania"), Hodnota("úplné stredné všeobecné vzdelanie (ISCED 344)") },
+        }, 2, new[] { 3.0, 7.0 });
+    }
+
     public static List<Blok> Osnova(PredmetSady p)
     {
-        var bloky = new List<Blok> { new Nadpis(1, "Charakteristika predmetu") };
+        var bloky = new List<Blok> { UvodnaTabulka(p.Nazov), new Nadpis(1, "Charakteristika predmetu") };
         bloky.AddRange(p.Charakteristika.Select(t => (Blok)Odsek(t)));
         bloky.Add(new Odsek(new[]
         {

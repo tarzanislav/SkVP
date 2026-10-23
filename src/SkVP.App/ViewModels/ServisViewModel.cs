@@ -82,6 +82,54 @@ public sealed partial class ServisViewModel : ObservableObject
 
     public bool JeTestovaciaSada => TestovaciaSada.JeNainstalovana;
 
+    // ---- archív školského roka ----
+
+    public IReadOnlyList<string> SkolskeRoky { get; } = ArchivSkolskehoRoka.Roky();
+
+    [ObservableProperty]
+    private string _skolskyRok = ArchivSkolskehoRoka.Aktualny();
+
+    public ObservableCollection<ZaznamArchivuRoka> ArchivyRokov { get; } = new();
+
+    /// <summary>Archivuje celé osnovy za vybraný školský rok (v programe aj do priečinka).</summary>
+    [RelayCommand]
+    public void ArchivovatRok()
+    {
+        if (!Dialogy.Potvrd($"Archivovať celé učebné osnovy za školský rok {SkolskyRok}?\n\n" +
+                            "Všetky aktuálne osnovy a charakteristiky oblastí sa uložia do archívu verzií v programe a do priečinka " +
+                            $"{ArchivSkolskehoRoka.Priecinok} (Word po oblastiach a celé osnovy v archívnom PDF/A). Osnovy sa nemenia."))
+        {
+            return;
+        }
+
+        try
+        {
+            ZaznamArchivuRoka? zaznam = null;
+            Dialogy.Cakaj(() => zaznam = ArchivSkolskehoRoka.Archivuj(SkolskyRok));
+            Zapis($"Archív školského roka {SkolskyRok}: {zaznam!.Dokumentov} dokumentov → {zaznam.Priecinok}");
+            Hlavny.Oznam($"Osnovy školského roka {SkolskyRok} sú archivované ({zaznam.Dokumentov} dokumentov).");
+            Obnov();
+            Dialogy.OtvorVSysteme(zaznam.Priecinok);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Dialogy.Chyba("Osnovy sa nepodarilo archivovať.", ex);
+        }
+    }
+
+    [RelayCommand]
+    private void OtvoritArchivRoka(ZaznamArchivuRoka? zaznam)
+    {
+        if (zaznam is not null && Directory.Exists(zaznam.Priecinok))
+        {
+            Dialogy.OtvorVSysteme(zaznam.Priecinok);
+        }
+        else
+        {
+            Dialogy.Upozornenie("Priečinok archívu sa nenašiel (bol presunutý alebo zmazaný).");
+        }
+    }
+
     public void Obnov()
     {
         Zalohy.Clear();
@@ -105,6 +153,11 @@ public sealed partial class ServisViewModel : ObservableObject
         OnPropertyChanged(nameof(Velkost));
         OnPropertyChanged(nameof(Pocty));
         OnPropertyChanged(nameof(JeTestovaciaSada));
+        ArchivyRokov.Clear();
+        foreach (var zaznam in ArchivSkolskehoRoka.Zoznam())
+        {
+            ArchivyRokov.Add(zaznam);
+        }
     }
 
     private void Zapis(string text) => Protokol = $"{DateTime.Now:HH:mm:ss}  {text}\n" + Protokol;

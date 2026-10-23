@@ -561,6 +561,7 @@ public sealed partial class MainViewModel : ObservableObject
         {
             predmet.DlzkaTextu = objekt.DlzkaTextu;
             predmet.Upravene = objekt.Upravene;
+            predmet.NacitajUdajeOsnovy(); // profilácie a platnosť podľa upraveného dokumentu
             predmet.Oblast.Obnov();
         }
 
