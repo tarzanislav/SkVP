@@ -330,7 +330,7 @@ public static class PdfVystup
             return;
         }
 
-        if (TitulnaStrana.JeJednaVeta(bloky))
+        if (SkVP.Services.TitulnaStrana.JeJednaVeta(bloky))
         {
             var datum = sekcia.AddParagraph(string.Concat(((Odsek)bloky[0]).Useky.Select(u => u.Text)));
             datum.Format.Font.Name = PismaDokumentu.Nadpis;

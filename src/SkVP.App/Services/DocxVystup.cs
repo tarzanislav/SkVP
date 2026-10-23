@@ -211,7 +211,7 @@ public static class DocxVystup
         var pata = t.PataNaStranu(dokument.Vytvorene);
         if (pata.Count > 0 && DokumentOsnovy.Text(pata).Trim().Length > 0)
         {
-            if (TitulnaStrana.JeJednaVeta(pata))
+            if (SkVP.Services.TitulnaStrana.JeJednaVeta(pata))
             {
                 var datum = Odsek(string.Concat(((Odsek)pata[0]).Useky.Select(u => u.Text)), "SkvpAdresa");
                 datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1100" };
