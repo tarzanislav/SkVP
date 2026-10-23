@@ -123,7 +123,7 @@ public sealed partial class DashboardViewModel
             {
                 var dni = najblizsi.Datum.DayNumber - dnes.DayNumber;
                 var kedy = dni switch { 0 => "dnes", 1 => "zajtra", <= 4 => $"o {dni} dni", _ => $"o {dni} dní" };
-                NajblizsiVolnyDen = $"Najbližší deň pracovného pokoja: {najblizsi.Nazov}, {najblizsi.Datum.Day}. {najblizsi.Datum.ToDateTime(TimeOnly.MinValue).ToString("MMMM", Sk)} ({kedy})";
+                NajblizsiVolnyDen = $"Najbližší deň pracovného pokoja: {najblizsi.Nazov}, {najblizsi.Datum.ToDateTime(TimeOnly.MinValue).ToString("d. MMMM", Sk)} ({kedy})";
             }
         }
         catch (Exception)

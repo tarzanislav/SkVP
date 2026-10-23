@@ -59,7 +59,8 @@ public sealed class PolozkaNovinkyVM
         Kategoria = kategoria;
         Zdroje = polozka.Zdroje.Select(z => new ZdrojNovinkyVM(z, overenie?.FirstOrDefault(o => o.Url == z.Url))).ToList();
         Odpocet = NovinkyService.Odpocet(polozka, dnes);
-        JeMinule = polozka.Koniec is { } k && k < dnes;
+        // termín je minulý po poslednom dni; novinka s dátumom účinnosti (len „od“) neuplynie
+        JeMinule = polozka.Druh == NovinkyService.DruhTermin ? polozka.Koniec is { } k && k < dnes : polozka.DatumDo is { } d && d < dnes;
         JeBlizko = !JeMinule && polozka.Zaciatok is { } z && z.DayNumber - dnes.DayNumber <= 14;
         Prebieha = !JeMinule && polozka.Zaciatok is { } zz && zz <= dnes && polozka.DatumOd is not null;
     }

@@ -1507,10 +1507,7 @@ internal static class Samotest
         var model = okno.Model;
         Over(model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "hlavné okno: 7 oblastí, 43 predmetov");
         Snimka(okno, "01_dashboard");
-        if (Najdi<System.Windows.Controls.ScrollViewer>(okno.Obsah)?.Content is FrameworkElement dashboardCely)
-        {
-            SnimkaPrvku(dashboardCely, "01a_dashboard_cely");
-        }
+        SnimkyStranky(okno, "01a_dashboard", 3);
 
         // sekcia Novinky – všetky záložky
         model.OtvorNovinky();
@@ -1524,10 +1521,7 @@ internal static class Samotest
         {
             zalozky!.SelectedIndex = i;
             Pumpuj();
-            if (Najdi<System.Windows.Controls.ScrollViewer>(okno.Obsah)?.Content is FrameworkElement novinkyCele)
-            {
-                SnimkaPrvku(novinkyCele, nazvyZaloziek[i]);
-            }
+            SnimkyStranky(okno, nazvyZaloziek[i], i == 0 ? 8 : 4);
         }
 
         model.OtvorDashboard();
@@ -2351,39 +2345,27 @@ internal static class Samotest
         Over(ArchivSkolskehoRoka.Zoznam().Count == 2, "odstránenie archívu školského roka z programu");
     }
 
-    /// <summary>Snímka celého prvku (aj časti mimo viditeľnej plochy posúvača) – dlhé stránky ako Novinky.</summary>
-    private static void SnimkaPrvku(FrameworkElement prvok, string nazov)
+    /// <summary>Dlhá stránka po častiach: posúvač sa postupne posunie a uloží sa niekoľko snímok okna (…_1, …_2).</summary>
+    private static void SnimkyStranky(Window okno, string nazov, int najviac = 6)
     {
-        try
+        if (Najdi<System.Windows.Controls.ScrollViewer>(((MainWindow)okno).Obsah) is not { } posuvac)
         {
-            var sirka = (int)Math.Ceiling(prvok.ActualWidth);
-            var vyska = (int)Math.Min(9000, Math.Ceiling(prvok.ActualHeight));
-            if (sirka < 1 || vyska < 1)
-            {
-                return;
-            }
-
-            var kresba = new DrawingVisual();
-            using (var kontext = kresba.RenderOpen())
-            {
-                var oblast = new Rect(0, 0, sirka, vyska);
-                kontext.DrawRectangle((Brush)(Application.Current.TryFindResource("SolidBackgroundFillColorBaseBrush") ?? Brushes.White), null, oblast);
-                kontext.DrawRectangle(new VisualBrush(prvok) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top,
-                    Viewbox = new Rect(0, 0, sirka, vyska), ViewboxUnits = BrushMappingMode.Absolute }, null, oblast);
-            }
-
-            var obrazok = new System.Windows.Media.Imaging.RenderTargetBitmap(sirka, vyska, 96, 96, PixelFormats.Pbgra32);
-            obrazok.Render(kresba);
-            var kodovac = new System.Windows.Media.Imaging.PngBitmapEncoder();
-            kodovac.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(obrazok));
-            Directory.CreateDirectory(Databaza.PriecinokDokumentov);
-            using var subor = File.Create(Path.Combine(Databaza.PriecinokDokumentov, nazov + ".png"));
-            kodovac.Save(subor);
+            return;
         }
-        catch (Exception ex)
+
+        for (var i = 0; i < najviac; i++)
         {
-            Krok($"snímka {nazov}: {ex.Message}");
+            posuvac.ScrollToVerticalOffset(i * Math.Max(200, posuvac.ViewportHeight - 80));
+            Pumpuj();
+            Snimka(okno, $"{nazov}_{i + 1}");
+            if (posuvac.VerticalOffset + posuvac.ViewportHeight >= posuvac.ExtentHeight - 1)
+            {
+                break;
+            }
         }
+
+        posuvac.ScrollToTop();
+        Pumpuj();
     }
 
     private static void Snimka(Window okno, string nazov)

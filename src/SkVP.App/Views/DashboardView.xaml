@@ -200,7 +200,7 @@
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </Border>
-                            <TextBlock Text="{Binding Pocasie.Aktualizovane}" Foreground="White" Opacity="0.75" FontSize="11" Margin="0,8,0,0" />
+                            <TextBlock Text="{Binding Pocasie.Aktualizovane}" Foreground="White" Opacity="0.75" FontSize="11" Margin="0,8,0,0" TextWrapping="Wrap" />
                         </StackPanel>
 
                         <TextBlock Text="{Binding PocasieStav}" Foreground="White" Opacity="0.9" FontSize="12.5" Margin="0,8,0,0" TextWrapping="Wrap"
