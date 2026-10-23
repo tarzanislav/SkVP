@@ -125,15 +125,24 @@ public sealed partial record UdajeOrganizacie(
         }
 
         var casti = adresa.Split(',', 2, StringSplitOptions.TrimEntries);
-        return casti.Length == 2 ? this with { Ulica = casti[0], Mesto = casti[1] } : this with { Ulica = adresa.Trim() };
+        return casti.Length == 2 ? this with { Ulica = casti[0], Mesto = casti[1], Psc = "" } : this with { Ulica = adresa.Trim(), Mesto = "", Psc = "" };
     }
 
-    private static bool JeSlovensko(string stat) =>
+    public static bool JeSlovensko(string stat) =>
         ImportOsnov.Kluc(stat) is "slovensko" or "slovenska republika" or "sr" or "slovakia";
 
     /// <summary>Kontrola IČO (8 číslic) – vráti text chyby alebo null.</summary>
     public static string? SkontrolujIco(string ico) =>
         ico.Trim().Length == 0 || Regex.IsMatch(ico.Replace(" ", ""), @"^\d{8}$") ? null : "IČO má 8 číslic.";
+
+    /// <summary>Kontrola PSČ na Slovensku a v Česku (5 číslic, napr. 974 01) – vráti text chyby alebo null.</summary>
+    public static string? SkontrolujPsc(string psc, string stat) =>
+        psc.Trim().Length == 0 || !(JeSlovensko(stat) || ImportOsnov.Kluc(stat) is "cesko" or "ceska republika") || Regex.IsMatch(psc.Replace(" ", ""), @"^\d{5}$")
+            ? null : "PSČ má 5 číslic (napr. 974 01).";
+
+    /// <summary>Kontrola DIČ (10 číslic, voliteľne s predponou SK) – vráti text chyby alebo null.</summary>
+    public static string? SkontrolujDic(string dic) =>
+        dic.Trim().Length == 0 || Regex.IsMatch(dic.Replace(" ", ""), @"^(SK)?\d{10}$", RegexOptions.IgnoreCase) ? null : "DIČ má 10 číslic.";
 
     /// <summary>Kontrola e-mailu – vráti text chyby alebo null.</summary>
     public static string? SkontrolujEmail(string email) =>

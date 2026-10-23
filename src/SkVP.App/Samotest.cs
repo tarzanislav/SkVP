@@ -978,6 +978,25 @@ internal static class Samotest
                 $"export a import oblastí a predmetov {pripona} ({spat.Oblasti.Count} oblastí, {spat.PocetPredmetov} predmetov)");
         }
 
+        // charakteristiky zo ŠVP: aktualizácia nahradí len nezmenené ukážkové texty, tlačidlo v Osnovách všetky
+        var dokumenty = new DokumentService();
+        var oblastiSvp = new ObjektService().Oblasti().Where(o => SvpGymnazia.Oblast(o.Nazov) is not null).Take(2).ToList();
+        if (oblastiSvp.Count == 2)
+        {
+            var ukazkova = TestovaciaSada.Nacitaj().Oblasti.First(o => ImportOsnov.Kluc(o.Nazov) == ImportOsnov.Kluc(oblastiSvp[0].Nazov));
+            dokumenty.UlozBloky(oblastiSvp[0].Id, TestovaciaSada.UkazkovaCharakteristika(ukazkova), null);
+            dokumenty.UlozBloky(oblastiSvp[1].Id, new List<Blok> { new Odsek(new[] { new Usek("Vlastná charakteristika školy.") }) }, null);
+            SvpGymnazia.PrevezmiVsetky(lenUkazkove: true);
+            var prva = SvpGymnazia.JePrevzata(dokumenty.Nacitaj(oblastiSvp[0].Id).Bloky, SvpGymnazia.Oblast(oblastiSvp[0].Nazov)!);
+            var druha = DokumentOsnovy.Text(dokumenty.Nacitaj(oblastiSvp[1].Id).Bloky).Contains("Vlastná charakteristika", StringComparison.Ordinal);
+            SvpGymnazia.PrevezmiVsetky(lenUkazkove: false);
+            Over(prva && druha && SvpGymnazia.JePrevzata(dokumenty.Nacitaj(oblastiSvp[1].Id).Bloky, SvpGymnazia.Oblast(oblastiSvp[1].Nazov)!)
+                 && dokumenty.Verzie(oblastiSvp[1].Id)[0].Dovod == SvpGymnazia.DovodPrevzatia,
+                "charakteristiky zo ŠVP: aktualizácia nahradí len ukážkové texty, prevzatie všetkých archivuje vlastné");
+        }
+
+        Over(ImportStruktury.Dekoduj(System.Text.Encoding.GetEncoding(1250).GetBytes("<html><head><meta charset=\"windows-1250\"></head><body>Človek a príroda</body></html>"), null)
+             .Contains("Človek a príroda", StringComparison.Ordinal), "webová stránka v kódovaní windows-1250");
         Krok("import oblastí a predmetov v poriadku");
     }
 
@@ -985,6 +1004,11 @@ internal static class Samotest
     private static void TestUdajovOrganizacie()
     {
         var povodne = UdajeOrganizacie.Nacitaj();
+        Over(UdajeOrganizacie.Prazdne with { Psc = "999 01" } is var x && x.ZAdresy("Školská 3, Vzorovo").Psc == ""
+             && UdajeOrganizacie.SkontrolujPsc("97401", "Slovensko") is null && UdajeOrganizacie.SkontrolujPsc("1234", "Slovensko") is not null
+             && UdajeOrganizacie.SkontrolujPsc("SW1A 1AA", "Spojené kráľovstvo") is null
+             && UdajeOrganizacie.SkontrolujDic("2021145766") is null && UdajeOrganizacie.SkontrolujDic("123") is not null,
+            "adresa bez PSČ, kontrola PSČ a DIČ");
         var stara = UdajeOrganizacie.Prazdne.ZAdresy("Hlavná 5, 811 01 Bratislava");
         Over(stara is { Ulica: "Hlavná 5", Psc: "811 01", Mesto: "Bratislava" } && stara.AdresaRiadok == "Hlavná 5, 811 01 Bratislava", "rozdelenie adresy na časti");
         var org = new UdajeOrganizacie("Spojená škola Vzorová", "Gymnázium", "Vzorová 1", "Vzorovo", "999 99", "Česko", "12345678", "2020999999", "skola@vzor.example", "+421 900 111 222");
@@ -1015,6 +1039,35 @@ internal static class Samotest
         var vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(celok));
         UlozObrazokStrany(vykreslenie, 1, Path.Combine(Databaza.PriecinokDokumentov, "organizacia_uvodna_strana.png"));
         UlozObrazokStrany(vykreslenie, 2, Path.Combine(Databaza.PriecinokDokumentov, "organizacia_hlavicka_pata.png"));
+
+        // okno úvodnej strany: uloženie zachová údaje o škole v zostave (IČO, kontakt, päta) a adresa sa uloží aj po častiach
+        var oknoTitulu = new UvodnaStranaWindow();
+        oknoTitulu.Show();
+        Pumpuj();
+        Snimka(oknoTitulu, "11c_uvodna_strana_udaje_skoly");
+        oknoTitulu.Adresa.Text = "Nová 7, 821 08 Bratislava";
+        oknoTitulu.UlozitAZavriet();
+        var poOkne = TitulnaStrana.Nacitaj();
+        Over(poOkne.IcoDicZobrazit && poOkne.KontaktZobrazit && poOkne.SkolaVPateZobrazit && poOkne.ZlozkaNaStrane == "Gymnázium"
+             && UdajeOrganizacie.Nacitaj() is { Ulica: "Nová 7", Psc: "821 08", Mesto: "Bratislava", Ico: "12345678" },
+            "okno úvodnej strany zachová údaje o škole v zostave a uloží adresu po častiach");
+        var bloky = StrukturaOsnov.Bloky(StrukturaOsnov.Aktualna());
+        Over(DokumentOsnovy.Text(bloky).Contains("IČO: 12345678", StringComparison.Ordinal), "údaje o škole aj v exporte oblastí a predmetov");
+
+        // export a import nastavení programu po skupinách
+        var nastavenia = Path.Combine(Databaza.PriecinokDokumentov, "samotest_nastavenia_skupiny.json");
+        NastaveniaProgramu.Export(nastavenia, new[] { "údaje o organizácii" });
+        var len = NastaveniaProgramu.Nacitaj(nastavenia);
+        Over(len.Nastavenia.Keys.All(k => NastaveniaProgramu.Skupina(k) == "údaje o organizácii") && len.Logo is null
+             && !NastaveniaProgramu.Vytvor().Nastavenia.ContainsKey(DiagnostikaService.KlucPoslednaKontrola)
+             && NastaveniaProgramu.Prehlad(NastaveniaProgramu.Vytvor())[0] == "údaje o organizácii",
+            "export nastavení programu po skupinách (bez stavu tohto počítača)");
+        Databaza.Zapis(UdajeOrganizacie.KlucTelefon, "0");
+        Databaza.Zapis(UdajeSkVP.KlucNazov, "Iný program");
+        NastaveniaProgramu.Import(NastaveniaProgramu.Nacitaj(nastavenia), new[] { "údaje o organizácii" });
+        Over(Databaza.Citaj(UdajeOrganizacie.KlucTelefon) == "+421 900 111 222" && Databaza.Citaj(UdajeSkVP.KlucNazov) == "Iný program",
+            "import len vybraných skupín nastavení");
+        Databaza.Zapis(UdajeSkVP.KlucNazov, null);
 
         // späť pôvodné údaje a predvolené zobrazenie
         titul.IcoDicZobrazit = false;
@@ -1479,6 +1532,15 @@ internal static class Samotest
              && File.Exists(Path.Combine(archivRoka.Priecinok!, "Učebné osnovy 2025-2026.pdf"))
              && File.Exists(Path.Combine(archivRoka.Priecinok!, "Učebné osnovy 2025-2026.docx")),
             $"archív osnov za školský rok ({archivRoka.Dokumentov} dokumentov)");
+        var wordyArchivu = Directory.GetFiles(archivRoka.Priecinok!, "*.docx", SearchOption.AllDirectories).Where(f => Path.GetDirectoryName(f) != archivRoka.Priecinok).ToList();
+        Over(wordyArchivu.Count >= 43 && wordyArchivu.All(f => File.Exists(Path.ChangeExtension(f, ".pdf"))),
+            $"v priečinku archívu roka je pri každom dokumente Word aj PDF ({wordyArchivu.Count})");
+        var zostavaRoka = ArchivSkolskehoRoka.Zostava(archivRoka);
+        Over(zostavaRoka.PocetPredmetov == model.PocetPredmetov && zostavaRoka.Titul.Platnost == "Archív školského roka 2025/2026"
+             && zostavaRoka.Oblasti.Sum(o => o.Predmety.Count(p => p.Obsah.Count > 0)) >= 43,
+            "celé osnovy roka zostavené zo snímky v programe (náhľad, tlač, PDF, Word)");
+        var vykreslenieRoka = NahladDokumentu.Priprav(PdfVystup.Vytvor(zostavaRoka));
+        UlozObrazokStrany(vykreslenieRoka, 1, Path.Combine(Databaza.PriecinokDokumentov, "archiv_roka_uvodna_strana.png"));
         Over(dokumentyUi.Verzie(fyz.Id).Count == verziePred + 1 && dokumentyUi.Verzie(fyz.Id)[0].Dovod == "Archív školského roka 2025/2026",
             "archív školského roka aj v archíve verzií");
         Over(ArchivSkolskehoRoka.Zoznam().First().SkolskyRok == "2025/2026", "záznam o archíve školského roka");
@@ -1663,14 +1725,23 @@ internal static class Samotest
             File.WriteAllBytes(Path.Combine(priecinokSvp, subor), OsnovaSTabulkou(predmet));
         }
 
+        // podpriečinok s názvom oblasti určí oblasť (aj keď ju názov predmetu neprezrádza), priečinok Archív sa preskočí
+        var podpriecinok = Path.Combine(priecinokSvp, "06 Človek a hodnoty");
+        Directory.CreateDirectory(podpriecinok);
+        File.WriteAllBytes(Path.Combine(podpriecinok, "osnova_5.docx"), OsnovaSTabulkou("Projektové vyučovanie"));
+        Directory.CreateDirectory(Path.Combine(priecinokSvp, "Archív"));
+        File.WriteAllBytes(Path.Combine(priecinokSvp, "Archív", "stara_osnova.docx"), OsnovaSTabulkou("Fyzika"));
+
         var sprievodcaSvp = new ImportOsnovViewModel(model);
         sprievodcaSvp.PridajPriecinok(priecinokSvp);
-        Over(sprievodcaSvp.Polozky.Count == 4 && sprievodcaSvp.Polozky.All(p => p.JeNovy)
-             && sprievodcaSvp.Polozky[0].NovyNazov == "Fyzika" && sprievodcaSvp.Polozky[0].NovaOblast?.Nazov == "Človek a príroda"
-             && sprievodcaSvp.Polozky[1].NovaOblast?.Nazov == "Človek a spoločnosť"
-             && sprievodcaSvp.Polozky[2].NovyNazov.StartsWith("Anglický jazyk", StringComparison.Ordinal) && sprievodcaSvp.Polozky[2].NovaOblast?.Nazov == "Jazyk a komunikácia"
-             && sprievodcaSvp.Polozky[3].NovaOblast?.Nazov == "Zdravie a pohyb",
-            "predmety z priečinka podľa úvodnej tabuľky a ich oblasti (" + string.Join(" | ", sprievodcaSvp.Polozky.Select(p => $"{p.NovyNazov} → {p.NovaOblast?.Nazov}")) + ")");
+        PolozkaImportu? Najdi(string zaciatok) => sprievodcaSvp.Polozky.FirstOrDefault(p => p.NovyNazov.StartsWith(zaciatok, StringComparison.Ordinal));
+        Over(sprievodcaSvp.Polozky.Count == 5 && sprievodcaSvp.Polozky.All(p => p.JeNovy)
+             && Najdi("Fyzika")?.NovaOblast?.Nazov == "Človek a príroda"
+             && Najdi("Seminár z dejepisu")?.NovaOblast?.Nazov == "Človek a spoločnosť"
+             && Najdi("Anglický jazyk")?.NovaOblast?.Nazov == "Jazyk a komunikácia"
+             && Najdi("Telesná a športová výchova")?.NovaOblast?.Nazov == "Zdravie a pohyb"
+             && Najdi("Projektové vyučovanie")?.NovaOblast?.Nazov == "Človek a hodnoty",
+            "predmety z priečinka a podpriečinkov podľa úvodnej tabuľky a ich oblasti (" + string.Join(" | ", sprievodcaSvp.Polozky.Select(p => $"{p.NovyNazov} → {p.NovaOblast?.Nazov}")) + ")");
         var oknoSvp = new ImportOsnovWindow(sprievodcaSvp) { Owner = okno };
         oknoSvp.Show();
         Pumpuj();
@@ -1681,9 +1752,9 @@ internal static class Samotest
             p.Uroven = "B2";
         }
 
-        Over(sprievodcaSvp.Importuj() == 4, "import osnov vytvorí predmety v oblastiach podľa ŠVP");
+        Over(sprievodcaSvp.Importuj() == 5, "import osnov vytvorí predmety v oblastiach podľa ŠVP");
         model.NacitajOblasti();
-        Over(model.PocetPredmetov == 4 && model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Single().Nazov == "Fyzika", "predmety sú v správnych oblastiach");
+        Over(model.PocetPredmetov == 5 && model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Single().Nazov == "Fyzika", "predmety sú v správnych oblastiach");
         model.OtvorOblast(model.Oblasti.First(o => o.Nazov == "Človek a príroda"));
         Pumpuj();
         var oblastSvp = (OblastViewModel)model.Stranka!;

@@ -85,6 +85,26 @@ public sealed partial class OsnovyViewModel : ObservableObject
             NovaOblast = "";
         }
     }
+
+    /// <summary>Charakteristiky všetkých oblastí podľa Štátneho vzdelávacieho programu (doterajšie texty sa zarchivujú).</summary>
+    [RelayCommand]
+    private void CharakteristikyZoSvp()
+    {
+        if (!Dialogy.Potvrd("Prevziať charakteristiky všetkých vzdelávacích oblastí zo Štátneho vzdelávacieho programu pre gymnáziá?\n\n" +
+                            "Charakteristiky, ktoré sa od ŠVP líšia, sa nahradia oficiálnym znením – doterajší text sa zarchivuje a dá sa obnoviť. " +
+                            "Oblasti, ktoré v ŠVP nie sú, zostanú bez zmeny."))
+        {
+            return;
+        }
+
+        var pocet = SvpGymnazia.PrevezmiVsetky(lenUkazkove: false);
+        foreach (var oblast in Hlavny.Oblasti)
+        {
+            Hlavny.OznamPrepisanie(oblast.Id);
+        }
+
+        Hlavny.Oznam(pocet == 0 ? "Charakteristiky oblastí už sú podľa ŠVP." : $"Charakteristiky podľa ŠVP: {pocet} oblastí.");
+    }
 }
 
 /// <summary>Vzdelávacia oblasť so zoznamom predmetov v poradí.</summary>

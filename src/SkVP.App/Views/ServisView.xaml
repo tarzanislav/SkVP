@@ -156,7 +156,7 @@
                         <StackPanel>
                             <TextBlock Text="Kontrola" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
                             <Button Padding="12,5" Margin="0,0,0,6" HorizontalContentAlignment="Left" Command="{Binding RychlaKontrolaCommand}"
-                                    Content="Rýchla kontrola" ToolTip="Overí, že súbor databázy nie je poškodený (niekoľko sekúnd)." />
+                                    Content="Rýchla kontrola" ToolTip="Overí, že súbor databázy nie je poškodený (niekoľko sekúnd). Robí sa aj pri každom spustení programu." />
                             <Button Padding="12,5" Margin="0,0,0,6" HorizontalContentAlignment="Left" Command="{Binding UplnaKontrolaCommand}"
                                     Content="Úplná kontrola integrity" ToolTip="Dôkladne prejde celú databázu. Odporúča sa raz za mesiac." />
                             <Button Padding="12,5" Margin="0,0,0,6" HorizontalContentAlignment="Left" Command="{Binding KontrolaVaziebCommand}"
@@ -166,7 +166,7 @@
 
                             <TextBlock Text="Údržba" Style="{StaticResource Stitok}" Margin="0,10,0,4" />
                             <Button Padding="12,5" Margin="0,0,0,6" HorizontalContentAlignment="Left" Command="{Binding OptimalizovatCommand}"
-                                    Content="Optimalizovať" ToolTip="Aktualizuje štatistiky databázy pre rýchle vyhľadávanie." />
+                                    Content="Optimalizovať" ToolTip="Aktualizuje štatistiky databázy pre rýchle vyhľadávanie. Robí sa aj pri zatvorení programu." />
                             <Button Padding="12,5" Margin="0,0,0,6" HorizontalContentAlignment="Left" Command="{Binding ObnovitIndexyCommand}"
                                     Content="Obnoviť indexy" ToolTip="Keď je vyhľadávanie pomalé alebo nepresné." />
                             <Button Padding="12,5" Margin="0,0,0,6" HorizontalContentAlignment="Left" Command="{Binding ZmensitCommand}"

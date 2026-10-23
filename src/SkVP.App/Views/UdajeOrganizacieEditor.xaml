@@ -21,6 +21,8 @@
             <StackPanel Grid.Column="2">
                 <TextBlock Text="PSČ" Style="{StaticResource Stitok}" />
                 <TextBox Text="{Binding Psc, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{Binding ChybaPsc}" Foreground="#C92A2A" FontSize="11.5" TextWrapping="Wrap"
+                           Visibility="{Binding MaChybuPsc, Converter={StaticResource BoolNaViditelnost}}" />
             </StackPanel>
         </Grid>
         <Grid>
@@ -53,6 +55,8 @@
             <StackPanel Grid.Column="2">
                 <TextBlock Text="DIČ" Style="{StaticResource Stitok}" />
                 <TextBox Text="{Binding Dic, UpdateSourceTrigger=PropertyChanged}" />
+                <TextBlock Text="{Binding ChybaDic}" Foreground="#C92A2A" FontSize="11.5"
+                           Visibility="{Binding MaChybuDic, Converter={StaticResource BoolNaViditelnost}}" />
             </StackPanel>
         </Grid>
         <Grid>

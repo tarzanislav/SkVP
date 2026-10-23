@@ -63,10 +63,28 @@
                     <TextBox x:Name="Skola" TextChanged="Hlavicka_Zmena" />
                 </DockPanel>
 
+                <TextBlock Text="Organizačná zložka (spojená škola)" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="ZlozkaZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Zlozka" ToolTip="Rovnaký údaj ako v Nastaveniach → Údaje o organizácii" />
+                </DockPanel>
+
                 <TextBlock Text="Adresa" Style="{StaticResource Stitok}" />
                 <DockPanel>
                     <CheckBox x:Name="AdresaZobrazit" Style="{StaticResource Prepinac}" />
-                    <TextBox x:Name="Adresa" />
+                    <TextBox x:Name="Adresa" ToolTip="Ulica, PSČ a obec – uloží sa aj do Nastavení → Údaje o organizácii (po častiach)" />
+                </DockPanel>
+
+                <TextBlock Text="IČO a DIČ (upravíte v Nastaveniach → Údaje o organizácii)" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="IcoDicZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBlock x:Name="IcoDic" VerticalAlignment="Center" Style="{StaticResource Popis}" />
+                </DockPanel>
+
+                <TextBlock Text="E-mail a telefón (upravíte v Nastaveniach → Údaje o organizácii)" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="KontaktZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBlock x:Name="Kontakt" VerticalAlignment="Center" Style="{StaticResource Popis}" />
                 </DockPanel>
 
                 <TextBlock Text="Nadpis" Style="{StaticResource Stitok}" />
@@ -134,8 +152,16 @@
                     <TextBlock Text="Vpravo" Style="{StaticResource Stitok}" />
                     <StackPanel Orientation="Horizontal">
                         <CheckBox x:Name="SkolaVHlavickeZobrazit" Content="Názov školy" Checked="Hlavicka_Zmena" Unchecked="Hlavicka_Zmena" />
+                        <CheckBox x:Name="ZlozkaVHlavickeZobrazit" Content="Organizačná zložka" Margin="16,0,0,0" Checked="Hlavicka_Zmena" Unchecked="Hlavicka_Zmena" />
                         <CheckBox x:Name="LogoVHlavickeZobrazit" Content="Logo školy" Margin="16,0,0,0" Checked="Hlavicka_Zmena" Unchecked="Hlavicka_Zmena" />
                     </StackPanel>
+                </StackPanel>
+
+                <TextBlock Text="Päta strán (vľavo, vpravo číslo strany)" Style="{StaticResource Stitok}" Margin="0,14,0,4" />
+                <StackPanel Orientation="Horizontal">
+                    <CheckBox x:Name="SkolaVPateZobrazit" Content="Názov školy" />
+                    <CheckBox x:Name="KontaktVPateZobrazit" Content="E-mail a telefón" Margin="16,0,0,0" />
+                    <CheckBox x:Name="MetadataZobrazit" Content="Názov školy ako autor vo vlastnostiach PDF a Word" Margin="16,0,0,0" />
                 </StackPanel>
 
                 <TextBlock Text="Ukážka hlavičky" Style="{StaticResource Stitok}" Margin="0,16,0,4" />

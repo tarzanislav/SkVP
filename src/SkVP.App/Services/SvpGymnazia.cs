@@ -151,6 +151,47 @@ public static class SvpGymnazia
         return nove;
     }
 
+    public const string DovodPrevzatia = "Pred prevzatím charakteristiky zo Štátneho vzdelávacieho programu";
+
+    /// <summary>
+    /// Prevezme charakteristiky všetkých oblastí, ktoré sú v ŠVP (doterajšie texty sa zarchivujú). Pri
+    /// <paramref name="lenUkazkove"/> len tie, ktoré sú ešte nezmenenou ukážkovou charakteristikou testovacej sady
+    /// (aktualizácia programu), alebo chýbajú. Vráti počet prevzatých.
+    /// </summary>
+    public static int PrevezmiVsetky(bool lenUkazkove)
+    {
+        var sluzba = new ObjektService();
+        var dokumenty = new DokumentService();
+        var ukazkove = lenUkazkove
+            ? TestovaciaSada.Nacitaj().Oblasti.ToDictionary(o => ImportOsnov.Kluc(o.Nazov), o => DokumentOsnovy.Text(TestovaciaSada.UkazkovaCharakteristika(o)).Trim())
+            : new Dictionary<string, string>();
+        var pocet = 0;
+        foreach (var oblast in sluzba.Oblasti())
+        {
+            if (Oblast(oblast.Nazov) is not { } svp)
+            {
+                continue;
+            }
+
+            var existuje = dokumenty.Existuje(oblast.Id);
+            var text = existuje ? DokumentOsnovy.Text(dokumenty.Nacitaj(oblast.Id).Bloky).Trim() : "";
+            if (existuje && JePrevzata(dokumenty.Nacitaj(oblast.Id).Bloky, svp))
+            {
+                continue;
+            }
+
+            if (lenUkazkove && existuje && text.Length > 0 && !(ukazkove.TryGetValue(ImportOsnov.Kluc(oblast.Nazov), out var u) && u == text))
+            {
+                continue; // vlastný text školy sa bez opýtania nemení
+            }
+
+            dokumenty.UlozBloky(oblast.Id, Charakteristika(svp), DovodPrevzatia);
+            pocet++;
+        }
+
+        return pocet;
+    }
+
     /// <summary>Nahradí charakteristiku oblasti textom ŠVP (doterajšia sa zarchivuje). Vráti false, ak oblasť nie je v ŠVP.</summary>
     public static bool PrevezmiCharakteristiku(long oblastId, string nazovOblasti)
     {
@@ -159,7 +200,7 @@ public static class SvpGymnazia
             return false;
         }
 
-        new DokumentService().UlozBloky(oblastId, Charakteristika(oblast), "Pred prevzatím charakteristiky zo Štátneho vzdelávacieho programu");
+        new DokumentService().UlozBloky(oblastId, Charakteristika(oblast), DovodPrevzatia);
         return true;
     }
 }

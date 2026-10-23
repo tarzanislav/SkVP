@@ -350,6 +350,69 @@ public sealed partial class ArchivViewModel : ObservableObject
         }
     }
 
+    /// <summary>Náhľad a tlač celých osnov roka zo snímky v programe (okno tlače ako v Tlač a zostavy).</summary>
+    [RelayCommand]
+    private void NahladRoka()
+    {
+        if (Vybrany is not { MaPrehlad: true } v)
+        {
+            return;
+        }
+
+        MigraDoc.Rendering.DocumentRenderer? vykreslenie = null;
+        Dialogy.Cakaj(() => vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(ArchivSkolskehoRoka.Zostava(v))));
+        if (!Dialogy.TichyRezim)
+        {
+            NahladDokumentu.Vytlac(vykreslenie!, $"Učebné osnovy {v.SkolskyRok}", () => PdfVystup.Vytvor(ArchivSkolskehoRoka.Zostava(v)));
+        }
+    }
+
+    /// <summary>Celé osnovy roka zo snímky v programe do PDF (PDF/A, obrázky…) alebo Wordu.</summary>
+    [RelayCommand]
+    private void UlozitRok(string? format)
+    {
+        if (Vybrany is not { MaPrehlad: true } v)
+        {
+            return;
+        }
+
+        var nazov = ImportOsnov.BezpecnyNazov($"Učebné osnovy {v.SkolskyRok.Replace('/', '-')}");
+        try
+        {
+            if (format == "docx")
+            {
+                var cesta = Dialogy.UlozitAko("Uložiť osnovy roka do Wordu", "Dokument Word (*.docx)|*.docx", nazov + ".docx");
+                if (cesta is not null)
+                {
+                    Dialogy.Cakaj(() => DocxVystup.Uloz(ArchivSkolskehoRoka.Zostava(v), cesta));
+                    Hlavny.Oznam($"Uložené: {Path.GetFileName(cesta)}");
+                    Dialogy.OtvorVSysteme(cesta);
+                }
+
+                return;
+            }
+
+            if (Dialogy.TichyRezim)
+            {
+                if (Dialogy.UlozitAko("PDF", "PDF|*.pdf", nazov + ".pdf") is { } pdf)
+                {
+                    SuboryZostavy.Uloz(PdfVystup.Vytvor(ArchivSkolskehoRoka.Zostava(v)), pdf, new VolbyPdf());
+                }
+
+                return;
+            }
+
+            MigraDoc.Rendering.DocumentRenderer? vykreslenie = null;
+            Dialogy.Cakaj(() => vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(ArchivSkolskehoRoka.Zostava(v))));
+            new TlacWindow(vykreslenie, false, $"Učebné osnovy {v.SkolskyRok}", RezimOknaTlace.Pdf,
+                () => PdfVystup.Vytvor(ArchivSkolskehoRoka.Zostava(v)), nazov + ".pdf") { Owner = Dialogy.Vlastnik }.ShowDialog();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or SkvpException)
+        {
+            Dialogy.Chyba("Osnovy roka sa nepodarilo uložiť.", ex);
+        }
+    }
+
     [RelayCommand]
     private void OtvoritPdf()
     {

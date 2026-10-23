@@ -216,8 +216,12 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
             polozka.Uroven = "";
         }
 
-        // nový jazykový predmet patrí do oblasti Jazyk a komunikácia, ostatné podľa učebného plánu, ŠVP a kľúčových slov
-        var oblastPredmetu = subor.Jazyk is not null ? JazykovePravidla.Oblast : SvpGymnazia.OblastPredmetu(polozka.NovyNazov);
+        // oblasť nového predmetu: podpriečinok s názvom oblasti („03 Človek a príroda“), jazykový predmet do oblasti
+        // Jazyk a komunikácia, ostatné podľa učebného plánu, ŠVP a kľúčových slov
+        var priecinokOblasti = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(polozka.Cesta) ?? "");
+        var oblastZPriecinka = Hlavny.Oblasti.FirstOrDefault(o => ImportOsnov.Kluc(ImportOsnov.CistyNazov(priecinokOblasti)) == ImportOsnov.Kluc(o.Nazov))?.Nazov;
+        var oblastPredmetu = oblastZPriecinka
+                             ?? (subor.Jazyk is not null ? JazykovePravidla.Oblast : SvpGymnazia.OblastPredmetu(polozka.NovyNazov));
         polozka.NovaOblast = (oblastPredmetu is not null
                                  ? Hlavny.Oblasti.FirstOrDefault(o => ImportOsnov.Kluc(o.Nazov) == ImportOsnov.Kluc(oblastPredmetu))
                                  : null)
@@ -225,13 +229,18 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
         polozka.Nastavuje = false;
     }
 
-    /// <summary>Všetky osnovy z priečinka (Word a PDF) – súbory sa len čítajú.</summary>
+    /// <summary>
+    /// Všetky osnovy z priečinka aj jeho podpriečinkov (Word a PDF) – súbory sa len čítajú. Podpriečinok s názvom oblasti
+    /// („03 Človek a príroda“) určí oblasť nového predmetu; priečinky Archív a dočasné súbory Wordu sa preskočia.
+    /// </summary>
     public void PridajPriecinok(string priecinok)
     {
-        var subory = System.IO.Directory.EnumerateFiles(priecinok)
+        var subory = System.IO.Directory.EnumerateFiles(priecinok, "*", new System.IO.EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
             .Where(f => ImportOsnov.Pripony.Contains(System.IO.Path.GetExtension(f).ToLowerInvariant())
-                        && !System.IO.Path.GetFileName(f).StartsWith("~$", StringComparison.Ordinal))
-            .OrderBy(f => f, StringComparer.CurrentCultureIgnoreCase)
+                        && !System.IO.Path.GetFileName(f).StartsWith("~$", StringComparison.Ordinal)
+                        && !System.IO.Path.GetRelativePath(priecinok, f).Split(System.IO.Path.DirectorySeparatorChar)
+                            .SkipLast(1).Any(c => ImportOsnov.Kluc(c).StartsWith("archiv", StringComparison.Ordinal)))
+            .OrderBy(f => System.IO.Path.GetRelativePath(priecinok, f), StringComparer.CurrentCultureIgnoreCase)
             .ToList();
         if (subory.Count == 0)
         {

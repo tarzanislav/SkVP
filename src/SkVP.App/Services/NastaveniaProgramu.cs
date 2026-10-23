@@ -17,7 +17,7 @@ public static class NastaveniaProgramu
     /// <summary>Kľúče, ktoré sa neprenášajú (stav tohto počítača, testovacia sada, jednorazové úpravy).</summary>
     private static readonly string[] Vynechat =
     {
-        "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "Aktualizacie.PoslednaKontrola", "archiv.",
+        "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "Aktualizacie.PoslednaKontrola", "archiv.", "kontrola.",
     };
 
     public sealed class Subor
@@ -89,27 +89,58 @@ public static class NastaveniaProgramu
         _ when kluc.StartsWith("uprava.", StringComparison.Ordinal) => "úprava osnov (Word / editor)",
         _ when kluc.StartsWith("zaloha.", StringComparison.Ordinal) => "zálohovanie (frekvencia, počet, priečinok)",
         _ when kluc.StartsWith("Aktualizacie.", StringComparison.Ordinal) => "aktualizácie",
+        _ when kluc.StartsWith("diktovanie.", StringComparison.Ordinal) => "diktovanie (spôsob a model reči)",
         _ => "ďalšie nastavenia",
     };
 
+    public const string SkupinaLogo = "logo školy";
+    public const string SkupinaPata = "text dole na úvodnej strane";
+
     /// <summary>Prehľad obsahu súboru nastavení: skupiny v poradí (s logom a textom dole na úvodnej strane).</summary>
+    private static readonly string[] PoradieSkupin =
+    {
+        "údaje o organizácii", SkupinaLogo, "školský vzdelávací program (názov, druh školy, platnosť)",
+        "úvodná strana, hlavička, päta a údaje o škole v zostavách", SkupinaPata, "voľby tlače a zostáv",
+        "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)", "obojstranná tlač", "vzhľad", "jazyk programu",
+        "úprava osnov (Word / editor)", "diktovanie (spôsob a model reči)", "zálohovanie (frekvencia, počet, priečinok)", "aktualizácie",
+    };
+
     public static IReadOnlyList<string> Prehlad(Subor subor)
     {
         var skupiny = subor.Nastavenia.Keys.Select(Skupina).Distinct().ToList();
         if (subor.Logo is { Length: > 0 })
         {
-            skupiny.Insert(Math.Min(1, skupiny.Count), "logo školy");
+            skupiny.Insert(Math.Min(1, skupiny.Count), SkupinaLogo);
         }
 
-        if (subor.TextDoleNaStrane is { Length: > 0 } && !skupiny.Contains("úvodná strana, hlavička, päta a údaje o škole v zostavách"))
+        if (subor.TextDoleNaStrane is { Length: > 0 })
         {
-            skupiny.Add("text dole na úvodnej strane");
+            skupiny.Add(SkupinaPata);
         }
 
-        return skupiny;
+        return skupiny.OrderBy(g => Array.IndexOf(PoradieSkupin, g) is var i && i >= 0 ? i : 99).ToList();
     }
 
-    public static void Export(string cesta) => File.WriteAllText(cesta, JsonSerializer.Serialize(Vytvor(), Moznosti));
+    public static void Export(string cesta, IReadOnlyCollection<string>? skupiny = null)
+    {
+        var subor = Vytvor();
+        if (skupiny is not null)
+        {
+            subor.Nastavenia = subor.Nastavenia.Where(n => skupiny.Contains(Skupina(n.Key))).ToDictionary(n => n.Key, n => n.Value);
+            if (!skupiny.Contains(SkupinaLogo))
+            {
+                subor.Logo = null;
+                subor.LogoPripona = null;
+            }
+
+            if (!skupiny.Contains(SkupinaPata))
+            {
+                subor.TextDoleNaStrane = null;
+            }
+        }
+
+        File.WriteAllText(cesta, JsonSerializer.Serialize(subor, Moznosti));
+    }
 
     public static Subor Nacitaj(string cesta)
     {
@@ -130,19 +161,25 @@ public static class NastaveniaProgramu
     }
 
     /// <summary>Zapíše nastavenia zo súboru (doterajšie s rovnakým kľúčom sa prepíšu). Vráti počet nastavení.</summary>
-    public static int Import(Subor subor)
+    public static int Import(Subor subor, IReadOnlyCollection<string>? skupiny = null)
     {
         var pocet = 0;
         foreach (var (kluc, hodnota) in subor.Nastavenia)
         {
-            if (Prenasat(kluc))
+            // priečinok záloh z iného počítača sa prevezme, len ak na tomto počítači existuje
+            if (kluc == Databaza.KlucPriecinokZaloh && hodnota is { Length: > 0 } && !Directory.Exists(hodnota))
+            {
+                continue;
+            }
+
+            if (Prenasat(kluc) && (skupiny is null || skupiny.Contains(Skupina(kluc))))
             {
                 Databaza.Zapis(kluc, hodnota);
                 pocet++;
             }
         }
 
-        if (subor.Logo is { Length: > 0 } logo && subor.LogoPripona is { Length: > 0 } pripona)
+        if (subor.Logo is { Length: > 0 } logo && subor.LogoPripona is { Length: > 0 } pripona && (skupiny is null || skupiny.Contains(SkupinaLogo)))
         {
             var docasne = Path.Combine(Path.GetTempPath(), $"skvp_logo_{Guid.NewGuid():N}{pripona}");
             try
@@ -156,7 +193,7 @@ public static class NastaveniaProgramu
             }
         }
 
-        if (subor.TextDoleNaStrane is { Length: > 0 } pata)
+        if (subor.TextDoleNaStrane is { Length: > 0 } pata && (skupiny is null || skupiny.Contains(SkupinaPata)))
         {
             TitulnaStrana.UlozDataPaty(Convert.FromBase64String(pata));
         }

@@ -41,6 +41,10 @@ public sealed partial class UdajeOrganizacieVM : ObservableObject
 
     public string? ChybaIco => UdajeOrganizacie.SkontrolujIco(Ico);
     public string? ChybaEmail => UdajeOrganizacie.SkontrolujEmail(Email);
+    public string? ChybaPsc => UdajeOrganizacie.SkontrolujPsc(Psc, Stat);
+    public string? ChybaDic => UdajeOrganizacie.SkontrolujDic(Dic);
+    public bool MaChybuPsc => ChybaPsc is not null;
+    public bool MaChybuDic => ChybaDic is not null;
     public bool MaChybuIco => ChybaIco is not null;
     public bool MaChybuEmail => ChybaEmail is not null;
 
@@ -53,6 +57,18 @@ public sealed partial class UdajeOrganizacieVM : ObservableObject
         {
             base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(ChybaIco)));
             base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(MaChybuIco)));
+        }
+
+        if (e.PropertyName is nameof(Psc) or nameof(Stat))
+        {
+            base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(ChybaPsc)));
+            base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(MaChybuPsc)));
+        }
+
+        if (e.PropertyName is nameof(Dic))
+        {
+            base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(ChybaDic)));
+            base.OnPropertyChanged(new PropertyChangedEventArgs(nameof(MaChybuDic)));
         }
 
         if (e.PropertyName is nameof(Email))

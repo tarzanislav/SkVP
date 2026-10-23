@@ -163,6 +163,28 @@ public sealed class TitulnaStrana
         }
     }
 
+    /// <summary>
+    /// Údaje o škole pre ďalšie výstupy (oblasti a predmety vo Worde, PDF, HTML a Exceli, štatistiky archívu) podľa
+    /// rovnakých volieb ako úvodná strana: názov a zložka, adresa, IČO a DIČ, kontakt.
+    /// </summary>
+    public IReadOnlyList<string> UdajeOSkole()
+    {
+        var riadky = new List<string>();
+        var nazov = string.Join(" – ", new[] { SkolaZobrazit ? Skola.Trim() : "", ZlozkaNaStrane ?? "" }.Where(t => t.Length > 0));
+        if (nazov.Length > 0)
+        {
+            riadky.Add(nazov);
+        }
+
+        if (AdresaZobrazit && Adresa.Trim().Length > 0)
+        {
+            riadky.Add(Adresa.Trim());
+        }
+
+        riadky.AddRange(RiadkyPodAdresou());
+        return riadky;
+    }
+
     /// <summary>Autor (názov školy) do vlastností súboru, alebo null.</summary>
     public string? AutorSuboru => MetadataZobrazit && Skola.Trim().Length > 0 ? Skola.Trim() : null;
 
@@ -307,8 +329,20 @@ public sealed class TitulnaStrana
 
     public void Uloz()
     {
-        // škola, adresa a druh školy sú spoločné s nastaveniami programu
-        Databaza.Zapis(UdajeSkVP.KlucSkola, Skola.Trim());
+        // škola, zložka, adresa a druh školy sú spoločné s Údajmi o organizácii – adresa sa uloží aj po častiach
+        var org = UdajeOrganizacie.Nacitaj();
+        var noveOrg = org with { Nazov = Skola.Trim(), Zlozka = Zlozka.Trim() };
+        if (Adresa.Trim() != org.AdresaRiadok)
+        {
+            noveOrg = noveOrg.ZAdresy(Adresa.Trim());
+        }
+
+        if (noveOrg != org)
+        {
+            noveOrg.Uloz();
+        }
+
+        // vlastný tvar adresy na úvodnej strane (napr. bez PSČ) zostane, kým sa adresa nezmení v Nastaveniach
         Databaza.Zapis(UdajeSkVP.KlucAdresa, Adresa.Trim());
         Databaza.Zapis(UcebnyPlanService.KlucTypSkoly, Typ.Trim());
         Databaza.Zapis(K + "nadpis", Nadpis.Trim());

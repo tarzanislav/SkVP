@@ -519,8 +519,29 @@ public static partial class ImportStruktury
         }
     }
 
-    private static string Dekoduj(byte[] data, string? znakovaSada)
+    /// <summary>
+    /// Text stránky v správnej znakovej sade: z hlavičky HTTP, inak z BOM alebo z &lt;meta charset&gt; na začiatku
+    /// stránky (staršie slovenské stránky v windows-1250 alebo iso-8859-2), inak UTF-8.
+    /// </summary>
+    public static string Dekoduj(byte[] data, string? znakovaSada)
     {
+        if (znakovaSada is not { Length: > 0 })
+        {
+            if (data.Length >= 3 && data[0] == 0xEF && data[1] == 0xBB && data[2] == 0xBF)
+            {
+                return Encoding.UTF8.GetString(data, 3, data.Length - 3);
+            }
+
+            var zaciatok = Encoding.ASCII.GetString(data, 0, Math.Min(data.Length, 4096));
+            var meta = Regex.Match(zaciatok, @"<meta[^>]+charset\s*=\s*[""']?\s*([a-zA-Z0-9_\-]+)", RegexOptions.IgnoreCase);
+            var xml = Regex.Match(zaciatok, @"^\s*<\?xml[^>]+encoding\s*=\s*[""']([a-zA-Z0-9_\-]+)", RegexOptions.IgnoreCase);
+            znakovaSada = meta.Success ? meta.Groups[1].Value : xml.Success ? xml.Groups[1].Value : null;
+            if (data.Length >= 2 && data[0] == 0xFF && data[1] == 0xFE)
+            {
+                return Encoding.Unicode.GetString(data, 2, data.Length - 2);
+            }
+        }
+
         try
         {
             if (znakovaSada is { Length: > 0 })
@@ -545,7 +566,7 @@ public static partial class ImportStruktury
             return null;
         }
 
-        var text = File.ReadAllText(cesta);
+        var text = Dekoduj(File.ReadAllBytes(cesta), null);
         return pripona switch
         {
             ".html" or ".htm" => ZHtml(text),
@@ -616,6 +637,12 @@ public static partial class ImportStruktury
                         "th,td{border:1px solid #c9d1dc;padding:6px 12px;text-align:left;vertical-align:top}th{background:#e7ecfb}</style>");
         html.AppendLine("</head>\n<body>");
         html.AppendLine($"<h1>{E(plan.Nazov ?? "Vzdelávacie oblasti a predmety")}</h1>");
+        var udaje = TitulnaStrana.Nacitaj().UdajeOSkole();
+        if (udaje.Count > 0)
+        {
+            html.AppendLine($"<p class=\"skola\">{string.Join("<br>", udaje.Select(E))}</p>");
+        }
+
         if (plan.Typ is { Length: > 0 })
         {
             html.AppendLine($"<p>{E(plan.Typ)}</p>");

@@ -23,6 +23,20 @@ public static class Migracie
             // skúsi sa znova pri ďalšom spustení
         }
 
+        // ukážkové charakteristiky oblastí (nezmenené) → oficiálne znenie Štátneho vzdelávacieho programu
+        if (Databaza.Citaj("migracia.charakteristiky_svp") != "1")
+        {
+            try
+            {
+                SvpGymnazia.PrevezmiVsetky(lenUkazkove: true);
+                Databaza.Zapis("migracia.charakteristiky_svp", "1");
+            }
+            catch (Exception)
+            {
+                // skúsi sa znova pri ďalšom spustení
+            }
+        }
+
         foreach (var (kluc, stary, novy) in PremenovanePredmety)
         {
             if (Databaza.Citaj(kluc) == "1")

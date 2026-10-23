@@ -210,6 +210,11 @@ public static class StrukturaOsnov
             harok.Cell(r++, 1).Value = plan.Typ;
         }
 
+        foreach (var riadok in TitulnaStrana.Nacitaj().UdajeOSkole())
+        {
+            harok.Cell(r++, 1).Value = riadok;
+        }
+
         harok.Cell(1, 1).Style.Font.Bold = true;
         harok.Cell(1, 1).Style.Font.FontSize = 14;
         r++;
@@ -254,6 +259,11 @@ public static class StrukturaOsnov
         }
 
         var bloky = new List<Blok> { new Nadpis(1, plan.Nazov ?? "Vzdelávacie oblasti a predmety") };
+        foreach (var riadok in TitulnaStrana.Nacitaj().UdajeOSkole())
+        {
+            bloky.Add(new Odsek(new[] { new Usek(riadok) }));
+        }
+
         if (!string.IsNullOrWhiteSpace(plan.Typ))
         {
             bloky.Add(new Odsek(new[] { new Usek(plan.Typ!) }));
@@ -283,8 +293,16 @@ public static class StrukturaOsnov
         nadpis.Format.Font.Size = 20;
         nadpis.Format.Font.Bold = true;
         nadpis.Format.SpaceAfter = Unit.FromPoint(4);
-        var skola = Databaza.Citaj(UdajeSkVP.KlucSkola, "");
-        var podnadpis = sekcia.AddParagraph(string.Join("  •  ", new[] { skola, plan.Typ ?? "" }.Where(t => t.Length > 0)));
+        var titul = TitulnaStrana.Nacitaj();
+        doc.Info.Author = titul.AutorSuboru ?? "";
+        foreach (var riadok in titul.UdajeOSkole())
+        {
+            var udaj = sekcia.AddParagraph(riadok);
+            udaj.Format.Font.Color = Colors.Gray;
+            udaj.Format.Font.Size = 10;
+        }
+
+        var podnadpis = sekcia.AddParagraph(plan.Typ ?? "");
         podnadpis.Format.Font.Color = Colors.Gray;
         podnadpis.Format.SpaceAfter = Unit.FromPoint(16);
 

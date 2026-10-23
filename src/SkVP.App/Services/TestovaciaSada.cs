@@ -447,6 +447,12 @@ public static class TestovaciaSada
             return SvpGymnazia.Charakteristika(svp);
         }
 
+        return UkazkovaCharakteristika(oblast);
+    }
+
+    /// <summary>Ukážková charakteristika oblasti zo starších verzií sady (pred prevzatím zo ŠVP).</summary>
+    public static List<Blok> UkazkovaCharakteristika(OblastSady oblast)
+    {
         var bloky = oblast.Charakteristika.Select(t => (Blok)Odsek(t)).ToList();
         bloky.Add(Poznamka());
         return bloky;

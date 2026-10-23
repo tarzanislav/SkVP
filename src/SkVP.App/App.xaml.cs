@@ -90,9 +90,23 @@ public partial class App : Application
             }, DispatcherPriority.ApplicationIdle);
         }
 
-        // automatická záloha raz za deň a kontrola novej verzie
+        // rýchla kontrola databázy pri spustení (ako v EviTA), automatická záloha raz za deň a kontrola novej verzie
         Task.Run(() =>
         {
+            try
+            {
+                if (!DiagnostikaService.RychlaKontrola().Ok)
+                {
+                    okno.Dispatcher.InvokeAsync(() => Dialogy.Upozornenie(
+                        "Rýchla kontrola našla v databáze chybu. Otvorte Servis → Databáza: spustite úplnú kontrolu, " +
+                        "obnovte dáta zo zálohy alebo použite záchranu dát."));
+                }
+            }
+            catch (Exception)
+            {
+                // kontrola sa skúsi nabudúce
+            }
+
             try
             {
                 new ZalohaService().AutomatickaAkTreba();
@@ -102,6 +116,17 @@ public partial class App : Application
                 // záloha sa skúsi nabudúce
             }
         });
+        Exit += (_, _) =>
+        {
+            try
+            {
+                DiagnostikaService.Optimalizuj(); // štatistiky databázy pri zatvorení programu
+            }
+            catch (Exception)
+            {
+                // nevadí
+            }
+        };
         _ = okno.Model.SkontrolujAktualizaciuAsync();
     }
 

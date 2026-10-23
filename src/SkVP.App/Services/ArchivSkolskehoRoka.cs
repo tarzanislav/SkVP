@@ -307,7 +307,8 @@ public static class ArchivSkolskehoRoka
         h.Cell(1, 1).Value = $"Učebné osnovy – školský rok {archiv.SkolskyRok}";
         h.Cell(1, 1).Style.Font.Bold = true;
         h.Cell(1, 1).Style.Font.FontSize = 14;
-        h.Cell(2, 1).Value = $"{Databaza.Citaj(UdajeSkVP.KlucSkola, "")}  •  archivované {archiv.Vytvorene.ToString("d. M. yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))}";
+        h.Cell(2, 1).Value = string.Join("  •  ", TitulnaStrana.Nacitaj().UdajeOSkole().Take(2)
+            .Append($"archivované {archiv.Vytvorene.ToString("d. M. yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))}"));
         var riadky = new List<(string, XLCellValue, string)>
         {
             ("Vzdelávacie oblasti", s.Oblasti, ""),
@@ -407,6 +408,47 @@ public static class ArchivSkolskehoRoka
         }
     }
 
+    /// <summary>
+    /// Celé učebné osnovy archivovaného roka zostavené zo snímky v programe (nie z priečinka) – na náhľad, tlač,
+    /// PDF a Word, aj keď priečinok archívu na disku chýba. Na úvodnej strane je „Archív školského roka R“.
+    /// </summary>
+    public static CelyDokument Zostava(ZaznamArchivuRoka archiv)
+    {
+        static List<Blok> Bloky(byte[]? data)
+        {
+            if (data is not { Length: > 0 })
+            {
+                return new List<Blok>();
+            }
+
+            try
+            {
+                using var prud = new MemoryStream(data, false);
+                return DocxCitac.Nacitaj(prud).Bloky;
+            }
+            catch (Exception)
+            {
+                return new List<Blok> { new Odsek(new[] { new Usek("Dokument sa nepodarilo prečítať.", Kurziva: true) }) };
+            }
+        }
+
+        var oblasti = new List<KapitolaOblasti>();
+        foreach (var skupina in Polozky(archiv.Id).GroupBy(p => (p.PoradieOblasti, p.Oblast)).OrderBy(g => g.Key.PoradieOblasti))
+        {
+            var charakteristika = skupina.FirstOrDefault(p => !p.JePredmet);
+            var predmety = skupina.Where(p => p.JePredmet)
+                .Select(p => new KapitolaPredmetu(p.ObjektId ?? -p.Id, p.Cislo, p.Nazov, p.MaDokument ? Bloky(Data(p.Id)) : new List<Blok>(), p.Stav))
+                .ToList();
+            oblasti.Add(new KapitolaOblasti(charakteristika?.ObjektId ?? 0, skupina.Key.Oblast, skupina.First().Farba ?? UcebnyPlanService.FarbaOblasti(skupina.Key.PoradieOblasti - 1),
+                charakteristika is { MaDokument: true } ? Bloky(Data(charakteristika.Id)) : new List<Blok>(), predmety));
+        }
+
+        var titul = TitulnaStrana.Nacitaj();
+        titul.Platnost = $"Archív školského roka {archiv.SkolskyRok}";
+        titul.PlatnostZobrazit = true;
+        return new CelyDokument(UdajeSkVP.Nacitaj(), new VolbyZostavy(), oblasti, archiv.Vytvorene) { Titul = titul };
+    }
+
     /// <summary>Odstráni archív školského roka z programu (priečinok so súbormi zostane).</summary>
     public static void Odstran(long archivId)
     {
@@ -428,7 +470,17 @@ public static class ArchivSkolskehoRoka
         var (od, po) = Obdobie(skolskyRok);
         var sluzba = new ObjektService();
         var dokumenty = new DokumentService();
-        var teraz = DateTime.Now;
+        var udajeSkvp = UdajeSkVP.Nacitaj();
+        var titul = TitulnaStrana.Nacitaj();
+
+        // vedľa každého dokumentu Word aj PDF (rovnaký vzhľad ako pri tlači)
+        void UlozPdf(string cestaDocx, byte[] docx, string oblast, string farba, Objekt? predmet, int poradie, StavOsnovy stav)
+        {
+            if (ZalohaService.PdfDokumentu(docx, udajeSkvp, titul, oblast, farba, predmet, poradie, stav) is { Length: > 0 } pdf)
+            {
+                File.WriteAllBytes(Path.ChangeExtension(cestaDocx, ".pdf"), pdf);
+            }
+        }
 
         long archivId;
         using (var db = Databaza.Otvor())
@@ -447,7 +499,9 @@ public static class ArchivSkolskehoRoka
             if (dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
             {
                 Directory.CreateDirectory(priecinokOblasti);
-                File.WriteAllBytes(Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov($"00 Charakteristika – {oblast.Nazov}") + ".docx"), charakteristika);
+                var cestaCharakteristiky = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov($"00 Charakteristika – {oblast.Nazov}") + ".docx");
+                File.WriteAllBytes(cestaCharakteristiky, charakteristika);
+                UlozPdf(cestaCharakteristiky, charakteristika, oblast.Nazov, farba, null, 0, StavOsnovy.Rozpracovana);
                 dokumenty.ArchivujAktualnu(oblast.Id, dovod);
                 Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, cisloOblasti, 0, "Charakteristika vzdelávacej oblasti",
                     StavOsnovy.Rozpracovana, oblast.DlzkaTextu, UdajeOsnovy.Prazdne, InfoOsnovy.Prazdne, ZmenenaVRoku(oblast.Id, od, po), charakteristika);
@@ -464,7 +518,9 @@ public static class ArchivSkolskehoRoka
                 {
                     Directory.CreateDirectory(priecinokOblasti);
                     var c = cislo.ToString("00", CultureInfo.InvariantCulture);
-                    File.WriteAllBytes(Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, info.Rok)) + ".docx"), osnova);
+                    var cestaOsnovy = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, info.Rok)) + ".docx");
+                    File.WriteAllBytes(cestaOsnovy, osnova);
+                    UlozPdf(cestaOsnovy, osnova, oblast.Nazov, farba, predmet, cislo, stav);
                     dokumenty.ArchivujAktualnu(predmet.Id, dovod);
                 }
 

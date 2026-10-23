@@ -46,10 +46,30 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         }
     }
 
+    /// <summary>Výber skupín nastavení (v tichom režime samotestu všetky).</summary>
+    private static IReadOnlyCollection<string>? VyberSkupiny(string titulok, string popis, string tlacidlo, IReadOnlyList<string> skupiny)
+    {
+        if (Dialogy.TichyRezim)
+        {
+            return skupiny;
+        }
+
+        var okno = new Views.VyberSkupinWindow(titulok, popis, tlacidlo, skupiny) { Owner = Dialogy.Vlastnik };
+        return okno.ShowDialog() == true ? okno.Vybrane : null;
+    }
+
     [RelayCommand]
     private void ExportovatNastavenia()
     {
-        var cesta = Dialogy.UlozitAko("Exportovať nastavenia", NastaveniaProgramu.Filter, $"SkVP_nastavenia_{DateTime.Now:yyyy-MM-dd}.json");
+        var skupiny = VyberSkupiny("Export nastavení programu",
+            "Ktoré nastavenia programu sa majú uložiť do súboru? Databáza (oblasti, predmety, osnovy a ich archív) sa neukladá – na to je záloha v sekcii Servis.",
+            "Exportovať…", NastaveniaProgramu.Prehlad(NastaveniaProgramu.Vytvor()));
+        if (skupiny is null)
+        {
+            return;
+        }
+
+        var cesta = Dialogy.UlozitAko("Exportovať nastavenia programu", NastaveniaProgramu.Filter, $"SkVP_nastavenia_{DateTime.Now:yyyy-MM-dd}.json");
         if (cesta is null)
         {
             return;
@@ -57,7 +77,7 @@ public sealed partial class NastaveniaViewModel : ObservableObject
 
         try
         {
-            NastaveniaProgramu.Export(cesta);
+            NastaveniaProgramu.Export(cesta, skupiny);
             Hlavny.Oznam($"Nastavenia sú uložené: {System.IO.Path.GetFileName(cesta)}");
         }
         catch (System.IO.IOException ex)
@@ -78,15 +98,17 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         try
         {
             var subor = NastaveniaProgramu.Nacitaj(cesta);
-            if (!Dialogy.Potvrd($"Importovať nastavenia programu zo súboru {System.IO.Path.GetFileName(cesta)} (SkVP {subor.Verzia}, {subor.Vytvorene:d. M. yyyy})?\n\n" +
-                                $"Súbor obsahuje: {string.Join(", ", NastaveniaProgramu.Prehlad(subor))}.\n\n" +
-                                "Doterajšie nastavenia sa prepíšu (pred tým sa urobí záloha databázy). Oblasti, predmety ani osnovy sa nemenia."))
+            var skupiny = VyberSkupiny("Import nastavení programu",
+                $"Súbor {System.IO.Path.GetFileName(cesta)} (SkVP {subor.Verzia}, {subor.Vytvorene:d. M. yyyy}). Vyberte, ktoré nastavenia sa majú prevziať – " +
+                "doterajšie sa prepíšu (pred tým sa urobí záloha databázy). Oblasti, predmety ani osnovy sa nemenia.",
+                "Importovať", NastaveniaProgramu.Prehlad(subor));
+            if (skupiny is null)
             {
                 return;
             }
 
             new ZalohaService().Zalohuj();
-            var pocet = NastaveniaProgramu.Import(subor);
+            var pocet = NastaveniaProgramu.Import(subor, skupiny);
             Preklad.Nacitaj();
             App.NastavTemu(Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem));
             Hlavny.NacitajUdaje();

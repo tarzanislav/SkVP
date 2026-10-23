@@ -13,6 +13,8 @@ namespace SkVP.Views;
 public partial class UvodnaStranaWindow : Window
 {
     private bool _nacitane;
+    private string _icoDic = "";
+    private string _kontakt = "";
 
     /// <summary>Text hlavičky odvodený z nadpisu a podnadpisu – kým ho používateľ neprepíše, mení sa spolu s nimi.</summary>
     private string _automatickyText = "";
@@ -46,6 +48,18 @@ public partial class UvodnaStranaWindow : Window
         SkolaZobrazit.IsChecked = t.SkolaZobrazit;
         Adresa.Text = t.Adresa;
         AdresaZobrazit.IsChecked = t.AdresaZobrazit;
+        Zlozka.Text = t.Zlozka;
+        ZlozkaZobrazit.IsChecked = t.ZlozkaZobrazit;
+        IcoDic.Text = t.IcoDic.Length > 0 ? t.IcoDic : "nevyplnené";
+        IcoDicZobrazit.IsChecked = t.IcoDicZobrazit;
+        Kontakt.Text = t.Kontakt.Length > 0 ? t.Kontakt : "nevyplnené";
+        KontaktZobrazit.IsChecked = t.KontaktZobrazit;
+        _icoDic = t.IcoDic;
+        _kontakt = t.Kontakt;
+        ZlozkaVHlavickeZobrazit.IsChecked = t.ZlozkaVHlavickeZobrazit;
+        SkolaVPateZobrazit.IsChecked = t.SkolaVPateZobrazit;
+        KontaktVPateZobrazit.IsChecked = t.KontaktVPateZobrazit;
+        MetadataZobrazit.IsChecked = t.MetadataZobrazit;
         Nadpis.Text = t.Nadpis;
         NadpisZobrazit.IsChecked = t.NadpisZobrazit;
         Podnadpis.Text = t.Podnadpis;
@@ -193,11 +207,13 @@ public partial class UvodnaStranaWindow : Window
     {
         var skola = Skola.Text;
         var adresa = Adresa.Text;
+        var zlozka = Zlozka.Text;
         var typ = Typ.Text;
         TitulnaStrana.Predvolene();
         var predvolene = TitulnaStrana.Nacitaj();
         predvolene.Skola = skola;
         predvolene.Adresa = adresa;
+        predvolene.Zlozka = zlozka;
         predvolene.Typ = typ;
         Zobraz(predvolene);
     }
@@ -210,6 +226,16 @@ public partial class UvodnaStranaWindow : Window
         SkolaZobrazit = SkolaZobrazit.IsChecked == true,
         Adresa = Adresa.Text,
         AdresaZobrazit = AdresaZobrazit.IsChecked == true,
+        Zlozka = Zlozka.Text,
+        ZlozkaZobrazit = ZlozkaZobrazit.IsChecked == true,
+        IcoDic = _icoDic,
+        IcoDicZobrazit = IcoDicZobrazit.IsChecked == true,
+        Kontakt = _kontakt,
+        KontaktZobrazit = KontaktZobrazit.IsChecked == true,
+        ZlozkaVHlavickeZobrazit = ZlozkaVHlavickeZobrazit.IsChecked == true,
+        SkolaVPateZobrazit = SkolaVPateZobrazit.IsChecked == true,
+        KontaktVPateZobrazit = KontaktVPateZobrazit.IsChecked == true,
+        MetadataZobrazit = MetadataZobrazit.IsChecked == true,
         Nadpis = Nadpis.Text,
         NadpisZobrazit = NadpisZobrazit.IsChecked == true,
         Podnadpis = Podnadpis.Text,
@@ -230,6 +256,23 @@ public partial class UvodnaStranaWindow : Window
 
     private void Ulozit_Click(object sender, RoutedEventArgs e)
     {
+        if (Uloz())
+        {
+            DialogResult = true;
+        }
+    }
+
+    /// <summary>Uloží a zatvorí okno otvorené bez dialógu (samotest).</summary>
+    public void UlozitAZavriet()
+    {
+        if (Uloz())
+        {
+            Close();
+        }
+    }
+
+    private bool Uloz()
+    {
         try
         {
             if (_zmenaLoga == "")
@@ -244,12 +287,12 @@ public partial class UvodnaStranaWindow : Window
         catch (SkvpException ex)
         {
             Dialogy.Chyba(ex.Message);
-            return;
+            return false;
         }
 
         var t = ZoZadania();
         t.PataBloky = Pata.Uloz();
         t.Uloz();
-        DialogResult = true;
+        return true;
     }
 }

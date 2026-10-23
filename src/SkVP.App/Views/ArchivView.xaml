@@ -124,10 +124,33 @@
                             <TextBlock Text="{Binding Nadpis}" Style="{StaticResource Podnadpis}" FontSize="22" Margin="0" />
                             <TextBlock Text="{Binding PopisArchivu}" Style="{StaticResource Popis}" TextWrapping="Wrap" Margin="0,2,0,10" />
                             <WrapPanel>
+                                <Button Padding="12,6" Margin="0,0,8,6" Style="{DynamicResource AccentButtonStyle}" Command="{Binding NahladRokaCommand}"
+                                        ToolTip="Celé osnovy roka zo snímky v programe – náhľad strán a tlač (ako v Tlač a zostavy)"
+                                        Visibility="{Binding MaPrehlad, Converter={StaticResource BoolNaViditelnost}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE749;" FontSize="13" Margin="0,0,8,0" />
+                                        <TextBlock Text="Náhľad a tlač…" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Padding="12,6" Margin="0,0,8,6" Command="{Binding UlozitRokCommand}" CommandParameter="pdf"
+                                        ToolTip="Celé osnovy roka do PDF, PDF/A, PDF/X alebo obrázkov – zo snímky v programe"
+                                        Visibility="{Binding MaPrehlad, Converter={StaticResource BoolNaViditelnost}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource Ikona}" Text="&#xEA90;" FontSize="13" Margin="0,0,8,0" />
+                                        <TextBlock Text="Uložiť ako PDF…" />
+                                    </StackPanel>
+                                </Button>
+                                <Button Padding="12,6" Margin="0,0,8,6" Command="{Binding UlozitRokCommand}" CommandParameter="docx"
+                                        Visibility="{Binding MaPrehlad, Converter={StaticResource BoolNaViditelnost}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE8A5;" FontSize="13" Margin="0,0,8,0" />
+                                        <TextBlock Text="Uložiť ako Word…" />
+                                    </StackPanel>
+                                </Button>
                                 <Button Padding="12,6" Margin="0,0,8,6" Command="{Binding OtvoritPdfCommand}" ToolTip="Celé osnovy roka v jednom archívnom PDF">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Style="{StaticResource Ikona}" Text="&#xEA90;" FontSize="13" Margin="0,0,8,0" />
-                                        <TextBlock Text="Celé osnovy (PDF)" />
+                                        <TextBlock Text="PDF z priečinka" />
                                     </StackPanel>
                                 </Button>
                                 <Button Padding="12,6" Margin="0,0,8,6" Command="{Binding OtvoritPriecinokCommand}">
