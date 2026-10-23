@@ -168,6 +168,23 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   (predmety bez oblasti → „Nezaradené predmety“), záchrana dát (prenos do novej DB, `Databaza.Inicializuj(cesta)`),
   prehľad tabuliek, verzia schémy, posledná kontrola, protokol (uložiť/vymazať).
 
+## Audit zadania (23. 10. 2026, na vetve vyvoj/etapa1)
+- Oprava chyby: okno úvodnej strany pri uložení prepísalo voľby údajov o škole na predvolené – okno má teraz aj zložku,
+  IČO/DIČ, kontakt, zložku v hlavičke, pätu a autora súboru; adresa z okna sa uloží aj do Údajov o organizácii po častiach.
+- Údaje o organizácii: kontrola PSČ (SK, CZ) a DIČ; adresa bez PSČ už neponechá staré PSČ.
+- Import osnov z priečinka aj z podpriečinkov; podpriečinok s názvom oblasti („06 Človek a hodnoty“) určí oblasť nového
+  predmetu; priečinky Archív sa preskočia.
+- Charakteristiky zo ŠVP pre existujúce inštalácie: migrácia `migracia.charakteristiky_svp` nahradí len nezmenené ukážkové
+  texty testovacej sady; Osnovy → „Charakteristiky zo ŠVP…“ prevezme všetky (`SvpGymnazia.PrevezmiVsetky`, archivácia).
+- Údaje o škole (podľa volieb úvodnej strany, `TitulnaStrana.UdajeOSkole`) aj v exporte oblastí a predmetov (Word, PDF,
+  HTML, Excel) a v štatistikách archívu.
+- Export/import nastavení programu po skupinách (`Views/VyberSkupinWindow`), stálé poradie skupín, bez `kontrola.*`, priečinok
+  záloh sa prevezme len ak na počítači existuje.
+- Archív: PDF pri každom Worde aj v priečinku archívu roka; „Náhľad a tlač…“, „Uložiť ako PDF/Word…“ celých osnov roka zo
+  snímky v programe (`ArchivSkolskehoRoka.Zostava`) – funguje aj bez priečinka na disku.
+- Databáza: rýchla kontrola pri spustení (upozornenie pri chybe), optimalizácia pri zatvorení programu.
+- Web/HTML/XML: kódovanie z BOM, `<meta charset>` alebo deklarácie XML (windows-1250, iso-8859-2).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
