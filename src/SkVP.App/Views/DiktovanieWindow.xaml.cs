@@ -19,7 +19,7 @@ public partial class DiktovanieWindow : Window
         public string Nazov => Model.Nazov;
         public string Velkost => $"· {Model.VelkostMb} MB";
         public string Popis => Model.Popis;
-        public string Stav => Model.JeStiahnuty ? Preklad.T("stiahnutý") : "";
+        public string Stav => Model.JeZEvity ? "stiahnutý v programe EviTA – použije sa aj tu" : Model.JeStiahnuty ? "stiahnutý" : "";
 
         public bool Vybrany
         {
@@ -76,7 +76,7 @@ public partial class DiktovanieWindow : Window
         SekciaModelov.IsEnabled = Offline.IsChecked == true && PrepisHlasu.Prekazka() is null;
         var model = VybranyModel;
         Stiahnut.IsEnabled = _stahovanie is null && !model.JeStiahnuty;
-        Vymazat.IsEnabled = _stahovanie is null && model.JeStiahnuty;
+        Vymazat.IsEnabled = _stahovanie is null && System.IO.File.Exists(model.Cesta);
     }
 
     private void Sposob_Click(object sender, RoutedEventArgs e) => Aktualizuj();

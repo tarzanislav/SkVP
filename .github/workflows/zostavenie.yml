@@ -90,6 +90,49 @@ jobs:
           Copy-Item $dll.FullName src/SkVP.App/Native/SkvpHlas.dll
           Copy-Item (Join-Path $ciel "LICENSE-whisper.cpp.txt") src/SkVP.App/Native/LICENSE-whisper.cpp.txt
 
+      - name: Vyrovnávacia pamäť – model na prepis pre samotest
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/skvp-model
+          key: skvp-model-ggml-small-1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b
+
+      - name: Model a slovenská skúšobná nahrávka pre samotest diktovania
+        # len pre samotest: model ggml-small (overený SHA-256) a slovenská veta z hlasového syntetizátora Piper
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $priecinok = Join-Path $env:RUNNER_TEMP "skvp-model"
+          New-Item -ItemType Directory -Force $priecinok | Out-Null
+          $model = Join-Path $priecinok "ggml-small.bin"
+          $sha = "1be3a9b2063867b937e64e2ec7483364a79917e157fa98c5d94b5c1fffea987b"
+          if (-not (Test-Path $model) -or (Get-FileHash $model -Algorithm SHA256).Hash -ne $sha) {
+            Invoke-WebRequest "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin" -OutFile $model
+          }
+          if ((Get-FileHash $model -Algorithm SHA256).Hash -ne $sha) { Write-Host "::error::Model ggml-small.bin má iný SHA-256"; exit 1 }
+
+          $hlas = Join-Path $env:RUNNER_TEMP "skvp-hlas-test"
+          New-Item -ItemType Directory -Force $hlas | Out-Null
+          python -m pip install --quiet piper-tts
+          $zaklad = "https://huggingface.co/rhasspy/piper-voices/resolve/main/sk/sk_SK/lili/medium/sk_SK-lili-medium.onnx"
+          Invoke-WebRequest $zaklad -OutFile (Join-Path $hlas "sk.onnx")
+          Invoke-WebRequest "$zaklad.json" -OutFile (Join-Path $hlas "sk.onnx.json")
+          $skript = Join-Path $hlas "syntetizuj.py"
+          @"
+          import sys, wave
+          from piper import PiperVoice
+          hlas = PiperVoice.load(sys.argv[1])
+          with wave.open(sys.argv[2], "wb") as w:
+              if hasattr(hlas, "synthesize_wav"):
+                  hlas.synthesize_wav(sys.argv[3], w)
+              else:
+                  hlas.synthesize(sys.argv[3], w)
+          "@ | Set-Content $skript -Encoding utf8
+          $wav = Join-Path $hlas "oblasti.wav"
+          python $skript (Join-Path $hlas "sk.onnx") $wav "Človek a príroda: fyzika, chémia, biológia. Zdravie a pohyb: telesná a športová výchova."
+          if (-not (Test-Path $wav)) { Write-Host "::warning::Slovenská nahrávka sa nevytvorila"; exit 0 }
+          "SKVP_SAMOTEST_HLAS=$wav" >> $env:GITHUB_ENV
+          "SKVP_SAMOTEST_HLAS_MODEL=$model" >> $env:GITHUB_ENV
+
       - name: Zostaviť program
         shell: pwsh
         run: >
@@ -106,9 +149,9 @@ jobs:
           $null = $p.Handle
           $log = Join-Path $env:SKVP_DATA_DIR "samotest.log"
           $priebeh = Join-Path $env:SKVP_DATA_DIR "samotest_priebeh.log"
-          if (-not $p.WaitForExit(480000)) {
+          if (-not $p.WaitForExit(720000)) {
             $p.Kill()
-            Write-Host "::error::Samotest neskončil do 8 minút"
+            Write-Host "::error::Samotest neskončil do 12 minút"
             if (Test-Path $priebeh) { Get-Content $priebeh -Tail 30 }
             exit 1
           }

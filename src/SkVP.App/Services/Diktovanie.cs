@@ -21,7 +21,16 @@ public sealed record ModelHlasu(string Kluc, string NazovSk, string PopisSk, str
     public string Nazov => Preklad.T(NazovSk);
     public string Popis => Preklad.T(PopisSk);
     public string Cesta => Path.Combine(Diktovanie.PriecinokModelov, Subor);
-    public bool JeStiahnuty => File.Exists(Cesta);
+
+    /// <summary>Rovnaký model stiahnutý programom EviTA (na tom istom počítači) – netreba ho sťahovať druhýkrát.</summary>
+    public string CestaEvita => Path.Combine(Diktovanie.PriecinokModelovEvita, Subor);
+
+    /// <summary>Súbor modelu, ktorý sa použije: vlastný, inak model z EviTA.</summary>
+    public string CestaNaPouzitie => File.Exists(Cesta) || !File.Exists(CestaEvita) ? Cesta : CestaEvita;
+
+    public bool JeZEvity => !File.Exists(Cesta) && File.Exists(CestaEvita);
+
+    public bool JeStiahnuty => File.Exists(Cesta) || File.Exists(CestaEvita);
 }
 
 /// <summary>Nastavenia diktovania a správa modelov na prepis bez internetu.</summary>
@@ -34,7 +43,12 @@ public static class Diktovanie
     public const string Jazyk = "sk";
 
     /// <summary>Úvodný text pre model – slovenský pravopis, interpunkcia a slovník školského vzdelávacieho programu.</summary>
-    public const string Vyzva = "Vzdelávacie oblasti a predmety: Jazyk a komunikácia, Človek a príroda, matematika, informatika, fyzika, chémia, biológia, dejepis, geografia, seminár, učebné osnovy.";
+    /// Je v tvare, aký má mať prepis (oblasť, dvojbodka, predmety oddelené čiarkou, bodka) – model ho napodobní.
+    public const string Vyzva =
+        "Jazyk a komunikácia: slovenský jazyk a literatúra, anglický jazyk, nemecký jazyk, ruský jazyk. " +
+        "Matematika a práca s informáciami: matematika, informatika. Človek a príroda: fyzika, chémia, biológia. " +
+        "Človek a spoločnosť: dejepis, geografia, občianska náuka. Človek a hodnoty: etická výchova, náboženská výchova. " +
+        "Umenie a kultúra: umenie a kultúra. Zdravie a pohyb: telesná a športová výchova.";
 
     public static IReadOnlyList<ModelHlasu> Modely { get; } = new[]
     {
@@ -51,6 +65,10 @@ public static class Diktovanie
             "ggml-base.bin", "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
             "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe", 148),
     };
+
+    /// <summary>Priečinok modelov programu EviTA (C:\ProgramData\EviTA\Modely) – ten istý model sa použije aj tu.</summary>
+    public static string PriecinokModelovEvita =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "EviTA", "Modely");
 
     /// <summary>Modely sú mimo priečinka s databázou, aby nezväčšovali zálohy.</summary>
     public static string PriecinokModelov =>

@@ -6,7 +6,7 @@ using SkVP.Services;
 namespace SkVP.Pomocne;
 
 /// <summary>
-/// Diktovanie do textového poľa (poznámka, nové položky z dokladu): hlasové písanie Windows alebo nahrávka z mikrofónu
+/// Diktovanie do textového poľa (vzdelávacie oblasti a predmety): hlasové písanie Windows alebo nahrávka z mikrofónu
 /// a prepis v počítači. Tlačidlo prepína Diktovať / Zastaviť a prepísať, stav a hlasitosť sa ukazujú pri ňom.
 /// </summary>
 public sealed class DiktovanieDoPola

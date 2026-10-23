@@ -364,8 +364,10 @@ public static partial class ImportStruktury
     public static UcebnyPlan ZDiktovania(string text)
     {
         var riadky = new List<(string A, string B)>();
-        var zname = UcebnyPlanService.Vstavany().Oblasti.Select(o => o.Nazov)
-            .Concat(new ObjektService().Oblasti().Select(o => o.Nazov)).ToList();
+        var zname = SvpGymnazia.Oblasti.Select(o => o.Nazov)
+            .Concat(UcebnyPlanService.Vstavany().Oblasti.Select(o => o.Nazov))
+            .Concat(new ObjektService().Oblasti().Select(o => o.Nazov))
+            .Distinct().OrderByDescending(n => n.Length).ToList();
         var normalizovany = Regex.Replace(text.Replace("\r", ""), @"\b(dvojbodka|dvojbodku)\b", ":", RegexOptions.IgnoreCase);
         normalizovany = Regex.Replace(normalizovany, @"\b(čiarka|čiarku)\b", ",", RegexOptions.IgnoreCase);
         normalizovany = Regex.Replace(normalizovany, @"\b(bodka|bodku|nový riadok|nova oblasť|nová oblasť|ďalšia oblasť)\b", "\n", RegexOptions.IgnoreCase);
@@ -375,6 +377,19 @@ public static partial class ImportStruktury
             var cast = veta.Trim().TrimEnd('.', '!', '?').Trim();
             if (cast.Length == 0)
             {
+                continue;
+            }
+
+            // známa oblasť na začiatku vety aj bez dvojbodky – prepis reči často dá čiarku alebo pomlčku:
+            // „Človek a príroda, fyzika, chémia, biológia“, „Zdravie a pohyb – telesná a športová výchova“
+            if (ZnamaNaZaciatku(cast, zname) is { } zaciatok)
+            {
+                riadky.Add((zaciatok.Oblast, ""));
+                foreach (var predmet in Rozdel(zaciatok.Zvysok))
+                {
+                    riadky.Add(("", predmet));
+                }
+
                 continue;
             }
 
@@ -413,6 +428,27 @@ public static partial class ImportStruktury
 
         static string Znama(string oblast, IReadOnlyList<string> zname) =>
             zname.FirstOrDefault(z => ImportOsnov.Kluc(z) == ImportOsnov.Kluc(oblast)) ?? oblast;
+    }
+
+    /// <summary>
+    /// Veta začína názvom známej oblasti, za ktorým nasleduje oddeľovač (dvojbodka, čiarka, pomlčka) a predmety.
+    /// Porovnáva sa bez diakritiky a veľkosti písmen; vráti oblasť a zvyšok vety, alebo null.
+    /// </summary>
+    private static (string Oblast, string Zvysok)? ZnamaNaZaciatku(string veta, IReadOnlyList<string> zname)
+    {
+        var bezUvodu = Regex.Replace(veta, @"^\s*(vzdelávacia\s+)?oblasť\s+", "", RegexOptions.IgnoreCase);
+        foreach (var oblast in zname)
+        {
+            var slova = oblast.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var vzor = @"^\s*" + string.Join(@"\s+", slova.Select(Regex.Escape)) + @"\s*[:,;–\-]\s*(?<zvysok>.+)$";
+            var m = Regex.Match(ImportOsnov.BezDiakritiky(bezUvodu), ImportOsnov.BezDiakritiky(vzor), RegexOptions.IgnoreCase);
+            if (m.Success)
+            {
+                return (oblast, bezUvodu[m.Groups["zvysok"].Index..]);
+            }
+        }
+
+        return null;
     }
 
     private static string Velke(string text) => text.Length == 0 ? text : char.ToUpper(text[0], System.Globalization.CultureInfo.GetCultureInfo("sk-SK")) + text[1..];

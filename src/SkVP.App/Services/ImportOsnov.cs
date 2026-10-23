@@ -203,6 +203,18 @@ public static partial class ImportOsnov
     }
 
     /// <summary>Text na porovnanie: malé písmená bez diakritiky.</summary>
+    /// <summary>Text bez diakritiky s rovnakou dĺžkou (každý znak sa nahradí základným písmenom: „č“ → „c“).</summary>
+    public static string BezDiakritiky(string text)
+    {
+        var vysledok = new StringBuilder(text.Length);
+        foreach (var znak in text)
+        {
+            vysledok.Append(znak < 128 ? znak : znak.ToString().Normalize(NormalizationForm.FormD)[0]);
+        }
+
+        return vysledok.ToString();
+    }
+
     public static string Kluc(string text)
     {
         var rozlozeny = text.ToLower(CultureInfo.GetCultureInfo("sk-SK")).Normalize(NormalizationForm.FormD);

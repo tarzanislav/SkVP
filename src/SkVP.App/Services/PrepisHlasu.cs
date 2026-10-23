@@ -82,16 +82,16 @@ public static class PrepisHlasu
         {
             return await Task.Run(() =>
             {
-                if (_kontext == IntPtr.Zero || _model != model.Cesta)
+                if (_kontext == IntPtr.Zero || _model != model.CestaNaPouzitie)
                 {
                     ZavriBezZamku();
-                    _kontext = skvp_hlas_otvor(model.Cesta);
+                    _kontext = skvp_hlas_otvor(model.CestaNaPouzitie);
                     if (_kontext == IntPtr.Zero)
                     {
                         throw new SkvpException(Preklad.T("Model na prepis sa nepodarilo načítať. Stiahnite ho v nastavení diktovania znova."));
                     }
 
-                    _model = model.Cesta;
+                    _model = model.CestaNaPouzitie;
                 }
 
                 var vystup = new byte[64 * 1024];
@@ -101,13 +101,55 @@ public static class PrepisHlasu
                     throw new SkvpException(Preklad.T("Prepis sa nepodaril."));
                 }
 
-                return Uprav(Encoding.UTF8.GetString(vystup, 0, dlzka));
+                return BezOzveny(Uprav(Encoding.UTF8.GetString(vystup, 0, dlzka)));
             }, zrusenie);
         }
         finally
         {
             Zamok.Release();
         }
+    }
+
+    /// <summary>
+    /// Načíta model do pamäte vopred (pri otvorení okna diktovania), aby prepis po zastavení nahrávky začal hneď.
+    /// Chyby sa ignorujú – ukážu sa až pri prepise.
+    /// </summary>
+    public static Task PripravAsync(ModelHlasu model) => Task.Run(async () =>
+    {
+        if (Prekazka() is not null || !model.JeStiahnuty)
+        {
+            return;
+        }
+
+        await Zamok.WaitAsync();
+        try
+        {
+            if (_kontext == IntPtr.Zero || _model != model.CestaNaPouzitie)
+            {
+                ZavriBezZamku();
+                _kontext = skvp_hlas_otvor(model.CestaNaPouzitie);
+                _model = _kontext == IntPtr.Zero ? null : model.CestaNaPouzitie;
+            }
+        }
+        catch (Exception)
+        {
+            // prepis to skúsi znova a chybu oznámi
+        }
+        finally
+        {
+            Zamok.Release();
+        }
+    });
+
+    /// <summary>
+    /// Pri tichu model niekedy „zopakuje“ úvodný text (výzvu) – výsledok, ktorý je väčšou časťou výzvy, sa zahodí.
+    /// Kratší úsek (napr. nadiktovaná jedna oblasť s predmetmi, ktorá je aj vo výzve) zostane.
+    /// </summary>
+    public static string BezOzveny(string text)
+    {
+        var kluc = ImportOsnov.Kluc(text);
+        var vyzva = ImportOsnov.Kluc(Diktovanie.Vyzva);
+        return kluc.Length >= vyzva.Length * 0.6 && vyzva.Contains(kluc, StringComparison.Ordinal) ? "" : text;
     }
 
     /// <summary>Uvoľní model z pamäte (pri zmene alebo vymazaní modelu).</summary>

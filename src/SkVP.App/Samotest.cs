@@ -1533,6 +1533,83 @@ internal static class Samotest
         Pumpuj();
         Over(diktovanieOkno.Plan is { Oblasti.Count: 2 }, "okno diktovania rozpozná oblasti a predmety");
         Snimka(diktovanieOkno, "18e_diktovanie_oblasti");
+
+        // prepis reči často dá namiesto dvojbodky čiarku alebo pomlčku
+        var bezDvojbodky = ImportStruktury.ZDiktovania("Človek a príroda, fyzika, chémia, biológia. zdravie a pohyb – telesná a športová výchova");
+        Over(bezDvojbodky.Oblasti.Count == 2 && bezDvojbodky.Oblasti[0].Nazov == "Človek a príroda" && bezDvojbodky.Oblasti[0].Predmety.Count == 3
+             && bezDvojbodky.Oblasti[1].Nazov == "Zdravie a pohyb" && bezDvojbodky.Oblasti[1].Predmety.SequenceEqual(new[] { "Telesná a športová výchova" }),
+            "diktovanie: oblasť rozpoznaná aj bez dvojbodky (čiarka, pomlčka, malé písmená)");
+        Over(PrepisHlasu.BezOzveny(Diktovanie.Vyzva) == "" && PrepisHlasu.BezOzveny("Človek a príroda: fyzika, chémia, biológia.").Length > 0
+             && PrepisHlasu.Uprav("  Fyzika   [BLANK_AUDIO] ") == "Fyzika" && Math.Abs(PrepisHlasu.Prevzorkuj(new float[22050], 22050).Length - 16000) <= 1,
+            "diktovanie: úprava prepisu (ozvena výzvy, ticho, prevzorkovanie na 16 kHz)");
+
+        // hlasové písanie Windows: pole dostane fokus a stlačí sa Win+H
+        var povodnySposob = Diktovanie.Sposob;
+        var povodnyModel = Diktovanie.Model;
+        Diktovanie.Sposob = SposobDiktovania.Windows;
+        var hlaseniaPred = Dialogy.TicheHlasenia.Count;
+        diktovanieOkno.Diktovat.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Primitives.ButtonBase.ClickEvent));
+        Pumpuj();
+        Over(Dialogy.TicheHlasenia.Skip(hlaseniaPred).Contains("[Hlasové písanie] Win+H"), "diktovanie: hlasové písanie Windows (Win+H)");
+
+        // prepis v počítači bez internetu (whisper.cpp) – ak zostavenie pripravilo model a slovenskú nahrávku
+        var nahravka = Environment.GetEnvironmentVariable("SKVP_SAMOTEST_HLAS");
+        var suborModelu = Environment.GetEnvironmentVariable("SKVP_SAMOTEST_HLAS_MODEL");
+        if (nahravka is not null && suborModelu is not null && File.Exists(nahravka) && File.Exists(suborModelu) && PrepisHlasu.Prekazka() is null)
+        {
+            var modelHlasu = Diktovanie.Modely.First(m => m.Kluc == "small");
+            Directory.CreateDirectory(Diktovanie.PriecinokModelov);
+            File.Copy(suborModelu, modelHlasu.Cesta, true);
+            var overenie = Diktovanie.OverAsync(modelHlasu.Cesta, modelHlasu.Sha256);
+            while (!overenie.IsCompleted)
+            {
+                Pumpuj();
+                Thread.Sleep(50);
+            }
+
+            Over(overenie.Result, "diktovanie: model overený podľa SHA-256");
+            Diktovanie.Sposob = SposobDiktovania.Offline;
+            Diktovanie.Model = modelHlasu;
+            diktovanieOkno.Vstup = "";
+            var priprava = PrepisHlasu.PripravAsync(modelHlasu);
+            var cas = System.Diagnostics.Stopwatch.StartNew();
+            while (!priprava.IsCompleted && cas.Elapsed < TimeSpan.FromMinutes(1))
+            {
+                Pumpuj();
+                Thread.Sleep(50);
+            }
+
+            var nacitanie = cas.Elapsed;
+            var zvuk = PrepisHlasu.NacitajWav(nahravka);
+            cas.Restart();
+            var uloha = diktovanieOkno.PrepisAsync(zvuk);
+            while (!uloha.IsCompleted && cas.Elapsed < TimeSpan.FromMinutes(4))
+            {
+                Pumpuj();
+                Thread.Sleep(50);
+            }
+
+            diktovanieOkno.Rozpoznaj();
+            Pumpuj();
+            var prepis = diktovanieOkno.Vstup;
+            Krok($"diktovanie bez internetu: model načítaný za {nacitanie.TotalSeconds:0.0} s, {zvuk.Length / 16000.0:0.0} s zvuku prepísaných za {cas.Elapsed.TotalSeconds:0} s: „{prepis.Trim()}“");
+            var kluc = ImportOsnov.Kluc(prepis);
+            var slova = new[] { "clovek a priroda", "fyzik", "chemi", "biologi", "zdravie a pohyb", "telesn", "sportov" }.Count(kluc.Contains);
+            var plan = diktovanieOkno.Plan;
+            Over(slova >= 5, $"diktovanie bez internetu: slovenský text rozpoznaný ({slova} zo 7 výrazov)");
+            Over(plan is not null && plan.Oblasti.Any(o => o.Nazov == "Človek a príroda" && o.Predmety.Count >= 2),
+                "diktovanie bez internetu: z prepisu sa rozpoznali oblasti a predmety (" +
+                string.Join(" | ", plan?.Oblasti.Select(o => o.Nazov + ": " + string.Join(", ", o.Predmety)) ?? Array.Empty<string>()) + ")");
+            Snimka(diktovanieOkno, "18g_diktovanie_prepis");
+        }
+        else
+        {
+            Krok("diktovanie bez internetu: prepis preskočený (chýba model alebo nahrávka)");
+        }
+
+        Diktovanie.Sposob = povodnySposob;
+        Diktovanie.Model = povodnyModel;
+        PrepisHlasu.Zavri();
         diktovanieOkno.Close();
         var nastavenieDiktovania = new DiktovanieWindow { Owner = okno };
         nastavenieDiktovania.Show();

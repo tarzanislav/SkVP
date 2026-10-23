@@ -56,6 +56,7 @@ public partial class ImportStrukturyWindow : Window
             _diktovanie = new DiktovanieDoPola(Text, Diktovat, IkonaDiktovania, TextDiktovania, StavDiktovania, Hlasitost);
             UkazSposob();
             Closing += (_, _) => _diktovanie.ZrusNahravanie();
+            PripravModel();
             Loaded += (_, _) => Text.Focus();
         }
 
@@ -114,6 +115,15 @@ public partial class ImportStrukturyWindow : Window
             ? "Hlasové písanie Windows (Win+H) – pre slovenčinu pridajte v Nastaveniach Windows slovenskú klávesnicu (Čas a jazyk → Jazyk a oblasť)."
             : "Hlasové písanie Windows (Win+H) – potrebuje internet. Bez internetu: ozubené koliesko → Prepis v počítači.");
 
+    /// <summary>Pri prepise bez internetu sa model načíta do pamäte hneď pri otvorení okna (prepis potom začne bez čakania).</summary>
+    private static void PripravModel()
+    {
+        if (Diktovanie.Sposob == SposobDiktovania.Offline)
+        {
+            _ = PrepisHlasu.PripravAsync(Diktovanie.Model);
+        }
+    }
+
     private async void Diktovat_Click(object sender, RoutedEventArgs e)
     {
         if (_diktovanie is not null)
@@ -128,6 +138,7 @@ public partial class ImportStrukturyWindow : Window
         if (new DiktovanieWindow { Owner = this }.ShowDialog() == true)
         {
             UkazSposob();
+            PripravModel();
         }
     }
 
