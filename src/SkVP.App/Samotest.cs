@@ -353,8 +353,8 @@ internal static class Samotest
         var cervene = behy.Where(r => r.Text.Contains("známkou", StringComparison.Ordinal)).ToList();
         Over(cervene.Count > 0 && cervene.All(r => r.Foreground is not SolidColorBrush { Color: var c } || c != Colors.Red),
             "farba vloženého textu sa zrušila");
-        Over(behy.All(r => r.FontFamily.Source == PismaDokumentu.Text || r.FontFamily.Source.Contains("Segoe", StringComparison.Ordinal)),
-            "cudzie písmo vloženého textu sa zrušilo");
+        var pisma = string.Join(", ", behy.Select(r => r.FontFamily.Source).Distinct());
+        Over(behy.All(r => r.FontFamily.Source is not ("Arial" or "Comic Sans MS")), $"cudzie písmo vloženého textu sa zrušilo ({pisma})");
     }
 
     private static void TestZostav()

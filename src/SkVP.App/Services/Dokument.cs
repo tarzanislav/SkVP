@@ -651,6 +651,11 @@ public static class DokumentOsnovy
                     break;
 
                 case Section sekcia:
+                    sekcia.ClearValue(TextElement.FontFamilyProperty);
+                    sekcia.ClearValue(TextElement.FontSizeProperty);
+                    sekcia.ClearValue(TextElement.ForegroundProperty);
+                    sekcia.ClearValue(TextElement.BackgroundProperty);
+                    sekcia.ClearValue(Block.LineHeightProperty);
                     OcistiBloky(sekcia.Blocks);
                     break;
             }
