@@ -28,6 +28,10 @@ public sealed partial class ZalohaService
         set => Databaza.Zapis(KlucFrekvencia, value);
     }
 
+    /// <summary>Deň poslednej automatickej zálohy (null = ešte nebola).</summary>
+    public static DateTime? PoslednaAutomaticka =>
+        DateTime.TryParseExact(Databaza.Citaj(KlucPoslednaAutomaticka), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
+
     /// <summary>Koľko automatických záloh sa ponechá (staršie sa zmažú).</summary>
     public static int Ponechat
     {

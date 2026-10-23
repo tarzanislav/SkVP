@@ -208,7 +208,7 @@
                 </Border.Effect>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="{Binding Oznamenie}" VerticalAlignment="Center" MaxWidth="560" TextWrapping="Wrap" />
-                    <Button Content="Vrátiť späť" Margin="16,0,0,0" Padding="12,4" Command="{Binding VratitSpatCommand}"
+                    <Button Content="{Binding TextAkcie}" Margin="16,0,0,0" Padding="12,4" Command="{Binding VratitSpatCommand}"
                             Visibility="{Binding MaVratitSpat, Converter={StaticResource BoolNaViditelnost}}" />
                     <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE711;" FontSize="11" Margin="6,0,0,0"
                             ToolTip="Zavrieť" Command="{Binding ZavrietOznamenieCommand}" />

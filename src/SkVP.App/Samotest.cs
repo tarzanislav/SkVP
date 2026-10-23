@@ -929,7 +929,7 @@ internal static class Samotest
         var dat = DiagnostikaService.KontrolaDat();
         Over(dat.Riadky.Count > 2, $"kontrola dát ({string.Join(" | ", dat.Riadky.Take(3))})");
         Over(DiagnostikaService.Optimalizuj().Ok && DiagnostikaService.ObnovIndexy().Ok && DiagnostikaService.Kompaktuj().Ok, "optimalizácia, indexy, kompaktovanie");
-        Over(DiagnostikaService.VerziaSchemy() == Databaza.VerziaSchemy && DiagnostikaService.Prehlad().Count == 7
+        Over(DiagnostikaService.VerziaSchemy() == Databaza.VerziaSchemy && DiagnostikaService.Prehlad().Count == DiagnostikaService.PocetTabuliek
              && DiagnostikaService.PoslednaKontrola() is not null, "prehľad databázy");
 
         // chybná väzba (súvislosť na zmazaný predmet) – nájde sa a opraví

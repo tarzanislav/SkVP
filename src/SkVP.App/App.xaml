@@ -267,6 +267,77 @@
                 <Setter Property="VerticalAlignment" Value="Center" />
                 <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
             </Style>
+
+            <!-- počet v menu (otvorené úlohy, poznámky); červený pri úlohách po termíne -->
+            <Style x:Key="PocetVMenu" TargetType="Border">
+                <Setter Property="CornerRadius" Value="9" />
+                <Setter Property="Padding" Value="7,0,7,1" />
+                <Setter Property="MinWidth" Value="20" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+            </Style>
+
+            <!-- čip „Týka sa“: predmet, oblasť alebo časť osnov vo farbe oblasti -->
+            <DataTemplate x:Key="CipNaviazania">
+                <Border x:Name="Cip" CornerRadius="10" Padding="9,2,9,3" Margin="0,0,5,4" ToolTip="{Binding Tip}"
+                        Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=38}">
+                    <TextBlock x:Name="Text" Text="{Binding Text}" FontSize="12.5" TextTrimming="CharacterEllipsis" MaxWidth="260"
+                               Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                </Border>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Odstranene}" Value="True">
+                        <Setter TargetName="Cip" Property="Opacity" Value="0.5" />
+                        <Setter TargetName="Text" Property="TextDecorations" Value="Strikethrough" />
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
+
+            <!-- riadok úlohy (sekcia Úlohy, dashboard, panel pri predmete): odškrtnutie, text, naviazanie, termín -->
+            <DataTemplate x:Key="RiadokUlohy">
+                <DockPanel Margin="0,3" Background="Transparent">
+                    <CheckBox DockPanel.Dock="Left" IsChecked="{Binding Hotovo, Mode=OneWay}" VerticalAlignment="Top" MinWidth="0" Margin="0,1,6,0"
+                              Command="{Binding DataContext.PrepnutHotovoCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                              CommandParameter="{Binding}" ToolTip="Označiť ako hotovú alebo znova otvoriť" />
+                    <Border x:Name="Termin" DockPanel.Dock="Right" CornerRadius="9" Padding="8,1,8,2" Margin="8,1,0,0" VerticalAlignment="Top"
+                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                            Visibility="{Binding TerminText, Converter={StaticResource NieJePrazdne}}">
+                        <TextBlock x:Name="TerminText" Text="{Binding TerminText}" FontSize="12.5" />
+                    </Border>
+                    <StackPanel>
+                        <DockPanel>
+                            <TextBlock x:Name="Priorita" DockPanel.Dock="Left" Text="!" FontWeight="Bold" FontSize="14.5" Margin="0,0,5,0" Visibility="Collapsed"
+                                       Foreground="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                            <TextBlock x:Name="Text" Text="{Binding Text}" FontSize="14.5" TextWrapping="Wrap" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding Podrobnosti}" FontSize="12.5" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding MaPodrobnosti, Converter={StaticResource BoolNaViditelnost}}" />
+                    </StackPanel>
+                </DockPanel>
+                <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding Vysoka}" Value="True">
+                        <Setter TargetName="Priorita" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="Text" Property="FontWeight" Value="SemiBold" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Nizka}" Value="True">
+                        <Setter TargetName="Text" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Dnes}" Value="True">
+                        <Setter TargetName="Termin" Property="Background" Value="{Binding Source='#6C8EBF', Converter={StaticResource FarbaNaStetec}, ConverterParameter=50}" />
+                        <Setter TargetName="TerminText" Property="FontWeight" Value="SemiBold" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding PoTermine}" Value="True">
+                        <Setter TargetName="Termin" Property="Background" Value="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=45}" />
+                        <Setter TargetName="TerminText" Property="Foreground" Value="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                        <Setter TargetName="TerminText" Property="FontWeight" Value="SemiBold" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Hotovo}" Value="True">
+                        <Setter TargetName="Text" Property="TextDecorations" Value="Strikethrough" />
+                        <Setter TargetName="Text" Property="Opacity" Value="0.55" />
+                        <Setter TargetName="Termin" Property="Opacity" Value="0.55" />
+                    </DataTrigger>
+                </DataTemplate.Triggers>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

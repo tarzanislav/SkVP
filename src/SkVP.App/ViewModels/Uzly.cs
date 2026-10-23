@@ -64,6 +64,10 @@ public sealed partial class OblastVM : ObservableObject
     [ObservableProperty]
     private bool _jeVybrana;
 
+    /// <summary>Otvorené úlohy oblasti a jej predmetov (odznak).</summary>
+    [ObservableProperty]
+    private int _otvoreneUlohy;
+
     public ObservableCollection<PredmetVM> Predmety { get; } = new();
 
     public int Pocet => Predmety.Count;
@@ -128,6 +132,10 @@ public sealed partial class PredmetVM : ObservableObject
 
     [ObservableProperty]
     private bool _jePosledny;
+
+    /// <summary>Otvorené úlohy, ktoré patria k predmetu (odznak v zozname).</summary>
+    [ObservableProperty]
+    private int _otvoreneUlohy;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Stav), nameof(StavText), nameof(UpraveneText))]

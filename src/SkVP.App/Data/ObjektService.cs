@@ -143,14 +143,18 @@ public sealed class ObjektService
         Databaza.Vykonaj(db, "DELETE FROM vazba WHERE id = $id", ("$id", vazbaId));
     }
 
-    /// <summary>Všetko, s čím je objekt prepojený – v oboch smeroch.</summary>
+    /// <summary>
+    /// Odborné súvislosti objektu v oboch smeroch (nadväznosť, predpoklady, medzipredmetové vzťahy …). Úlohy, udalosti
+    /// a poznámky, ktoré k objektu patria, sa zobrazujú zvlášť (<see cref="TypVazby.Patri"/>).
+    /// </summary>
     public List<Suvislost> Suvislosti(long id)
     {
-        var platne = Vsetky().ToDictionary(o => o.Id);
+        var platne = Vsetky().Where(o => !TypObjektu.JePlanovanie(o.Typ)).ToDictionary(o => o.Id);
         var vysledok = new List<Suvislost>();
         using var db = Databaza.Otvor();
         using var prikaz = Databaza.Prikaz(db,
-            "SELECT id, z_id, do_id, typ, poznamka FROM vazba WHERE z_id = $id OR do_id = $id ORDER BY id", ("$id", id));
+            "SELECT id, z_id, do_id, typ, poznamka FROM vazba WHERE (z_id = $id OR do_id = $id) AND typ <> $patri ORDER BY id",
+            ("$id", id), ("$patri", TypVazby.Patri));
         using var citac = prikaz.ExecuteReader();
         while (citac.Read())
         {

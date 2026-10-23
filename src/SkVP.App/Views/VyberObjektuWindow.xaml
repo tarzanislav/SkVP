@@ -5,9 +5,13 @@
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <DockPanel Margin="24,20,24,20">
         <StackPanel DockPanel.Dock="Top">
-            <TextBlock Text="Prepojiť s predmetom alebo oblasťou" Style="{StaticResource Podnadpis}" FontSize="19" />
-            <TextBlock Text="Druh súvislosti" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
-            <ComboBox x:Name="Druh" DisplayMemberPath="Nazov" SelectedIndex="0" />
+            <TextBlock x:Name="Titulok" Text="Prepojiť s predmetom alebo oblasťou" Style="{StaticResource Podnadpis}" FontSize="19" />
+            <TextBlock x:Name="Vysvetlenie" Style="{StaticResource Popis}" Margin="0,0,0,4" Visibility="Collapsed"
+                       Text="Označte predmety, oblasti alebo časti osnov, ktorých sa to týka (kliknutím, aj viac naraz)." />
+            <StackPanel x:Name="VolbaDruhu">
+                <TextBlock Text="Druh súvislosti" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                <ComboBox x:Name="Druh" DisplayMemberPath="Nazov" SelectedIndex="0" />
+            </StackPanel>
             <TextBlock Text="Hľadať" Style="{StaticResource Stitok}" />
             <TextBox x:Name="Hladat" TextChanged="Hladat_TextChanged" />
         </StackPanel>
@@ -17,10 +21,13 @@
             <Button Content="Zrušiť" MinWidth="100" Margin="8,0,0,0" IsCancel="True" />
         </StackPanel>
 
-        <ListBox x:Name="Zoznam" Margin="0,12,0,0" MouseDoubleClick="Zoznam_MouseDoubleClick">
+        <ListBox x:Name="Zoznam" Margin="0,12,0,0" MouseDoubleClick="Zoznam_MouseDoubleClick" SelectionChanged="Zoznam_SelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <DockPanel Margin="0,3">
+                        <CheckBox DockPanel.Dock="Left" VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="0" Focusable="False" IsHitTestVisible="False"
+                                  IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}, Mode=OneWay}"
+                                  Visibility="{Binding Tag, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolNaViditelnost}}" />
                         <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,1,10,1"
                                 Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
                         <StackPanel>

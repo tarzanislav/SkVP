@@ -1,0 +1,224 @@
+<UserControl x:Class="SkVP.Views.UlohyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SkVP.Views">
+    <UserControl.Resources>
+        <Style x:Key="Filter" TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Padding" Value="14,5" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="FontSize" Value="13.5" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel Margin="44,30,44,24">
+        <!-- hlavička -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,14">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <RadioButton Style="{StaticResource Filter}" GroupName="filterUloh" Content="Otvorené" IsChecked="{Binding JeOtvorene}" />
+                <RadioButton Style="{StaticResource Filter}" GroupName="filterUloh" Content="Hotové" IsChecked="{Binding JeHotove}" />
+                <RadioButton Style="{StaticResource Filter}" GroupName="filterUloh" Content="Všetky" IsChecked="{Binding JeVsetky}" />
+                <Button Padding="12,5" Margin="10,0,0,0" Command="{Binding OdstranitHotoveCommand}" IsEnabled="{Binding SuHotove}"
+                        ToolTip="Odstráni všetky hotové úlohy (dá sa vrátiť späť)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Odstrániť hotové" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="Úlohy" Style="{StaticResource Nadpis}" Margin="0" />
+                <TextBlock Text="{Binding Suhrn}" Style="{StaticResource Popis}" FontSize="14" Margin="0,2,0,0" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- filter a hľadanie -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock Text="Týka sa:" VerticalAlignment="Center" Margin="0,0,8,0" FontSize="13.5" />
+            <ComboBox ItemsSource="{Binding Filtre, Mode=OneTime}" SelectedItem="{Binding FilterObjektu}" Width="300" Margin="0,0,16,0"
+                      ToolTip="Len úlohy k vybranej oblasti (aj s jej predmetmi) alebo k predmetu" />
+            <Grid>
+                <TextBox Text="{Binding Hladat, UpdateSourceTrigger=PropertyChanged, Delay=250}" Padding="30,5,8,5" VerticalContentAlignment="Center" />
+                <TextBlock Style="{StaticResource Ikona}" Text="&#xE721;" FontSize="13" Margin="10,0,0,0" HorizontalAlignment="Left" IsHitTestVisible="False"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                <TextBlock Text="Hľadať v úlohách" Margin="32,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                           Visibility="{Binding Hladat, Converter={StaticResource NieJePrazdne}, ConverterParameter=opacne}" />
+            </Grid>
+        </DockPanel>
+
+        <!-- navrhované úlohy z osnov -->
+        <Border DockPanel.Dock="Top" Style="{StaticResource Karta}" Padding="16,12" Margin="0,0,0,12"
+                Background="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=14}"
+                Visibility="{Binding Navrhy.Count, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+            <StackPanel>
+                <DockPanel>
+                    <ToggleButton DockPanel.Dock="Right" Padding="10,3" IsChecked="{Binding UkazNavrhy}">
+                        <TextBlock Text="Zobraziť" FontSize="12.5" />
+                    </ToggleButton>
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE82F;" FontSize="16" Margin="0,0,10,0"
+                               Foreground="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                    <TextBlock VerticalAlignment="Center" FontSize="15" FontWeight="SemiBold">
+                        <Run Text="Navrhované úlohy z osnov a Noviniek (" /><Run Text="{Binding Navrhy.Count, Mode=OneWay}" /><Run Text=")" />
+                    </TextBlock>
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Navrhy}" Margin="0,10,0,0" Focusable="False"
+                              Visibility="{Binding UkazNavrhy, Converter={StaticResource BoolNaViditelnost}}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border CornerRadius="8" Padding="12,8" Margin="0,0,0,6" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+                                <DockPanel>
+                                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                                        <Button Padding="12,4" Style="{DynamicResource AccentButtonStyle}"
+                                                Command="{Binding DataContext.PrevziatNavrhCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" ToolTip="Pridať ako úlohu (naviazanú na predmety)">
+                                            <TextBlock Text="Prevziať" />
+                                        </Button>
+                                        <Button Padding="10,4" Margin="6,0,0,0"
+                                                Command="{Binding DataContext.SkrytNavrhCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}" ToolTip="Tento návrh už neukazovať">
+                                            <TextBlock Text="Skryť" />
+                                        </Button>
+                                    </StackPanel>
+                                    <Border DockPanel.Dock="Left" Width="5" CornerRadius="2.5" Margin="0,2,12,2"
+                                            Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Text}" FontSize="14.5" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding Dovod}" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <Button HorizontalAlignment="Left" Style="{StaticResource RiadokTlacidlo}" Padding="6,2" Margin="-6,4,0,0"
+                        Command="{Binding ZobrazitSkryteNavrhyCommand}"
+                        Visibility="{Binding PocetSkrytych, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                    <TextBlock Style="{StaticResource Popis}" FontSize="12.5"><Run Text="Znova ukázať skryté návrhy (" /><Run Text="{Binding PocetSkrytych, Mode=OneWay}" /><Run Text=")" /></TextBlock>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- rýchle pridanie -->
+        <Border DockPanel.Dock="Top" Style="{StaticResource Karta}" Padding="12,10" Margin="0,0,0,12">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Style="{DynamicResource AccentButtonStyle}" Padding="14,6" Margin="8,0,0,0" Command="{Binding PridatCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE710;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Pridať" />
+                    </StackPanel>
+                </Button>
+                <ComboBox DockPanel.Dock="Right" Width="130" Margin="8,0,0,0" ItemsSource="{Binding Priority}" DisplayMemberPath="Nazov"
+                          SelectedValuePath="Hodnota" SelectedValue="{Binding NovaPriorita}" ToolTip="Priorita" />
+                <DatePicker DockPanel.Dock="Right" Width="150" Margin="8,0,0,0" SelectedDate="{Binding NovyTermin}" ToolTip="Termín (nepovinný) – úloha s termínom je aj v kalendári" />
+                <Grid>
+                    <TextBox x:Name="PoleNova" Text="{Binding NovyText, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center" FontSize="14.5">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding PridatCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <TextBlock Text="{Binding PopisPridania}" Margin="12,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" FontSize="14"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                               Visibility="{Binding NovyText, Converter={StaticResource NieJePrazdne}, ConverterParameter=opacne}" />
+                </Grid>
+            </DockPanel>
+        </Border>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="400" />
+            </Grid.ColumnDefinitions>
+
+            <!-- zoznam úloh zoskupený podľa termínu -->
+            <Border Style="{StaticResource Karta}" Padding="6">
+                <Grid>
+                    <TextBlock Text="{Binding TextPrazdneho}" Style="{StaticResource Popis}" FontSize="14" Margin="12"
+                               Visibility="{Binding Zoznam.Count, Converter={StaticResource NulaNaViditelnost}}" />
+                    <ListBox x:Name="Zoznam" ItemsSource="{Binding Zobrazenie}" SelectedItem="{Binding Vybrana}" ItemTemplate="{StaticResource RiadokUlohy}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled" Background="Transparent" BorderThickness="0">
+                        <ListBox.GroupStyle>
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="10,10,0,4" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{Binding Name, Mode=OneWay}" /><Run Text="  " /><Run Text="{Binding ItemCount, Mode=OneWay}" />
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </ListBox.GroupStyle>
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="10,4" />
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                    </ListBox>
+                </Grid>
+            </Border>
+
+            <!-- podrobnosti vybranej úlohy (ukladajú sa priebežne) -->
+            <Border Grid.Column="2" Style="{StaticResource Karta}" VerticalAlignment="Top" Padding="0">
+                <Grid>
+                    <TextBlock Text="Vyberte úlohu v zozname – tu doplníte termín, prioritu, zodpovedného, čoho sa týka a popis. Zmeny sa ukladajú priebežne."
+                               Style="{StaticResource Popis}" FontSize="14" Margin="20"
+                               Visibility="{Binding JeVybrana, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="760"
+                                  Visibility="{Binding JeVybrana, Converter={StaticResource BoolNaViditelnost}}">
+                        <StackPanel Margin="20,16,20,18">
+                            <TextBlock Text="Úloha" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                            <TextBox Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" TextWrapping="Wrap" FontSize="14.5" />
+                            <CheckBox Content="Hotovo" IsChecked="{Binding Hotovo}" Margin="0,10,0,0" />
+
+                            <Grid Margin="0,6,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="130" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="Termín" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                                    <DatePicker SelectedDate="{Binding Termin}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="Priorita" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                                    <ComboBox ItemsSource="{Binding Priority}" DisplayMemberPath="Nazov" SelectedValuePath="Hodnota" SelectedValue="{Binding Priorita}" />
+                                </StackPanel>
+                            </Grid>
+                            <WrapPanel Margin="0,6,0,0">
+                                <Button Content="Dnes" Padding="9,2" Margin="0,0,4,4" Command="{Binding TerminDnesCommand}" />
+                                <Button Content="Zajtra" Padding="9,2" Margin="0,0,4,4" Command="{Binding TerminZajtraCommand}" />
+                                <Button Content="O týždeň" Padding="9,2" Margin="0,0,4,4" Command="{Binding TerminOTyzdenCommand}" />
+                                <Button Content="Bez termínu" Padding="9,2" Margin="0,0,4,4" Command="{Binding TerminZrusitCommand}" />
+                                <Button Padding="9,2" Margin="0,0,4,4" Command="{Binding OtvoritVKalendariCommand}" ToolTip="Ukázať v kalendári"
+                                        Visibility="{Binding Termin, Converter={StaticResource NieJePrazdne}}">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE787;" FontSize="13" />
+                                </Button>
+                            </WrapPanel>
+
+                            <TextBlock Text="Zodpovedá (nepovinné)" Style="{StaticResource Stitok}" />
+                            <TextBox Text="{Binding Zodpovedny, UpdateSourceTrigger=PropertyChanged}" ToolTip="Napr. meno učiteľa alebo predmetová komisia" />
+
+                            <TextBlock Text="Týka sa" Style="{StaticResource Stitok}" />
+                            <v:TykaSaPole DataContext="{Binding TykaSa}" />
+
+                            <TextBlock Text="Popis" Style="{StaticResource Stitok}" />
+                            <TextBox Text="{Binding Popis, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                                     MinHeight="90" MaxHeight="220" VerticalScrollBarVisibility="Auto" />
+
+                            <TextBlock Text="{Binding InfoText}" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,10,0,0" />
+                            <Button HorizontalAlignment="Left" Margin="0,14,0,0" Padding="12,5" Command="{Binding OdstranitCommand}"
+                                    ToolTip="Odstrániť úlohu (dá sa vrátiť späť)">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
+                                    <TextBlock Text="Odstrániť úlohu" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>

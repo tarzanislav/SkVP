@@ -19,6 +19,9 @@ public static class Sekcie
 {
     public const string Dashboard = "dashboard";
     public const string Osnovy = "osnovy";
+    public const string Kalendar = "kalendar";
+    public const string Ulohy = "ulohy";
+    public const string Poznamky = "poznamky";
     public const string Tlac = "tlac";
     public const string ImportExport = "import";
     public const string Archiv = "archiv";
@@ -126,7 +129,8 @@ public sealed partial class MainViewModel : ObservableObject
     private object? _stranka;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia), nameof(JeImportExport), nameof(JeArchiv), nameof(JeServis), nameof(JeNovinky))]
+    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia), nameof(JeImportExport), nameof(JeArchiv), nameof(JeServis), nameof(JeNovinky),
+        nameof(JeKalendar), nameof(JeUlohy), nameof(JePoznamky))]
     private string _sekcia = Sekcie.Dashboard;
 
     public bool JeDashboard => Sekcia == Sekcie.Dashboard;
@@ -137,6 +141,9 @@ public sealed partial class MainViewModel : ObservableObject
     public bool JeArchiv => Sekcia == Sekcie.Archiv;
     public bool JeNovinky => Sekcia == Sekcie.Novinky;
     public bool JeServis => Sekcia == Sekcie.Servis;
+    public bool JeKalendar => Sekcia == Sekcie.Kalendar;
+    public bool JeUlohy => Sekcia == Sekcie.Ulohy;
+    public bool JePoznamky => Sekcia == Sekcie.Poznamky;
 
     [ObservableProperty]
     private string _skola = "";
@@ -227,6 +234,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         OnPropertyChanged(nameof(PocetPredmetov));
         JeTestovaciaSada = TestovaciaSada.JeNainstalovana;
+        ObnovPlanovanie();
     }
 
     public void NacitajUdaje()
@@ -305,6 +313,95 @@ public sealed partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     public void OtvorServis() => Prejdi(Sekcie.Servis, new ServisViewModel(this));
+
+    /// <summary>Kalendár na mesiaci s dátumom (predvolene dnes).</summary>
+    [RelayCommand]
+    public void OtvorKalendar(DateTime? datum) => Prejdi(Sekcie.Kalendar, new KalendarViewModel(this, datum ?? DateTime.Today));
+
+    /// <summary>Úlohy, voliteľne s vybranou úlohou.</summary>
+    [RelayCommand]
+    public void OtvorUlohy(long? vybrana) => Prejdi(Sekcie.Ulohy, new UlohyViewModel(this, vybrana));
+
+    /// <summary>Poznámky, voliteľne s vybranou poznámkou.</summary>
+    [RelayCommand]
+    public void OtvorPoznamky(long? vybrana) => Prejdi(Sekcie.Poznamky, new PoznamkyViewModel(this, vybrana));
+
+    /// <summary>Otvorí ľubovoľný objekt: oblasť alebo časti osnov, predmet, úlohu, poznámku alebo udalosť (v kalendári).</summary>
+    public void OtvorObjekt(long id)
+    {
+        if (NajdiOblast(id) is { } oblast)
+        {
+            OtvorOblast(oblast);
+        }
+        else if (NajdiPredmet(id) is { } predmet)
+        {
+            if (!predmet.Oblast.Aktivna)
+            {
+                Oznam($"{predmet.Oblast.Nazov} sú vypnuté – zapnite ich prepínačom v sekcii Osnovy.");
+                return;
+            }
+
+            OtvorPredmet(predmet);
+        }
+        else if (_sluzba.Nacitaj(id) is { } objekt)
+        {
+            switch (objekt.Typ)
+            {
+                case TypObjektu.Uloha:
+                    OtvorUlohy(id);
+                    break;
+                case TypObjektu.Poznamka:
+                    OtvorPoznamky(id);
+                    break;
+                case TypObjektu.Udalost:
+                    OtvorKalendar(new KalendarService().Nacitaj(id)?.Zaciatok);
+                    break;
+            }
+        }
+    }
+
+    // ---- kalendár, úlohy, poznámky: počty v menu a odznaky pri predmetoch ----
+
+    [ObservableProperty]
+    private int _pocetOtvorenychUloh;
+
+    [ObservableProperty]
+    private int _pocetUlohPoTermine;
+
+    [ObservableProperty]
+    private int _pocetPoznamok;
+
+    /// <summary>Počet dnešných udalostí a úloh s dnešným termínom.</summary>
+    [ObservableProperty]
+    private int _pocetDnes;
+
+    /// <summary>Prepočíta počty v menu a odznaky otvorených úloh pri predmetoch a oblastiach.</summary>
+    public void ObnovPlanovanie()
+    {
+        try
+        {
+            var ulohy = new UlohyService();
+            var (otvorene, poTermine, _) = ulohy.Pocty();
+            PocetOtvorenychUloh = otvorene;
+            PocetUlohPoTermine = poTermine;
+            PocetPoznamok = new PoznamkyService().Pocet();
+            PocetDnes = new KalendarService().Vyskyty(DateTime.Today, DateTime.Today, automaticke: false).Count(v => !v.JeVybavena);
+            var podlaObjektov = ulohy.OtvorenePodlaObjektov();
+            foreach (var skupina in VsetkySkupiny)
+            {
+                foreach (var predmet in skupina.Predmety)
+                {
+                    predmet.OtvoreneUlohy = podlaObjektov.GetValueOrDefault(predmet.Id);
+                }
+
+                skupina.OtvoreneUlohy = podlaObjektov.GetValueOrDefault(skupina.Id) + skupina.Predmety.Sum(p => p.OtvoreneUlohy);
+            }
+        }
+        catch (Exception)
+        {
+            // počty sa obnovia nabudúce
+        }
+    }
 
     // ---- oblasti ----
 
@@ -552,6 +649,17 @@ public sealed partial class MainViewModel : ObservableObject
         _sluzba.NastavStav(predmet.Id, stav);
         predmet.StavKod = stav;
         predmet.Oblast.Obnov();
+        if (stav == StavyOsnovy.NaKontrolu && !new UlohyService().Zdroje().Contains($"kontrola:{predmet.Id}"))
+        {
+            // ponuka (nič sa nevytvára samo): úloha na kontrolu osnovy, naviazaná na predmet
+            Oznam($"Osnova „{predmet.Nazov}“ je na kontrolu.", () =>
+            {
+                new UlohyService().Pridaj($"Skontrolovať osnovu: {predmet.Nazov}", priorita: PrioritaUlohy.Vysoka, tykaSa: new[] { predmet.Id },
+                    zdroj: $"kontrola:{predmet.Id}");
+                ObnovPlanovanie();
+                Oznam($"Úloha „Skontrolovať osnovu: {predmet.Nazov}“ je v Úlohách – doplňte termín a zodpovedného.");
+            }, "Vytvoriť úlohu");
+        }
     }
 
     // ---- dokumenty a úprava vo Worde ----
@@ -731,14 +839,19 @@ public sealed partial class MainViewModel : ObservableObject
 
     // ---- oznámenie s možnosťou vrátiť späť ----
 
-    public void Oznam(string text, Action? vratitSpat = null)
+    /// <summary>Oznámenie v spodnej lište, voliteľne s tlačidlom (predvolene „Vrátiť späť“).</summary>
+    public void Oznam(string text, Action? vratitSpat = null, string textAkcie = "Vrátiť späť")
     {
         _casovacOznamenia.Stop();
         Oznamenie = text;
         _vratitSpat = vratitSpat;
         MaVratitSpat = vratitSpat is not null;
+        TextAkcie = textAkcie;
         _casovacOznamenia.Start();
     }
+
+    [ObservableProperty]
+    private string _textAkcie = "Vrátiť späť";
 
     [RelayCommand]
     private void VratitSpat()

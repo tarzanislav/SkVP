@@ -15,8 +15,23 @@ public static class TypObjektu
     /// <summary>Úvodná alebo záverečná časť učebných osnov (dokument ako osnova predmetu).</summary>
     public const string Cast = "cast";
 
+    /// <summary>Udalosť v kalendári.</summary>
+    public const string Udalost = "udalost";
+
+    /// <summary>Úloha (s termínom je aj v kalendári).</summary>
+    public const string Uloha = "uloha";
+
+    /// <summary>Poznámka (lístok).</summary>
+    public const string Poznamka = "poznamka";
+
     /// <summary>Skupina, ktorá obsahuje dokumenty osnov – oblasť alebo úvodné/záverečné časti.</summary>
     public static bool JeSkupina(string typ) => typ is Oblast or Uvod or Zaver;
+
+    /// <summary>Súčasť učebných osnov – skupina alebo dokument (predmet, časť).</summary>
+    public static bool JeOsnova(string typ) => JeSkupina(typ) || typ is Predmet or Cast;
+
+    /// <summary>Záznam plánovania – udalosť, úloha alebo poznámka (nie je súčasťou učebných osnov).</summary>
+    public static bool JePlanovanie(string typ) => typ is Udalost or Uloha or Poznamka;
 
     public static string Nazov(string typ) => typ switch
     {
@@ -25,6 +40,9 @@ public static class TypObjektu
         Uvod => "Úvodné časti učebných osnov",
         Zaver => "Záverečné časti učebných osnov",
         Cast => "Časť učebných osnov",
+        Udalost => "Udalosť",
+        Uloha => "Úloha",
+        Poznamka => "Poznámka",
         _ => typ,
     };
 }
@@ -82,6 +100,9 @@ public static class TypVazby
     public const string NadvazujeNa = "nadvazuje";
     public const string Predpoklad = "predpoklad";
     public const string Medzipredmetovy = "medzipredmetovy";
+
+    /// <summary>Úloha, udalosť alebo poznámka patrí k objektu („Týka sa“) – nezobrazuje sa medzi odbornými súvislosťami.</summary>
+    public const string Patri = "patri";
 
     public static readonly (string Kod, string Nazov, string Spatny)[] Vsetky =
     {

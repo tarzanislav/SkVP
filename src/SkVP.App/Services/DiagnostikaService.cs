@@ -35,10 +35,18 @@ public static class DiagnostikaService
         ("objekt", "oblasti, predmety a ďalšie objekty"),
         ("dokument", "dokumenty osnov a charakteristík"),
         ("verzia", "archív verzií osnov"),
-        ("vazba", "súvislosti medzi predmetmi"),
+        ("vazba", "súvislosti medzi predmetmi a naviazania úloh, udalostí a poznámok"),
+        ("typ_udalosti", "typy udalostí v kalendári"),
+        ("udalost", "udalosti v kalendári"),
+        ("uloha", "úlohy"),
+        ("poznamka", "poznámky"),
         ("archiv_rok", "archívy školských rokov"),
         ("archiv_polozka", "osnovy v archívoch školských rokov"),
+        ("archiv_zaznam", "úlohy a poznámky v archívoch školských rokov"),
     };
+
+    /// <summary>Počet tabuliek v databáze (prehľad v Servise).</summary>
+    public static int PocetTabuliek => Tabulky.Length;
 
     public static VysledokKontroly RychlaKontrola() => Kontrola("PRAGMA quick_check;", "Rýchla kontrola");
 
@@ -88,6 +96,9 @@ public static class DiagnostikaService
         ("verzie v archíve bez predmetu", "SELECT count(*) FROM verzia WHERE objekt_id NOT IN (SELECT id FROM objekt)"),
         ("súvislosti na neexistujúci predmet", "SELECT count(*) FROM vazba WHERE z_id NOT IN (SELECT id FROM objekt) OR do_id NOT IN (SELECT id FROM objekt)"),
         ("osnovy archívu roka bez archívu", "SELECT count(*) FROM archiv_polozka WHERE archiv_id NOT IN (SELECT id FROM archiv_rok)"),
+        ("úlohy a poznámky archívu roka bez archívu", "SELECT count(*) FROM archiv_zaznam WHERE archiv_id NOT IN (SELECT id FROM archiv_rok)"),
+        ("podrobnosti udalostí, úloh a poznámok bez záznamu",
+            "SELECT (SELECT count(*) FROM udalost WHERE objekt_id NOT IN (SELECT id FROM objekt)) + (SELECT count(*) FROM uloha WHERE objekt_id NOT IN (SELECT id FROM objekt)) + (SELECT count(*) FROM poznamka WHERE objekt_id NOT IN (SELECT id FROM objekt))"),
         ("úvodné a záverečné časti bez svojej skupiny",
             "SELECT count(*) FROM objekt WHERE typ = 'cast' AND (rodic_id IS NULL OR rodic_id NOT IN (SELECT id FROM objekt WHERE typ IN ('uvod', 'zaver')))"),
     };
@@ -102,6 +113,11 @@ public static class DiagnostikaService
         spolu += Databaza.Vykonaj(db, "DELETE FROM verzia WHERE objekt_id NOT IN (SELECT id FROM objekt)");
         spolu += Databaza.Vykonaj(db, "DELETE FROM vazba WHERE z_id NOT IN (SELECT id FROM objekt) OR do_id NOT IN (SELECT id FROM objekt)");
         spolu += Databaza.Vykonaj(db, "DELETE FROM archiv_polozka WHERE archiv_id NOT IN (SELECT id FROM archiv_rok)");
+        spolu += Databaza.Vykonaj(db, "DELETE FROM archiv_zaznam WHERE archiv_id NOT IN (SELECT id FROM archiv_rok)");
+        foreach (var tabulka in new[] { "udalost", "uloha", "poznamka" })
+        {
+            spolu += Databaza.Vykonaj(db, $"DELETE FROM {tabulka} WHERE objekt_id NOT IN (SELECT id FROM objekt)");
+        }
 
         // predmety bez oblasti sa nemažú – presunú sa do oblasti „Nezaradené predmety“
         var siroty = Pocet(db, Siroty[0].Pocet);
@@ -219,6 +235,18 @@ public static class DiagnostikaService
         using (var db = Databaza.Otvor())
         {
             riadky.Add($"Verzií v archíve osnov: {Pocet(db, "SELECT count(*) FROM verzia")}, archívov školských rokov: {Pocet(db, "SELECT count(*) FROM archiv_rok")}.");
+            riadky.Add($"Udalostí v kalendári: {Pocet(db, "SELECT count(*) FROM objekt WHERE typ = 'udalost' AND odstranene IS NULL")}, " +
+                       $"úloh: {Pocet(db, "SELECT count(*) FROM objekt WHERE typ = 'uloha' AND odstranene IS NULL")}, " +
+                       $"poznámok: {Pocet(db, "SELECT count(*) FROM objekt WHERE typ = 'poznamka' AND odstranene IS NULL")}.");
+            var bezCiela = Pocet(db, """
+                SELECT count(DISTINCT v.z_id) FROM vazba v JOIN objekt c ON c.id = v.do_id JOIN objekt z ON z.id = v.z_id
+                WHERE v.typ = 'patri' AND c.odstranene IS NOT NULL AND z.odstranene IS NULL
+                  AND NOT EXISTS (SELECT 1 FROM vazba v2 JOIN objekt c2 ON c2.id = v2.do_id WHERE v2.z_id = v.z_id AND v2.typ = 'patri' AND c2.odstranene IS NULL)
+                """);
+            if (bezCiela > 0)
+            {
+                riadky.Add($"Úlohy, udalosti a poznámky naviazané len na odstránené predmety: {bezCiela} (len informácia – zostávajú zachované).");
+            }
             var buduce = Pocet(db, "SELECT count(*) FROM objekt WHERE upravene > $t", ("$t", DateTime.Now.AddMinutes(5).ToString("s", CultureInfo.InvariantCulture)));
             if (buduce > 0)
             {
@@ -307,6 +335,8 @@ public static class DiagnostikaService
         using (var spojenie = Databaza.Otvor(nova))
         {
             Databaza.Vykonaj(spojenie, "PRAGMA foreign_keys = OFF;");
+            // predvolené typy udalostí novej databázy nahradia tie z pôvodnej (aj s úpravami používateľa)
+            Databaza.Vykonaj(spojenie, "DELETE FROM typ_udalosti;");
             Databaza.Vykonaj(spojenie, "ATTACH DATABASE $cesta AS stara;", ("$cesta", Databaza.Cesta));
             foreach (var (tabulka, _) in Tabulky)
             {

@@ -557,10 +557,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
     /// <summary>Termíny vo formáte iCalendar (celodenné udalosti, posledný deň vrátane).</summary>
     public static string Kalendar(IEnumerable<PolozkaNoviniek> terminy, DataNoviniek data)
     {
-        static string Esc(string t) => t.Replace("\\", "\\\\").Replace(";", "\\;").Replace(",", "\\,").Replace("\r", "").Replace("\n", "\\n");
-        var sb = new StringBuilder();
-        sb.Append("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//SkVP//Novinky//SK\r\nCALSCALE:GREGORIAN\r\n");
-        var teraz = DateTime.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'", CultureInfo.InvariantCulture);
+        var ics = new Ics("SkVP – termíny školského roka");
         foreach (var t in terminy)
         {
             if (t.Zaciatok is not { } od || t.Koniec is not { } dokedy)
@@ -568,22 +565,12 @@ public sealed partial class NovinkyViewModel : ObservableObject
                 continue;
             }
 
-            var kategoria = data.Kategoria(t.Kategoria)?.Nazov ?? "";
             var popis = t.Text + (t.Poznamka is { Length: > 0 } p ? "\n\nPoznámka: " + p : "") + "\n\nZdroje: " + string.Join("; ", t.Zdroje.Select(z => z.Url));
-            sb.Append("BEGIN:VEVENT\r\n");
-            sb.Append($"UID:{t.Id}@skvp-novinky\r\nDTSTAMP:{teraz}\r\n");
-            sb.Append($"DTSTART;VALUE=DATE:{od:yyyyMMdd}\r\nDTEND;VALUE=DATE:{dokedy.AddDays(1):yyyyMMdd}\r\n");
-            sb.Append($"SUMMARY:{Esc(t.Nazov)}\r\nCATEGORIES:{Esc(kategoria)}\r\nDESCRIPTION:{Esc(popis)}\r\n");
-            if (t.Zdroje.FirstOrDefault() is { } zdroj)
-            {
-                sb.Append($"URL:{zdroj.Url}\r\n");
-            }
-
-            sb.Append("END:VEVENT\r\n");
+            ics.Udalost($"{t.Id}@skvp-novinky", t.Nazov, od.ToDateTime(TimeOnly.MinValue), dokedy.ToDateTime(TimeOnly.MinValue), celyDen: true,
+                popis: popis, kategoria: data.Kategoria(t.Kategoria)?.Nazov, url: t.Zdroje.FirstOrDefault()?.Url, volno: true);
         }
 
-        sb.Append("END:VCALENDAR\r\n");
-        return sb.ToString();
+        return ics.ToString();
     }
 
     private async Task StiahniSpravyAsync(bool tichy)

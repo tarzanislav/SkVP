@@ -12,7 +12,7 @@ namespace SkVP.Data;
 /// </summary>
 public static class Databaza
 {
-    public const int VerziaSchemy = 2;
+    public const int VerziaSchemy = 3;
 
     /// <summary>Priečinok s databázou (pri samoteste dočasný – premenná SKVP_DATA_DIR).</summary>
     public static string Priecinok =>
@@ -188,9 +188,90 @@ public static class Databaza
                 """);
         }
 
+        if (verzia < 3)
+        {
+            Vykonaj(db, """
+                -- kalendár, úlohy a poznámky: každý záznam je objekt (typ udalost/uloha/poznamka), podrobnosti sú tu;
+                -- k predmetom, oblastiam a častiam patria cez väzbu typu 'patri'
+                CREATE TABLE typ_udalosti(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nazov TEXT NOT NULL,
+                    farba TEXT NOT NULL,
+                    aktivny INTEGER NOT NULL DEFAULT 1,
+                    poradie INTEGER NOT NULL DEFAULT 0
+                );
+                CREATE TABLE udalost(
+                    objekt_id INTEGER PRIMARY KEY REFERENCES objekt(id) ON DELETE CASCADE,
+                    guid TEXT NOT NULL,
+                    typ_id INTEGER NULL REFERENCES typ_udalosti(id) ON DELETE SET NULL,
+                    zaciatok TEXT NOT NULL,
+                    koniec TEXT NULL,
+                    cely_den INTEGER NOT NULL DEFAULT 0,
+                    opakovanie INTEGER NOT NULL DEFAULT 0,
+                    opakovanie_do TEXT NULL,
+                    pripomienka INTEGER NOT NULL DEFAULT 0,
+                    stav INTEGER NOT NULL DEFAULT 0,
+                    miesto TEXT NULL,
+                    popis TEXT NULL
+                );
+                CREATE INDEX ix_udalost_zaciatok ON udalost(zaciatok);
+                CREATE TABLE uloha(
+                    objekt_id INTEGER PRIMARY KEY REFERENCES objekt(id) ON DELETE CASCADE,
+                    termin TEXT NULL,
+                    priorita INTEGER NOT NULL DEFAULT 1,
+                    hotovo TEXT NULL,
+                    zodpovedny TEXT NULL,
+                    zdroj TEXT NULL,
+                    popis TEXT NULL
+                );
+                CREATE INDEX ix_uloha_termin ON uloha(termin);
+                CREATE TABLE poznamka(
+                    objekt_id INTEGER PRIMARY KEY REFERENCES objekt(id) ON DELETE CASCADE,
+                    text TEXT NOT NULL DEFAULT '',
+                    pripnuta INTEGER NOT NULL DEFAULT 0,
+                    datum TEXT NULL
+                );
+                CREATE INDEX ix_poznamka_datum ON poznamka(datum);
+                CREATE INDEX ix_vazba_typ ON vazba(typ, do_id);
+
+                -- archív školského roka: úlohy a poznámky k predmetom tak, ako boli v danom roku
+                CREATE TABLE archiv_zaznam(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    archiv_id INTEGER NOT NULL REFERENCES archiv_rok(id) ON DELETE CASCADE,
+                    druh TEXT NOT NULL,
+                    nazov TEXT NOT NULL,
+                    text TEXT NULL,
+                    datum TEXT NULL,
+                    stav TEXT NULL,
+                    tyka_sa TEXT NULL
+                );
+                CREATE INDEX ix_archiv_zaznam ON archiv_zaznam(archiv_id);
+                """);
+            var poradie = 0;
+            foreach (var (nazov, farba) in PredvoleneTypyUdalosti)
+            {
+                Vykonaj(db, "INSERT INTO typ_udalosti(nazov, farba, aktivny, poradie) VALUES($n, $f, 1, $p)",
+                    ("$n", nazov), ("$f", farba), ("$p", poradie++));
+            }
+        }
+
         Vykonaj(db, $"PRAGMA user_version = {VerziaSchemy};");
         transakcia.Commit();
     }
+
+    /// <summary>Typy udalostí v novej databáze (dajú sa upraviť v kalendári).</summary>
+    public static readonly IReadOnlyList<(string Nazov, string Farba)> PredvoleneTypyUdalosti = new[]
+    {
+        ("Pedagogická rada", "#7C9CE0"),
+        ("Predmetová komisia / metodické združenie", "#5FB3A1"),
+        ("Termín k osnovám", "#E39B5B"),
+        ("Porada", "#9AA5B8"),
+        ("Školská akcia", "#D98BB4"),
+        ("Rodičovské združenie", "#B79BD9"),
+        ("Maturita", "#E07A7A"),
+        ("Prijímacie skúšky", "#D4B04C"),
+        ("Iné", "#94A3B8"),
+    };
 
     // ---- nastavenia ----
 
