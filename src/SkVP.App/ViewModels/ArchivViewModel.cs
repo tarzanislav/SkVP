@@ -43,7 +43,7 @@ public sealed class PolozkaArchivuVM
     {
         Polozka.Profilacie is { Length: > 0 } p ? $"Profilácie: {p}" : null,
         Polozka.Platnost is { Length: > 0 } pl ? $"Platnosť: {pl}" : null,
-        Polozka.Dlzka > 0 ? $"{Polozka.Dlzka / 1800.0:0.0} NS" : null,
+        Polozka.Dlzka > 0 ? (Polozka.Dlzka / 1800.0).ToString("0.0", CultureInfo.GetCultureInfo("sk-SK")) + " NS" : null,
     }.Where(t => t is not null));
 
     public bool MaUdaje => Udaje.Length > 0;
@@ -111,7 +111,8 @@ public sealed partial class ArchivViewModel : ObservableObject
     public string Nadpis => Vybrany is null ? "" : $"Učebné osnovy {Vybrany.SkolskyRok}";
 
     public string PopisArchivu => Vybrany is null ? "" :
-        $"Archivované {Vybrany.Vytvorene.ToString("d. MMMM yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))}  •  dokumentov: {Vybrany.Dokumentov}"
+        $"Archivované {Vybrany.Vytvorene.ToString("d. MMMM yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))}"
+        + (Vybrany.MaPrehlad ? $"  •  predmetov: {Vybrany.Predmetov}  •  dokumentov: {Vybrany.Dokumentov}" : "")
         + (Vybrany.Poznamka is { Length: > 0 } p ? $"  •  {p}" : "");
 
     [ObservableProperty]
@@ -204,11 +205,11 @@ public sealed partial class ArchivViewModel : ObservableObject
         Dlazdice.Add(new DlazdicaStatistiky($"{s.Percento(s.Hotove)} %", "hotových osnov", $"{s.Hotove} z {s.Predmety}", "#2F9E44", ""));
         Dlazdice.Add(new DlazdicaStatistiky(s.NaKontrolu.ToString(CultureInfo.InvariantCulture), "na kontrolu",
             $"rozpracované {s.Rozpracovane}, nezačaté {s.Nezacate}", "#F08C00", ""));
-        Dlazdice.Add(new DlazdicaStatistiky(s.ZmeneneVRoku.ToString(CultureInfo.InvariantCulture), "zmenených počas roka",
+        Dlazdice.Add(new DlazdicaStatistiky(s.ZmeneneVRoku.ToString(CultureInfo.InvariantCulture), "zmenených v roku",
             "úpravy, importy a obnovy osnov", "#AE3EC9", ""));
         Dlazdice.Add(new DlazdicaStatistiky(s.Normostrany.ToString("0.#", CultureInfo.GetCultureInfo("sk-SK")), "normostrán",
             $"{s.Znakov.ToString("N0", CultureInfo.GetCultureInfo("sk-SK"))} znakov textu", "#1098AD", ""));
-        Dlazdice.Add(new DlazdicaStatistiky($"{s.UrovenB1} / {s.UrovenB2}", "jazykov B1 / B2",
+        Dlazdice.Add(new DlazdicaStatistiky($"{s.UrovenB1} / {s.UrovenB2}", "cudzie jazyky B1 / B2",
             $"profilácie v {s.SProfilaciami}, platnosť v {s.SPlatnostou} osnovách", "#E8590C", ""));
 
         OblastArchivuVM? oblast = null;
