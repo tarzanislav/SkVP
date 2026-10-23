@@ -194,7 +194,7 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         Hlavny = hlavny;
         Predmet = predmet;
         _nazov = predmet.Nazov;
-        _vybranyStav = Stavy.First(s => s.Kod == predmet.StavKod);
+        _vybranyStav = VsetkyStavy.First(s => s.Kod == predmet.StavKod);
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id, () => $"{Predmet.Cislo} {Predmet.Nazov}", sablonaOsnovy: true);
         NacitajSuvislosti();
     }
@@ -210,12 +210,14 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
 
     public sealed record VolbaStavu(string? Kod, string Nazov);
 
-    public static IReadOnlyList<VolbaStavu> Stavy { get; } = new[]
+    private static readonly IReadOnlyList<VolbaStavu> VsetkyStavy = new[]
     {
         new VolbaStavu(null, "Podľa obsahu (nezačatá / rozpracovaná)"),
         new VolbaStavu(StavyOsnovy.NaKontrolu, "Na kontrolu"),
         new VolbaStavu(StavyOsnovy.Hotova, "Hotová"),
     };
+
+    public IReadOnlyList<VolbaStavu> Stavy => VsetkyStavy;
 
     [ObservableProperty]
     private string _nazov;
