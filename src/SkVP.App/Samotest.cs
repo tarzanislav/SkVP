@@ -1371,16 +1371,19 @@ internal static class Samotest
         model.Hladat = "";
 
         // blok: hore dôležité, potom odporúčané (najviac polovica strany), 6 informácií na strane, staršie v histórii bloku
-        bool PravidlaStrany(List<PolozkaNovinkyVM> strana)
+        // viac ako polovica vybraných je povolená len vtedy, keď už nie sú žiadne ďalšie bežné informácie (inak by strana zostala poloprázdna)
+        bool PravidlaStrany(BlokNoviniekVM blok, int index)
         {
+            var strana = blok.Strany[index];
+            var bezneNeskor = blok.Strany.Skip(index + 1).SelectMany(st => st).Any(p => !p.JeVybrana);
             var vybrane = strana.TakeWhile(p => p.JeVybrana).Count();
             var dolezitePredOdporucanymi = strana.Where(p => p.JeVybrana).Select(p => p.Dolezite ? 0 : 1).Zip(strana.Where(p => p.JeVybrana).Select(p => p.Dolezite ? 0 : 1).Skip(1))
                 .All(d => d.First <= d.Second);
             return strana.Count <= NovinkyService.NaStranu && strana.Skip(vybrane).All(p => !p.JeVybrana)
-                   && (vybrane <= BlokNoviniekVM.MaxVybranychNaStranu || strana.All(p => p.JeVybrana)) && dolezitePredOdporucanymi;
+                   && (vybrane <= BlokNoviniekVM.MaxVybranychNaStranu || !bezneNeskor) && dolezitePredOdporucanymi;
         }
 
-        Over(model.Bloky.All(b => b.Strany.All(PravidlaStrany) && b.Strany.Sum(st => st.Count) == b.Pocet),
+        Over(model.Bloky.All(b => Enumerable.Range(0, b.PocetStran).All(i => PravidlaStrany(b, i)) && b.Strany.Sum(st => st.Count) == b.Pocet),
             "Novinky: na každej strane bloku sú hore dôležité, potom odporúčané – najviac polovica strany; nič nechýba");
         var maturita = model.Bloky.Single(b => b.Kategoria.Id == "maturita");
         Over(maturita.Polozky.Count == NovinkyService.NaStranu && maturita.Polozky[0].Dolezite && maturita.PocetStran >= 2 && maturita.MaDalsiu && !maturita.JeHistoria,
