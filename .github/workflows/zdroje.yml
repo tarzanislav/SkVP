@@ -1,0 +1,32 @@
+name: Zdroje (ŠVP)
+
+# Jednorazové stiahnutie oficiálnych dokumentov (ŠVP pre gymnáziá) a extrakcia textu – podklad pre charakteristiky oblastí.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  stiahnut:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stiahnuť a extrahovať text
+        run: |
+          sudo apt-get install -y -qq poppler-utils > /dev/null
+          mkdir zdroje && cd zdroje
+          curl -sSL -o svp_gymnazia.pdf "https://www.statpedu.sk/files/articles/dokumenty/inovovany-statny-vzdelavaci-program/statny_vzdel_program_pre_gymnazia.pdf"
+          curl -sSL -o dodatok_5.pdf "https://www.statpedu.sk/files/sk/svp/inovovany-statny-vzdelavaci-program/inovovany-svp-gymnazia-so-stvorrocnym-patrocnym-vzdelavacim-programom/svp-dodatok-c-5-schvaleny-platnost-od-01_09_2023.pdf"
+          for f in *.pdf; do pdftotext -layout "$f" "${f%.pdf}.txt"; pdftotext "$f" "${f%.pdf}_tok.txt"; done
+          ls -la
+      - name: Zverejniť na vetve zdroje
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd zdroje
+          git init -q -b zdroje
+          git config user.name "SkVP zdroje"
+          git config user.email "zostavenie@users.noreply.github.com"
+          git add -A
+          git commit -q -m "ŠVP pre gymnáziá – text"
+          git push -q -f "https://x-access-token:$GH_TOKEN@github.com/${{ github.repository }}.git" zdroje
