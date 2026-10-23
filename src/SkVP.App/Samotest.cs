@@ -563,13 +563,14 @@ internal static class Samotest
     }
 
     /// <summary>Po vymazaní testovacej sady nesmú zostať údaje vymyslenej školy.</summary>
-    private static void OverBezSkolySady(string popis)
+    private static void OverBezSkolySady(string popis, Dictionary<string, string?> predSadou)
     {
         var t = TitulnaStrana.Nacitaj();
         var zvysky = new List<string>();
         foreach (var (kluc, hodnota) in TestovaciaSada.NastaveniaSady)
         {
-            if (Databaza.Citaj(kluc) == hodnota)
+            // nastavenie musí mať hodnotu spred nahratia sady (ak bola rovnaká ako v sade, zostane)
+            if (Databaza.Citaj(kluc) is var teraz && teraz == hodnota && teraz != predSadou.GetValueOrDefault(kluc))
             {
                 zvysky.Add(kluc);
             }
@@ -831,6 +832,7 @@ internal static class Samotest
         var dataSjl = DocxVystup.Osnova(osnovaSjl);
         OverDocx(dataSjl, "testovacia osnova SJL");
         PorovnajBloky(osnovaSjl, DocxCitac.Nacitaj(new MemoryStream(dataSjl)).Bloky, "testovacia osnova Word → program");
+        var predSadou = TestovaciaSada.NastaveniaSady.ToDictionary(n => n.Kluc, n => Databaza.Citaj(n.Kluc));
         model.NahrajTestovaciuSadu();
         Pumpuj();
         Over(model.JeTestovaciaSada && TestovaciaSada.JeNainstalovana, "testovacia sada je nahratá (upozornenie v programe)");
@@ -870,12 +872,12 @@ internal static class Samotest
         Over(!model.JeTestovaciaSada && model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "vymazanie osnov – oblasti a predmety zostali");
         Over(model.Oblasti.SelectMany(o => o.Predmety).All(p => p.Stav == StavOsnovy.Prazdna) && new DokumentService().Verzie(sjl.Id).Count == 0, "osnovy aj archív sú vymazané");
         Over(new ZalohaService().Zalohy().Count == zalohyPred + 1, "pred vymazaním sa vytvorila záloha");
-        OverBezSkolySady("vymazanie osnov");
+        OverBezSkolySady("vymazanie osnov", predSadou);
         model.NahrajTestovaciuSadu();
         Over(TitulnaStrana.Nacitaj().Skola == TestovaciaSada.SkolaSady && NastaveniaSkoly.CestaLoga() is not null, "opätovné nahratie sady doplní školu aj logo");
         model.Vymaz(vsetko: true);
         Over(model.Oblasti.Count == 0 && !model.JeTestovaciaSada, "vymazanie všetkého");
-        OverBezSkolySady("vymazanie všetkého");
+        OverBezSkolySady("vymazanie všetkého", predSadou);
 
         // vlastné údaje, ktoré používateľ zadal počas skúšania, vymazanie sady nezmaže
         model.NahrajTestovaciuSadu();
