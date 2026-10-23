@@ -45,8 +45,6 @@
                         </ToggleButton>
                     </StackPanel>
                     <WrapPanel VerticalAlignment="Center">
-                        <TextBlock Text="Učebná osnova predmetu" Style="{StaticResource Popis}" FontSize="13" />
-                        <TextBlock Text="  •  " Style="{StaticResource Popis}" FontSize="13" />
                         <TextBlock Text="{Binding Predmet.StavText}" Style="{StaticResource Popis}" FontSize="13" />
                         <TextBlock Text="  •  upravené " Style="{StaticResource Popis}" FontSize="13"
                                    Visibility="{Binding Predmet.UpraveneText, Converter={StaticResource NieJePrazdne}}" />
