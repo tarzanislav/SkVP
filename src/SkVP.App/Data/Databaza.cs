@@ -60,11 +60,14 @@ public static class Databaza
 
     public static bool Existuje => File.Exists(Cesta);
 
-    public static SqliteConnection Otvor()
+    public static SqliteConnection Otvor() => Otvor(Cesta);
+
+    /// <summary>Spojenie s databázou v inom súbore (záchrana dát).</summary>
+    public static SqliteConnection Otvor(string cesta)
     {
         var spojenie = new SqliteConnection(new SqliteConnectionStringBuilder
         {
-            DataSource = Cesta,
+            DataSource = cesta,
             ForeignKeys = true,
             Pooling = false,
         }.ToString());
@@ -73,10 +76,13 @@ public static class Databaza
     }
 
     /// <summary>Vytvorí databázu alebo ju prevedie na aktuálnu verziu schémy.</summary>
-    public static void Inicializuj()
+    public static void Inicializuj() => Inicializuj(Cesta);
+
+    /// <summary>Vytvorí databázu v zadanom súbore alebo ju prevedie na aktuálnu verziu schémy.</summary>
+    public static void Inicializuj(string cesta)
     {
-        Directory.CreateDirectory(Priecinok);
-        using var db = Otvor();
+        Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(cesta))!);
+        using var db = Otvor(cesta);
         Vykonaj(db, "PRAGMA journal_mode = WAL;");
         var verzia = Convert.ToInt32(Skalar(db, "PRAGMA user_version;") ?? 0L, CultureInfo.InvariantCulture);
         if (verzia > VerziaSchemy)

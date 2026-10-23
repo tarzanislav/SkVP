@@ -223,8 +223,9 @@ public sealed partial class ZalohaService
     }
 
     /// <summary>
-    /// Záloha učebných osnov vo Worde (ZIP): aktuálne osnovy „01 Jazyk a komunikácia\01 Slovenský jazyk a literatúra 2026.docx“,
-    /// charakteristiky oblastí a celý archív starších verzií („Archív\… – archív 2025.docx“). Dá sa otvoriť aj bez programu.
+    /// Záloha učebných osnov vo Worde a PDF (ZIP): aktuálne osnovy „01 Jazyk a komunikácia\01 Slovenský jazyk a literatúra 2026.docx“
+    /// a vedľa nich rovnaký dokument v PDF, charakteristiky oblastí a celý archív starších verzií („Archív\… – archív 2025.docx“ + .pdf).
+    /// Dá sa otvoriť aj bez programu.
     /// </summary>
     public static string ZalohujOsnovy(string? ciel = null)
     {
@@ -237,28 +238,40 @@ public sealed partial class ZalohaService
             File.Delete(ciel);
         }
 
+        var udaje = UdajeSkVP.Nacitaj();
+        var titul = TitulnaStrana.Nacitaj();
         using var archiv = ZipFile.Open(ciel, ZipArchiveMode.Create);
         var pouzite = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        void Pridaj(string cesta, byte[] data)
+        void Pridaj(string cesta, byte[] data, Func<byte[]?> pdf)
         {
             var zaklad = cesta[..^5];
-            for (var i = 2; !pouzite.Add(cesta); i++)
+            for (var i = 2; !pouzite.Add(zaklad + ".docx"); i++)
             {
-                cesta = $"{zaklad} ({i}).docx";
+                zaklad = $"{cesta[..^5]} ({i})";
             }
 
-            using var prud = archiv.CreateEntry(cesta, CompressionLevel.Optimal).Open();
-            prud.Write(data);
+            using (var prud = archiv.CreateEntry(zaklad + ".docx", CompressionLevel.Optimal).Open())
+            {
+                prud.Write(data);
+            }
+
+            if (pdf() is { Length: > 0 } dataPdf)
+            {
+                using var prud = archiv.CreateEntry(zaklad + ".pdf", CompressionLevel.Optimal).Open();
+                prud.Write(dataPdf);
+            }
         }
 
         var cisloOblasti = 0;
         foreach (var oblast in sluzba.Oblasti())
         {
             cisloOblasti++;
+            var farba = oblast.Farba ?? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1);
             var priecinok = ImportOsnov.BezpecnyNazov($"{cisloOblasti:00} {oblast.Nazov}");
             if (dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
             {
-                Pridaj($"{priecinok}/00 Charakteristika – {ImportOsnov.BezpecnyNazov(oblast.Nazov)}.docx", charakteristika);
+                Pridaj($"{priecinok}/00 Charakteristika – {ImportOsnov.BezpecnyNazov(oblast.Nazov)}.docx", charakteristika,
+                    () => PdfDokumentu(charakteristika, udaje, titul, oblast.Nazov, farba, null, 0, StavOsnovy.Rozpracovana));
             }
 
             var cislo = 0;
@@ -266,23 +279,63 @@ public sealed partial class ZalohaService
             {
                 cislo++;
                 var c = cislo.ToString("00", CultureInfo.InvariantCulture);
+                var poradie = cislo;
                 if (dokumenty.NacitajData(predmet.Id) is { Length: > 0 } osnova)
                 {
                     var rok = InfoOsnovyService.Nacitaj(predmet.Id).Rok;
-                    Pridaj($"{priecinok}/{ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, rok))}.docx", osnova);
+                    var stav = StavyOsnovy.Urci(predmet.Stav, predmet.DlzkaTextu);
+                    Pridaj($"{priecinok}/{ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, rok))}.docx", osnova,
+                        () => PdfDokumentu(osnova, udaje, titul, oblast.Nazov, farba, predmet, poradie, stav));
                 }
 
                 foreach (var verzia in dokumenty.Verzie(predmet.Id))
                 {
                     if (dokumenty.DataVerzie(verzia.Id) is { Length: > 0 } stara)
                     {
-                        Pridaj($"{priecinok}/Archív/{ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovArchivu(c, predmet.Nazov, verzia.Vytvorene.Year))} {verzia.Vytvorene:yyyy-MM-dd HH-mm}.docx", stara);
+                        Pridaj($"{priecinok}/Archív/{ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovArchivu(c, predmet.Nazov, verzia.Vytvorene.Year))} {verzia.Vytvorene:yyyy-MM-dd HH-mm}.docx", stara,
+                            () => PdfDokumentu(stara, udaje, titul, oblast.Nazov, farba, predmet, poradie, StavOsnovy.Rozpracovana));
                     }
                 }
             }
         }
 
         return ciel;
+    }
+
+    /// <summary>
+    /// Dokument osnovy (alebo charakteristiky oblasti) ako PDF – rovnaký vzhľad ako pri tlači, bez úvodnej strany.
+    /// Dokument, ktorý sa nedá prečítať, sa vynechá (Word v zálohe zostane).
+    /// </summary>
+    public static byte[]? PdfDokumentu(byte[] docx, UdajeSkVP udaje, TitulnaStrana titul, string oblast, string farba, Objekt? predmet, int poradie, StavOsnovy stav)
+    {
+        try
+        {
+            List<Blok> bloky;
+            using (var prud = new MemoryStream(docx, false))
+            {
+                bloky = DocxCitac.Nacitaj(prud).Bloky;
+            }
+
+            var predmety = predmet is null
+                ? new List<KapitolaPredmetu>()
+                : new List<KapitolaPredmetu> { new(predmet.Id, poradie, predmet.Nazov, bloky, stav) };
+            var volby = new VolbyZostavy
+            {
+                TitulnaStrana = false,
+                Obsah = false,
+                OddelovacOblasti = false,
+                OddelovacPredmetu = false,
+                CharakteristikyOblasti = predmet is null,
+                NespracovanePredmety = true,
+            };
+            var celok = new CelyDokument(udaje, volby,
+                new List<KapitolaOblasti> { new(0, oblast, farba, predmet is null ? bloky : new List<Blok>(), predmety) }, DateTime.Now) { Titul = titul };
+            return SuboryZostavy.Vytvor(PdfVystup.Vytvor(celok), predmet?.Nazov ?? oblast, new VolbyPdf()).FirstOrDefault()?.Data;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            return null;
+        }
     }
 
     private int DalsieCislo() => Zalohy().Select(f => Cislo(f.Name)).DefaultIfEmpty(0).Max() + 1;

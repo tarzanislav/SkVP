@@ -55,7 +55,8 @@ public static partial class ImportStruktury
 
         void PridajText()
         {
-            var t = Regex.Replace(WebUtility.HtmlDecode(text.ToString()), @"\s+", " ");
+            // zalomenie <br> (\u0002) zostane novým riadkom, ostatné medzery a zalomenia zdroja sa zlúčia
+            var t = Regex.Replace(WebUtility.HtmlDecode(text.ToString()), @"[^\S\u0002]+", " ").Replace(" \u0002", "\u0002").Replace("\u0002 ", "\u0002").Replace('\u0002', '\n');
             text.Clear();
             if (t.Trim().Length > 0)
             {
@@ -112,7 +113,7 @@ public static partial class ImportStruktury
                     tucne = Math.Max(0, tucne - 1);
                     break;
                 case "br":
-                    text.Append('\n');
+                    text.Append('\u0002');
                     break;
                 case "h1" or "h2" or "h3" or "h4" or "h5" or "h6":
                     UzavriOdsek();

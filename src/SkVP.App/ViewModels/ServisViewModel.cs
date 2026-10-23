@@ -158,7 +158,7 @@ public sealed partial class ServisViewModel : ObservableObject
         }
     }
 
-    private void Zapis(string text) => Protokol = $"{DateTime.Now:HH:mm:ss}  {text}\n" + Protokol;
+    private void Zapis(string text) => Protokol = $"{DateTime.Now:HH:mm:ss}  {text}\n\n" + Protokol;
 
     partial void OnFrekvenciaChanged(string value)
     {
@@ -222,7 +222,7 @@ public sealed partial class ServisViewModel : ObservableObject
         {
             string? cesta = null;
             Dialogy.Cakaj(() => cesta = ZalohaService.ZalohujOsnovy());
-            Zapis($"Záloha učebných osnov vo Worde: {Path.GetFileName(cesta)}");
+            Zapis($"Záloha učebných osnov (Word a PDF): {Path.GetFileName(cesta)}");
             Hlavny.Oznam($"Osnovy sú zálohované: {Path.GetFileName(cesta)}");
             Obnov();
         }
@@ -310,12 +310,103 @@ public sealed partial class ServisViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Zmensit()
+    private void Zmensit() => Spusti(DiagnostikaService.Kompaktuj);
+
+    // ---- správa databázy (ako v EviTA) ----
+
+    public int VerziaSchemy => DiagnostikaService.VerziaSchemy();
+
+    public string PoslednaKontrola => DiagnostikaService.PoslednaKontrola() ?? "Databáza sa zatiaľ nekontrolovala.";
+
+    public IReadOnlyList<TabulkaDatabazy> TabulkyDatabazy => DiagnostikaService.Prehlad();
+
+    [RelayCommand]
+    private void RychlaKontrola() => Spusti(DiagnostikaService.RychlaKontrola);
+
+    [RelayCommand]
+    private void UplnaKontrola() => Spusti(DiagnostikaService.UplnaKontrola);
+
+    [RelayCommand]
+    private void KontrolaVazieb() => Spusti(DiagnostikaService.KontrolaVazieb);
+
+    [RelayCommand]
+    private void KontrolaDat() => Spusti(DiagnostikaService.KontrolaDat);
+
+    [RelayCommand]
+    private void Optimalizovat() => Spusti(DiagnostikaService.Optimalizuj);
+
+    [RelayCommand]
+    private void ObnovitIndexy() => Spusti(DiagnostikaService.ObnovIndexy);
+
+    [RelayCommand]
+    private void OpravitVazby()
     {
-        (long Pred, long Po) velkost = default;
-        Dialogy.Cakaj(() => velkost = ZalohaService.Zmensi());
-        Zapis($"Databáza zmenšená: {ZalohaVM.Velkost(velkost.Pred)} → {ZalohaVM.Velkost(velkost.Po)}");
-        OnPropertyChanged(nameof(Velkost));
+        var kontrola = DiagnostikaService.KontrolaVazieb();
+        if (kontrola.Ok)
+        {
+            Zapis(kontrola.Text);
+            Dialogy.Info("Väzby sú v poriadku – nie je čo opravovať.");
+            return;
+        }
+
+        if (!Dialogy.Potvrd("Opraviť chybné väzby?\n\n" + string.Join("\n", kontrola.Riadky.Where(r => r.StartsWith("UPOZORNENIE", StringComparison.Ordinal))) +
+                            "\n\nZáznamy bez predmetu sa zmažú, predmety bez oblasti sa presunú do oblasti „Nezaradené predmety“. Pred opravou sa urobí záloha."))
+        {
+            return;
+        }
+
+        new ZalohaService().Zalohuj();
+        Spusti(DiagnostikaService.OpravVazby);
+        Hlavny.NacitajOblasti();
+    }
+
+    [RelayCommand]
+    private void Zachranit()
+    {
+        if (!Dialogy.Potvrd("Záchrana dát prenesie všetky čitateľné záznamy do novej databázy a tou nahradí súčasnú. " +
+                            "Pôvodný súbor sa uloží do priečinka záloh.\n\nPri poškodenej databáze je lepšia obnova zo zálohy – záchrana je posledná možnosť. Pokračovať?"))
+        {
+            return;
+        }
+
+        Spusti(DiagnostikaService.Zachran);
+        Hlavny.NacitajOblasti();
+    }
+
+    [RelayCommand]
+    private void UlozitProtokol()
+    {
+        var cesta = Dialogy.UlozitAko("Uložiť protokol", "Text (*.txt)|*.txt", $"SkVP_protokol_{DateTime.Now:yyyy-MM-dd_HH-mm}.txt");
+        if (cesta is not null)
+        {
+            File.WriteAllText(cesta, Protokol);
+        }
+    }
+
+    [RelayCommand]
+    private void VymazatProtokol() => Protokol = "";
+
+    /// <summary>Spustí nástroj, zapíše výsledok do protokolu a obnoví údaje o databáze.</summary>
+    public VysledokKontroly? Spusti(Func<VysledokKontroly> nastroj)
+    {
+        try
+        {
+            VysledokKontroly? vysledok = null;
+            Dialogy.Cakaj(() => vysledok = nastroj());
+            Zapis(vysledok!.Text);
+            Hlavny.Oznam($"{vysledok.Nastroj}: {(vysledok.Ok ? "v poriadku" : "nájdené problémy – pozrite protokol")}.");
+            OnPropertyChanged(nameof(Velkost));
+            OnPropertyChanged(nameof(Pocty));
+            OnPropertyChanged(nameof(TabulkyDatabazy));
+            OnPropertyChanged(nameof(PoslednaKontrola));
+            return vysledok;
+        }
+        catch (Exception ex) when (ex is Microsoft.Data.Sqlite.SqliteException or IOException or UnauthorizedAccessException or SkvpException)
+        {
+            Zapis($"CHYBA: {ex.Message}");
+            Dialogy.Chyba("Nástroj sa nepodarilo vykonať.", ex);
+            return null;
+        }
     }
 
     [RelayCommand]

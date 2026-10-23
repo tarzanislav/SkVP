@@ -62,6 +62,9 @@ internal static class Samotest
             TestVystupov();
             TestImportuAExportu();
             TestServisu();
+            TestSpravyDatabazy();
+            TestImportuStruktury();
+            TestUdajovOrganizacie();
             TestJazykovychOsnov(aplikacia);
             TestUvodnejTabulky();
             TestZaloh();
@@ -881,6 +884,9 @@ internal static class Samotest
             Over(archiv.Entries.Count > 5 && archiv.Entries.Any(e => e.FullName.Contains("/Archív/", StringComparison.Ordinal))
                  && archiv.Entries.Any(e => e.FullName.StartsWith("03 Človek a príroda/", StringComparison.Ordinal)),
                 $"záloha učebných osnov vo Worde ({archiv.Entries.Count} súborov)");
+            var wordy = archiv.Entries.Where(e => e.FullName.EndsWith(".docx", StringComparison.OrdinalIgnoreCase)).ToList();
+            Over(wordy.Count > 0 && wordy.All(w => archiv.GetEntry(w.FullName[..^5] + ".pdf") is { Length: > 1000 }),
+                $"pri každom dokumente Word je v zálohe aj PDF ({wordy.Count})");
         }
 
         Over(ZalohaService.Skontroluj() == "Databáza je v poriadku.", "kontrola databázy");
@@ -904,6 +910,120 @@ internal static class Samotest
         Over(pocet > 3 && Databaza.Citaj(UdajeSkVP.KlucAdresa) == "Skúšobná 1, Vzorovo", $"export a import nastavení ({pocet})");
         Databaza.Zapis(UdajeSkVP.KlucAdresa, "");
         Krok("servis v poriadku");
+    }
+
+    /// <summary>Správa databázy: kontroly, údržba, oprava väzieb a záchrana dát.</summary>
+    private static void TestSpravyDatabazy()
+    {
+        Over(DiagnostikaService.RychlaKontrola().Ok && DiagnostikaService.UplnaKontrola().Ok, "rýchla a úplná kontrola integrity");
+        Over(DiagnostikaService.KontrolaVazieb().Ok, "kontrola väzieb");
+        var dat = DiagnostikaService.KontrolaDat();
+        Over(dat.Riadky.Count > 2, $"kontrola dát ({string.Join(" | ", dat.Riadky.Take(3))})");
+        Over(DiagnostikaService.Optimalizuj().Ok && DiagnostikaService.ObnovIndexy().Ok && DiagnostikaService.Kompaktuj().Ok, "optimalizácia, indexy, kompaktovanie");
+        Over(DiagnostikaService.VerziaSchemy() == Databaza.VerziaSchemy && DiagnostikaService.Prehlad().Count == 7
+             && DiagnostikaService.PoslednaKontrola() is not null, "prehľad databázy");
+
+        // chybná väzba (súvislosť na zmazaný predmet) – nájde sa a opraví
+        var sluzba = new ObjektService();
+        var predmety = sluzba.Oblasti().SelectMany(o => sluzba.Deti(o.Id)).Where(p => p.Typ == TypObjektu.Predmet).Take(1).ToList();
+        if (predmety.Count == 1)
+        {
+            using (var db = Databaza.Otvor())
+            {
+                Databaza.Vykonaj(db, "PRAGMA foreign_keys = OFF;");
+                Databaza.Vykonaj(db, "INSERT INTO vazba(z_id, do_id, typ, vytvorene) VALUES($z, 99999999, 'suvisi', $t)", ("$z", predmety[0].Id), ("$t", Databaza.Teraz()));
+            }
+
+            Over(!DiagnostikaService.KontrolaVazieb().Ok, "kontrola väzieb nájde chybnú súvislosť");
+            DiagnostikaService.OpravVazby();
+            Over(DiagnostikaService.KontrolaVazieb().Ok, "oprava väzieb");
+        }
+
+        var predmetovPred = sluzba.Oblasti().SelectMany(o => sluzba.Deti(o.Id)).Count();
+        var zachrana = DiagnostikaService.Zachran();
+        Over(zachrana.Ok && new ObjektService().Oblasti().SelectMany(o => new ObjektService().Deti(o.Id)).Count() == predmetovPred,
+            $"záchrana dát ({zachrana.Riadky.LastOrDefault()})");
+        Krok("správa databázy v poriadku");
+    }
+
+    /// <summary>Oblasti a predmety z HTML, XML, JSON a diktovaného textu, export a znova import.</summary>
+    private static void TestImportuStruktury()
+    {
+        var html = ImportStruktury.ZHtml("""
+            <html><head><title>x</title><style>p{}</style></head><body>
+            <h1>Učebný plán</h1>
+            <table><tr><th>Vzdelávacia oblasť</th><th>Predmety</th></tr>
+            <tr><td><b>Jazyk a komunikácia</b></td><td>Slovenský jazyk a literatúra<br>Anglický jazyk</td></tr>
+            <tr><td>Človek a príroda</td><td>Fyzika<br>Chémia&nbsp;<br>Biológia</td></tr></table></body></html>
+            """);
+        Over(html.Oblasti.Count == 2 && html.Oblasti[1].Predmety.SequenceEqual(new[] { "Fyzika", "Chémia", "Biológia" }), $"oblasti a predmety z HTML tabuľky ({html.PocetPredmetov})");
+        var zoznam = ImportStruktury.ZHtml("<h2>Matematika a práca s informáciami</h2><ul><li>Matematika</li><li>Informatika</li></ul><h2>Zdravie a pohyb</h2><ul><li>Telesná a športová výchova</li></ul>");
+        Over(zoznam.Oblasti.Count == 2 && zoznam.Oblasti[0].Predmety.Count == 2, "oblasti a predmety z nadpisov a zoznamov HTML");
+        var xml = ImportStruktury.ZXml("""<ucebnyPlan><oblast nazov="Človek a spoločnosť"><predmet>Dejepis</predmet><predmet>Geografia</predmet></oblast><oblast><nazov>Umenie a kultúra</nazov><predmet>Umenie a kultúra</predmet></oblast></ucebnyPlan>""");
+        Over(xml.Oblasti.Count == 2 && xml.Oblasti[1].Nazov == "Umenie a kultúra" && xml.PocetPredmetov == 3, "oblasti a predmety z XML");
+        var json = ImportStruktury.ZJson("""{"oblasti":[{"nazov":"Človek a hodnoty","predmety":["Etická výchova",{"nazov":"Náboženská výchova"}]}]}""");
+        var mapa = ImportStruktury.ZJson("""{"Zdravie a pohyb":["Telesná a športová výchova"]}""");
+        Over(json.Oblasti[0].Predmety.Count == 2 && mapa.Oblasti[0].Nazov == "Zdravie a pohyb", "oblasti a predmety z JSON");
+        var diktat = ImportStruktury.ZDiktovania("Človek a príroda dvojbodka fyzika čiarka chémia čiarka biológia bodka Matematika a práca s informáciami: matematika, informatika.");
+        Over(diktat.Oblasti.Count == 2 && diktat.Oblasti[0].Nazov == "Človek a príroda" && diktat.Oblasti[0].Predmety.SequenceEqual(new[] { "Fyzika", "Chémia", "Biológia" })
+             && diktat.Oblasti[1].Predmety.Count == 2, $"oblasti a predmety z diktovania ({string.Join(" | ", diktat.Oblasti.Select(o => o.Nazov + ": " + string.Join(", ", o.Predmety)))})");
+
+        var plan = StrukturaOsnov.Aktualna();
+        foreach (var (pripona, uloz) in new (string, Action<UcebnyPlan, string>)[] { (".json", ImportStruktury.UlozJson), (".xml", ImportStruktury.UlozXml), (".html", ImportStruktury.UlozHtml) })
+        {
+            var cesta = Path.Combine(Databaza.PriecinokDokumentov, "samotest_oblasti" + pripona);
+            uloz(plan, cesta);
+            var spat = StrukturaOsnov.NacitajZoSuboru(cesta);
+            Over(spat.Oblasti.Count == plan.Oblasti.Count && spat.PocetPredmetov == plan.PocetPredmetov,
+                $"export a import oblastí a predmetov {pripona} ({spat.Oblasti.Count} oblastí, {spat.PocetPredmetov} predmetov)");
+        }
+
+        Krok("import oblastí a predmetov v poriadku");
+    }
+
+    /// <summary>Údaje o organizácii: adresa po častiach, prevod staršej adresy, údaje v zostave.</summary>
+    private static void TestUdajovOrganizacie()
+    {
+        var povodne = UdajeOrganizacie.Nacitaj();
+        var stara = UdajeOrganizacie.Prazdne.ZAdresy("Hlavná 5, 811 01 Bratislava");
+        Over(stara is { Ulica: "Hlavná 5", Psc: "811 01", Mesto: "Bratislava" } && stara.AdresaRiadok == "Hlavná 5, 811 01 Bratislava", "rozdelenie adresy na časti");
+        var org = new UdajeOrganizacie("Spojená škola Vzorová", "Gymnázium", "Vzorová 1", "Vzorovo", "999 99", "Česko", "12345678", "2020999999", "skola@vzor.example", "+421 900 111 222");
+        Over(org.AdresaRiadok == "Vzorová 1, 999 99 Vzorovo, Česko" && org.IcoDicRiadok.Contains("IČO: 12345678", StringComparison.Ordinal)
+             && UdajeOrganizacie.SkontrolujIco("123") is not null && UdajeOrganizacie.SkontrolujEmail("zly") is not null, "údaje o organizácii");
+        org.Uloz();
+        var titul = TitulnaStrana.Nacitaj();
+        titul.IcoDicZobrazit = true;
+        titul.KontaktZobrazit = true;
+        titul.SkolaVPateZobrazit = true;
+        titul.UlozUdajeOSkole();
+        var znova = TitulnaStrana.Nacitaj();
+        Over(znova.ZlozkaNaStrane == "Gymnázium" && znova.RiadkyPodAdresou().Count() == 2 && znova.SkolaVHlavicke == "Spojená škola Vzorová – Gymnázium"
+             && znova.TextVPate == "Spojená škola Vzorová – Gymnázium" && znova.Adresa == org.AdresaRiadok, "údaje o škole na úvodnej strane, v hlavičke a päte");
+        var celok = ZostavaOsnov.Zostav(new VolbyZostavy { Obsah = false });
+        var pdf = Path.Combine(Databaza.PriecinokDokumentov, "samotest_udaje_organizacie.pdf");
+        PdfVystup.UlozPdf(celok, pdf);
+        var docx = Path.Combine(Databaza.PriecinokDokumentov, "samotest_udaje_organizacie.docx");
+        DocxVystup.Uloz(celok, docx);
+        using (var word = WordprocessingDocument.Open(docx, false))
+        {
+            var text = word.MainDocumentPart!.Document.Body!.InnerText;
+            var pata = string.Concat(word.MainDocumentPart.FooterParts.Select(f => f.Footer.InnerText));
+            Over(text.Contains("IČO: 12345678", StringComparison.Ordinal) && text.Contains("Gymnázium", StringComparison.Ordinal)
+                 && pata.Contains("Spojená škola Vzorová", StringComparison.Ordinal), "údaje o organizácii v dokumente Word (úvodná strana a päta)");
+        }
+
+        var vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(celok));
+        UlozObrazokStrany(vykreslenie, 1, Path.Combine(Databaza.PriecinokDokumentov, "organizacia_uvodna_strana.png"));
+        UlozObrazokStrany(vykreslenie, 2, Path.Combine(Databaza.PriecinokDokumentov, "organizacia_hlavicka_pata.png"));
+
+        // späť pôvodné údaje a predvolené zobrazenie
+        titul.IcoDicZobrazit = false;
+        titul.KontaktZobrazit = false;
+        titul.SkolaVPateZobrazit = false;
+        titul.UlozUdajeOSkole();
+        UdajeOrganizacie.Vymaz();
+        povodne.Uloz();
+        Krok("údaje o organizácii v poriadku");
     }
 
     /// <summary>Uloženie zostavy do PDF, PDF/A-2b, PDF/A-3b, PDF/X-4, PNG, JPEG, TIFF a zašifrovaného PDF.</summary>
