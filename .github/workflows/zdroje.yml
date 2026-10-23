@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Stiahnuť a extrahovať text
         run: |
-          sudo apt-get install -y -qq poppler-utils > /dev/null
+          sudo apt-get update -qq > /dev/null && sudo apt-get install -y -qq poppler-utils > /dev/null
           mkdir zdroje && cd zdroje
           curl -sSL -o svp_gymnazia.pdf "https://www.statpedu.sk/files/articles/dokumenty/inovovany-statny-vzdelavaci-program/statny_vzdel_program_pre_gymnazia.pdf"
           curl -sSL -o dodatok_5.pdf "https://www.statpedu.sk/files/sk/svp/inovovany-statny-vzdelavaci-program/inovovany-svp-gymnazia-so-stvorrocnym-patrocnym-vzdelavacim-programom/svp-dodatok-c-5-schvaleny-platnost-od-01_09_2023.pdf"
