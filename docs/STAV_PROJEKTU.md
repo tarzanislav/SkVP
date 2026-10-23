@@ -1,6 +1,6 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.37** (vetva `main` = `vyvoj/etapa1`)
+Aktualizované: 24. 10. 2026 · posledné vydanie **v0.1.85** (vetva `main` = `vyvoj/etapa1`)
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
@@ -231,7 +231,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   `novinky.json` (polia `posledny`, `nastup`); export .ics z Noviniek ich obsahuje. Nástroje `nastroje/zdroje/novinky.py`
   (generovanie JSON) a `over.py` (kontrola textov `overit` v stiahnutých stránkach).
 
-## Novinky – strany a história blokov (23. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Novinky – strany a história blokov (vydané vo v0.1.85)
 - Blok témy po stranách (`NovinkyService.NaStranu` = 6, `BlokNoviniekVM.Rozdel`): hore najprv dôležité, potom odporúčané
   (najviac polovica strany – `MaxVybranychNaStranu` = 3; viac len keď už nie sú bežné informácie), zvyšok najnovšie
   informácie (podľa `pridane`). Novšia dôležitá/odporúčaná posunie staršiu na ďalšiu stranu, kde je opäť hore; uplynulé
@@ -244,7 +244,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   `VyberatelnyText` – TextBox iba na čítanie s `Decorator` namiesto posúvača, koliesko myši posúva stránku); tlačidlo
   Kopírovať skopíruje celú informáciu so zdrojmi.
 
-## Úvodné a záverečné časti učebných osnov (24. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Úvodné a záverečné časti učebných osnov (vydané vo v0.1.85)
 - Nové typy objektov (`Models/TypObjektu`): `uvod`, `zaver` (jediná skupina každého druhu, vytvorí sa automaticky –
   `CastiOsnov.Skupina`) a `cast` (dokument v skupine, ako osnova predmetu). `Services/CastiOsnov.cs`: názvy, pevné
   charakteristiky, pastelové farby, zapnutie (`osnovy.uvod.aktivne`, `osnovy.zaver.aktivne`, predvolene vypnuté),
@@ -259,6 +259,9 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   archív školského roka (typ `cast`, poradie 0/99), záloha osnov (aj vypnuté), servis (kontrola dát, oprava väzieb –
   časti bez skupiny do úvodných), export/import nastavení (skupina „úvodné a záverečné časti…“; vyrovnávacie pamäte
   Noviniek a počasia sa neprenášajú).
+- Kontrola pred vydaním v0.1.85: skupiny úvodných a záverečných častí vytvára `Migracie.Spusti` pri štarte (pred
+  zálohou na pozadí – bez duplicít), kontrola dát v Servise nič nevytvára, `StrukturaOsnov.ZnameOblasti` pozná názvy
+  skupín (import z PDF), odstránený nepoužívaný kód (filter krajov a uplynulých v Novinkách, kľúč citátov).
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
