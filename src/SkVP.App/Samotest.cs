@@ -1610,10 +1610,12 @@ internal static class Samotest
         Snimka(okno, "22f_archiv");
         archiv.Hladat = "fyzika";
         Pumpuj();
-        Over(archiv.Oblasti.Count == 1 && archiv.Oblasti[0].Predmety.Count == 1 && archiv.Oblasti[0].Predmety[0].Zmenena,
-            "hľadanie v archíve a značka zmenenej osnovy");
+        var najdene = archiv.Oblasti.SelectMany(o => o.Predmety).ToList();
+        Over(najdene.Count > 0 && najdene.All(p => ImportOsnov.Kluc(p.Nazov).Contains("fyzika", StringComparison.Ordinal))
+             && najdene.Count(p => p.Zmenena) == 1 && najdene.Single(p => p.Zmenena).Polozka.ObjektId == fyz.Id,
+            $"hľadanie v archíve a značka zmenenej osnovy ({najdene.Count} nájdených)");
         Snimka(okno, "22g_archiv_hladanie");
-        var predmetVArchive = archiv.Oblasti[0].Predmety[0];
+        var predmetVArchive = najdene.Single(p => p.Zmenena);
         var oknoOsnovy = archiv.OknoOsnovy(predmetVArchive.Polozka, predmetVArchive.Oblast.Farba)!;
         oknoOsnovy.Show();
         Pumpuj();
