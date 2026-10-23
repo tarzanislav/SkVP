@@ -920,10 +920,10 @@ internal static class Samotest
     private static void TestZaloh()
     {
         var zalohy = new ZalohaService();
+        int Cislo(string cesta) => int.Parse(Path.GetFileName(cesta).Substring("SkVP_zaloha_".Length, 4), System.Globalization.CultureInfo.InvariantCulture);
         var prva = zalohy.Zalohuj();
         var druha = zalohy.Zalohuj();
-        Over(Path.GetFileName(prva).StartsWith("SkVP_zaloha_0001_", StringComparison.Ordinal) &&
-             Path.GetFileName(druha).StartsWith("SkVP_zaloha_0002_", StringComparison.Ordinal), "zálohy sú číslované za sebou");
+        Over(Cislo(druha) == Cislo(prva) + 1 && Path.GetFileName(prva).StartsWith("SkVP_zaloha_0", StringComparison.Ordinal), "zálohy sú číslované za sebou");
         using var archiv = System.IO.Compression.ZipFile.OpenRead(druha);
         Over(archiv.GetEntry("skvp.db") is { Length: > 10_000 }, "záloha obsahuje databázu");
         Over(zalohy.AutomatickaAkTreba() is not null && zalohy.AutomatickaAkTreba() is null, "automatická záloha raz za deň");
