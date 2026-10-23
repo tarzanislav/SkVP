@@ -1367,8 +1367,40 @@ internal static class Samotest
         Over(model.Bloky.Count == 1 && model.Bloky[0].Kategoria.Id == "maturita", "filter témy");
         model.VybranaTema = null;
         model.Hladat = "ematurita";
-        Over(model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Polozka.Id == "ms-ematurita"), "hľadanie v Novinkách (bez diakritiky)");
+        Over(model.Bloky.SelectMany(b => b.Vsetky).Any(p => p.Polozka.Id == "ms-ematurita"), "hľadanie v Novinkách (bez diakritiky)");
         model.Hladat = "";
+
+        // blok: odporúčania hore, 6 najnovších informácií, staršie v histórii bloku (ďalšie strany)
+        var maturita = model.Bloky.Single(b => b.Kategoria.Id == "maturita");
+        Over(maturita.Polozky[0].JeOdporucanie && maturita.Polozky.Count(p => !p.JeOdporucanie) == NovinkyService.NaStranu
+             && maturita.PocetStran >= 2 && maturita.MaDalsiu && !maturita.JeHistoria,
+            $"Novinky: blok Maturita – odporúčanie hore, {NovinkyService.NaStranu} informácií na strane, {maturita.PocetStran} strany");
+        maturita.DalsiaCommand.Execute(null);
+        Over(maturita.Strana == 2 && maturita.JeHistoria && maturita.Polozky.Count is > 0 and <= NovinkyService.NaStranu && !maturita.Polozky.Any(p => p.JeOdporucanie),
+            "Novinky: odkaz na ďalšiu stranu bloku (história)");
+        maturita.PredchadzajucaCommand.Execute(null);
+        Over(maturita.Strana == 1, "Novinky: návrat na novšie informácie");
+        var kopia = maturita.Polozky[1].TextNaKopirovanie;
+        Over(kopia.Contains(maturita.Polozky[1].Nazov) && kopia.Contains("Zdroje: ") && kopia.Contains("https://"), "Novinky: kopírovanie celej informácie");
+        model.KopirovatCommand.Execute(maturita.Polozky[1]);
+
+        // informácia, ktorá v nových údajoch chýba, sa nezmaže – zostane v histórii bloku
+        var historia = NovinkyService.SHistoriou(data);
+        var stara = new PolozkaNoviniek
+        {
+            Id = "historia-test", Kategoria = "maturita", Druh = NovinkyService.DruhNovinka, Nazov = "Staršia novinka o maturite", Text = "Test histórie.",
+            Pridane = "2025-09-01", Overene = "2025-09-01", Zdroje = new() { new ZdrojNovinky { Nazov = "NIVaM", Url = "https://nivam.sk/" } },
+        };
+        Databaza.Zapis(NovinkyService.KlucHistoria, System.Text.Json.JsonSerializer.Serialize(historia.Append(stara).ToList()));
+        var sHistoriou = new NovinkyViewModel(new MainViewModel()) { Dnes = den };
+        sHistoriou.Obnov();
+        var blokSHistoriou = sHistoriou.Bloky.Single(b => b.Kategoria.Id == "maturita");
+        Over(blokSHistoriou.Vsetky.Last().Polozka.Id == "historia-test" && blokSHistoriou.Vsetky.Last().Archivna
+             && !blokSHistoriou.Polozky.Any(p => p.Polozka.Id == "historia-test")
+             && NovinkyService.SHistoriou(data, ulozit: false).Any(p => p.Id == "historia-test" && p.Archivna),
+            "Novinky: informácia chýbajúca v nových údajoch zostáva v histórii bloku (nemaže sa)");
+        Over(NovinkyService.SHistoriou(data, ulozit: false).Where(p => !p.Archivna).All(p => p.Pridane is not null), "Novinky: dátum pridania informácií");
+        Databaza.Zapis(NovinkyService.KlucHistoria, null);
 
         // skutočné overenie na oficiálnych stránkach (informatívne – bez siete sa preskočí)
         try

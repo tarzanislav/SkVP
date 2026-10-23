@@ -200,6 +200,31 @@
                 </Setter>
             </Style>
 
+            <!-- text, ktorý sa dá označiť a skopírovať (Ctrl+C) – vyzerá ako bežný text, koliesko myši posúva stránku -->
+            <Style x:Key="VyberatelnyText" TargetType="TextBox">
+                <Setter Property="IsReadOnly" Value="True" />
+                <Setter Property="IsReadOnlyCaretVisible" Value="False" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="FontFamily" Value="{StaticResource PismoTextu}" />
+                <Setter Property="SelectionBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                <Setter Property="SelectionOpacity" Value="0.35" />
+                <Setter Property="Cursor" Value="IBeam" />
+                <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                                <Decorator x:Name="PART_ContentHost" />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style x:Key="Odznak" TargetType="Border">
                 <Setter Property="CornerRadius" Value="10" />
                 <Setter Property="Padding" Value="9,2,9,3" />

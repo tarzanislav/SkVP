@@ -86,6 +86,24 @@ public sealed class PolozkaNovinkyVM
     public bool JeBlizko { get; }
     public bool Prebieha { get; }
 
+    /// <summary>Informácia z predchádzajúcich údajov (v aktuálnych už nie je).</summary>
+    public bool Archivna => Polozka.Archivna;
+
+    /// <summary>Patrí do histórie bloku – uplynulý termín alebo informácia z predchádzajúcich údajov.</summary>
+    public bool JeVHistorii => Archivna || JeMinule;
+
+    public bool JeOdporucanie => Polozka.Druh == NovinkyService.DruhOdporucanie;
+
+    /// <summary>Text na skopírovanie (nadpis, termín, text, poznámka, zdroje).</summary>
+    public string TextNaKopirovanie => string.Join(Environment.NewLine, new[]
+    {
+        Nazov,
+        TerminText.Length > 0 ? TerminText : null,
+        Text,
+        MaPoznamku ? "Poznámka: " + Poznamka : null,
+        "Zdroje: " + string.Join("; ", Zdroje.Select(z => $"{z.Nazov} – {z.Url}")),
+    }.Where(t => t is not null));
+
     public string DruhText => Polozka.Druh switch
     {
         NovinkyService.DruhTermin => "Termín",
@@ -140,23 +158,71 @@ public sealed class PolozkaNovinkyVM
     public string Hladany => ImportOsnov.BezDiakritiky($"{Nazov} {Text} {Poznamka} {KategoriaNazov} {Skupina} {TerminText}").ToLowerInvariant();
 }
 
-/// <summary>Blok jednej témy (farebná karta so zoznamom informácií).</summary>
-public sealed class BlokNoviniekVM
+/// <summary>
+/// Blok jednej témy: odporúčania hore, pod nimi najnovších <see cref="NovinkyService.NaStranu"/> informácií; staršie
+/// a uplynulé informácie sa nemažú – sú v histórii bloku na ďalších stranách.
+/// </summary>
+public sealed partial class BlokNoviniekVM : ObservableObject
 {
-    public BlokNoviniekVM(KategoriaNoviniek kategoria, List<PolozkaNovinkyVM> polozky)
+    private readonly List<PolozkaNovinkyVM> _odporucania;
+    private readonly List<PolozkaNovinkyVM> _zoznam;
+
+    public BlokNoviniekVM(KategoriaNoviniek kategoria, List<PolozkaNovinkyVM> odporucania, List<PolozkaNovinkyVM> zoznam)
     {
         Kategoria = kategoria;
-        Polozky = polozky;
+        _odporucania = odporucania;
+        _zoznam = zoznam;
     }
 
     public KategoriaNoviniek Kategoria { get; }
-    public List<PolozkaNovinkyVM> Polozky { get; }
     public string Nazov => Kategoria.Nazov;
     public string Popis => Kategoria.Popis;
     public string Farba => Kategoria.Farba;
     public string Ikona => Kategoria.Ikona;
-    public int Pocet => Polozky.Count;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Polozky), nameof(MaDalsiu), nameof(MaPredchadzajucu), nameof(JeHistoria), nameof(StranaText), nameof(DalsiaText))]
+    private int _strana = 1;
+
+    /// <summary>Informácie na aktuálnej strane (na prvej aj odporúčania).</summary>
+    public List<PolozkaNovinkyVM> Polozky => Strana == 1
+        ? _odporucania.Concat(_zoznam.Take(NovinkyService.NaStranu)).ToList()
+        : _zoznam.Skip((Strana - 1) * NovinkyService.NaStranu).Take(NovinkyService.NaStranu).ToList();
+
+    /// <summary>Všetky informácie bloku (všetky strany).</summary>
+    public IEnumerable<PolozkaNovinkyVM> Vsetky => _odporucania.Concat(_zoznam);
+
+    public int PocetStran => Math.Max(1, (int)Math.Ceiling(_zoznam.Count / (double)NovinkyService.NaStranu));
+    public bool MaDalsiu => Strana < PocetStran;
+    public bool MaPredchadzajucu => Strana > 1;
+    public bool JeHistoria => Strana > 1;
+    public bool MaStrany => PocetStran > 1;
+    public int Pocet => _odporucania.Count + _zoznam.Count;
+    public int PocetVHistorii => Math.Max(0, _zoznam.Count - NovinkyService.NaStranu);
     public string PocetText => Pocet switch { 1 => "1 informácia", <= 4 => $"{Pocet} informácie", _ => $"{Pocet} informácií" };
+    public string StranaText => $"strana {Strana} z {PocetStran}";
+
+    public string DalsiaText => Strana == 1
+        ? $"Staršie informácie a história bloku ({PocetVHistorii})"
+        : "Ďalšia strana histórie";
+
+    [RelayCommand]
+    private void Dalsia()
+    {
+        if (MaDalsiu)
+        {
+            Strana++;
+        }
+    }
+
+    [RelayCommand]
+    private void Predchadzajuca()
+    {
+        if (MaPredchadzajucu)
+        {
+            Strana--;
+        }
+    }
 }
 
 /// <summary>Mesiac v termínovníku.</summary>
@@ -218,6 +284,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
     public const string VsetkyKraje = "Všetky kraje";
 
     private DataNoviniek _data;
+    private List<PolozkaNoviniek> _polozky;
     private OverenieNoviniek? _overenie;
     private SpravyZoZdrojov? _spravy;
     private List<PolozkaNovinkyVM> _vsetky = new();
@@ -227,6 +294,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
     {
         Hlavny = hlavny;
         _data = NovinkyService.Nacitaj();
+        _polozky = NovinkyService.SHistoriou(_data);
         _overenie = NovinkyService.UlozeneOverenie();
         _spravy = NovinkyService.UlozeneSpravy();
         Kraje = new[] { VsetkyKraje }.Concat(_data.Polozky.Select(p => p.Skupina).OfType<string>().Distinct().Order()).ToList();
@@ -317,6 +385,30 @@ public sealed partial class NovinkyViewModel : ObservableObject
         Obnov();
     }
 
+    /// <summary>Skopíruje celú informáciu (nadpis, termín, text, zdroje) do schránky.</summary>
+    [RelayCommand]
+    private void Kopirovat(PolozkaNovinkyVM? polozka)
+    {
+        if (polozka is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (!Dialogy.TichyRezim)
+            {
+                System.Windows.Clipboard.SetText(polozka.TextNaKopirovanie);
+            }
+
+            Hlavny.Oznam("Informácia je skopírovaná – vložte ju klávesmi Ctrl+V.");
+        }
+        catch (Exception)
+        {
+            Hlavny.Oznam("Schránka je práve obsadená – skúste to znova.");
+        }
+    }
+
     [RelayCommand]
     private void VybratTemu(string? id) => VybranaTema = VybranaTema == id ? null : id;
 
@@ -349,6 +441,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
                 if (await NovinkyService.AktualizujUdajeAsync())
                 {
                     _data = NovinkyService.Nacitaj();
+                    _polozky = NovinkyService.SHistoriou(_data);
                     sprava.Add($"Overené údaje sú aktualizované (stav k {NovinkyService.Datum(_data.DatumAktualizacie!.Value)}).");
                 }
                 else
@@ -469,7 +562,8 @@ public sealed partial class NovinkyViewModel : ObservableObject
     {
         var hladane = ImportOsnov.BezDiakritiky(Hladat.Trim()).ToLowerInvariant();
         var predvolenaKategoria = new KategoriaNoviniek { Id = "", Nazov = "Ostatné" };
-        _vsetky = _data.Polozky
+        _vsetky = _polozky
+            .Where(p => _data.Kategoria(p.Kategoria) is not null)
             .Select(p => new PolozkaNovinkyVM(p, _data.Kategoria(p.Kategoria) ?? predvolenaKategoria,
                 _overenie?.Polozky.TryGetValue(p.Id, out var o) == true ? o : null, Dnes))
             .ToList();
@@ -480,30 +574,38 @@ public sealed partial class NovinkyViewModel : ObservableObject
         // prázdniny a organizácia školského roka sú na dashboarde (tabuľka prázdnin)
         bool VNovinkach(PolozkaNovinkyVM p) => p.Polozka.Kategoria != NovinkyService.TemaSkolskyRok;
         var kategorie = _data.Kategorie.Where(k => k.Id != NovinkyService.TemaSkolskyRok).ToList();
-        var viditelne = _vsetky.Where(p => VNovinkach(p) && PodlaKraja(p) && PodlaHladania(p) && (AjUplynule || !p.JeMinule)).ToList();
+        // história sa nemaže – staršie a uplynulé informácie sú na ďalších stranách bloku
+        var viditelne = _vsetky.Where(p => VNovinkach(p) && PodlaKraja(p) && PodlaHladania(p)).ToList();
 
-        Temy = new[] { new FilterTemyVM(null, "Všetky témy", "#9AA5B1", "\uE80F", viditelne.Count) { Vybrany = VybranaTema is null } }
-            .Concat(kategorie.Select(k => new FilterTemyVM(k.Id, k.Nazov, k.Farba, k.Ikona, viditelne.Count(p => p.Polozka.Kategoria == k.Id))
+        Temy = new[] { new FilterTemyVM(null, "Všetky témy", "#9AA5B1", "\uE80F", viditelne.Count(p => !p.JeVHistorii)) { Vybrany = VybranaTema is null } }
+            .Concat(kategorie.Select(k => new FilterTemyVM(k.Id, k.Nazov, k.Farba, k.Ikona, viditelne.Count(p => p.Polozka.Kategoria == k.Id && !p.JeVHistorii))
                 { Vybrany = VybranaTema == k.Id }))
             .ToList();
 
         var podlaTemy = viditelne.Where(p => VybranaTema is null || p.Polozka.Kategoria == VybranaTema).ToList();
 
-        // v bloku: najprv dôležité novinky, potom termíny podľa dátumu, odporúčania na koniec
+        // v bloku: odporúčania hore, potom najnovšie informácie (dôležité novinky, novinky, termíny podľa dátumu), história na koniec
+        static int Poradie(PolozkaNovinkyVM p) => p.Polozka.Druh == NovinkyService.DruhNovinka ? (p.Dolezite ? 0 : 1) : 2;
         Bloky = kategorie
-            .Select(k => new BlokNoviniekVM(k, podlaTemy.Where(p => p.Polozka.Kategoria == k.Id)
-                .OrderBy(p => p.Polozka.Druh == NovinkyService.DruhOdporucanie ? 2 : p.Polozka.Druh == NovinkyService.DruhNovinka ? 0 : 1)
-                .ThenByDescending(p => p.Polozka.Druh == NovinkyService.DruhNovinka && p.Dolezite)
-                .ThenBy(p => p.Polozka.Zaciatok ?? DateOnly.MaxValue)
-                .ToList()))
+            .Select(k =>
+            {
+                var vBloku = podlaTemy.Where(p => p.Polozka.Kategoria == k.Id).ToList();
+                var odporucania = vBloku.Where(p => p.JeOdporucanie && !p.JeVHistorii).ToList();
+                var aktualne = vBloku.Where(p => !p.JeOdporucanie && !p.JeVHistorii)
+                    .OrderByDescending(p => p.Polozka.DatumPridania).ThenBy(Poradie).ThenBy(p => p.Polozka.Zaciatok ?? DateOnly.MaxValue);
+                var historia = vBloku.Where(p => p.JeVHistorii)
+                    .OrderByDescending(p => p.Polozka.Koniec ?? p.Polozka.DatumPridania).ThenByDescending(p => p.Polozka.DatumPridania);
+                return new BlokNoviniekVM(k, odporucania, aktualne.Concat(historia).ToList());
+            })
             .Where(b => b.Pocet > 0)
             .ToList();
 
-        Najblizsie = _vsetky.Where(p => VNovinkach(p) && p.Polozka.Druh == NovinkyService.DruhTermin && !p.JeMinule && p.Dolezite)
+        Najblizsie = _vsetky.Where(p => VNovinkach(p) && p.Polozka.Druh == NovinkyService.DruhTermin && !p.JeVHistorii && p.Dolezite)
             .OrderBy(p => p.Polozka.Zaciatok).Take(6).ToList();
 
         var sk = CultureInfo.GetCultureInfo("sk-SK");
-        Terminovnik = podlaTemy.Where(p => p.Polozka.Druh == NovinkyService.DruhTermin && p.Polozka.Zaciatok is not null)
+        Terminovnik = podlaTemy.Where(p => p.Polozka.Druh == NovinkyService.DruhTermin && p.Polozka.Zaciatok is not null && !p.Archivna
+                                           && (AjUplynule || !p.JeMinule))
             .OrderBy(p => p.Polozka.Zaciatok).ThenBy(p => p.Polozka.Koniec)
             .GroupBy(p => (p.Polozka.Zaciatok!.Value.Year, p.Polozka.Zaciatok!.Value.Month))
             .Select(g => new MesiacTerminovnikaVM(

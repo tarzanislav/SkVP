@@ -60,7 +60,12 @@
                     Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=0C}"
                     BorderBrush="{Binding Farba, Converter={StaticResource FarbaNaStetec}}">
                 <StackPanel>
-                    <WrapPanel Margin="0,0,0,6">
+                    <DockPanel Margin="0,0,0,6">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE8C8;" FontSize="13" Width="30" Height="28"
+                            VerticalAlignment="Top" ToolTip="Kopírovať celú informáciu (nadpis, termín, text, zdroje)"
+                            Command="{Binding DataContext.KopirovatCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}" />
+                    <WrapPanel>
                         <Border CornerRadius="10" Padding="8,2,9,3" Margin="0,0,8,4"
                                 Background="{Binding DruhFarba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}">
                             <StackPanel Orientation="Horizontal">
@@ -87,9 +92,15 @@
                         <TextBlock Text="★ dôležité" FontSize="12.5" FontWeight="SemiBold" Margin="0,2,0,4"
                                    Foreground="{Binding Source='#E0A458', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                    Visibility="{Binding Dolezite, Converter={StaticResource BoolNaViditelnost}}" />
+                        <Border CornerRadius="10" Padding="9,2,9,3" Margin="0,0,8,4" Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                Visibility="{Binding Archivna, Converter={StaticResource BoolNaViditelnost}}"
+                                ToolTip="Informácia z predchádzajúcich údajov – v aktuálnych už nie je, zostáva v histórii bloku">
+                            <TextBlock Text="z histórie" FontSize="12.5" />
+                        </Border>
                     </WrapPanel>
-                    <TextBlock Text="{Binding Nazov}" FontSize="16.5" FontWeight="SemiBold" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" Margin="0,5,0,0" LineHeight="22" FontSize="14.5" />
+                    </DockPanel>
+                    <TextBox Style="{StaticResource VyberatelnyText}" Text="{Binding Nazov, Mode=OneWay}" FontSize="18" FontWeight="Bold" />
+                    <TextBox Style="{StaticResource VyberatelnyText}" Text="{Binding Text, Mode=OneWay}" Margin="0,6,0,0" FontSize="14.5" />
                     <Border CornerRadius="6" Padding="10,7" Margin="0,8,0,0" BorderThickness="1"
                             Background="{Binding Source='#F2C38B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}"
                             BorderBrush="{Binding Source='#F2C38B', Converter={StaticResource FarbaNaStetec}}"
@@ -97,7 +108,7 @@
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Style="{StaticResource Ikona}" Text="&#xE7BA;" FontSize="13" Margin="0,1,9,0"
                                        VerticalAlignment="Top" Foreground="{Binding Source='#E0A458', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
-                            <TextBlock Text="{Binding Poznamka}" TextWrapping="Wrap" FontSize="13.5" />
+                            <TextBox Style="{StaticResource VyberatelnyText}" Text="{Binding Poznamka, Mode=OneWay}" FontSize="13.5" />
                         </DockPanel>
                     </Border>
                     <WrapPanel Margin="0,8,0,0">
@@ -120,7 +131,11 @@
                     <Setter TargetName="OdpocetText" Property="FontWeight" Value="SemiBold" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding JeMinule}" Value="True">
-                    <Setter TargetName="Karta" Property="Opacity" Value="0.6" />
+                    <Setter TargetName="Karta" Property="Opacity" Value="0.7" />
+                </DataTrigger>
+                <!-- odporúčania sú hore v bloku, jemne podfarbené farbou bloku -->
+                <DataTrigger Binding="{Binding JeOdporucanie}" Value="True">
+                    <Setter TargetName="Karta" Property="Background" Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}" />
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
@@ -154,7 +169,7 @@
                     </Button>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Novinky" Style="{StaticResource Nadpis}" />
+                    <TextBlock Text="Novinky" Style="{StaticResource Nadpis}" FontWeight="Bold" />
                     <TextBlock Text="{Binding Podnadpis}" Style="{StaticResource Popis}" FontSize="14" Margin="0,4,0,0" />
                 </StackPanel>
             </DockPanel>
@@ -168,7 +183,7 @@
             </Border>
 
             <!-- najbližšie dôležité termíny -->
-            <TextBlock Text="Najbližšie dôležité termíny" Style="{StaticResource Podnadpis}" Margin="0,24,0,10" />
+            <TextBlock Text="Najbližšie dôležité termíny" Style="{StaticResource Podnadpis}" FontSize="21" FontWeight="Bold" Margin="0,24,0,10" />
             <ItemsControl ItemsSource="{Binding Najblizsie}" Focusable="False">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -191,7 +206,7 @@
                                 <StackPanel>
                                     <TextBlock Text="{Binding KategoriaNazov}" FontSize="12.5" FontWeight="SemiBold"
                                                Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
-                                    <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" FontSize="14.5" TextWrapping="Wrap" Margin="0,2,0,0" MaxHeight="42"
+                                    <TextBlock Text="{Binding Nazov}" FontWeight="Bold" FontSize="15.5" TextWrapping="Wrap" Margin="0,2,0,0" MaxHeight="44"
                                                TextTrimming="CharacterEllipsis" />
                                     <TextBlock Style="{StaticResource Popis}" FontSize="13" Margin="0,3,0,0">
                                         <Run Text="{Binding TerminText, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding Odpocet, Mode=OneWay}" FontWeight="SemiBold" />
@@ -222,12 +237,13 @@
                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE721;" Margin="0,0,8,0" />
                 <TextBox Width="300" Text="{Binding Hladat, UpdateSourceTrigger=PropertyChanged, Delay=250}" Margin="0,0,20,0"
                          ToolTip="Hľadať v nadpisoch a textoch (napr. matematika, eMaturita, jarné)" />
-                <CheckBox Content="Zobraziť aj uplynulé" IsChecked="{Binding AjUplynule}" VerticalAlignment="Center" />
+                <TextBlock Text="Staršie a uplynulé informácie sú v histórii každého bloku (odkaz na konci bloku)." VerticalAlignment="Center"
+                           Style="{StaticResource Popis}" FontSize="13.5" />
             </WrapPanel>
 
             <TabControl Margin="0,18,0,0" Background="Transparent" BorderThickness="0">
                 <!-- podľa tém -->
-                <TabItem Header="Prehľad podľa tém">
+                <TabItem FontSize="15" Header="Prehľad podľa tém">
                     <StackPanel Margin="0,14,0,0">
                         <TextBlock Text="Nič sa nenašlo. Zmeňte hľadaný text alebo filtre." Style="{StaticResource Popis}" FontSize="13"
                                    Visibility="{Binding NicSaNenaslo, Converter={StaticResource BoolNaViditelnost}}" />
@@ -246,15 +262,38 @@
                                                     <TextBlock DockPanel.Dock="Left" Style="{StaticResource Ikona}" Text="{Binding Ikona}" FontSize="22" Margin="0,0,14,0"
                                                                Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                     <StackPanel>
-                                                        <TextBlock Text="{Binding Nazov}" FontFamily="{StaticResource PismoNadpisov}" FontSize="19" FontWeight="SemiBold"
+                                                        <TextBlock Text="{Binding Nazov}" FontFamily="{StaticResource PismoNadpisov}" FontSize="21" FontWeight="Bold"
                                                                    Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                         <TextBlock Text="{Binding Popis}" FontSize="13.5" TextWrapping="Wrap"
                                                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                                                     </StackPanel>
                                                 </DockPanel>
                                             </Border>
+                                            <Border CornerRadius="6" Padding="12,6" Margin="16,12,16,0" Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                                    Visibility="{Binding JeHistoria, Converter={StaticResource BoolNaViditelnost}}">
+                                                <TextBlock FontSize="14" TextWrapping="Wrap">
+                                                    <Run Text="História bloku" FontWeight="SemiBold" /><Run Text=" – staršie a uplynulé informácie, " /><Run Text="{Binding StranaText, Mode=OneWay}" />
+                                                </TextBlock>
+                                            </Border>
                                             <ItemsControl ItemsSource="{Binding Polozky}" ItemTemplate="{StaticResource Informacia}"
-                                                          Margin="16,14,16,6" Focusable="False" />
+                                                          Margin="16,14,16,4" Focusable="False" />
+                                            <!-- odkaz na ďalšie strany bloku (história) -->
+                                            <DockPanel Margin="16,0,16,14" Visibility="{Binding MaStrany, Converter={StaticResource BoolNaViditelnost}}">
+                                                <Button DockPanel.Dock="Left" Style="{StaticResource RiadokTlacidlo}" Padding="8,5" Command="{Binding PredchadzajucaCommand}"
+                                                        Visibility="{Binding MaPredchadzajucu, Converter={StaticResource BoolNaViditelnost}}">
+                                                    <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}">
+                                                        <Run Text="←" /> <Run Text="Novšie informácie" />
+                                                    </TextBlock>
+                                                </Button>
+                                                <Button DockPanel.Dock="Right" Style="{StaticResource RiadokTlacidlo}" Padding="8,5" Command="{Binding DalsiaCommand}"
+                                                        Visibility="{Binding MaDalsiu, Converter={StaticResource BoolNaViditelnost}}">
+                                                    <TextBlock FontSize="14" FontWeight="SemiBold" Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}">
+                                                        <Run Text="{Binding DalsiaText, Mode=OneWay}" /> <Run Text="→" />
+                                                    </TextBlock>
+                                                </Button>
+                                                <TextBlock Text="{Binding StranaText}" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            </DockPanel>
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -264,7 +303,7 @@
                 </TabItem>
 
                 <!-- termínovník -->
-                <TabItem Header="Termínovník">
+                <TabItem FontSize="15" Header="Termínovník">
                     <StackPanel Margin="0,14,0,0">
                         <TextBlock Style="{StaticResource Popis}" FontSize="14" Margin="0,0,0,12"
                                    Text="Všetky overené termíny školského roka v časovom poradí – farba patrí téme. Tlačidlom „Do kalendára…“ ich uložíte do Outlooku alebo Google Kalendára." />
@@ -291,7 +330,7 @@
                                                                        VerticalAlignment="Center" Margin="12,0,4,0" />
                                                             <StackPanel VerticalAlignment="Center">
                                                                 <TextBlock TextWrapping="Wrap" FontSize="14.5">
-                                                                    <Run Text="{Binding Nazov, Mode=OneWay}" FontWeight="SemiBold" />
+                                                                    <Run Text="{Binding Nazov, Mode=OneWay}" FontWeight="Bold" FontSize="15.5" />
                                                                 </TextBlock>
                                                                 <TextBlock FontSize="13">
                                                                     <Run Text="{Binding KategoriaNazov, Mode=OneWay}" FontWeight="SemiBold"
@@ -322,7 +361,7 @@
                 </TabItem>
 
                 <!-- aktuálne správy z RSS -->
-                <TabItem Header="Aktuálne správy zo zdrojov">
+                <TabItem FontSize="15" Header="Aktuálne správy zo zdrojov">
                     <StackPanel Margin="0,14,0,0">
                         <TextBlock Text="{Binding SpravyStav}" Style="{StaticResource Popis}" FontSize="14" Margin="0,0,0,4" />
                         <TextBlock Style="{StaticResource Popis}" FontSize="12.5" Margin="0,0,0,12"
@@ -346,10 +385,10 @@
                                             <Button Style="{StaticResource RiadokTlacidlo}" Padding="0,2" HorizontalAlignment="Left" ToolTip="{Binding Odkaz}"
                                                     Command="{Binding DataContext.OtvoritOdkazCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding Odkaz}">
-                                                <TextBlock Text="{Binding Titulok}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap"
+                                                <TextBlock Text="{Binding Titulok}" FontWeight="Bold" FontSize="16.5" TextWrapping="Wrap"
                                                            Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
                                             </Button>
-                                            <TextBlock Text="{Binding Popis}" TextWrapping="Wrap" FontSize="13.5" Margin="0,2,0,0"
+                                            <TextBox Style="{StaticResource VyberatelnyText}" Text="{Binding Popis, Mode=OneWay}" FontSize="14" Margin="0,3,0,0"
                                                        Visibility="{Binding MaPopis, Converter={StaticResource BoolNaViditelnost}}" />
                                             <Border CornerRadius="9" Padding="8,2" Margin="0,6,0,0" HorizontalAlignment="Left" Background="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}"
                                                     Visibility="{Binding JePotvrdena, Converter={StaticResource BoolNaViditelnost}}">
@@ -369,7 +408,7 @@
                 </TabItem>
 
                 <!-- odporúčané stránky -->
-                <TabItem Header="Odporúčané stránky (zdroje)">
+                <TabItem FontSize="15" Header="Odporúčané stránky (zdroje)">
                     <StackPanel Margin="0,14,0,0">
                         <TextBlock Style="{StaticResource Popis}" FontSize="14" Margin="0,0,0,12"
                                    Text="Sekcia Novinky čerpá výlučne z týchto oficiálnych stránok štátnej správy v školstve a jeho organizácií. Médiá, noviny ani spravodajské portály sa nepoužívajú; každý údaj je podľa možnosti overený na viacerých z týchto stránok." />
@@ -391,7 +430,7 @@
                                                     <TextBlock Text="RSS" FontSize="12" FontWeight="SemiBold"
                                                                Foreground="{Binding Source='#F2B27A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
                                                 </Border>
-                                                <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" FontSize="15" TextWrapping="Wrap" />
+                                                <TextBlock Text="{Binding Nazov}" FontWeight="Bold" FontSize="16" TextWrapping="Wrap" />
                                             </DockPanel>
                                             <Button Style="{StaticResource RiadokTlacidlo}" Padding="0,2" HorizontalAlignment="Left" ToolTip="{Binding Url}"
                                                     Command="{Binding DataContext.OtvoritOdkazCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"

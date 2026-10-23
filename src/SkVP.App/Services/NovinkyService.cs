@@ -46,6 +46,14 @@ public sealed class PolozkaNoviniek
     [JsonPropertyName("zdroje")] public List<ZdrojNovinky> Zdroje { get; set; } = new();
     [JsonPropertyName("overene")] public string? Overene { get; set; }
 
+    /// <summary>Kedy sa informácia v programe objavila (pri prvom načítaní; inak dátum overenia).</summary>
+    [JsonPropertyName("pridane")] public string? Pridane { get; set; }
+
+    /// <summary>Informácia už nie je v aktuálnych údajoch – zostáva v histórii bloku (nič sa nemaže).</summary>
+    [JsonIgnore] public bool Archivna { get; set; }
+
+    [JsonIgnore] public DateOnly DatumPridania => NovinkyService.Datum(Pridane) ?? NovinkyService.Datum(Overene) ?? DateOnly.MinValue;
+
     [JsonIgnore] public DateOnly? DatumOd => NovinkyService.Datum(Od);
     [JsonIgnore] public DateOnly? DatumDo => NovinkyService.Datum(Do);
 
@@ -174,6 +182,10 @@ public static partial class NovinkyService
     public const string KlucSpravy = "novinky.spravy";
     public const string KlucOverenie = "novinky.overenie";
     public const string KlucKraj = "novinky.kraj";
+    public const string KlucHistoria = "novinky.historia";
+
+    /// <summary>Počet informácií na jednej strane bloku; staršie sú v histórii bloku (ďalšie strany).</summary>
+    public const int NaStranu = 6;
 
     /// <summary>Téma Prázdniny a školský rok – zobrazuje sa na dashboarde (tabuľka prázdnin), nie v Novinkách.</summary>
     public const string TemaSkolskyRok = "skolskyrok";
@@ -327,6 +339,66 @@ public static partial class NovinkyService
         Databaza.Zapis(KlucData, json);
         return true;
     }
+
+    // ------------------------------------------------------------------ história
+
+    /// <summary>
+    /// Aktuálne údaje spolu s históriou: informácie, ktoré v novších údajoch už nie sú, sa nezmažú – zostanú v histórii
+    /// svojho bloku (<see cref="PolozkaNoviniek.Archivna"/>). Každá informácia si pamätá, kedy sa v programe objavila.
+    /// </summary>
+    public static List<PolozkaNoviniek> SHistoriou(DataNoviniek data, bool ulozit = true)
+    {
+        var historia = new List<PolozkaNoviniek>();
+        try
+        {
+            var json = Databaza.Citaj(KlucHistoria);
+            if (!string.IsNullOrEmpty(json))
+            {
+                historia = JsonSerializer.Deserialize<List<PolozkaNoviniek>>(json) ?? new();
+            }
+        }
+        catch (Exception)
+        {
+            historia = new List<PolozkaNoviniek>();
+        }
+
+        var zHistorie = historia.Where(h => h.Id.Length > 0).GroupBy(h => h.Id).ToDictionary(g => g.Key, g => g.Last());
+        var vysledok = new List<PolozkaNoviniek>();
+        foreach (var p in data.Polozky)
+        {
+            p.Archivna = false;
+            p.Pridane ??= zHistorie.TryGetValue(p.Id, out var h) && h.Pridane is not null ? h.Pridane : p.Overene ?? Iso(DateOnly.FromDateTime(DateTime.Today));
+            vysledok.Add(p);
+        }
+
+        var aktualne = data.Polozky.Select(p => p.Id).ToHashSet();
+        var kategorie = data.Kategorie.Select(k => k.Id).ToHashSet();
+        foreach (var h in zHistorie.Values.Where(h => !aktualne.Contains(h.Id)))
+        {
+            // do histórie sa vráti len platná informácia z oficiálnych zdrojov
+            if (kategorie.Contains(h.Kategoria) && h.Zdroje.Count > 0 && h.Zdroje.All(z => JeOficialna(z.Url)))
+            {
+                h.Archivna = true;
+                vysledok.Add(h);
+            }
+        }
+
+        if (ulozit)
+        {
+            try
+            {
+                Databaza.Zapis(KlucHistoria, JsonSerializer.Serialize(vysledok, Nastavenia));
+            }
+            catch (Exception)
+            {
+                // história sa uloží nabudúce
+            }
+        }
+
+        return vysledok;
+    }
+
+    private static string Iso(DateOnly d) => d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
     // ------------------------------------------------------------------ termíny
 
