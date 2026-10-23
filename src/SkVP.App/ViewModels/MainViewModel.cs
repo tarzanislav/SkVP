@@ -275,8 +275,52 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
+        var stary = oblast.Nazov;
+        (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
         _sluzba.Premenuj(oblast.Id, nazov);
         oblast.Nazov = nazov;
+        PrenesNazovDoDokumentov(stary, nazov, "Oblasť");
+    }
+
+    /// <summary>
+    /// Nový názov predmetu či oblasti sa prenesie aj do textov dokumentov (osnovy, charakteristiky, úvodná strana).
+    /// Dokumenty otvorené vo Worde sa nemenia – to by prepísalo rozpracované úpravy.
+    /// </summary>
+    private void PrenesNazovDoDokumentov(string stary, string novy, string co)
+    {
+        PremenovanieVDokumentoch.Vysledok vysledok;
+        try
+        {
+            vysledok = PremenovanieVDokumentoch.NahradVsade(stary, novy, _upravyVoWorde.Keys.ToList());
+        }
+        catch (Exception ex)
+        {
+            Dialogy.Chyba($"{co} má nový názov, ale v textoch dokumentov sa ho nepodarilo zmeniť.", ex);
+            return;
+        }
+
+        foreach (var id in vysledok.Zmenene)
+        {
+            PoZmeneDokumentu(id, oznamit: false);
+            DokumentPrepisany?.Invoke(id);
+        }
+
+        var sprava = vysledok.Zmenene.Count switch
+        {
+            0 => "",
+            1 => $"Názov „{novy}“ je zmenený aj v texte 1 dokumentu (predchádzajúce znenie je v archíve verzií).",
+            _ => $"Názov „{novy}“ je zmenený aj v textoch dokumentov: {vysledok.Zmenene.Count} (predchádzajúce znenie je v archíve verzií).",
+        };
+        if (vysledok.Vynechane.Count > 0)
+        {
+            var nazvy = string.Join(", ", vysledok.Vynechane.Select(id => _sluzba.Nacitaj(id)?.Nazov ?? "?"));
+            sprava = (sprava + $" Dokument otvorený vo Worde ({nazvy}) ostal bez zmeny – starý názov v ňom opravte vo Worde.").Trim();
+        }
+
+        if (sprava.Length > 0)
+        {
+            Oznam(sprava);
+        }
     }
 
     public void NastavFarbuOblasti(OblastVM oblast, string farba)
@@ -387,8 +431,11 @@ public sealed partial class MainViewModel : ObservableObject
             return;
         }
 
+        var stary = predmet.Nazov;
+        (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
         _sluzba.Premenuj(predmet.Id, nazov);
         predmet.Nazov = nazov;
+        PrenesNazovDoDokumentov(stary, nazov, "Predmet");
     }
 
     [RelayCommand]
@@ -434,6 +481,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>Dokument objektu sa zmenil (prevzatý z Wordu).</summary>
     public event Action<long>? DokumentZmeneny;
+
+    /// <summary>Text dokumentu sa zmenil v programe (napr. nový názov predmetu) – zobrazenie aj editor ho majú načítať znova.</summary>
+    public event Action<long>? DokumentPrepisany;
 
     /// <summary>Úprava dokumentu vo Worde sa skončila (Word dokument zatvoril).</summary>
     public event Action<long>? WordSkoncil;

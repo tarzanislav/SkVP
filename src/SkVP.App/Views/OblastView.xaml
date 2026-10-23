@@ -145,8 +145,16 @@
                                                        FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center"
                                                        Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
                                             <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Nazov}" FontSize="16" TextTrimming="CharacterEllipsis"
-                                                           Visibility="{Binding Premenuva, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                                                <StackPanel Orientation="Horizontal"
+                                                            Visibility="{Binding Premenuva, Converter={StaticResource InverzBoolNaViditelnost}}">
+                                                    <TextBlock Text="{Binding Nazov}" FontSize="16" TextTrimming="CharacterEllipsis" MaxWidth="560" />
+                                                    <!-- oprava názvu priamo v riadku -->
+                                                    <Button x:Name="Pero" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70F;" FontSize="12"
+                                                            Margin="6,-4,0,-4" Opacity="0.35" Cursor="Hand"
+                                                            ToolTip="Opraviť názov predmetu (F2) – zmení sa aj v textoch osnov"
+                                                            Command="{Binding DataContext.ZacniPremenovanieCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                            CommandParameter="{Binding}" />
+                                                </StackPanel>
                                                 <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
                                                     <Border Style="{StaticResource StavOsnovy}">
                                                         <TextBlock Text="{Binding StavText}" FontSize="11.5" />
@@ -174,7 +182,7 @@
                                         <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70D;" ToolTip="Posunúť nižšie (Alt+↓)"
                                                 Command="{Binding DataContext.Hlavny.PosunPredmetDoleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}" IsEnabled="{Binding JePosledny, Converter={StaticResource InverzBool}}" />
-                                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE8AC;" ToolTip="Premenovať"
+                                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70F;" ToolTip="Opraviť názov predmetu (F2)"
                                                 Command="{Binding DataContext.ZacniPremenovanieCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}" />
                                         <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE74D;" ToolTip="Odstrániť predmet"
@@ -187,6 +195,7 @@
                                     <Trigger SourceName="Riadok" Property="IsMouseOver" Value="True">
                                         <Setter TargetName="Akcie" Property="Opacity" Value="1" />
                                         <Setter TargetName="Uchytka" Property="Opacity" Value="0.55" />
+                                        <Setter TargetName="Pero" Property="Opacity" Value="1" />
                                     </Trigger>
                                     <Trigger SourceName="Riadok" Property="IsKeyboardFocusWithin" Value="True">
                                         <Setter TargetName="Akcie" Property="Opacity" Value="1" />

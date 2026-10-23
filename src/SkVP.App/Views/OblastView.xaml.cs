@@ -77,6 +77,15 @@ public partial class OblastView : UserControl
 
     private void Klavesy(object sender, KeyEventArgs e)
     {
+        // F2 – oprava názvu predmetu, v ktorom je zameranie
+        if (e.Key == Key.F2 && Keyboard.Modifiers == ModifierKeys.None && Model is { } m
+            && (Keyboard.FocusedElement as FrameworkElement)?.DataContext is PredmetVM upravovany && !upravovany.Premenuva)
+        {
+            m.ZacniPremenovanieCommand.Execute(upravovany);
+            e.Handled = true;
+            return;
+        }
+
         if (Keyboard.Modifiers != ModifierKeys.Alt || Model is not { } model)
         {
             return;

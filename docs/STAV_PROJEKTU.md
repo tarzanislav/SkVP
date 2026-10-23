@@ -61,6 +61,14 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Samotest `TestLogaAHlavicky`: hľadá body skúšobného loga na vykreslených stranách, kontroluje hlavičky a obrázky vo Worde,
   snímky `uvodna_strana_logo.png`, `hlavicka_*.png` na vetve `vystupy`.
 
+## Oprava názvu predmetu (23. 10. 2026, na vetve vyvoj/etapa1)
+- V zozname predmetov oblasti je pri názve ceruzka (a F2) – oprava názvu priamo v riadku.
+- Nový názov predmetu alebo oblasti sa prenesie aj do textov dokumentov Word v programe (`PremenovanieVDokumentoch`):
+  len celé výskyty, nie časť dlhšieho názvu iného predmetu/oblasti; formátovanie zostane; predtým sa zarchivuje verzia
+  („Pred premenovaním …“). Dokument práve otvorený vo Worde sa nemení (oznámenie). Názvy súborov sa tvoria z aktuálneho názvu.
+- „Konverzácia z nemeckého jazyka“ → „Konverzácia v nemeckom jazyku“ (učebný plán, testovacia sada) + jednorazová úprava
+  existujúcich databáz pri spustení (`Migracie`, značka `migracia.konverzacia_nj`).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.

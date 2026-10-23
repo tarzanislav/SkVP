@@ -32,6 +32,7 @@ public partial class App : Application
         try
         {
             Databaza.Inicializuj();
+            Services.Migracie.Spusti();
         }
         catch (Exception ex)
         {

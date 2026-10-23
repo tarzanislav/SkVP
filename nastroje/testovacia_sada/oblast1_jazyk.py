@@ -251,7 +251,7 @@ P("Konverzácia v anglickom jazyku", OBL, "ŠkVP",
   suvisi=[("Anglický jazyk", "nadvazuje"), ("Reálie v anglickom jazyku", "suvisi")])
 
 # ---------------------------------------------------------------------------------------------
-P("Konverzácia z nemeckého jazyka", OBL, "ŠkVP",
+P("Konverzácia v nemeckom jazyku", OBL, "ŠkVP",
   char=[
       "Predmet rozvíja ústny prejav v nemeckom jazyku a pripravuje žiakov na ústnu formu maturitnej skúšky na úrovni B1.",
   ],

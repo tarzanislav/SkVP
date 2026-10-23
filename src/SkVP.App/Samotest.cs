@@ -58,6 +58,7 @@ internal static class Samotest
             TestVlozeniaZWordu();
             TestZostav();
             TestLogaAHlavicky();
+            TestPremenovania();
             TestZaloh();
             TestObrazoviek(aplikacia);
 
@@ -562,6 +563,62 @@ internal static class Samotest
         Krok("logo a hlavička v poriadku");
     }
 
+    /// <summary>Nový názov predmetu sa prenesie aj do textov dokumentov (celé výskyty, formátovanie zostane, archív).</summary>
+    private static void TestPremenovania()
+    {
+        // nahradenie v dokumente Word – aj keď je názov rozdelený do behov s rôznym formátovaním
+        var bloky = new List<Blok>
+        {
+            new Odsek(new[] { new Usek("Predmet "), new Usek("Fyz", Tucne: true), new Usek("ika nadväzuje na predmet Fyzika z 1. ročníka.") }),
+            new Odsek(new[] { new Usek("Fyzikálne pokusy, Fyzika2, Matematika a práca s informáciami, Matematika.") }),
+        };
+        var data = DocxVystup.Osnova(bloky);
+        var nove = PremenovanieVDokumentoch.Nahrad(data, "Fyzika", "Fyzika a astronómia", Array.Empty<string>(), out var pocet);
+        var text = nove is null ? "" : DokumentOsnovy.Text(DocxCitac.Nacitaj(new MemoryStream(nove)).Bloky);
+        Over(pocet == 2 && text.Contains("Predmet Fyzika a astronómia nadväzuje na predmet Fyzika a astronómia z 1. ročníka.", StringComparison.Ordinal)
+             && text.Contains("Fyzikálne pokusy, Fyzika2", StringComparison.Ordinal), $"nahradenie celého názvu v dokumente ({pocet}): {text}");
+        OverDocx(nove!, "dokument po premenovaní");
+        var chranene = PremenovanieVDokumentoch.Nahrad(data, "Matematika", "Matematika 2", new[] { "Matematika a práca s informáciami" }, out var pocetM);
+        var textM = chranene is null ? "" : DokumentOsnovy.Text(DocxCitac.Nacitaj(new MemoryStream(chranene)).Bloky);
+        Over(pocetM == 1 && textM.Contains("Matematika a práca s informáciami, Matematika 2.", StringComparison.Ordinal),
+            "názov oblasti, ktorý obsahuje názov predmetu, sa nezmení");
+        Over(PremenovanieVDokumentoch.Nahrad(data, "Chémia", "Chémia 2", Array.Empty<string>(), out _) is null, "dokument bez názvu sa nemení");
+
+        // jednorazová úprava: Konverzácia z nemeckého jazyka → Konverzácia v nemeckom jazyku (aj v textoch)
+        var sluzba = new ObjektService();
+        var dokumenty = new DokumentService();
+        var jazyk = sluzba.Oblasti()[0];
+        var stary = sluzba.Pridaj(TypObjektu.Predmet, jazyk.Id, "Konverzácia z nemeckého jazyka");
+        dokumenty.UlozBloky(stary.Id, new List<Blok>
+        {
+            new Odsek(new[] { new Usek("Konverzácia z nemeckého jazyka rozvíja ústny prejav.") }),
+        }, null);
+        var malCharakteristiku = dokumenty.Existuje(jazyk.Id);
+        var charakteristika = dokumenty.Nacitaj(jazyk.Id).Bloky;
+        dokumenty.UlozBloky(jazyk.Id, charakteristika.Append(new Odsek(new[] { new Usek("Patrí sem aj Konverzácia z nemeckého jazyka.") })).ToList(), null);
+        Over(Migracie.PremenujPredmet("Konverzácia z nemeckého jazyka", "Konverzácia v nemeckom jazyku") == 1
+             && sluzba.Nacitaj(stary.Id)!.Nazov == "Konverzácia v nemeckom jazyku", "premenovanie predmetu Konverzácia v nemeckom jazyku");
+        Over(DokumentOsnovy.Text(dokumenty.Nacitaj(stary.Id).Bloky).Contains("Konverzácia v nemeckom jazyku rozvíja", StringComparison.Ordinal)
+             && DokumentOsnovy.Text(dokumenty.Nacitaj(jazyk.Id).Bloky).Contains("Patrí sem aj Konverzácia v nemeckom jazyku.", StringComparison.Ordinal),
+            "nový názov aj v osnove a charakteristike oblasti");
+        Over(dokumenty.Verzie(stary.Id).FirstOrDefault()?.Dovod?.Contains("Pred premenovaním", StringComparison.Ordinal) == true,
+            "pred premenovaním v texte sa zarchivovala verzia");
+        Migracie.Spusti();
+        Over(Migracie.PremenujPredmet("Konverzácia z nemeckého jazyka", "Konverzácia v nemeckom jazyku") == 0, "opakované premenovanie nič nezmení");
+        if (malCharakteristiku)
+        {
+            dokumenty.UlozBloky(jazyk.Id, charakteristika, null);
+        }
+        else
+        {
+            using var db = Databaza.Otvor();
+            Databaza.Vykonaj(db, "DELETE FROM verzia WHERE objekt_id = $id; DELETE FROM dokument WHERE objekt_id = $id;", ("$id", jazyk.Id));
+        }
+
+        sluzba.Odstran(stary.Id);
+        Krok("premenovanie v dokumentoch v poriadku");
+    }
+
     /// <summary>Po vymazaní testovacej sady nesmú zostať údaje vymyslenej školy.</summary>
     private static void OverBezSkolySady(string popis, Dictionary<string, string?> predSadou)
     {
@@ -855,6 +912,29 @@ internal static class Samotest
         model.OtvorPredmet(model.Oblasti[2].Predmety.First(p => p.Nazov == "Seminár z biológie"));
         Pumpuj();
         Snimka(okno, "22_sada_seminar");
+
+        // oprava názvu predmetu priamo v riadku – zmení sa aj v texte osnovy
+        var nemcina = model.Oblasti[0].Predmety.First(p => p.Nazov == "Konverzácia v nemeckom jazyku");
+        var dokumentyUi = new DokumentService();
+        var osnovaNj = dokumentyUi.Nacitaj(nemcina.Id).Bloky;
+        dokumentyUi.UlozBloky(nemcina.Id, osnovaNj.Prepend(new Odsek(new[] { new Usek("Predmet Konverzácia v nemeckom jazyku sa vyučuje v 3. a 4. ročníku.") })).ToList(), null);
+        model.OtvorOblast(model.Oblasti[0]);
+        Pumpuj();
+        var oblastJazyk = (OblastViewModel)model.Stranka!;
+        oblastJazyk.ZacniPremenovanieCommand.Execute(nemcina);
+        nemcina.NovyNazov = "Konverzácia v nemeckom jazyku (B1)";
+        Pumpuj();
+        Snimka(okno, "22b_oprava_nazvu_v_riadku");
+        oblastJazyk.DokonciPremenovanie(nemcina, true);
+        Pumpuj();
+        Over(nemcina.Nazov == "Konverzácia v nemeckom jazyku (B1)" && new ObjektService().Nacitaj(nemcina.Id)!.Nazov == nemcina.Nazov,
+            "oprava názvu predmetu v riadku");
+        Over(DokumentOsnovy.Text(dokumentyUi.Nacitaj(nemcina.Id).Bloky).Contains("Predmet Konverzácia v nemeckom jazyku (B1) sa vyučuje", StringComparison.Ordinal),
+            "nový názov sa prejavil aj v texte osnovy");
+        Snimka(okno, "22c_po_oprave_nazvu");
+        model.PremenujPredmet(nemcina, "Konverzácia v nemeckom jazyku");
+        Over(DokumentOsnovy.Text(dokumentyUi.Nacitaj(nemcina.Id).Bloky).Contains("Predmet Konverzácia v nemeckom jazyku sa vyučuje", StringComparison.Ordinal),
+            "vrátenie názvu späť aj v texte");
         var celaSada = ZostavaOsnov.Zostav(new VolbyZostavy());
         var zhustenie = PdfVystup.StupenZhustenia(celaSada);
         Over(zhustenie > 0 && zhustenie < PdfVystup.MaxZhustenie, $"úvodná strana sady sa zhustením zmestí na jednu stranu (stupeň {zhustenie})");

@@ -24,6 +24,7 @@ public sealed partial class DokumentStrankyVM : ObservableObject, IDisposable
         SablonaOsnovy = sablonaOsnovy;
         _jeVoWorde = hlavny.JeVoWorde(objektId);
         hlavny.DokumentZmeneny += PriZmeneDokumentu;
+        hlavny.DokumentPrepisany += PriPrepisaniDokumentu;
         hlavny.WordSkoncil += PriKonciWordu;
     }
 
@@ -159,6 +160,16 @@ public sealed partial class DokumentStrankyVM : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Program zmenil text (nový názov predmetu) – načítať znova aj v režime úprav (text bol pred zmenou uložený).</summary>
+    private void PriPrepisaniDokumentu(long id)
+    {
+        if (id == ObjektId)
+        {
+            Obnovit?.Invoke();
+            OnPropertyChanged(nameof(PocetVerzii));
+        }
+    }
+
     private void PriKonciWordu(long id)
     {
         if (id == ObjektId)
@@ -170,6 +181,7 @@ public sealed partial class DokumentStrankyVM : ObservableObject, IDisposable
     public void Dispose()
     {
         Hlavny.DokumentZmeneny -= PriZmeneDokumentu;
+        Hlavny.DokumentPrepisany -= PriPrepisaniDokumentu;
         Hlavny.WordSkoncil -= PriKonciWordu;
     }
 }
