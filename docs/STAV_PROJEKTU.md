@@ -1,6 +1,6 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.16** (`main`); na vetve `vyvoj/etapa1` je navyše logo a hlavička strán
+Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.24** (vetva `main` = `vyvoj/etapa1`)
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
@@ -42,7 +42,7 @@ charakteristika oblasti, Tlač a zostavy (všetky/jedna/vybrané oblasti, úvodn
 oblasti a predmetu, tlač, PDF, Word), Nastavenia (škola, logo, program, Word/editor, vzhľad, import z Excelu, zálohy,
 testovacia sada, aktualizácie), automatické denné zálohy číslované za sebou, aktualizácia z GitHub releases.
 
-## Logo a hlavička strán (23. 10. 2026, na vetve vyvoj/etapa1, čaká na vydanie)
+## Logo a hlavička strán (vydané vo v0.1.24, 23. 10. 2026)
 - Úvodná strana: logo školy sa dá vybrať/odstrániť priamo v okne „Úvodná strana a hlavička“ (rovnaké logo ako v Nastaveniach)
   a vypnúť zaškrtávacím políčkom (`titul.logo.zobrazit`).
 - Hlavička ďalších strán: vľavo text (predvolene nadpis – podnadpis „Školský vzdelávací program – Učebné osnovy“, dá sa prepísať;
