@@ -131,6 +131,34 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   Bez nájdených verzií zostane len záznam s priečinkom (poznámka „bez prehľadu…“, doplní sa pri ďalšom spustení, ak verzie pribudnú). Vymazanie osnov / všetkého maže aj archív rokov v programe.
 - Samotest: snímky 13k, 22f–22j, `samotest_statistiky_archivu.xlsx`.
 
+## Údaje o organizácii, ŠVP, import oblastí, správa databázy (na vetve vyvoj/etapa1, nevydané)
+- Nastavenia → Údaje o organizácii (`Services/UdajeOrganizacie`, `ViewModels/UdajeOrganizacieVM`, `Views/UdajeOrganizacieEditor`):
+  názov školy (`skvp.skola`), organizačná zložka, ulica, mesto/obec, PSČ, štát, IČO, DIČ, e-mail, telefón (`org.*`);
+  `skvp.adresa` sa skladá z častí (staršia adresa v 1 riadku sa rozdelí). Kontrola IČO a e-mailu.
+- Údaje o škole v zostave (`ViewModels/UdajeOSkoleVZostaveVM`, `Views/UdajeOSkoleVZostave` – v Tlač a zostavy aj v okne
+  Export, spoločné voľby `titul.*.zobrazit`): úvodná strana – názov, zložka, adresa, IČO a DIČ, e-mail a telefón, logo;
+  hlavička – názov, zložka, logo; päta strán – názov školy a kontakt vľavo (vpravo číslo strany); autor vo vlastnostiach
+  PDF/Word. Predvolene IČO/DIČ, kontakt a päta vypnuté. PDF aj Word (`PdfVystup`, `DocxVystup`).
+- Export a import nastavení programu: premenované, popis „nie je to záloha databázy“, prehľad skupín v súbore
+  (`NastaveniaProgramu.Prehlad`), vynechaný aj čas poslednej kontroly aktualizácií.
+- ŠVP pre gymnáziá: `Zdroje/svp_gymnazia.json` (kap. 4.1–4.7 doslovne, Tab. 1 predmety, poznámky pod čiarou, zdroj),
+  text stiahnutý workflowom `.github/workflows/zdroje.yml` (vetva `zdroje`, ručné spustenie). `Services/SvpGymnazia`:
+  `VytvorOblasti`, `PrevezmiCharakteristiku`, `OblastPredmetu` (oblasť pre predmet podľa plánu, ŠVP a kľúčových slov).
+  Testovacia sada má charakteristiky oblastí zo ŠVP. V oblasti → Charakteristika: pás „Prevziať zo ŠVP…“.
+- Prvé spustenie (`PrveSpustenieWindow`) v 2 krokoch: 1. údaje o škole + logo, 2. voľba – oblasti podľa ŠVP (predvolené;
+  voliteľne priečinok s osnovami → po spustení sprievodca importu), testovacia sada, učebný plán gymnázia (+ charakteristiky
+  zo ŠVP), Excel, prázdny. Import osnov rozpozná predmet podľa „Názov predmetu“ v úvodnej tabuľke (`UvodnaTabulka.NazovPredmetu`,
+  pri PDF riadok „Názov predmetu: …“) a nový predmet zaradí do oblasti podľa `SvpGymnazia.OblastPredmetu`.
+- Import a export → Vzdelávacie oblasti a predmety: zo súboru (aj HTML, XML, JSON, TXT), z webovej stránky (HttpClient, aj
+  PDF/Word/Excel/JSON/XML na webe), diktovaním (hlasové písanie Windows Win+H, `Pomocne/HlasovePisanie` z EviTA) s náhľadom
+  (`Views/ImportStrukturyWindow`); export aj do HTML, XML, JSON (`Services/ImportStruktury`, vlastný jednoduchý HTML parser
+  bez knižnice). Prepis bez internetu (whisper.cpp ako v EviTA) zatiaľ nie – nová knižnica, čaká na súhlas používateľa.
+- Servis: „Zálohovať učebné osnovy (Word, PDF)“ – pri každom .docx v ZIP aj .pdf (`ZalohaService.PdfDokumentu`).
+  Správa databázy ako v EviTA (`Services/DiagnostikaService`): rýchla/úplná kontrola, kontrola väzieb, kontrola dát
+  (čitateľnosť a SHA dokumentov, duplicitné predmety…), optimalizácia, obnova indexov, kompaktovanie, oprava väzieb
+  (predmety bez oblasti → „Nezaradené predmety“), záchrana dát (prenos do novej DB, `Databaza.Inicializuj(cesta)`),
+  prehľad tabuliek, verzia schémy, posledná kontrola, protokol (uložiť/vymazať).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
