@@ -1546,8 +1546,8 @@ internal static class Samotest
              && Databaza.Citaj(UdajeSkVP.KlucSkola) == "Gymnázium Skúšobné" && UdajeOrganizacie.Nacitaj().AdresaRiadok == "Školská 1, 999 99 Skúšobné",
             "prvé spustenie podľa ŠVP – 7 oblastí bez predmetov a údaje o škole");
         var dokumentySvp = new DokumentService();
-        var priroda = oblastiSvp.First(o => o.Nazov == "Človek a príroda");
-        var textPrirody = DokumentOsnovy.Text(dokumentySvp.Nacitaj(priroda.Id).Bloky);
+        var prirodaSvp = oblastiSvp.First(o => o.Nazov == "Človek a príroda");
+        var textPrirody = DokumentOsnovy.Text(dokumentySvp.Nacitaj(prirodaSvp.Id).Bloky);
         Over(textPrirody.Contains("Základnou charakteristikou vzdelávacej oblasti je hľadanie zákonitých súvislostí", StringComparison.Ordinal)
              && textPrirody.Contains("Štátny vzdelávací program pre gymnáziá", StringComparison.Ordinal), "charakteristika oblasti podľa ŠVP");
 
