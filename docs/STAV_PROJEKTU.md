@@ -231,6 +231,16 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   `novinky.json` (polia `posledny`, `nastup`); export .ics z Noviniek ich obsahuje. Nástroje `nastroje/zdroje/novinky.py`
   (generovanie JSON) a `over.py` (kontrola textov `overit` v stiahnutých stránkach).
 
+## Novinky – strany a história blokov (23. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+- Blok témy: hore odporúčania (podfarbené farbou bloku), pod nimi `NovinkyService.NaStranu` = 6 najnovších informácií
+  (podľa dátumu pridania `pridane`), staršie a uplynulé na ďalších stranách „História bloku“ (`BlokNoviniekVM.Strana`,
+  odkazy „Staršie informácie a história bloku (N) →“ / „← Novšie informácie“). Prepínač „Zobraziť aj uplynulé“ zrušený.
+- Nič sa nemaže: `NovinkyService.SHistoriou` ukladá všetky informácie do `novinky.historia`; informácia, ktorá v novších
+  stiahnutých údajoch chýba, zostane v histórii bloku so štítkom „z histórie“ (len s oficiálnymi zdrojmi).
+- Nadpisy väčšie a tučné; nadpis, text a poznámka informácie aj popis správy sa dajú označiť a kopírovať (štýl
+  `VyberatelnyText` – TextBox iba na čítanie s `Decorator` namiesto posúvača, koliesko myši posúva stránku); tlačidlo
+  Kopírovať skopíruje celú informáciu so zdrojmi.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
