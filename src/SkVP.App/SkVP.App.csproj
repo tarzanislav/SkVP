@@ -30,6 +30,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Kalendárium – meniny a sviatky spoločné s programom EviTA (C:\ProgramData\Kalendarium) -->
+    <ProjectReference Include="..\Kalendarium.Core\Kalendarium.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Assets\skvp.ico" />
     <EmbeddedResource Include="Zdroje\ucebny_plan_gymnazium.json" LogicalName="SkVP.UcebnyPlanGymnazium.json" />
     <EmbeddedResource Include="Zdroje\testovacia_sada.json" LogicalName="SkVP.TestovaciaSada.json" />

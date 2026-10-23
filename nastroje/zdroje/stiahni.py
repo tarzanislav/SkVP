@@ -27,6 +27,8 @@ def text(cesta):
             for r in t.rows:
                 riadky.append(" | ".join(c.text.strip() for c in r.cells))
         open(cesta + ".txt", "w", encoding="utf-8").write("\n".join(riadky))
+    elif cesta.endswith(".xml"):
+        open(cesta + ".txt", "wb").write(open(cesta, "rb").read())
     elif cesta.endswith(".html"):
         from bs4 import BeautifulSoup
         s = BeautifulSoup(open(cesta, "rb").read(), "html.parser")
@@ -44,6 +46,10 @@ for riadok in open(os.path.join(os.path.dirname(__file__), "zoznam.txt"), encodi
     if stiahni(url, cesta):
         text(cesta)
     time.sleep(1)
+
+if os.environ.get("BEZ_CITATOV"):
+    print("hotovo (bez citátov)")
+    sys.exit(0)
 
 # citáty: stránky zoznamu (20 na stranu), slušne s odstupom
 citaty = os.path.join(ciel, "citaty")
