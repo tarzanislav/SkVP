@@ -523,7 +523,7 @@ public static class DocxVystup
                     }
                 }
 
-                var obsah = Bloky(b.Bloky.Where(x => x is not Tabulka).ToList(), farba, stav);
+                var obsah = Bloky(b.Bloky.Where(x => x is not SkVP.Services.Tabulka).ToList(), farba, stav);
                 riadok.Append(Bunka(obsah, Sucet(sirky, stlpec, stlpce), stlpce, zvislo, b.Hlavicka));
                 stlpec += stlpce;
             }

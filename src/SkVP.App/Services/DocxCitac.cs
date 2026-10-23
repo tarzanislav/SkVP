@@ -371,7 +371,7 @@ public sealed class DocxCitac
 
                     break;
 
-                case Hyperlink or SimpleField or InsertedRun or SmartTagRun or SdtRun:
+                case Hyperlink or SimpleField or InsertedRun or SdtRun:
                     PridajUseky(prvok, useky, zaklad);
                     break;
 
