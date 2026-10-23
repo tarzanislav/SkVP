@@ -392,6 +392,9 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
 
     public OblastVM Oblast => Predmet.Oblast;
 
+    /// <summary>„Importovať novú osnovu…“ alebo pri úvodnej/záverečnej časti „Importovať nový dokument…“.</summary>
+    public string TextImportu => Oblast.JeOblast ? "Importovať novú osnovu…" : "Importovať nový dokument…";
+
     public sealed record VolbaStavu(string? Kod, string Nazov);
 
     private static readonly IReadOnlyList<VolbaStavu> VsetkyStavy = new[]

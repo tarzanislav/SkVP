@@ -64,7 +64,7 @@
                                     ToolTip="Nová osnova z Wordu alebo PDF – doterajšia sa zarchivuje s rokom archivácie">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Style="{StaticResource Ikona}" Text="&#xE8B5;" FontSize="12" Margin="0,0,6,0" />
-                                    <TextBlock Text="Importovať novú osnovu…" FontSize="12.5" />
+                                    <TextBlock Text="{Binding TextImportu}" FontSize="12.5" />
                                 </StackPanel>
                             </Button>
                             <Button Padding="10,3" Margin="6,0,0,0" Command="{Binding ArchivCommand}"

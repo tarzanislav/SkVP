@@ -244,6 +244,22 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   `VyberatelnyText` – TextBox iba na čítanie s `Decorator` namiesto posúvača, koliesko myši posúva stránku); tlačidlo
   Kopírovať skopíruje celú informáciu so zdrojmi.
 
+## Úvodné a záverečné časti učebných osnov (24. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+- Nové typy objektov (`Models/TypObjektu`): `uvod`, `zaver` (jediná skupina každého druhu, vytvorí sa automaticky –
+  `CastiOsnov.Skupina`) a `cast` (dokument v skupine, ako osnova predmetu). `Services/CastiOsnov.cs`: názvy, pevné
+  charakteristiky, pastelové farby, zapnutie (`osnovy.uvod.aktivne`, `osnovy.zaver.aktivne`, predvolene vypnuté),
+  `SkupinyVPoradi` (úvod – oblasti – záver), `Dokumenty`, `TypPodlaNazvu` (rozpoznanie „Úvodné časti…“ / „00 …“).
+- UI: Osnovy – bloky ÚVODNÉ / ZÁVEREČNÉ ČASTI UČEBNÝCH OSNOV cez celú šírku nad a pod oblasťami (tenká čiara),
+  posuvník (štýl `Prepinac`), vypnutý blok zosivený a neotvoriteľný; OblastView pre skupinu (bez charakteristiky a palety,
+  „Pridať úvodnú/záverečnú časť“); PredmetView pre časť (bez šablóny úvodnej tabuľky); ľavé menu (zapnuté skupiny);
+  dashboard (stena osnov); súvislosti. Predmety a časti sa medzi sebou nepresúvajú.
+- Zaradenie zapnutých skupín: tlač a zostavy (`KapitolaOblasti.Typ`, na začiatku/konci, bez charakteristiky, PDF/Word),
+  export osnov (priečinky „00 Úvodné časti…“ / „99 Záverečné časti…“), import osnov (ciele, nová časť z priečinka
+  00/99 – skupina sa zapne), oblasti a predmety (Excel, Word, PDF, HTML, XML, JSON, diktovanie – skupina podľa názvu),
+  archív školského roka (typ `cast`, poradie 0/99), záloha osnov (aj vypnuté), servis (kontrola dát, oprava väzieb –
+  časti bez skupiny do úvodných), export/import nastavení (skupina „úvodné a záverečné časti…“; vyrovnávacie pamäte
+  Noviniek a počasia sa neprenášajú).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
