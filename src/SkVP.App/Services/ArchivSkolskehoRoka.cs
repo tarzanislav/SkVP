@@ -135,33 +135,143 @@ public static class ArchivSkolskehoRoka
     }
 
     /// <summary>
-    /// Archívy z verzie 0.1.37 (zoznam v nastaveniach, bez snímky predmetov) sa prenesú do tabuľky archívov,
-    /// aby boli vidieť v sekcii Archív aspoň s priečinkom.
+    /// Archívy z verzie 0.1.37 (zoznam v nastaveniach, bez snímky predmetov) sa prenesú do tabuľky archívov so všetkými
+    /// údajmi: osnovy roka sa doplnia z archívu verzií (verzie s dôvodom „Archív školského roka R“), profilácie a platnosť
+    /// z ich úvodnej tabuľky, rozsah z textu. Ak sa verzie nenájdu, archív zostane len so záznamom a priečinkom.
     /// </summary>
     public static void PrenesStareZaznamy()
     {
         const string kluc = "archiv.skolske_roky";
-        if (Databaza.Citaj(kluc) is not { Length: > 0 } json)
+        if (Databaza.Citaj(kluc) is { Length: > 0 } json)
         {
-            return;
+            try
+            {
+                foreach (var stary in System.Text.Json.JsonSerializer.Deserialize<List<StaryZaznam>>(json) ?? new())
+                {
+                    using var db = Databaza.Otvor();
+                    Databaza.Vykonaj(db, "INSERT INTO archiv_rok(skolsky_rok, vytvorene, priecinok, poznamka) VALUES($r, $v, $p, $n)",
+                        ("$r", stary.SkolskyRok), ("$v", stary.Vytvorene.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)),
+                        ("$p", stary.Priecinok), ("$n", BezPrehladu));
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                // poškodený zoznam – priečinky archívov zostávajú na disku
+            }
+
+            Databaza.Zapis(kluc, null);
         }
 
-        try
+        // archívy bez prehľadu predmetov – doplniť z archívu verzií
+        var prazdne = new List<(long Id, string Rok, DateTime Vytvorene)>();
+        using (var db = Databaza.Otvor())
+        using (var prikaz = Databaza.Prikaz(db, """
+                   SELECT id, skolsky_rok, vytvorene FROM archiv_rok a
+                   WHERE poznamka = $n AND NOT EXISTS (SELECT 1 FROM archiv_polozka p WHERE p.archiv_id = a.id)
+                   """, ("$n", BezPrehladu)))
+        using (var citac = prikaz.ExecuteReader())
         {
-            using var db = Databaza.Otvor();
-            foreach (var stary in System.Text.Json.JsonSerializer.Deserialize<List<StaryZaznam>>(json) ?? new())
+            while (citac.Read())
             {
-                Databaza.Vykonaj(db, "INSERT INTO archiv_rok(skolsky_rok, vytvorene, priecinok, poznamka) VALUES($r, $v, $p, $n)",
-                    ("$r", stary.SkolskyRok), ("$v", stary.Vytvorene.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture)),
-                    ("$p", stary.Priecinok), ("$n", "bez prehľadu predmetov (archív staršej verzie programu)"));
+                prazdne.Add((citac.GetInt64(0), citac.GetString(1), Datum(citac.GetString(2))));
             }
         }
-        catch (System.Text.Json.JsonException)
+
+        foreach (var (id, rok, vytvorene) in prazdne)
         {
-            // poškodený zoznam – priečinky archívov zostávajú na disku
+            if (DoplnZVerzii(id, rok, vytvorene) > 0)
+            {
+                using var db = Databaza.Otvor();
+                Databaza.Vykonaj(db, "UPDATE archiv_rok SET poznamka = $n WHERE id = $id", ("$n", DoplneneZVerzii), ("$id", id));
+            }
+        }
+    }
+
+    public const string BezPrehladu = "bez prehľadu predmetov (archív staršej verzie programu)";
+    public const string DoplneneZVerzii = "prenesené zo staršej verzie programu";
+
+    /// <summary>
+    /// Snímka archívu roka z archívu verzií: pre každý predmet a charakteristiku verzia „Archív školského roka R“
+    /// (najbližšia k času archivácie). Stav: ak sa dokument odvtedy nezmenil, terajší stav, inak podľa textu. Vráti počet dokumentov.
+    /// </summary>
+    private static int DoplnZVerzii(long archivId, string skolskyRok, DateTime vytvorene)
+    {
+        var dovod = $"Archív školského roka {skolskyRok}";
+        var (od, po) = Obdobie(skolskyRok);
+        var verzie = new Dictionary<long, (byte[] Data, string Sha, double Odstup)>();
+        using (var db = Databaza.Otvor())
+        using (var prikaz = Databaza.Prikaz(db, "SELECT objekt_id, data, sha256, vytvorene FROM verzia WHERE dovod = $d", ("$d", dovod)))
+        using (var citac = prikaz.ExecuteReader())
+        {
+            while (citac.Read())
+            {
+                var objektId = citac.GetInt64(0);
+                var odstup = Math.Abs((Datum(citac.GetString(3)) - vytvorene).TotalSeconds);
+                if (!verzie.TryGetValue(objektId, out var doteraz) || odstup < doteraz.Odstup)
+                {
+                    verzie[objektId] = ((byte[])citac.GetValue(1), citac.GetString(2), odstup);
+                }
+            }
         }
 
-        Databaza.Zapis(kluc, null);
+        if (verzie.Count == 0)
+        {
+            return 0;
+        }
+
+        var sluzba = new ObjektService();
+        var dokumenty = new DokumentService();
+        var pocet = 0;
+        var cisloOblasti = 0;
+        foreach (var oblast in sluzba.Oblasti())
+        {
+            cisloOblasti++;
+            var farba = oblast.Farba ?? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1);
+            if (verzie.TryGetValue(oblast.Id, out var charakteristika))
+            {
+                Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, cisloOblasti, 0, "Charakteristika vzdelávacej oblasti",
+                    StavOsnovy.Rozpracovana, Dlzka(charakteristika.Data), UdajeOsnovy.Prazdne, InfoOsnovy.Prazdne,
+                    ZmenenaVRoku(oblast.Id, od, po), charakteristika.Data);
+                pocet++;
+            }
+
+            var cislo = 0;
+            foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            {
+                cislo++;
+                var info = InfoOsnovyService.Nacitaj(predmet.Id);
+                if (!verzie.TryGetValue(predmet.Id, out var verzia))
+                {
+                    Zapis(archivId, predmet.Id, TypObjektu.Predmet, oblast.Nazov, farba, cisloOblasti, cislo, predmet.Nazov, StavOsnovy.Prazdna, 0,
+                        UdajeOsnovy.Prazdne, info, false, null);
+                    continue;
+                }
+
+                var dlzka = Dlzka(verzia.Data);
+                var terajsiSha = dokumenty.NacitajData(predmet.Id) is { Length: > 0 } teraz ? Convert.ToHexString(SHA256.HashData(teraz)) : null;
+                var stav = terajsiSha == verzia.Sha
+                    ? StavyOsnovy.Urci(predmet.Stav, dlzka)
+                    : dlzka > 0 ? StavOsnovy.Rozpracovana : StavOsnovy.Prazdna;
+                Zapis(archivId, predmet.Id, TypObjektu.Predmet, oblast.Nazov, farba, cisloOblasti, cislo, predmet.Nazov, stav, dlzka,
+                    UvodnaTabulka.Precitaj(verzia.Data), info, ZmenenaVRoku(predmet.Id, od, po), verzia.Data);
+                pocet++;
+            }
+        }
+
+        return pocet;
+    }
+
+    private static int Dlzka(byte[] docx)
+    {
+        try
+        {
+            using var prud = new MemoryStream(docx, false);
+            return DokumentOsnovy.DlzkaTextu(DocxCitac.Nacitaj(prud).Bloky);
+        }
+        catch (Exception)
+        {
+            return 0;
+        }
     }
 
     private sealed record StaryZaznam(string SkolskyRok, DateTime Vytvorene, string Priecinok, int Dokumentov);

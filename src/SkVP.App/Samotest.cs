@@ -1648,17 +1648,54 @@ internal static class Samotest
                 "štatistiky archívu v Exceli");
         }
 
-        // archív zo staršej verzie programu (len zoznam v nastaveniach) sa prenesie, zobrazí bez prehľadu a dá sa odstrániť
-        Databaza.Zapis("archiv.skolske_roky",
-            """[{"SkolskyRok":"2023/2024","Vytvorene":"2024-06-30T10:00:00","Priecinok":"C:\\neexistuje","Dokumentov":5}]""");
+        // archívy zo staršej verzie programu (zoznam v nastaveniach): 2024/2025 má verzie „Archív školského roka 2024/2025“
+        // v archíve verzií → prenesie sa so všetkými údajmi; 2023/2024 verzie nemá → len záznam s priečinkom
+        var dokumentyPred = 0;
+        foreach (var ob in model.Oblasti)
+        {
+            if (dokumenty.ArchivujAktualnu(ob.Id, "Archív školského roka 2024/2025"))
+            {
+                dokumentyPred++;
+            }
+
+            foreach (var pr in ob.Predmety)
+            {
+                if (dokumenty.ArchivujAktualnu(pr.Id, "Archív školského roka 2024/2025"))
+                {
+                    dokumentyPred++;
+                }
+            }
+        }
+
+        Databaza.Zapis("archiv.skolske_roky", $$"""
+            [{"SkolskyRok":"2024/2025","Vytvorene":"{{DateTime.Now.ToString("s", System.Globalization.CultureInfo.InvariantCulture)}}","Priecinok":"C:\neexistuje","Dokumentov":{{dokumentyPred}}},
+             {"SkolskyRok":"2023/2024","Vytvorene":"2024-06-30T10:00:00","Priecinok":"C:\neexistuje","Dokumentov":5}]
+            """);
         ArchivSkolskehoRoka.PrenesStareZaznamy();
+        var prenesene = ArchivSkolskehoRoka.Zoznam().SingleOrDefault(z => z.SkolskyRok == "2024/2025");
         var stary = ArchivSkolskehoRoka.Zoznam().SingleOrDefault(z => z.SkolskyRok == "2023/2024");
-        Over(stary is { MaPrehlad: false } && Databaza.Citaj("archiv.skolske_roky") is null, "prenos archívu zo staršej verzie programu");
+        Over(Databaza.Citaj("archiv.skolske_roky") is null && stary is { MaPrehlad: false }, "prenos archívu bez verzií zo staršej verzie programu");
+        int ZnakyPredmetov(long id) => ArchivSkolskehoRoka.Polozky(id).Where(x => x.JePredmet).Sum(x => x.Dlzka);
+        var statDruhy = ArchivSkolskehoRoka.Statistiky(ArchivSkolskehoRoka.Polozky(druhy.Id));
+        var statPrenesene = prenesene is null ? null : ArchivSkolskehoRoka.Statistiky(ArchivSkolskehoRoka.Polozky(prenesene.Id));
+        Over(prenesene is { MaPrehlad: true, Poznamka: ArchivSkolskehoRoka.DoplneneZVerzii } && prenesene.Predmetov == model.PocetPredmetov
+             && prenesene.Dokumentov == dokumentyPred && ZnakyPredmetov(prenesene.Id) == ZnakyPredmetov(druhy.Id)
+             && statPrenesene!.SProfilaciami == statDruhy.SProfilaciami && statPrenesene.Hotove == statDruhy.Hotove,
+            $"archív zo staršej verzie programu prenesený so všetkými údajmi ({prenesene?.Predmetov} predmetov, {prenesene?.Dokumentov} dokumentov)");
+        var fyzPrenesena = ArchivSkolskehoRoka.Polozky(prenesene!.Id).First(p => p.ObjektId == fyz.Id);
+        Over(fyzPrenesena.Profilacie == "šport, informatika" && fyzPrenesena.Stav == fyz.Stav, "prenesený archív – údaje a stav osnovy");
+        ArchivSkolskehoRoka.PrenesStareZaznamy();
+        Over(ArchivSkolskehoRoka.Zoznam().Count == 4, "prenos starších archívov sa nezopakuje");
+        archiv.Obnov(prenesene.Id);
+        Pumpuj();
+        Over(archiv.MaPrehlad && archiv.Dlazdice.Count == 6, "prenesený archív v sekcii Archív");
+        Snimka(okno, "22i_archiv_preneseny");
         archiv.Obnov(stary!.Id);
         Pumpuj();
-        Over(archiv.BezPrehladu && archiv.Archivy.Count == 3, "starší archív bez prehľadu predmetov");
-        Snimka(okno, "22i_archiv_starsi");
+        Over(archiv.BezPrehladu && archiv.Archivy.Count == 4, "starší archív bez verzií – bez prehľadu predmetov");
+        Snimka(okno, "22j_archiv_starsi");
         ArchivSkolskehoRoka.Odstran(stary.Id);
+        ArchivSkolskehoRoka.Odstran(prenesene.Id);
         Over(ArchivSkolskehoRoka.Zoznam().Count == 2, "odstránenie archívu školského roka z programu");
     }
 

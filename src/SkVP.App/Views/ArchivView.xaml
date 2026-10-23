@@ -156,7 +156,7 @@
                     <!-- archív staršej verzie programu: len priečinok -->
                     <Border Style="{StaticResource Karta}" Margin="0,16,0,0" Visibility="{Binding BezPrehladu, Converter={StaticResource BoolNaViditelnost}}">
                         <TextBlock TextWrapping="Wrap"
-                                   Text="Tento archív vytvorila staršia verzia programu, preto nemá prehľad predmetov ani štatistiky. Osnovy nájdete v priečinku archívu a v archíve verzií jednotlivých predmetov." />
+                                   Text="Tento archív vytvorila staršia verzia programu a jeho osnovy sa v archíve verzií nenašli (boli vymazané), preto nemá prehľad predmetov ani štatistiky. Súbory nájdete v priečinku archívu." />
                     </Border>
 
                     <StackPanel Visibility="{Binding MaPrehlad, Converter={StaticResource BoolNaViditelnost}}">

@@ -125,9 +125,11 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   objekt_id a SHA), osnovy po oblastiach s hľadaním a značkami; klik → `ArchivnaOsnovaWindow` (len na čítanie, kópia vo
   Worde, Uložiť ako). Celé PDF roka, priečinok, štatistiky do Excelu (hárky Štatistiky, Oblasti, Predmety), odstránenie
   z programu (súbory na disku zostanú). Servis má pri rokoch „Prezerať v Archíve“; po archivácii sa otvorí Archív.
-- Archívy z v0.1.37 (kľúč `archiv.skolske_roky`) sa pri spustení prenesú (`Migracie` → `PrenesStareZaznamy`) – bez
-  prehľadu predmetov. Vymazanie osnov / všetkého maže aj archív rokov v programe.
-- Samotest: snímky 13k, 22f–22i, `samotest_statistiky_archivu.xlsx`.
+- Archívy z v0.1.37 (kľúč `archiv.skolske_roky`) sa pri spustení prenesú (`Migracie` → `PrenesStareZaznamy`) so všetkými
+  údajmi – osnovy z archívu verzií (dôvod „Archív školského roka R“, verzia najbližšia k času archivácie), profilácie
+  a platnosť z úvodnej tabuľky, rozsah z textu, stav = terajší, ak sa dokument odvtedy nezmenil, inak podľa textu.
+  Bez nájdených verzií zostane len záznam s priečinkom (poznámka „bez prehľadu…“, doplní sa pri ďalšom spustení, ak verzie pribudnú). Vymazanie osnov / všetkého maže aj archív rokov v programe.
+- Samotest: snímky 13k, 22f–22j, `samotest_statistiky_archivu.xlsx`.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
