@@ -145,8 +145,8 @@ public static class DocxVystup
             // pás farieb oblastí
             var pas = new Table(new TableProperties(
                 new TableWidth { Type = TableWidthUnitValues.Pct, Width = "5000" },
-                new TableBorders(new TopBorder { Val = BorderValues.None }, new BottomBorder { Val = BorderValues.None },
-                    new LeftBorder { Val = BorderValues.None }, new RightBorder { Val = BorderValues.None },
+                new TableBorders(new TopBorder { Val = BorderValues.None }, new LeftBorder { Val = BorderValues.None },
+                    new BottomBorder { Val = BorderValues.None }, new RightBorder { Val = BorderValues.None },
                     new InsideHorizontalBorder { Val = BorderValues.None }, new InsideVerticalBorder { Val = BorderValues.None }),
                 new TableLayout { Type = TableLayoutValues.Fixed }));
             var siet = new TableGrid();
@@ -462,8 +462,8 @@ public static class DocxVystup
             new TableWidth { Type = TableWidthUnitValues.Pct, Width = "5000" },
             new TableBorders(
                 new TopBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
-                new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
                 new LeftBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
+                new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
                 new RightBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
                 new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
                 new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Color = Linka }),
