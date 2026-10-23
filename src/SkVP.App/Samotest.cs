@@ -329,9 +329,32 @@ internal static class Samotest
         DokumentOsnovy.OcistiVlozene(vlozeny);
         var bloky = DokumentOsnovy.Rozober(vlozeny);
         Over(bloky.FirstOrDefault() is Nadpis { Uroven: 1, Text: "Hodnotenie predmetu" }, "vložený nadpis z Wordu sa rozpoznal");
-        var odsek = vlozeny.Blocks.OfType<Paragraph>().Last();
-        Over(odsek.Inlines.FirstInline is Run beh && beh.ReadLocalValue(TextElement.ForegroundProperty) == DependencyProperty.UnsetValue,
+        var behy = new List<Run>();
+        void Zbieraj(InlineCollection inlines)
+        {
+            foreach (var inline in inlines)
+            {
+                if (inline is Run r)
+                {
+                    behy.Add(r);
+                }
+                else if (inline is Span sp)
+                {
+                    Zbieraj(sp.Inlines);
+                }
+            }
+        }
+
+        foreach (var p in vlozeny.Blocks.OfType<Paragraph>())
+        {
+            Zbieraj(p.Inlines);
+        }
+
+        var cervene = behy.Where(r => r.Text.Contains("známkou", StringComparison.Ordinal)).ToList();
+        Over(cervene.Count > 0 && cervene.All(r => r.Foreground is not SolidColorBrush { Color: var c } || c != Colors.Red),
             "farba vloženého textu sa zrušila");
+        Over(behy.All(r => r.FontFamily.Source == PismaDokumentu.Text || r.FontFamily.Source.Contains("Segoe", StringComparison.Ordinal)),
+            "cudzie písmo vloženého textu sa zrušilo");
     }
 
     private static void TestZostav()
