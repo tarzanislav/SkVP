@@ -295,7 +295,9 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
 
     /// <summary>Spustí export. Vráti true, ak sa niečo uložilo.</summary>
     [RelayCommand]
-    public bool Exportovat()
+    private void Exportovat() => Exportuj();
+
+    public bool Exportuj()
     {
         var volby = Volby();
         if (Len && volby.Predmety!.Count == 0)

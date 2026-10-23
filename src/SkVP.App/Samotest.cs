@@ -678,7 +678,7 @@ internal static class Samotest
         var polozka = sprievodca.Polozky.Single();
         Over(polozka.JeNovy && polozka.NovyNazov == "Astronómia", "sprievodca navrhne nový predmet");
         polozka.NovaOblast = model.Oblasti.First(o => o.Nazov == "Človek a príroda");
-        Over(sprievodca.Importovat() == 1 && model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Any(p => p.Nazov == "Astronómia"),
+        Over(sprievodca.Importuj() == 1 && model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Any(p => p.Nazov == "Astronómia"),
             "import do nového predmetu");
         var astronomia = model.Oblasti.SelectMany(o => o.Predmety).First(p => p.Nazov == "Astronómia");
 

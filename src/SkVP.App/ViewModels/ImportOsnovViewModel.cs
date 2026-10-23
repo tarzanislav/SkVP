@@ -157,7 +157,9 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
 
     /// <summary>Naimportuje zaškrtnuté súbory. Vráti počet naimportovaných osnov.</summary>
     [RelayCommand]
-    public int Importovat()
+    private void Importovat() => Importuj();
+
+    public int Importuj()
     {
         var naImport = Polozky.Where(p => p.Zahrnut && p.Subor is not null).ToList();
         if (naImport.Count == 0)
