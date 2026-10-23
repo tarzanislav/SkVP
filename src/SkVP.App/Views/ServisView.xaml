@@ -98,7 +98,7 @@
                         <TextBlock Text="Archív osnov za školský rok" Style="{StaticResource Podnadpis}" Margin="0" />
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap"
-                               Text="Celé učebné osnovy tak, ako platili v školskom roku – do archívu verzií v programe a do priečinka Dokumenty\SkVP\Archív školských rokov: osnovy vo Worde po oblastiach a celé osnovy v jednom dokumente Word a v archívnom PDF/A. Odporúčame na konci každého školského roka." />
+                               Text="Celé učebné osnovy tak, ako platili v školskom roku – do sekcie Archív (prehľad so štatistikami roka), do archívu verzií v programe a do priečinka Dokumenty\SkVP\Archív školských rokov: osnovy vo Worde po oblastiach a celé osnovy v jednom dokumente Word a v archívnom PDF/A. Odporúčame na konci každého školského roka." />
                     <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
                         <TextBlock Text="Školský rok" VerticalAlignment="Center" Margin="0,0,10,0" />
                         <ComboBox ItemsSource="{Binding SkolskeRoky}" SelectedItem="{Binding SkolskyRok}" Width="130" />
@@ -113,13 +113,16 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <DockPanel Margin="0,2">
-                                    <Button DockPanel.Dock="Right" Content="Otvoriť" Padding="10,3"
+                                    <Button DockPanel.Dock="Right" Content="Priečinok" Padding="10,3" Margin="6,0,0,0"
                                             Command="{Binding DataContext.OtvoritArchivRokaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" />
+                                    <Button DockPanel.Dock="Right" Content="Prezerať v Archíve" Padding="10,3"
+                                            Command="{Binding DataContext.PrezeratArchivRokaCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}" />
                                     <TextBlock VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
                                         <Run Text="{Binding SkolskyRok, Mode=OneWay}" FontWeight="SemiBold" />
                                         <Run Text="  •  " /><Run Text="{Binding Vytvorene, Mode=OneWay, StringFormat={}{0:d. M. yyyy H:mm}}" />
-                                        <Run Text="  •  dokumentov: " /><Run Text="{Binding Dokumentov, Mode=OneWay}" />
+                                        <Run Text="  •  predmetov: " /><Run Text="{Binding Predmetov, Mode=OneWay}" /><Run Text="  •  dokumentov: " /><Run Text="{Binding Dokumentov, Mode=OneWay}" />
                                     </TextBlock>
                                 </DockPanel>
                             </DataTemplate>

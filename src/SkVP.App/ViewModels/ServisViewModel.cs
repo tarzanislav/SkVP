@@ -91,38 +91,36 @@ public sealed partial class ServisViewModel : ObservableObject
 
     public ObservableCollection<ZaznamArchivuRoka> ArchivyRokov { get; } = new();
 
-    /// <summary>Archivuje celé osnovy za vybraný školský rok (v programe aj do priečinka).</summary>
+    /// <summary>Archivuje celé osnovy za vybraný školský rok a otvorí ho v sekcii Archív.</summary>
     [RelayCommand]
     public void ArchivovatRok()
     {
-        if (!Dialogy.Potvrd($"Archivovať celé učebné osnovy za školský rok {SkolskyRok}?\n\n" +
-                            "Všetky aktuálne osnovy a charakteristiky oblastí sa uložia do archívu verzií v programe a do priečinka " +
-                            $"{ArchivSkolskehoRoka.Priecinok} (Word po oblastiach a celé osnovy v archívnom PDF/A). Osnovy sa nemenia."))
+        if (ArchivViewModel.Spusti(SkolskyRok, Hlavny) is { } zaznam)
         {
-            return;
-        }
-
-        try
-        {
-            ZaznamArchivuRoka? zaznam = null;
-            Dialogy.Cakaj(() => zaznam = ArchivSkolskehoRoka.Archivuj(SkolskyRok));
-            Zapis($"Archív školského roka {SkolskyRok}: {zaznam!.Dokumentov} dokumentov → {zaznam.Priecinok}");
-            Hlavny.Oznam($"Osnovy školského roka {SkolskyRok} sú archivované ({zaznam.Dokumentov} dokumentov).");
+            Zapis($"Archív školského roka {SkolskyRok}: {zaznam.Predmetov} predmetov, {zaznam.Dokumentov} dokumentov → {zaznam.Priecinok}");
             Obnov();
-            Dialogy.OtvorVSysteme(zaznam.Priecinok);
+            if (!Dialogy.TichyRezim)
+            {
+                Hlavny.OtvorArchivRoka(zaznam.Id);
+            }
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+    }
+
+    [RelayCommand]
+    private void PrezeratArchivRoka(ZaznamArchivuRoka? zaznam)
+    {
+        if (zaznam is not null)
         {
-            Dialogy.Chyba("Osnovy sa nepodarilo archivovať.", ex);
+            Hlavny.OtvorArchivRoka(zaznam.Id);
         }
     }
 
     [RelayCommand]
     private void OtvoritArchivRoka(ZaznamArchivuRoka? zaznam)
     {
-        if (zaznam is not null && Directory.Exists(zaznam.Priecinok))
+        if (zaznam?.Priecinok is { } priecinok && Directory.Exists(priecinok))
         {
-            Dialogy.OtvorVSysteme(zaznam.Priecinok);
+            Dialogy.OtvorVSysteme(priecinok);
         }
         else
         {

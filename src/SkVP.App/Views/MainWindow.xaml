@@ -29,6 +29,9 @@
         <DataTemplate DataType="{x:Type vm:ImportExportViewModel}">
             <v:ImportExportView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ArchivViewModel}">
+            <v:ArchivView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ServisViewModel}">
             <v:ServisView />
         </DataTemplate>
@@ -136,6 +139,13 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE8AB;" Margin="0,0,14,0" />
                                 <TextBlock Text="Import a export" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeArchiv, Mode=OneWay}"
+                                     Command="{Binding OtvorArchivCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" Margin="0,0,14,0" />
+                                <TextBlock Text="Archív" />
                             </StackPanel>
                         </RadioButton>
                         <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeServis, Mode=OneWay}"

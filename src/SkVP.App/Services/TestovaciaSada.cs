@@ -384,13 +384,15 @@ public static class TestovaciaSada
         }
     }
 
-    /// <summary>Vymaže všetky osnovy, ich archív, súvislosti a údaje vymyslenej školy; oblasti a predmety zostanú.</summary>
+    /// <summary>Vymaže všetky osnovy, ich archív (aj archív školských rokov v programe), súvislosti a údaje vymyslenej školy; oblasti a predmety zostanú.</summary>
     public static void VymazOsnovy()
     {
         VymazSkolu();
         using var db = Databaza.Otvor();
         using var transakcia = db.BeginTransaction();
         Databaza.Vykonaj(db, """
+            DELETE FROM archiv_polozka;
+            DELETE FROM archiv_rok;
             DELETE FROM verzia;
             DELETE FROM dokument;
             DELETE FROM vazba;
@@ -410,6 +412,8 @@ public static class TestovaciaSada
         using var db = Databaza.Otvor();
         using var transakcia = db.BeginTransaction();
         Databaza.Vykonaj(db, """
+            DELETE FROM archiv_polozka;
+            DELETE FROM archiv_rok;
             DELETE FROM verzia;
             DELETE FROM dokument;
             DELETE FROM vazba;

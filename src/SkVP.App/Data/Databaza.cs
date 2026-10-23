@@ -12,7 +12,7 @@ namespace SkVP.Data;
 /// </summary>
 public static class Databaza
 {
-    public const int VerziaSchemy = 1;
+    public const int VerziaSchemy = 2;
 
     /// <summary>Priečinok s databázou (pri samoteste dočasný – premenná SKVP_DATA_DIR).</summary>
     public static string Priecinok =>
@@ -144,6 +144,41 @@ public static class Databaza
                     kluc TEXT PRIMARY KEY,
                     hodnota TEXT NULL
                 );
+                """);
+        }
+
+        if (verzia < 2)
+        {
+            Vykonaj(db, """
+                -- archív osnov za školský rok: snímka predmetov a osnov tak, ako boli v danom roku
+                CREATE TABLE archiv_rok(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    skolsky_rok TEXT NOT NULL,
+                    vytvorene TEXT NOT NULL,
+                    priecinok TEXT NULL,
+                    poznamka TEXT NULL
+                );
+                CREATE TABLE archiv_polozka(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    archiv_id INTEGER NOT NULL REFERENCES archiv_rok(id) ON DELETE CASCADE,
+                    objekt_id INTEGER NULL,
+                    typ TEXT NOT NULL,
+                    oblast TEXT NOT NULL,
+                    farba TEXT NULL,
+                    poradie_oblasti INTEGER NOT NULL,
+                    cislo INTEGER NOT NULL,
+                    nazov TEXT NOT NULL,
+                    stav TEXT NOT NULL,
+                    dlzka INTEGER NOT NULL DEFAULT 0,
+                    profilacie TEXT NULL,
+                    platnost TEXT NULL,
+                    rok_osnovy INTEGER NULL,
+                    uroven TEXT NULL,
+                    zmenena_v_roku INTEGER NOT NULL DEFAULT 0,
+                    sha256 TEXT NULL,
+                    data BLOB NULL
+                );
+                CREATE INDEX ix_archiv_polozka ON archiv_polozka(archiv_id, poradie_oblasti, cislo);
                 """);
         }
 

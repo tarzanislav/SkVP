@@ -14,6 +14,15 @@ public static class Migracie
 
     public static void Spusti()
     {
+        try
+        {
+            ArchivSkolskehoRoka.PrenesStareZaznamy();
+        }
+        catch (Exception)
+        {
+            // skúsi sa znova pri ďalšom spustení
+        }
+
         foreach (var (kluc, stary, novy) in PremenovanePredmety)
         {
             if (Databaza.Citaj(kluc) == "1")

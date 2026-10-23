@@ -1252,6 +1252,10 @@ internal static class Samotest
         model.OtvorServis();
         Pumpuj();
         Snimka(okno, "13j_servis");
+        model.OtvorArchiv();
+        Pumpuj();
+        Over(model.Stranka is ArchivViewModel { NemaArchivy: true } && model.JeArchiv, "sekcia Archív bez archivovaného roka");
+        Snimka(okno, "13k_archiv_prazdny");
         tlacOblasti.UlozitPdfCommand.Execute(null);
         tlacOblasti.UlozitWordCommand.Execute(null);
 
@@ -1352,12 +1356,13 @@ internal static class Samotest
         var verziePred = dokumentyUi.Verzie(fyz.Id).Count;
         var archivRoka = ArchivSkolskehoRoka.Archivuj("2025/2026");
         Over(Directory.Exists(archivRoka.Priecinok) && archivRoka.Dokumentov >= 43
-             && File.Exists(Path.Combine(archivRoka.Priecinok, "Učebné osnovy 2025-2026.pdf"))
-             && File.Exists(Path.Combine(archivRoka.Priecinok, "Učebné osnovy 2025-2026.docx")),
+             && File.Exists(Path.Combine(archivRoka.Priecinok!, "Učebné osnovy 2025-2026.pdf"))
+             && File.Exists(Path.Combine(archivRoka.Priecinok!, "Učebné osnovy 2025-2026.docx")),
             $"archív osnov za školský rok ({archivRoka.Dokumentov} dokumentov)");
         Over(dokumentyUi.Verzie(fyz.Id).Count == verziePred + 1 && dokumentyUi.Verzie(fyz.Id)[0].Dovod == "Archív školského roka 2025/2026",
             "archív školského roka aj v archíve verzií");
         Over(ArchivSkolskehoRoka.Zoznam().First().SkolskyRok == "2025/2026", "záznam o archíve školského roka");
+        TestSekcieArchiv(okno, model, archivRoka, fyz);
         var celaSada = ZostavaOsnov.Zostav(new VolbyZostavy());
         var zhustenie = PdfVystup.StupenZhustenia(celaSada);
         Over(zhustenie > 0 && zhustenie < PdfVystup.MaxZhustenie, $"úvodná strana sady sa zhustením zmestí na jednu stranu (stupeň {zhustenie})");
@@ -1377,6 +1382,7 @@ internal static class Samotest
         Over(!model.JeTestovaciaSada && model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "vymazanie osnov – oblasti a predmety zostali");
         Over(model.Oblasti.SelectMany(o => o.Predmety).All(p => p.Stav == StavOsnovy.Prazdna) && new DokumentService().Verzie(sjl.Id).Count == 0, "osnovy aj archív sú vymazané");
         Over(new ZalohaService().Zalohy().Count == zalohyPred + 1, "pred vymazaním sa vytvorila záloha");
+        Over(ArchivSkolskehoRoka.Zoznam().Count == 0, "vymazanie osnov odstráni aj archív školských rokov v programe");
         OverBezSkolySady("vymazanie osnov", predSadou);
         model.NahrajTestovaciuSadu();
         Over(TitulnaStrana.Nacitaj().Skola == TestovaciaSada.SkolaSady && NastaveniaSkoly.CestaLoga() is not null, "opätovné nahratie sady doplní školu aj logo");
@@ -1565,6 +1571,82 @@ internal static class Samotest
             Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.ContextIdle, new Action(() => ramec.Continue = false));
             Dispatcher.PushFrame(ramec);
         }
+    }
+
+    /// <summary>Sekcia Archív: snímka roka, štatistiky, porovnanie rokov, hľadanie, archivovaná osnova a export štatistík.</summary>
+    private static void TestSekcieArchiv(Window okno, MainViewModel model, ZaznamArchivuRoka prvy, PredmetVM fyz)
+    {
+        var polozky = ArchivSkolskehoRoka.Polozky(prvy.Id);
+        var stat = ArchivSkolskehoRoka.Statistiky(polozky);
+        Over(prvy.Predmetov == model.PocetPredmetov && stat.Predmety == model.PocetPredmetov && stat.Oblasti == model.Oblasti.Count
+             && stat.Hotove + stat.NaKontrolu + stat.Rozpracovane + stat.Nezacate == stat.Predmety && stat.Znakov > 10_000,
+            $"štatistiky archívu roka ({stat.Predmety} predmetov, {stat.Hotove} hotových, {stat.Normostrany} NS)");
+        Over(stat.Hotove == model.Oblasti.SelectMany(o => o.Predmety).Count(p => p.Stav == StavOsnovy.Hotova), "počet hotových osnov v archíve");
+        var fyzPolozka = polozky.First(p => p.ObjektId == fyz.Id);
+        Over(fyzPolozka.Profilacie == "informatika" && fyzPolozka.Platnost == "od 1.9.2027" && fyzPolozka.MaDokument,
+            "archív roka si pamätá profilácie a platnosť osnovy");
+        Over(polozky.Count(p => !p.JePredmet) > 0, "archív roka obsahuje charakteristiky oblastí");
+        if (ArchivSkolskehoRoka.Aktualny() != "2025/2026")
+        {
+            Over(stat.ZmeneneVRoku == 0, "v minulom školskom roku sa osnovy testovacej sady nemenili");
+        }
+
+        // druhý rok po zmene osnovy fyziky – porovnanie s predchádzajúcim rokom
+        var dokumenty = new DokumentService();
+        dokumenty.Uloz(fyz.Id, UvodnaTabulka.Zapis(dokumenty.NacitajData(fyz.Id)!, "šport, informatika", null), null);
+        model.PoZmeneDokumentu(fyz.Id, oznamit: false);
+        var rok = ArchivSkolskehoRoka.Aktualny();
+        var druhy = ArchivSkolskehoRoka.Archivuj(rok);
+        var porovnanie = ArchivSkolskehoRoka.Porovnaj(druhy);
+        Over(porovnanie is { PredchadzajuciRok: "2025/2026", ZmeneneOsnovy: 1, NovePredmety: 0, OdstranenePredmety: 0 } && porovnanie.Zmenene.Contains(fyz.Id),
+            $"porovnanie s predchádzajúcim rokom ({porovnanie?.ZmeneneOsnovy} zmenených)");
+        Over(ArchivSkolskehoRoka.Statistiky(ArchivSkolskehoRoka.Polozky(druhy.Id)).ZmeneneVRoku > 0, "osnovy zmenené počas aktuálneho školského roka");
+
+        model.OtvorArchivRoka(druhy.Id);
+        Pumpuj();
+        var archiv = (ArchivViewModel)model.Stranka!;
+        Over(archiv.Archivy.Count == 2 && archiv.Vybrany?.Id == druhy.Id && archiv.Dlazdice.Count == 6 && archiv.MaPorovnanie
+             && archiv.Oblasti.Count == model.Oblasti.Count, "sekcia Archív – vybraný rok so štatistikami");
+        Snimka(okno, "22f_archiv");
+        archiv.Hladat = "fyzika";
+        Pumpuj();
+        Over(archiv.Oblasti.Count == 1 && archiv.Oblasti[0].Predmety.Count == 1 && archiv.Oblasti[0].Predmety[0].Zmenena,
+            "hľadanie v archíve a značka zmenenej osnovy");
+        Snimka(okno, "22g_archiv_hladanie");
+        var predmetVArchive = archiv.Oblasti[0].Predmety[0];
+        var oknoOsnovy = archiv.OknoOsnovy(predmetVArchive.Polozka, predmetVArchive.Oblast.Farba)!;
+        oknoOsnovy.Show();
+        Pumpuj();
+        Over(oknoOsnovy.Bloky.Count > 3, "archivovaná osnova sa dá prečítať");
+        Snimka(oknoOsnovy, "22h_archivna_osnova");
+        oknoOsnovy.Close();
+        archiv.Hladat = "";
+        archiv.Vybrany = archiv.Archivy.First(a => a.Id == prvy.Id);
+        Pumpuj();
+        Over(!archiv.MaPorovnanie && archiv.MaPrehlad, "najstarší archivovaný rok nemá s čím porovnať");
+
+        var excel = Path.Combine(Databaza.PriecinokDokumentov, "samotest_statistiky_archivu.xlsx");
+        ArchivSkolskehoRoka.UlozStatistiky(druhy, excel);
+        using (var zosit = new XLWorkbook(excel))
+        {
+            Over(zosit.Worksheet("Predmety").LastRowUsed()!.RowNumber() == model.PocetPredmetov + 1
+                 && zosit.Worksheet("Štatistiky").Cell(5, 2).GetValue<int>() == model.PocetPredmetov
+                 && zosit.Worksheet("Predmety").Column(10).CellsUsed().Any(c => c.GetString() == "zmenená"),
+                "štatistiky archívu v Exceli");
+        }
+
+        // archív zo staršej verzie programu (len zoznam v nastaveniach) sa prenesie, zobrazí bez prehľadu a dá sa odstrániť
+        Databaza.Zapis("archiv.skolske_roky",
+            """[{"SkolskyRok":"2023/2024","Vytvorene":"2024-06-30T10:00:00","Priecinok":"C:\\neexistuje","Dokumentov":5}]""");
+        ArchivSkolskehoRoka.PrenesStareZaznamy();
+        var stary = ArchivSkolskehoRoka.Zoznam().SingleOrDefault(z => z.SkolskyRok == "2023/2024");
+        Over(stary is { MaPrehlad: false } && Databaza.Citaj("archiv.skolske_roky") is null, "prenos archívu zo staršej verzie programu");
+        archiv.Obnov(stary!.Id);
+        Pumpuj();
+        Over(archiv.BezPrehladu && archiv.Archivy.Count == 3, "starší archív bez prehľadu predmetov");
+        Snimka(okno, "22i_archiv_starsi");
+        ArchivSkolskehoRoka.Odstran(stary.Id);
+        Over(ArchivSkolskehoRoka.Zoznam().Count == 2, "odstránenie archívu školského roka z programu");
     }
 
     private static void Snimka(Window okno, string nazov)
