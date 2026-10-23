@@ -448,7 +448,42 @@ public static partial class ImportStruktury
             }
         }
 
+        // prepis reči môže v názve oblasti zameniť písmeno („Človek a prírova“) – tolerancia 1 – 2 znakov
+        var oddelovac = Regex.Match(bezUvodu, @"^\s*(?<nazov>[^:,;–\-]{3,60}?)\s*[:,;–\-]\s*(?<zvysok>.+)$");
+        if (oddelovac.Success)
+        {
+            var nazov = ImportOsnov.Kluc(oddelovac.Groups["nazov"].Value);
+            var najblizsia = zname
+                .Select(o => (Oblast: o, Vzdialenost: Vzdialenost(nazov, ImportOsnov.Kluc(o))))
+                .Where(x => x.Vzdialenost <= Math.Max(1, x.Oblast.Length / 9))
+                .OrderBy(x => x.Vzdialenost)
+                .FirstOrDefault();
+            if (najblizsia.Oblast is not null)
+            {
+                return (najblizsia.Oblast, bezUvodu[oddelovac.Groups["zvysok"].Index..]);
+            }
+        }
+
         return null;
+    }
+
+    /// <summary>Levenshteinova vzdialenosť dvoch textov.</summary>
+    public static int Vzdialenost(string a, string b)
+    {
+        var predchadzajuci = Enumerable.Range(0, b.Length + 1).ToArray();
+        for (var i = 1; i <= a.Length; i++)
+        {
+            var aktualny = new int[b.Length + 1];
+            aktualny[0] = i;
+            for (var j = 1; j <= b.Length; j++)
+            {
+                aktualny[j] = Math.Min(Math.Min(aktualny[j - 1] + 1, predchadzajuci[j] + 1), predchadzajuci[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1));
+            }
+
+            predchadzajuci = aktualny;
+        }
+
+        return predchadzajuci[b.Length];
     }
 
     private static string Velke(string text) => text.Length == 0 ? text : char.ToUpper(text[0], System.Globalization.CultureInfo.GetCultureInfo("sk-SK")) + text[1..];

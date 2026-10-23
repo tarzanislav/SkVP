@@ -1918,6 +1918,10 @@ internal static class Samotest
         Over(bezDvojbodky.Oblasti.Count == 2 && bezDvojbodky.Oblasti[0].Nazov == "Človek a príroda" && bezDvojbodky.Oblasti[0].Predmety.Count == 3
              && bezDvojbodky.Oblasti[1].Nazov == "Zdravie a pohyb" && bezDvojbodky.Oblasti[1].Predmety.SequenceEqual(new[] { "Telesná a športová výchova" }),
             "diktovanie: oblasť rozpoznaná aj bez dvojbodky (čiarka, pomlčka, malé písmená)");
+        var preklep = ImportStruktury.ZDiktovania("Človek a prírova, fyzika, chémia, biológia. Fyzika, chémia.");
+        Over(preklep.Oblasti.Count >= 1 && preklep.Oblasti[0].Nazov == "Človek a príroda" && preklep.Oblasti[0].Predmety.Count >= 3
+             && ImportStruktury.Vzdialenost("priroda", "prirova") == 1,
+            "diktovanie: oblasť rozpoznaná aj pri chybe prepisu v jednom písmene („Človek a prírova“)");
         Over(PrepisHlasu.BezOzveny(Diktovanie.Vyzva) == "" && PrepisHlasu.BezOzveny("Človek a príroda: fyzika, chémia, biológia.").Length > 0
              && PrepisHlasu.Uprav("  Fyzika   [BLANK_AUDIO] ") == "Fyzika" && Math.Abs(PrepisHlasu.Prevzorkuj(new float[22050], 22050).Length - 16000) <= 1,
             "diktovanie: úprava prepisu (ozvena výzvy, ticho, prevzorkovanie na 16 kHz)");
