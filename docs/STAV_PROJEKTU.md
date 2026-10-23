@@ -157,6 +157,11 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   advapi32) a exportov, `LICENSE-whisper.cpp.txt` pri programe. Kód z EviTA: `Services/Diktovanie` (modely small/turbo/base
   z Hugging Face s overením SHA-256, priečinok Modely vedľa dát), `Services/PrepisHlasu`, `Pomocne/Mikrofon` (winmm),
   `Pomocne/DiktovanieDoPola`, `Views/DiktovanieWindow` (ozubené koliesko v okne diktovania). Kľúče `diktovanie.sposob/model`.
+  Vylepšenia po kontrole: výzva modelu v tvare „Oblasť: predmet, predmet.“ so všetkými 7 oblasťami; oblasť sa rozpozná aj
+  bez dvojbodky (čiarka/pomlčka, bez diakritiky – `ImportStruktury.ZnamaNaZaciatku`, `ImportOsnov.BezDiakritiky`); model sa
+  načíta do pamäte pri otvorení okna (`PrepisHlasu.PripravAsync`); model stiahnutý v EviTA (C:\ProgramData\EviTA\Modely)
+  sa použije bez sťahovania; filter „ozveny“ výzvy pri tichu. CI: model ggml-small (cache, SHA-256) + slovenská veta
+  z Piper (sk_SK-lili) → samotest prepisu: 6 s zvuku za ~7 s, 7/7 výrazov, oblasti a predmety rozpoznané.
 - Servis: „Zálohovať učebné osnovy (Word, PDF)“ – pri každom .docx v ZIP aj .pdf (`ZalohaService.PdfDokumentu`).
   Správa databázy ako v EviTA (`Services/DiagnostikaService`): rýchla/úplná kontrola, kontrola väzieb, kontrola dát
   (čitateľnosť a SHA dokumentov, duplicitné predmety…), optimalizácia, obnova indexov, kompaktovanie, oprava väzieb
