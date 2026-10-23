@@ -1,0 +1,211 @@
+<Application x:Class="SkVP.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:pom="clr-namespace:SkVP.Pomocne"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <!-- vzhľad Fluent (Windows 11) nastavuje App.NastavTemu – svetlý, tmavý alebo podľa Windows -->
+
+            <BooleanToVisibilityConverter x:Key="BoolNaViditelnost" />
+            <pom:InverzBoolNaViditelnost x:Key="InverzBoolNaViditelnost" />
+            <pom:NieJePrazdne x:Key="NieJePrazdne" />
+            <pom:NulaNaViditelnost x:Key="NulaNaViditelnost" />
+            <pom:FarbaNaStetec x:Key="FarbaNaStetec" />
+            <pom:RovnaSa x:Key="RovnaSa" />
+            <pom:InverzBool x:Key="InverzBool" />
+
+            <FontFamily x:Key="IkonovePismo">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+            <FontFamily x:Key="PismoNadpisov">Segoe UI Variable Display, Segoe UI</FontFamily>
+            <FontFamily x:Key="PismoTextu">Segoe UI Variable Text, Segoe UI</FontFamily>
+
+            <!-- papier dokumentu je biely v svetlom aj tmavom vzhľade, ako list papiera -->
+            <SolidColorBrush x:Key="PapierStetec" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="AtramentStetec" Color="#1F2933" />
+
+            <Style x:Key="Ikona" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource IkonovePismo}" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+            </Style>
+
+            <Style x:Key="Nadpis" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource PismoNadpisov}" />
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="Podnadpis" TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource PismoNadpisov}" />
+                <Setter Property="FontSize" Value="18" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,0,0,10" />
+            </Style>
+
+            <Style x:Key="Popis" TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                <Setter Property="FontSize" Value="12.5" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+
+            <Style x:Key="Stitok" TargetType="TextBlock">
+                <Setter Property="Margin" Value="0,12,0,4" />
+                <Setter Property="FontSize" Value="12.5" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            </Style>
+
+            <Style x:Key="Karta" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Padding" Value="20" />
+            </Style>
+
+            <!-- tlačidlo s ikonou bez rámčeka (akcie v zoznamoch a paneloch nástrojov) -->
+            <Style x:Key="IkonoveTlacidlo" TargetType="Button">
+                <Setter Property="Width" Value="32" />
+                <Setter Property="Height" Value="32" />
+                <Setter Property="FontFamily" Value="{StaticResource IkonovePismo}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Focusable" Value="True" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Pozadie" Background="{TemplateBinding Background}" CornerRadius="6">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Pozadie" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Pozadie" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Pozadie" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                    <Setter TargetName="Pozadie" Property="BorderThickness" Value="1.5" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.35" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- prepínač formátu v editore (tučné, kurzíva …) -->
+            <Style x:Key="NastrojEditora" TargetType="Button" BasedOn="{StaticResource IkonoveTlacidlo}">
+                <Setter Property="Width" Value="34" />
+                <Setter Property="Height" Value="32" />
+            </Style>
+
+            <!-- položka hlavného menu -->
+            <Style x:Key="PolozkaMenu" TargetType="RadioButton">
+                <Setter Property="GroupName" Value="HlavneMenu" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Margin" Value="0,1" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="RadioButton">
+                            <Border x:Name="Pozadie" Background="Transparent" CornerRadius="7" Padding="12,9">
+                                <Grid>
+                                    <Border x:Name="Znacka" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" Margin="-12,0,0,0"
+                                            Background="{DynamicResource AccentFillColorDefaultBrush}" Visibility="Hidden" />
+                                    <ContentPresenter VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Pozadie" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="Pozadie" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                    <Setter TargetName="Znacka" Property="Visibility" Value="Visible" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Pozadie" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                    <Setter TargetName="Pozadie" Property="BorderThickness" Value="1.5" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- plochý obsah tlačidla – riadok zoznamu, ktorý sa dá kliknúť -->
+            <Style x:Key="RiadokTlacidlo" TargetType="Button">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="Pozadie" Background="{TemplateBinding Background}" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Pozadie" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="Pozadie" Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Pozadie" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                    <Setter TargetName="Pozadie" Property="BorderThickness" Value="1.5" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- textové pole, ktoré vyzerá ako nadpis, kým sa doň neklikne -->
+            <Style x:Key="NadpisovePole" TargetType="TextBox">
+                <Setter Property="FontFamily" Value="{StaticResource PismoNadpisov}" />
+                <Setter Property="FontSize" Value="30" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="CaretBrush" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border x:Name="Ram" Background="{TemplateBinding Background}" BorderThickness="0,0,0,2" BorderBrush="Transparent"
+                                    Padding="0,0,0,2">
+                                <ScrollViewer x:Name="PART_ContentHost" Focusable="False" HorizontalScrollBarVisibility="Hidden"
+                                              VerticalScrollBarVisibility="Hidden" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Ram" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                    <Setter TargetName="Ram" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="Odznak" TargetType="Border">
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="Padding" Value="9,2,9,3" />
+                <Setter Property="VerticalAlignment" Value="Center" />
+                <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

@@ -1,0 +1,84 @@
+{
+  "nazov": "Vzdelávacie oblasti a predmety",
+  "typ": "Gymnázium, ISCED 3A",
+  "oblasti": [
+    {
+      "nazov": "Jazyk a komunikácia",
+      "predmety": [
+        "Slovenský jazyk a literatúra",
+        "Anglický jazyk",
+        "Nemecký jazyk",
+        "Ruský jazyk",
+        "Seminár zo slovenského jazyka a literatúry",
+        "Konverzácia v anglickom jazyku",
+        "Konverzácia z nemeckého jazyka",
+        "Reálie v anglickom jazyku",
+        "Jazykom k maturite"
+      ]
+    },
+    {
+      "nazov": "Matematika a práca s informáciami",
+      "predmety": [
+        "Matematika",
+        "Informatika",
+        "Aplikovaná informatika",
+        "Aplikovaná matematika",
+        "Technika",
+        "Cvičenia z matematiky",
+        "Matematika pre maturantov",
+        "Informatika pre maturantov"
+      ]
+    },
+    {
+      "nazov": "Človek a príroda",
+      "predmety": [
+        "Fyzika",
+        "Chémia",
+        "Biológia",
+        "Experimentálna prírodoveda",
+        "Seminár z biológie",
+        "Seminár z chémie",
+        "Seminár z fyziky",
+        "Biológia pre maturantov",
+        "Chémia pre maturantov",
+        "Fyzika pre maturantov"
+      ]
+    },
+    {
+      "nazov": "Človek a spoločnosť",
+      "predmety": [
+        "Dejepis",
+        "Geografia",
+        "Občianska náuka",
+        "Finančná gramotnosť",
+        "Seminár z dejepisu",
+        "Seminár z geografie",
+        "Dejepis pre maturantov",
+        "Geografia pre maturantov",
+        "Občianska náuka pre maturantov"
+      ]
+    },
+    {
+      "nazov": "Umenie a kultúra",
+      "predmety": [
+        "Umenie a kultúra"
+      ]
+    },
+    {
+      "nazov": "Človek a hodnoty",
+      "predmety": [
+        "Etická výchova",
+        "Náboženská výchova"
+      ]
+    },
+    {
+      "nazov": "Zdravie a pohyb",
+      "predmety": [
+        "Telesná a športová výchova",
+        "Športová príprava",
+        "Základy športovej prípravy",
+        "Športová príprava pre maturantov"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,583 @@
+using System.Collections.ObjectModel;
+using System.Windows.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using SkVP.Data;
+using SkVP.Models;
+using SkVP.Pomocne;
+using SkVP.Services;
+
+namespace SkVP.ViewModels;
+
+/// <summary>Stránka, ktorá má pred odchodom niečo uložiť (rozpísaný text osnovy).</summary>
+public interface IUkladaPredOdchodom
+{
+    void UlozTeraz();
+}
+
+public static class Sekcie
+{
+    public const string Dashboard = "dashboard";
+    public const string Osnovy = "osnovy";
+    public const string Tlac = "tlac";
+    public const string Nastavenia = "nastavenia";
+}
+
+/// <summary>Hlavné okno: menu, oblasti s predmetmi, prechod medzi stránkami a spoločné akcie.</summary>
+public sealed partial class MainViewModel : ObservableObject
+{
+    private readonly ObjektService _sluzba = new();
+    private readonly DispatcherTimer _casovacOznamenia = new() { Interval = TimeSpan.FromSeconds(9) };
+    private Action? _vratitSpat;
+
+    public MainViewModel()
+    {
+        _casovacOznamenia.Tick += (_, _) =>
+        {
+            _casovacOznamenia.Stop();
+            Oznamenie = null;
+            _vratitSpat = null;
+        };
+        NacitajOblasti();
+        NacitajUdaje();
+        OtvorDashboard();
+    }
+
+    public ObservableCollection<OblastVM> Oblasti { get; } = new();
+
+    [ObservableProperty]
+    private object? _stranka;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia))]
+    private string _sekcia = Sekcie.Dashboard;
+
+    public bool JeDashboard => Sekcia == Sekcie.Dashboard;
+    public bool JeOsnovy => Sekcia == Sekcie.Osnovy;
+    public bool JeTlac => Sekcia == Sekcie.Tlac;
+    public bool JeNastavenia => Sekcia == Sekcie.Nastavenia;
+
+    [ObservableProperty]
+    private string _skola = "";
+
+    [ObservableProperty]
+    private string _nazovProgramu = UdajeSkVP.PredvolenyNazov;
+
+    [ObservableProperty]
+    private string? _oznamenie;
+
+    [ObservableProperty]
+    private bool _maVratitSpat;
+
+    [ObservableProperty]
+    private DostupnaVerzia? _novaVerzia;
+
+    public string VerziaText => $"Verzia {AktualizaciaService.AktualnaVerzia}";
+
+    public string PodtitulMenu => Skola.Length > 0 ? Skola : NazovProgramu;
+
+    partial void OnSkolaChanged(string value) => OnPropertyChanged(nameof(PodtitulMenu));
+
+    partial void OnNazovProgramuChanged(string value) => OnPropertyChanged(nameof(PodtitulMenu));
+
+    public int PocetPredmetov => Oblasti.Sum(o => o.Pocet);
+
+    // ---- načítanie ----
+
+    public void NacitajOblasti()
+    {
+        var vybrana = Oblasti.FirstOrDefault(o => o.JeVybrana)?.Id;
+        Oblasti.Clear();
+        var index = 0;
+        foreach (var objekt in _sluzba.Oblasti())
+        {
+            var oblast = new OblastVM(objekt, index++) { JeVybrana = objekt.Id == vybrana };
+            foreach (var predmet in _sluzba.Deti(objekt.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            {
+                oblast.Predmety.Add(new PredmetVM(predmet, oblast));
+            }
+
+            oblast.Obnov();
+            Oblasti.Add(oblast);
+        }
+
+        OnPropertyChanged(nameof(PocetPredmetov));
+    }
+
+    public void NacitajUdaje()
+    {
+        var udaje = UdajeSkVP.Nacitaj();
+        Skola = udaje.Skola;
+        NazovProgramu = udaje.NazovProgramu;
+    }
+
+    public OblastVM? NajdiOblast(long id) => Oblasti.FirstOrDefault(o => o.Id == id);
+
+    public PredmetVM? NajdiPredmet(long id) => Oblasti.SelectMany(o => o.Predmety).FirstOrDefault(p => p.Id == id);
+
+    // ---- navigácia ----
+
+    private void Prejdi(string sekcia, object stranka, OblastVM? oblast = null)
+    {
+        (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
+        (Stranka as IDisposable)?.Dispose();
+        foreach (var o in Oblasti)
+        {
+            o.JeVybrana = o == oblast;
+        }
+
+        Sekcia = sekcia;
+        Stranka = stranka;
+    }
+
+    [RelayCommand]
+    public void OtvorDashboard() => Prejdi(Sekcie.Dashboard, new DashboardViewModel(this));
+
+    [RelayCommand]
+    public void OtvorOsnovy() => Prejdi(Sekcie.Osnovy, new OsnovyViewModel(this));
+
+    [RelayCommand]
+    public void OtvorOblast(OblastVM? oblast)
+    {
+        if (oblast is not null)
+        {
+            Prejdi(Sekcie.Osnovy, new OblastViewModel(this, oblast), oblast);
+        }
+    }
+
+    [RelayCommand]
+    public void OtvorPredmet(PredmetVM? predmet)
+    {
+        if (predmet is not null)
+        {
+            Prejdi(Sekcie.Osnovy, new PredmetViewModel(this, predmet), predmet.Oblast);
+        }
+    }
+
+    [RelayCommand]
+    public void OtvorTlac(OblastVM? oblast) => Prejdi(Sekcie.Tlac, new TlacViewModel(this, oblast));
+
+    [RelayCommand]
+    public void OtvorNastavenia() => Prejdi(Sekcie.Nastavenia, new NastaveniaViewModel(this));
+
+    // ---- oblasti ----
+
+    public OblastVM? PridajOblast(string nazov)
+    {
+        if (string.IsNullOrWhiteSpace(nazov))
+        {
+            return null;
+        }
+
+        var objekt = _sluzba.Pridaj(TypObjektu.Oblast, null, nazov, UcebnyPlanService.FarbaOblasti(Oblasti.Count));
+        var oblast = new OblastVM(objekt, Oblasti.Count);
+        oblast.Obnov();
+        Oblasti.Add(oblast);
+        return oblast;
+    }
+
+    [RelayCommand]
+    private void PosunOblastHore(OblastVM? oblast) => PosunOblast(oblast, -1);
+
+    [RelayCommand]
+    private void PosunOblastDole(OblastVM? oblast) => PosunOblast(oblast, +1);
+
+    private void PosunOblast(OblastVM? oblast, int smer)
+    {
+        if (oblast is null || !_sluzba.Posun(oblast.Id, smer))
+        {
+            return;
+        }
+
+        var index = Oblasti.IndexOf(oblast);
+        Oblasti.Move(index, index + smer);
+    }
+
+    public void PremenujOblast(OblastVM oblast, string nazov)
+    {
+        nazov = nazov.Trim();
+        if (nazov.Length == 0 || nazov == oblast.Nazov)
+        {
+            return;
+        }
+
+        _sluzba.Premenuj(oblast.Id, nazov);
+        oblast.Nazov = nazov;
+    }
+
+    public void NastavFarbuOblasti(OblastVM oblast, string farba)
+    {
+        _sluzba.NastavFarbu(oblast.Id, farba);
+        oblast.Farba = farba;
+    }
+
+    [RelayCommand]
+    private void OdstranOblast(OblastVM? oblast)
+    {
+        if (oblast is null || !Dialogy.Potvrd(
+                $"Odstrániť vzdelávaciu oblasť „{oblast.Nazov}“ aj s jej predmetmi ({oblast.Pocet})?\n\nOdstránenie sa dá hneď vrátiť späť."))
+        {
+            return;
+        }
+
+        _sluzba.Odstran(oblast.Id);
+        var index = Oblasti.IndexOf(oblast);
+        Oblasti.Remove(oblast);
+        OnPropertyChanged(nameof(PocetPredmetov));
+        if (Stranka is OblastViewModel or PredmetViewModel)
+        {
+            OtvorOsnovy();
+        }
+
+        Oznam($"Oblasť „{oblast.Nazov}“ je odstránená.", () =>
+        {
+            _sluzba.Obnov(oblast.Id);
+            Oblasti.Insert(Math.Min(index, Oblasti.Count), oblast);
+            OnPropertyChanged(nameof(PocetPredmetov));
+        });
+    }
+
+    // ---- predmety ----
+
+    public PredmetVM? PridajPredmet(OblastVM oblast, string nazov)
+    {
+        if (string.IsNullOrWhiteSpace(nazov))
+        {
+            return null;
+        }
+
+        var objekt = _sluzba.Pridaj(TypObjektu.Predmet, oblast.Id, nazov);
+        var predmet = new PredmetVM(objekt, oblast);
+        oblast.Predmety.Add(predmet);
+        oblast.Obnov();
+        OnPropertyChanged(nameof(PocetPredmetov));
+        return predmet;
+    }
+
+    [RelayCommand]
+    private void PosunPredmetHore(PredmetVM? predmet) => PosunPredmet(predmet, -1);
+
+    [RelayCommand]
+    private void PosunPredmetDole(PredmetVM? predmet) => PosunPredmet(predmet, +1);
+
+    public void PosunPredmet(PredmetVM? predmet, int smer)
+    {
+        if (predmet is null || !_sluzba.Posun(predmet.Id, smer))
+        {
+            return;
+        }
+
+        var zoznam = predmet.Oblast.Predmety;
+        var index = zoznam.IndexOf(predmet);
+        zoznam.Move(index, index + smer);
+        predmet.Oblast.Obnov();
+    }
+
+    /// <summary>Presun predmetu na iné miesto alebo do inej oblasti (ťahanie myšou).</summary>
+    public void PresunPredmet(PredmetVM predmet, OblastVM cielova, int pozicia)
+    {
+        var povodna = predmet.Oblast;
+        var staryIndex = povodna.Predmety.IndexOf(predmet);
+        if (povodna == cielova)
+        {
+            if (pozicia > staryIndex)
+            {
+                pozicia--;
+            }
+
+            pozicia = Math.Clamp(pozicia, 0, povodna.Predmety.Count - 1);
+            if (pozicia == staryIndex)
+            {
+                return;
+            }
+        }
+
+        _sluzba.Presun(predmet.Id, cielova.Id, pozicia);
+        povodna.Predmety.Remove(predmet);
+        pozicia = Math.Clamp(pozicia, 0, cielova.Predmety.Count);
+        cielova.Predmety.Insert(pozicia, predmet);
+        predmet.Oblast = cielova;
+        povodna.Obnov();
+        if (cielova != povodna)
+        {
+            cielova.Obnov();
+            Oznam($"Predmet „{predmet.Nazov}“ je presunutý do oblasti {cielova.Nazov}.");
+        }
+    }
+
+    public void PremenujPredmet(PredmetVM predmet, string nazov)
+    {
+        nazov = nazov.Trim();
+        if (nazov.Length == 0 || nazov == predmet.Nazov)
+        {
+            return;
+        }
+
+        _sluzba.Premenuj(predmet.Id, nazov);
+        predmet.Nazov = nazov;
+    }
+
+    [RelayCommand]
+    private void OdstranPredmet(PredmetVM? predmet)
+    {
+        if (predmet is null)
+        {
+            return;
+        }
+
+        var oblast = predmet.Oblast;
+        var index = oblast.Predmety.IndexOf(predmet);
+        _sluzba.Odstran(predmet.Id);
+        oblast.Predmety.Remove(predmet);
+        oblast.Obnov();
+        OnPropertyChanged(nameof(PocetPredmetov));
+        if (Stranka is PredmetViewModel { Predmet: var otvoreny } && otvoreny == predmet)
+        {
+            OtvorOblast(oblast);
+        }
+
+        Oznam($"Predmet „{predmet.Nazov}“ je odstránený.", () =>
+        {
+            _sluzba.Obnov(predmet.Id);
+            oblast.Predmety.Insert(Math.Min(index, oblast.Predmety.Count), predmet);
+            oblast.Obnov();
+            OnPropertyChanged(nameof(PocetPredmetov));
+        });
+    }
+
+    public void NastavStav(PredmetVM predmet, string? stav)
+    {
+        _sluzba.NastavStav(predmet.Id, stav);
+        predmet.StavKod = stav;
+        predmet.Oblast.Obnov();
+    }
+
+    // ---- dokumenty a úprava vo Worde ----
+
+    private readonly Dictionary<long, UpravaVoWorde> _upravyVoWorde = new();
+    private readonly HashSet<long> _zarchivovaneVoWorde = new();
+    private DispatcherTimer? _kontrolaWordu;
+
+    /// <summary>Dokument objektu sa zmenil (prevzatý z Wordu).</summary>
+    public event Action<long>? DokumentZmeneny;
+
+    /// <summary>Úprava dokumentu vo Worde sa skončila (Word dokument zatvoril).</summary>
+    public event Action<long>? WordSkoncil;
+
+    public bool JeVoWorde(long objektId) => _upravyVoWorde.ContainsKey(objektId);
+
+    public bool NiecoJeVoWorde => _upravyVoWorde.Count > 0;
+
+    /// <summary>Otvorí dokument objektu vo Worde (pracovná kópia, zmeny sa preberajú automaticky).</summary>
+    public void UpravVoWorde(long objektId, string nazovSuboru, bool sablonaOsnovy)
+    {
+        if (_upravyVoWorde.TryGetValue(objektId, out var bezi))
+        {
+            if (!Dialogy.TichyRezim && Word.Cesta is not null)
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Word.Cesta, $"\"{bezi.Cesta}\"") { UseShellExecute = false });
+            }
+
+            return;
+        }
+
+        var data = new DokumentService().NacitajData(objektId)
+                   ?? DocxVystup.Osnova(sablonaOsnovy ? DokumentOsnovy.SablonaOsnovy() : new List<Blok>());
+        var uprava = UpravaVoWorde.Spusti(objektId, nazovSuboru, data);
+        uprava.Ulozene += novy => PrevezmiZWordu(objektId, novy);
+        _upravyVoWorde[objektId] = uprava;
+        if (_kontrolaWordu is null)
+        {
+            _kontrolaWordu = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+            _kontrolaWordu.Tick += (_, _) => KontrolaWordu();
+        }
+
+        _kontrolaWordu.Start();
+    }
+
+    public void SkontrolujWord(long objektId)
+    {
+        if (_upravyVoWorde.TryGetValue(objektId, out var uprava))
+        {
+            uprava.Skontroluj();
+        }
+    }
+
+    private void PrevezmiZWordu(long objektId, byte[] data)
+    {
+        try
+        {
+            var dovod = _zarchivovaneVoWorde.Contains(objektId) ? null : "Pred úpravou vo Worde";
+            if (new DokumentService().Uloz(objektId, data, dovod))
+            {
+                _zarchivovaneVoWorde.Add(objektId);
+                PoZmeneDokumentu(objektId, oznamit: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Oznam($"Zmeny z Wordu sa nepodarilo prevziať: {ex.Message}");
+        }
+    }
+
+    /// <summary>Po uložení dokumentu obnoví stav predmetu (dĺžka textu, dátum úpravy) a dá vedieť stránkam.</summary>
+    public void PoZmeneDokumentu(long objektId, bool oznamit)
+    {
+        if (NajdiPredmet(objektId) is { } predmet && _sluzba.Nacitaj(objektId) is { } objekt)
+        {
+            predmet.DlzkaTextu = objekt.DlzkaTextu;
+            predmet.Upravene = objekt.Upravene;
+            predmet.Oblast.Obnov();
+        }
+
+        if (oznamit)
+        {
+            DokumentZmeneny?.Invoke(objektId);
+        }
+    }
+
+    private void KontrolaWordu()
+    {
+        foreach (var (id, uprava) in _upravyVoWorde.ToList())
+        {
+            if (uprava.JeOtvorenyVoWorde)
+            {
+                uprava.BolOtvoreny = true;
+                continue;
+            }
+
+            // Word sa spúšťa niekoľko sekúnd – koniec úpravy sa uzná, až keď bol súbor aspoň raz otvorený
+            if (!uprava.BolOtvoreny && DateTime.Now - uprava.Spustene < TimeSpan.FromSeconds(90))
+            {
+                continue;
+            }
+
+            uprava.Skontroluj();
+            uprava.Dispose();
+            _upravyVoWorde.Remove(id);
+            _zarchivovaneVoWorde.Remove(id);
+            WordSkoncil?.Invoke(id);
+            var nazov = NajdiPredmet(id)?.Nazov ?? NajdiOblast(id)?.Nazov ?? "dokument";
+            Oznam($"Úprava vo Worde je ukončená – {nazov} je uložený v programe.");
+        }
+
+        if (_upravyVoWorde.Count == 0)
+        {
+            _kontrolaWordu?.Stop();
+        }
+    }
+
+    /// <summary>Pri zatvorení programu prevezme posledné zmeny z Wordu.</summary>
+    public void UkonciUpravyVoWorde()
+    {
+        foreach (var uprava in _upravyVoWorde.Values.ToList())
+        {
+            uprava.Skontroluj();
+            uprava.Dispose();
+        }
+
+        _upravyVoWorde.Clear();
+    }
+
+    /// <summary>Zmeny z Wordu, ktoré sa neprevzali (program skončil počas úpravy) – ponúkne ich obnovenie.</summary>
+    public void ObnovNeprevzateZWordu()
+    {
+        var dokumenty = new DokumentService();
+        foreach (var (id, cesta, data) in UpravaVoWorde.NajdiNeprevzate(dokumenty))
+        {
+            var nazov = NajdiPredmet(id)?.Nazov ?? NajdiOblast(id)?.Nazov;
+            if (nazov is null)
+            {
+                continue;
+            }
+
+            if (Dialogy.Potvrd($"Našli sa zmeny dokumentu „{nazov}“ z Wordu, ktoré program ešte neprevzal:\n{cesta}\n\nPrevziať ich teraz? (Doterajšia verzia sa zarchivuje.)"))
+            {
+                try
+                {
+                    dokumenty.Uloz(id, data, "Pred prevzatím neuložených zmien z Wordu");
+                    PoZmeneDokumentu(id, oznamit: true);
+                }
+                catch (Exception ex)
+                {
+                    Dialogy.Chyba("Zmeny sa nepodarilo prevziať.", ex);
+                    continue;
+                }
+            }
+
+            try
+            {
+                System.IO.Directory.Delete(System.IO.Path.GetDirectoryName(cesta)!, true);
+            }
+            catch (Exception)
+            {
+                // pracovná kópia zostane, nevadí
+            }
+        }
+    }
+
+    // ---- oznámenie s možnosťou vrátiť späť ----
+
+    public void Oznam(string text, Action? vratitSpat = null)
+    {
+        _casovacOznamenia.Stop();
+        Oznamenie = text;
+        _vratitSpat = vratitSpat;
+        MaVratitSpat = vratitSpat is not null;
+        _casovacOznamenia.Start();
+    }
+
+    [RelayCommand]
+    private void VratitSpat()
+    {
+        var akcia = _vratitSpat;
+        _vratitSpat = null;
+        _casovacOznamenia.Stop();
+        Oznamenie = null;
+        akcia?.Invoke();
+    }
+
+    [RelayCommand]
+    private void ZavrietOznamenie()
+    {
+        _casovacOznamenia.Stop();
+        Oznamenie = null;
+        _vratitSpat = null;
+    }
+
+    // ---- aktualizácia programu ----
+
+    public string NovaVerziaText => NovaVerzia is null ? "" : $"Je dostupná nová verzia SkVP {NovaVerzia.Verzia}.";
+
+    partial void OnNovaVerziaChanged(DostupnaVerzia? value) => OnPropertyChanged(nameof(NovaVerziaText));
+
+    public async Task SkontrolujAktualizaciuAsync()
+    {
+        var sluzba = new AktualizaciaService();
+        if (!sluzba.KontrolovatPriSpusteni())
+        {
+            return;
+        }
+
+        try
+        {
+            NovaVerzia = await sluzba.SkontrolujAsync();
+        }
+        catch (Exception)
+        {
+            // bez internetu sa nová verzia skontroluje nabudúce
+        }
+    }
+
+    [RelayCommand]
+    private void Aktualizovat()
+    {
+        if (NovaVerzia is null)
+        {
+            return;
+        }
+
+        (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
+        new Views.AktualizaciaWindow(NovaVerzia) { Owner = Dialogy.Vlastnik }.ShowDialog();
+    }
+}

@@ -1,0 +1,99 @@
+<UserControl x:Class="SkVP.Views.EditorDokumentu"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Koren">
+    <UserControl.Resources>
+        <Style x:Key="Oddelovac" TargetType="Border">
+            <Setter Property="Width" Value="1" />
+            <Setter Property="Height" Value="20" />
+            <Setter Property="Margin" Value="6,0" />
+            <Setter Property="Background" Value="{DynamicResource DividerStrokeColorDefaultBrush}" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- panel nástrojov – len v režime úprav -->
+        <Border x:Name="Nastroje" DockPanel.Dock="Top" Padding="44,6" Visibility="Collapsed"
+                Background="{DynamicResource LayerFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,1">
+            <WrapPanel HorizontalAlignment="Center">
+                <ComboBox x:Name="StylOdseku" Width="150" Margin="0,0,4,0" VerticalAlignment="Center" SelectionChanged="StylOdseku_SelectionChanged"
+                          ToolTip="Štýl odseku (Ctrl+0 až Ctrl+3)">
+                    <ComboBoxItem Content="Text" Tag="0" />
+                    <ComboBoxItem Content="Nadpis 1" Tag="1" FontWeight="Bold" />
+                    <ComboBoxItem Content="Nadpis 2" Tag="2" FontWeight="SemiBold" />
+                    <ComboBoxItem Content="Nadpis 3" Tag="3" FontStyle="Italic" />
+                </ComboBox>
+                <Border Style="{StaticResource Oddelovac}" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8DD;" ToolTip="Tučné (Ctrl+B)" Click="Tucne_Click" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8DB;" ToolTip="Kurzíva (Ctrl+I)" Click="Kurziva_Click" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8DC;" ToolTip="Podčiarknuté (Ctrl+U)" Click="Podciarknute_Click" />
+                <Border Style="{StaticResource Oddelovac}" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8FD;" ToolTip="Odrážky" Click="Odrazky_Click" />
+                <Button Style="{StaticResource NastrojEditora}" ToolTip="Číslovanie" Click="Cislovanie_Click">
+                    <TextBlock Text="1." FontFamily="Segoe UI" FontWeight="SemiBold" FontSize="13" />
+                </Button>
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE290;" ToolTip="Zmenšiť odsadenie" Click="ZmensitOdsadenie_Click" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE291;" ToolTip="Zväčšiť odsadenie" Click="ZvacsitOdsadenie_Click" />
+                <Border Style="{StaticResource Oddelovac}" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8E4;" ToolTip="Zarovnať vľavo" Click="Vlavo_Click" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8E3;" ToolTip="Zarovnať na stred" Click="Stred_Click" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE8E2;" ToolTip="Zarovnať do bloku" Click="Blok_Click" />
+                <Border Style="{StaticResource Oddelovac}" />
+                <Button Style="{StaticResource NastrojEditora}" Width="Auto" Padding="8,0" ToolTip="Tabuľka" Click="Tabulka_Click" x:Name="TlacidloTabulky">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE80A;" Style="{StaticResource Ikona}" FontSize="14" />
+                        <TextBlock Text="&#xE70D;" Style="{StaticResource Ikona}" FontSize="8" Margin="6,0,0,0" />
+                    </StackPanel>
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Vložiť tabuľku 2 × 2" Tag="2x2" Click="VlozitTabulku_Click" />
+                            <MenuItem Header="Vložiť tabuľku 3 × 3" Tag="3x3" Click="VlozitTabulku_Click" />
+                            <MenuItem Header="Vložiť tabuľku 4 × 4" Tag="4x4" Click="VlozitTabulku_Click" />
+                            <Separator />
+                            <MenuItem Header="Pridať riadok pod" Click="PridatRiadok_Click" />
+                            <MenuItem Header="Pridať stĺpec vpravo" Click="PridatStlpec_Click" />
+                            <MenuItem Header="Odstrániť riadok" Click="OdstranitRiadok_Click" />
+                            <MenuItem Header="Odstrániť stĺpec" Click="OdstranitStlpec_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE894;" ToolTip="Vyčistiť formát označeného textu" Click="VycistitFormat_Click" />
+                <Border Style="{StaticResource Oddelovac}" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE7A7;" ToolTip="Späť (Ctrl+Z)" Click="Spat_Click" />
+                <Button Style="{StaticResource NastrojEditora}" Content="&#xE7A6;" ToolTip="Znova (Ctrl+Y)" Click="Znova_Click" />
+            </WrapPanel>
+        </Border>
+
+        <!-- stôl s listom papiera -->
+        <ScrollViewer x:Name="Stol" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                      Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}">
+            <Grid Margin="40,26,40,48">
+                <Border x:Name="Papier" Width="794" MinHeight="1000" HorizontalAlignment="Center" VerticalAlignment="Top"
+                        Background="{StaticResource PapierStetec}" CornerRadius="3" Padding="76,64,72,72">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="22" ShadowDepth="3" Direction="270" Opacity="0.16" />
+                    </Border.Effect>
+                    <Grid>
+                        <Border x:Name="PruhPapiera" Width="5" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Margin="-46,4,0,0"
+                                CornerRadius="2.5" />
+                        <RichTextBox x:Name="Text" BorderThickness="0" Background="Transparent" Foreground="{StaticResource AtramentStetec}"
+                                     CaretBrush="{StaticResource AtramentStetec}" SelectionBrush="#663B5BDB"
+                                     IsReadOnly="True" IsReadOnlyCaretVisible="False" AcceptsTab="True" IsDocumentEnabled="True"
+                                     SpellCheck.IsEnabled="False" VerticalScrollBarVisibility="Disabled"
+                                     TextChanged="Text_TextChanged" SelectionChanged="Text_SelectionChanged" PreviewKeyDown="Text_PreviewKeyDown">
+                            <RichTextBox.Template>
+                                <ControlTemplate TargetType="RichTextBox">
+                                    <ScrollViewer x:Name="PART_ContentHost" Focusable="False" VerticalScrollBarVisibility="Disabled"
+                                                  HorizontalScrollBarVisibility="Disabled" />
+                                </ControlTemplate>
+                            </RichTextBox.Template>
+                        </RichTextBox>
+                        <TextBlock x:Name="Prazdne" Visibility="Collapsed" IsHitTestVisible="False" TextWrapping="Wrap"
+                                   FontSize="15" Foreground="#8A94A3" Margin="0,4,0,0" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

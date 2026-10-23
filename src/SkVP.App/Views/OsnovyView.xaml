@@ -1,0 +1,92 @@
+<UserControl x:Class="SkVP.Views.OsnovyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SkVP.ViewModels">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="44,34,44,40" MaxWidth="1240">
+            <TextBlock Text="Osnovy" Style="{StaticResource Nadpis}" />
+            <TextBlock Style="{StaticResource Popis}" FontSize="14" Margin="0,4,0,24"
+                       Text="Vzdelávacie oblasti v poradí, v akom idú v školskom vzdelávacom programe. Otvorte oblasť a uvidíte jej predmety." />
+
+            <ItemsControl ItemsSource="{Binding Oblasti}" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:OblastVM}">
+                        <Grid Width="372" Margin="0,0,16,16" x:Name="Karta">
+                            <Button Style="{StaticResource RiadokTlacidlo}" Padding="0"
+                                    Command="{Binding DataContext.Hlavny.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+                                <Border Style="{StaticResource Karta}" Padding="0" Height="196">
+                                    <DockPanel>
+                                        <Border DockPanel.Dock="Top" Height="6" CornerRadius="10,10,0,0"
+                                                Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                        <StackPanel Margin="22,16,22,18">
+                                            <TextBlock Text="{Binding Nazov}" FontFamily="{StaticResource PismoNadpisov}" FontSize="19"
+                                                       FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,64,0" />
+                                            <TextBlock Text="{Binding PocetText}" Style="{StaticResource Popis}" FontSize="13" Margin="0,4,0,0" />
+                                            <ItemsControl ItemsSource="{Binding Predmety}" Margin="0,12,0,0" Height="42" ClipToBounds="True" Focusable="False">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel />
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate DataType="{x:Type vm:PredmetVM}">
+                                                        <Border CornerRadius="9" Padding="8,1,8,2" Margin="0,0,5,5"
+                                                                Background="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=1C}">
+                                                            <TextBlock Text="{Binding Nazov}" FontSize="11.5" />
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                            <DockPanel Margin="0,12,0,0">
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding HotoveText}" Style="{StaticResource Popis}" FontSize="11.5"
+                                                           Margin="12,0,0,0" />
+                                                <ProgressBar Height="5" Minimum="0" Maximum="1" Value="{Binding Podiel, Mode=OneWay}" VerticalAlignment="Center"
+                                                             Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}}"
+                                                             Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}" />
+                                            </DockPanel>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </Button>
+                            <StackPanel x:Name="Akcie" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                        Margin="0,16,12,0" Visibility="Hidden">
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70E;" ToolTip="Posunúť oblasť skôr"
+                                        Command="{Binding DataContext.Hlavny.PosunOblastHoreCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70D;" ToolTip="Posunúť oblasť neskôr"
+                                        Command="{Binding DataContext.Hlavny.PosunOblastDoleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                                <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE74D;" ToolTip="Odstrániť oblasť"
+                                        Command="{Binding DataContext.Hlavny.OdstranOblastCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </Grid>
+                        <DataTemplate.Triggers>
+                            <Trigger SourceName="Karta" Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Akcie" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- nová oblasť -->
+            <Border Style="{StaticResource Karta}" Width="372" HorizontalAlignment="Left" Padding="22,18" BorderThickness="1.5"
+                    Background="Transparent">
+                <StackPanel>
+                    <TextBlock Text="Nová vzdelávacia oblasť" FontWeight="SemiBold" Margin="0,0,0,8" />
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Content="Pridať" Margin="8,0,0,0" Padding="14,5" Command="{Binding PridajOblastCommand}" />
+                        <TextBox x:Name="NovaOblast" Text="{Binding NovaOblast, UpdateSourceTrigger=PropertyChanged}" KeyDown="NovaOblast_KeyDown" />
+                    </DockPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

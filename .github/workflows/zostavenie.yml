@@ -1,0 +1,142 @@
+name: Zostavenie SkVP
+
+on:
+  push:
+    branches: [ main, 'vyvoj/**' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: zostavenie-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zostavenie:
+    runs-on: windows-latest
+    steps:
+      - name: Stiahnuť zdrojový kód
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Nainštalovať .NET 10
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Určiť verziu
+        id: verzia
+        shell: pwsh
+        run: |
+          $v = "0.1.${{ github.run_number }}"
+          "cislo=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Verzia: $v"
+
+      - name: Zostaviť program
+        shell: pwsh
+        run: >
+          dotnet publish src/SkVP.App/SkVP.App.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:Version=${{ steps.verzia.outputs.cislo }}
+          -o publish
+
+      - name: Samotest programu
+        shell: pwsh
+        run: |
+          $env:SKVP_DATA_DIR = Join-Path $env:RUNNER_TEMP "skvp-samotest"
+          $p = Start-Process -FilePath "publish\SkVP.exe" -ArgumentList "--samotest" -PassThru
+          $null = $p.Handle
+          $log = Join-Path $env:SKVP_DATA_DIR "samotest.log"
+          $priebeh = Join-Path $env:SKVP_DATA_DIR "samotest_priebeh.log"
+          if (-not $p.WaitForExit(480000)) {
+            $p.Kill()
+            Write-Host "::error::Samotest neskončil do 8 minút"
+            if (Test-Path $priebeh) { Get-Content $priebeh -Tail 30 }
+            exit 1
+          }
+          if (Test-Path $log) {
+            Get-Content $log
+            Get-Content $log | Where-Object { $_ -cmatch 'CHYBA' } | Select-Object -First 5 | ForEach-Object {
+              $riadok = $_ -replace "`r", '' -replace '%', '%25'
+              Write-Host "::error::$riadok"
+            }
+          } else {
+            Write-Host "::error::Samotest nevytvoril záznam (kód $($p.ExitCode))"
+            if (Test-Path $priebeh) { Get-Content $priebeh -Tail 30 }
+          }
+          if ($p.ExitCode -ne 0) {
+            Write-Host ("::error::Program skončil s kódom {0} (0x{0:X8})" -f $p.ExitCode)
+            exit 1
+          }
+          Write-Host "::notice::Samotest OK"
+
+      - name: Uložiť výstupy samotestu (len vývojové vetvy)
+        # aj po neúspešnom samoteste – záznam, snímky obrazovky a vzorové PDF pomôžu nájsť chybu
+        if: ${{ !cancelled() && github.ref != 'refs/heads/main' }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $zdroj = Join-Path $env:RUNNER_TEMP "skvp-samotest"
+          $ciel = Join-Path $env:RUNNER_TEMP "vystupy"
+          New-Item -ItemType Directory -Force $ciel | Out-Null
+          if (Test-Path (Join-Path $zdroj "Export")) { Copy-Item (Join-Path $zdroj "Export\*") $ciel -Force }
+          Copy-Item (Join-Path $zdroj "samotest.log") $ciel -ErrorAction SilentlyContinue
+          Copy-Item (Join-Path $zdroj "samotest_priebeh.log") $ciel -ErrorAction SilentlyContinue
+          Set-Location $ciel
+          git init -q -b vystupy
+          git config user.name "SkVP zostavenie"
+          git config user.email "zostavenie@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Výstupy samotestu ${{ github.sha }}"
+          git push -q -f "https://x-access-token:$env:GH_TOKEN@github.com/${{ github.repository }}.git" vystupy
+
+      - name: Zostaviť inštalátor
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          & $iscc "/DAppVersion=${{ steps.verzia.outputs.cislo }}" "/DSourceDir=$PWD\publish" installer\skvp.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Inštalátor na stiahnutie (vývojová verzia)
+        if: github.ref != 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: SkVP_Setup_${{ steps.verzia.outputs.cislo }}
+          path: installer/Output/SkVP_Setup_${{ steps.verzia.outputs.cislo }}.exe
+          retention-days: 14
+
+      - name: Zverejniť novú verziu
+        # vývojové vetvy sa len zostavia a otestujú, verzia sa zverejní iba z vetvy main
+        if: github.ref == 'refs/heads/main'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $verzia = "${{ steps.verzia.outputs.cislo }}"
+          $instalator = "installer/Output/SkVP_Setup_$verzia.exe"
+          $predosla = git describe --tags --abbrev=0 --match "v*" 2>$null
+          $global:LASTEXITCODE = 0
+          if ($predosla) {
+            $zmeny = git log --no-merges --pretty=format:"- %s" "$predosla..HEAD"
+          } else {
+            $zmeny = git log --no-merges --pretty=format:"- %s" -n 20
+          }
+          $poznamky = @(
+            "## Novinky vo verzii $verzia",
+            "",
+            ($zmeny -join "`n"),
+            "",
+            "Stiahnite súbor **SkVP_Setup_$verzia.exe** a spustite ho. Nainštalovaný SkVP ponúkne ďalšie verzie sám pri spustení."
+          ) -join "`n"
+          Set-Content -Path notes.md -Value $poznamky -Encoding utf8
+          gh release create "v$verzia" $instalator `
+            --title "SkVP $verzia" `
+            --notes-file notes.md `
+            --latest `
+            --target ${{ github.sha }}

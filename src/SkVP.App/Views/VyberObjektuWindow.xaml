@@ -1,0 +1,35 @@
+<Window x:Class="SkVP.Views.VyberObjektuWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Prepojiť s…" Width="560" Height="640" MinWidth="440" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <DockPanel Margin="24,20,24,20">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Prepojiť s predmetom alebo oblasťou" Style="{StaticResource Podnadpis}" FontSize="19" />
+            <TextBlock Text="Druh súvislosti" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+            <ComboBox x:Name="Druh" DisplayMemberPath="Nazov" SelectedIndex="0" />
+            <TextBlock Text="Hľadať" Style="{StaticResource Stitok}" />
+            <TextBox x:Name="Hladat" TextChanged="Hladat_TextChanged" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button x:Name="Ok" Content="Prepojiť" MinWidth="120" Style="{DynamicResource AccentButtonStyle}" IsDefault="True" Click="Ok_Click" />
+            <Button Content="Zrušiť" MinWidth="100" Margin="8,0,0,0" IsCancel="True" />
+        </StackPanel>
+
+        <ListBox x:Name="Zoznam" Margin="0,12,0,0" MouseDoubleClick="Zoznam_MouseDoubleClick">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel Margin="0,3">
+                        <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,1,10,1"
+                                Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                        <StackPanel>
+                            <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding Popis}" Style="{StaticResource Popis}" FontSize="11.5" />
+                        </StackPanel>
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

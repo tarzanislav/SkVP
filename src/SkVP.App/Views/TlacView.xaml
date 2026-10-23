@@ -1,0 +1,139 @@
+<UserControl x:Class="SkVP.Views.TlacView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SkVP.ViewModels">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- voľby zostavy -->
+        <Border BorderThickness="0,0,1,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Bottom" Margin="28,12,28,24">
+                    <CheckBox Content="Otvoriť súbor po uložení" IsChecked="{Binding OtvoritPoUlozeni}" Margin="0,0,0,12" />
+                    <Button HorizontalAlignment="Stretch" Padding="12,8" Style="{DynamicResource AccentButtonStyle}" Command="{Binding TlacitCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE749;" FontSize="15" Margin="0,0,10,0" />
+                            <TextBlock Text="Tlačiť…" />
+                        </StackPanel>
+                    </Button>
+                    <UniformGrid Columns="2" Margin="0,8,0,0">
+                        <Button Padding="10,8" Margin="0,0,4,0" Command="{Binding UlozitPdfCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xEA90;" FontSize="15" Margin="0,0,8,0" />
+                                <TextBlock Text="Uložiť PDF" />
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="10,8" Margin="4,0,0,0" Command="{Binding UlozitWordCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE8A5;" FontSize="15" Margin="0,0,8,0" />
+                                <TextBlock Text="Uložiť Word" />
+                            </StackPanel>
+                        </Button>
+                    </UniformGrid>
+                </StackPanel>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="28,30,28,10">
+                        <TextBlock Text="Tlač a zostavy" Style="{StaticResource Nadpis}" FontSize="26" />
+                        <TextBlock Style="{StaticResource Popis}" FontSize="13" Margin="0,4,0,18"
+                                   Text="Spojte osnovy do jedného dokumentu – všetky, jednu oblasť alebo len vybrané oblasti." />
+
+                        <TextBlock Text="Ktoré osnovy" FontWeight="SemiBold" Margin="0,0,0,6" />
+                        <RadioButton Content="Všetky vzdelávacie oblasti" IsChecked="{Binding Len, Converter={StaticResource InverzBool}}" GroupName="Rozsah" />
+                        <RadioButton Content="Len vybrané oblasti" IsChecked="{Binding Len}" GroupName="Rozsah" Margin="0,2,0,0" />
+                        <Border Style="{StaticResource Karta}" Padding="10,8" Margin="0,8,0,0"
+                                Visibility="{Binding Len, Converter={StaticResource BoolNaViditelnost}}">
+                            <StackPanel>
+                                <ItemsControl ItemsSource="{Binding Oblasti}" Focusable="False">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:VolbaOblasti}">
+                                            <CheckBox IsChecked="{Binding Zahrnut}" Margin="0,1">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Border Width="10" Height="10" CornerRadius="2.5" Margin="0,0,8,0" VerticalAlignment="Center"
+                                                            Background="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                                    <TextBlock Text="{Binding Oblast.Nazov}" TextWrapping="Wrap" MaxWidth="230" />
+                                                </StackPanel>
+                                            </CheckBox>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                    <Button Content="Vybrať všetky" Padding="10,3" Command="{Binding VybratVsetkyCommand}" />
+                                    <Button Content="Zrušiť výber" Padding="10,3" Margin="6,0,0,0" Command="{Binding ZrusitVyberCommand}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Strany" FontWeight="SemiBold" Margin="0,20,0,6" />
+                        <CheckBox IsChecked="{Binding TitulnaStrana}">
+                            <TextBlock TextWrapping="Wrap">Úvodná strana – škola, logo, Školský vzdelávací program – Učebné osnovy</TextBlock>
+                        </CheckBox>
+                        <TextBlock Style="{StaticResource Popis}" Margin="28,0,0,4" Text="Logo školy nastavíte v Nastaveniach."
+                                   Visibility="{Binding MaLogo, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                        <CheckBox Content="Obsah s číslami strán" IsChecked="{Binding Obsah}" Margin="0,4,0,0" />
+                        <CheckBox IsChecked="{Binding OddelovacOblasti}" Margin="0,4,0,0">
+                            <TextBlock TextWrapping="Wrap">Oddeľujúca strana pred každou oblasťou (názov a zoznam predmetov)</TextBlock>
+                        </CheckBox>
+                        <CheckBox IsChecked="{Binding OddelovacPredmetu}" Margin="0,4,0,0">
+                            <TextBlock TextWrapping="Wrap">Oddeľujúca strana pred každým predmetom</TextBlock>
+                        </CheckBox>
+                        <CheckBox Content="Charakteristiky vzdelávacích oblastí" IsChecked="{Binding Charakteristiky}" Margin="0,4,0,0" />
+                        <CheckBox IsChecked="{Binding Nespracovane}" Margin="0,4,0,0">
+                            <TextBlock TextWrapping="Wrap">Aj predmety, ktorých osnova ešte nemá text</TextBlock>
+                        </CheckBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- náhľad strán -->
+        <DockPanel Grid.Column="1" Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}">
+            <Border DockPanel.Dock="Top" Padding="24,12" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                    Background="{DynamicResource LayerFillColorDefaultBrush}">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE71F;" ToolTip="Oddialiť" Command="{Binding OddialitCommand}" />
+                        <TextBlock Text="{Binding Zvacsenie, StringFormat={}{0:P0}}" VerticalAlignment="Center" Width="48" TextAlignment="Center" />
+                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE8A3;" ToolTip="Priblížiť" Command="{Binding PriblizitCommand}" />
+                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE72C;" ToolTip="Obnoviť náhľad" Margin="8,0,0,0" Command="{Binding ObnovitCommand}" />
+                    </StackPanel>
+                    <TextBlock Text="Náhľad" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Popis}" Style="{StaticResource Popis}" VerticalAlignment="Center" Margin="14,0,0,0" />
+                </DockPanel>
+            </Border>
+            <ListBox ItemsSource="{Binding Strany}" Background="Transparent" BorderThickness="0" Focusable="False"
+                     VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.VirtualizationMode="Recycling"
+                     ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalContentAlignment="Center" Padding="0,18">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Focusable" Value="False" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <ContentPresenter HorizontalAlignment="Center" />
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:StranaNahladu}">
+                        <StackPanel Margin="0,0,0,18">
+                            <Border Background="White" Width="{Binding DataContext.SirkaStrany, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                    Height="{Binding DataContext.VyskaStrany, RelativeSource={RelativeSource AncestorType=ListBox}}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="16" ShadowDepth="2" Direction="270" Opacity="0.18" />
+                                </Border.Effect>
+                                <Image Source="{Binding Obrazok}" Stretch="Uniform" />
+                            </Border>
+                            <TextBlock Text="{Binding Cislo}" HorizontalAlignment="Center" Margin="0,6,0,0" Style="{StaticResource Popis}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </Grid>
+</UserControl>

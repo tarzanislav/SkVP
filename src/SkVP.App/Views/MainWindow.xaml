@@ -1,0 +1,155 @@
+<Window x:Class="SkVP.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:SkVP.ViewModels"
+        xmlns:v="clr-namespace:SkVP.Views"
+        Title="SkVP – Školský vzdelávací program"
+        Icon="pack://application:,,,/Assets/skvp.ico"
+        Width="1360" Height="860" MinWidth="1040" MinHeight="640"
+        WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <v:DashboardView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OsnovyViewModel}">
+            <v:OsnovyView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:OblastViewModel}">
+            <v:OblastView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PredmetViewModel}">
+            <v:PredmetView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:TlacViewModel}">
+            <v:TlacView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:NastaveniaViewModel}">
+            <v:NastaveniaView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="276" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ľavý panel: menu a vzdelávacie oblasti -->
+        <Border Grid.Column="0" BorderThickness="0,0,1,0"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="20,22,16,20">
+                    <Image Source="pack://application:,,,/Assets/skvp.ico" Width="36" Height="36" VerticalAlignment="Center" />
+                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="SkVP" FontFamily="{StaticResource PismoNadpisov}" FontSize="21" FontWeight="Bold" />
+                        <TextBlock Text="{Binding PodtitulMenu}" Style="{StaticResource Popis}" FontSize="12"
+                                   TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" MaxWidth="190" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel DockPanel.Dock="Bottom" Margin="12,8,12,14">
+                    <Border CornerRadius="8" Padding="12,10" Margin="0,0,0,10"
+                            Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                            Visibility="{Binding NovaVerziaText, Converter={StaticResource NieJePrazdne}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding NovaVerziaText}" TextWrapping="Wrap" FontSize="12.5" />
+                            <Button Content="Aktualizovať" Margin="0,8,0,0" HorizontalAlignment="Left" Padding="12,4"
+                                    Style="{DynamicResource AccentButtonStyle}" Command="{Binding AktualizovatCommand}" />
+                        </StackPanel>
+                    </Border>
+                    <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeNastavenia, Mode=OneWay}"
+                                 Command="{Binding OtvorNastaveniaCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE713;" Margin="0,0,14,0" />
+                            <TextBlock Text="Nastavenia" />
+                        </StackPanel>
+                    </RadioButton>
+                    <TextBlock Text="{Binding VerziaText}" Style="{StaticResource Popis}" FontSize="11.5" Margin="12,8,0,0" />
+                </StackPanel>
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12,0">
+                    <StackPanel>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeDashboard, Mode=OneWay}"
+                                     Command="{Binding OtvorDashboardCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE80F;" Margin="0,0,14,0" />
+                                <TextBlock Text="Dashboard" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeOsnovy, Mode=OneWay}"
+                                     Command="{Binding OtvorOsnovyCommand}">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding PocetPredmetov}" Style="{StaticResource Popis}"
+                                           VerticalAlignment="Center" FontWeight="Normal" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE8F1;" Margin="0,0,14,0" />
+                                    <TextBlock Text="Osnovy" />
+                                </StackPanel>
+                            </DockPanel>
+                        </RadioButton>
+
+                        <!-- vzdelávacie oblasti ako farebné záložky -->
+                        <ItemsControl x:Name="ZoznamOblasti" ItemsSource="{Binding Oblasti}" Margin="0,2,0,6" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type vm:OblastVM}">
+                                    <Button x:Name="Polozka" Style="{StaticResource RiadokTlacidlo}" Padding="10,7,10,7" Margin="14,1,0,1"
+                                            Command="{Binding DataContext.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}" AllowDrop="True" Tag="{Binding}"
+                                            Drop="Oblast_Drop" DragOver="Oblast_DragOver" ToolTip="{Binding HotoveText}">
+                                        <DockPanel>
+                                            <Border x:Name="Pruh" DockPanel.Dock="Left" Width="4" Height="18" CornerRadius="2" Margin="0,0,11,0"
+                                                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Pocet}" FontSize="12" Margin="8,0,0,0"
+                                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="Nazov" Text="{Binding Nazov}" FontSize="13.5" TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </Button>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding JeVybrana}" Value="True">
+                                            <Setter TargetName="Polozka" Property="Background"
+                                                    Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}" />
+                                            <Setter TargetName="Nazov" Property="FontWeight" Value="SemiBold" />
+                                            <Setter TargetName="Pruh" Property="Height" Value="22" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeTlac, Mode=OneWay}"
+                                     Command="{Binding OtvorTlacCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE749;" Margin="0,0,14,0" />
+                                <TextBlock Text="Tlač a zostavy" />
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+
+        <!-- obsah -->
+        <Grid Grid.Column="1" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+            <ContentControl x:Name="Obsah" Content="{Binding Stranka}" Focusable="False" />
+
+            <!-- oznámenie dole (s možnosťou vrátiť späť) -->
+            <Border VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,26" CornerRadius="10" Padding="18,10,10,10"
+                    Background="{DynamicResource SolidBackgroundFillColorQuarternaryBrush}"
+                    BorderBrush="{DynamicResource SurfaceStrokeColorFlyoutBrush}" BorderThickness="1"
+                    Visibility="{Binding Oznamenie, Converter={StaticResource NieJePrazdne}}">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.18" />
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding Oznamenie}" VerticalAlignment="Center" MaxWidth="560" TextWrapping="Wrap" />
+                    <Button Content="Vrátiť späť" Margin="16,0,0,0" Padding="12,4" Command="{Binding VratitSpatCommand}"
+                            Visibility="{Binding MaVratitSpat, Converter={StaticResource BoolNaViditelnost}}" />
+                    <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE711;" FontSize="11" Margin="6,0,0,0"
+                            ToolTip="Zavrieť" Command="{Binding ZavrietOznamenieCommand}" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
