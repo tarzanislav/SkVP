@@ -1,0 +1,24 @@
+# oficiálne zdroje pre sekciu Novinky (stiahnu sa a prevedú na text) – názov|URL
+prazdniny_2026_2027.docx|https://www.minedu.sk/data/att/2da/36701.feb2b6.docx
+pop_2026_2027.pdf|https://www.minedu.sk/data/att/a96/36583.42ace6.pdf
+prijimacky_2027_2028.pdf|https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf
+ms2027_zakladne_info.pdf|https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf
+minedu_testovanie9.html|https://www.minedu.sk/testovanie-9/
+minedu_terminy_prazdnin.html|https://www.minedu.sk/terminy-prazdnin/
+minedu_ai_gymnazia.html|https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/
+minedu_reforma.html|https://www.minedu.sk/najvacsia-reforma-skolstva-za-poslednych-20-rokov/
+minedu_pop.html|https://www.minedu.sk/38037-sk/pedagogicko-organizacne-pokyny/
+minedu_gymnazia.html|https://www.minedu.sk/38696-sk/gymnazia/
+minedu_svp.html|https://www.minedu.sk/8387-sk/statne-vzdelavacie-programy/
+minedu_stredne_skoly.html|https://www.minedu.sk/44151-sk/stredne-skoly/
+minedu_pre_2027_2028.html|https://www.minedu.sk/pre-skolsky-rok-20272028/
+minedu_home.html|https://www.minedu.sk/
+reforma_iedu_ss.html|https://reforma.iedu.sk/stredne-skoly/
+nucem_ms_2026_2027.html|https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027
+nucem_maturita.html|https://www2.nucem.sk/sk/merania/narodne-merania/maturita
+nucem_home.html|https://www2.nucem.sk/
+nivam_home.html|https://nivam.sk/
+statpedu_svp_gym.html|https://www.statpedu.sk/sk/svp/inovovany-statny-vzdelavaci-program/inovovany-svp-gymnazia-so-stvorrocnym-patrocnym-vzdelavacim-programom/
+statpedu_home.html|https://www.statpedu.sk/
+slovensko_prihlaska_ss.html|https://www.slovensko.sk/sk/zivotne-situacie/zivotna-situacia/_ako-sa-prihlasit-na-strednu-sk
+citaty_robots.txt|https://citaty-slavnych.sk/robots.txt
