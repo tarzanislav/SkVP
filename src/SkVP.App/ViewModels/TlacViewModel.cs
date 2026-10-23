@@ -54,6 +54,7 @@ public sealed partial class TlacViewModel : ObservableObject
             Oblasti.Add(volba);
         }
 
+        _udajeOSkole = new UdajeOSkoleVZostaveVM(Zmena);
         _len = oblast is not null;
         _titulnaStrana = oblast is null;
         _obsah = oblast is null;
@@ -66,6 +67,10 @@ public sealed partial class TlacViewModel : ObservableObject
     }
 
     public MainViewModel Hlavny { get; }
+
+    /// <summary>Údaje o škole v zostave – čo sa vytlačí na úvodnej strane, v hlavičke a päte strán.</summary>
+    [ObservableProperty]
+    private UdajeOSkoleVZostaveVM _udajeOSkole;
 
     public ObservableCollection<VolbaOblasti> Oblasti { get; } = new();
 
@@ -148,6 +153,7 @@ public sealed partial class TlacViewModel : ObservableObject
         {
             Hlavny.NacitajUdaje();
             OnPropertyChanged(nameof(MaLogo));
+            UdajeOSkole = new UdajeOSkoleVZostaveVM(Zmena);
             TitulnaStrana = true;
             Obnovit();
         }

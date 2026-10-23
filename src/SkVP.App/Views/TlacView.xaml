@@ -1,6 +1,7 @@
 <UserControl x:Class="SkVP.Views.TlacView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SkVP.Views"
              xmlns:vm="clr-namespace:SkVP.ViewModels">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -80,6 +81,9 @@
                         </Button>
                         <TextBlock Style="{StaticResource Popis}" Margin="28,0,0,4" Text="Logo školy vyberiete v úprave úvodnej strany alebo v Nastaveniach."
                                    Visibility="{Binding MaLogo, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                        <Expander Margin="0,8,0,4" Header="Údaje o škole v zostave">
+                            <v:UdajeOSkoleVZostave DataContext="{Binding UdajeOSkole}" Margin="4,6,0,4" />
+                        </Expander>
                         <CheckBox Content="Obsah s číslami strán" IsChecked="{Binding Obsah}" Margin="0,4,0,0" />
                         <CheckBox IsChecked="{Binding OddelovacOblasti}" Margin="0,4,0,0">
                             <TextBlock TextWrapping="Wrap">Oddeľujúca strana pred každou oblasťou (názov a zoznam predmetov)</TextBlock>

@@ -17,7 +17,7 @@ public static class NastaveniaProgramu
     /// <summary>Kľúče, ktoré sa neprenášajú (stav tohto počítača, testovacia sada, jednorazové úpravy).</summary>
     private static readonly string[] Vynechat =
     {
-        "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "archiv.",
+        "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "Aktualizacie.PoslednaKontrola", "archiv.",
     };
 
     public sealed class Subor
@@ -73,6 +73,40 @@ public static class NastaveniaProgramu
         }
 
         return subor;
+    }
+
+    /// <summary>Skupina nastavenia podľa kľúča (na prehľad, čo súbor nastavení obsahuje).</summary>
+    public static string Skupina(string kluc) => kluc switch
+    {
+        _ when kluc == UdajeSkVP.KlucSkola || kluc == UdajeSkVP.KlucAdresa || kluc.StartsWith("org.", StringComparison.Ordinal) => "údaje o organizácii",
+        _ when kluc.StartsWith("skvp.", StringComparison.Ordinal) => "školský vzdelávací program (názov, druh školy, platnosť)",
+        _ when kluc.StartsWith("titul.", StringComparison.Ordinal) => "úvodná strana, hlavička, päta a údaje o škole v zostavách",
+        "tlac.volby" => "voľby tlače a zostáv",
+        "tlac.pdf" => "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)",
+        "tlac.obojstranne" => "obojstranná tlač",
+        _ when kluc.StartsWith("vzhlad.", StringComparison.Ordinal) => "vzhľad",
+        _ when kluc.StartsWith("program.jazyk", StringComparison.Ordinal) => "jazyk programu",
+        _ when kluc.StartsWith("uprava.", StringComparison.Ordinal) => "úprava osnov (Word / editor)",
+        _ when kluc.StartsWith("zaloha.", StringComparison.Ordinal) => "zálohovanie (frekvencia, počet, priečinok)",
+        _ when kluc.StartsWith("Aktualizacie.", StringComparison.Ordinal) => "aktualizácie",
+        _ => "ďalšie nastavenia",
+    };
+
+    /// <summary>Prehľad obsahu súboru nastavení: skupiny v poradí (s logom a textom dole na úvodnej strane).</summary>
+    public static IReadOnlyList<string> Prehlad(Subor subor)
+    {
+        var skupiny = subor.Nastavenia.Keys.Select(Skupina).Distinct().ToList();
+        if (subor.Logo is { Length: > 0 })
+        {
+            skupiny.Insert(Math.Min(1, skupiny.Count), "logo školy");
+        }
+
+        if (subor.TextDoleNaStrane is { Length: > 0 } && !skupiny.Contains("úvodná strana, hlavička, päta a údaje o škole v zostavách"))
+        {
+            skupiny.Add("text dole na úvodnej strane");
+        }
+
+        return skupiny;
     }
 
     public static void Export(string cesta) => File.WriteAllText(cesta, JsonSerializer.Serialize(Vytvor(), Moznosti));

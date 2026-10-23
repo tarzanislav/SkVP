@@ -1,6 +1,7 @@
 <Window x:Class="SkVP.Views.ExportOsnovWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="clr-namespace:SkVP.Views"
         xmlns:vm="clr-namespace:SkVP.ViewModels"
         Title="Export učebných osnov" Width="900" Height="700" MinWidth="720" MinHeight="520"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
@@ -98,12 +99,15 @@
                         <CheckBox Content="Oddeľujúca strana pred oblasťou" IsChecked="{Binding OddelovacOblasti}" Margin="0,4,0,0" />
                         <CheckBox Content="Oddeľujúca strana pred predmetom" IsChecked="{Binding OddelovacPredmetu}" Margin="0,4,0,0" />
                         <CheckBox Content="Charakteristiky vzdelávacích oblastí" IsChecked="{Binding Charakteristiky}" Margin="0,4,0,0" />
+                        <Expander Margin="0,10,0,0" Header="Údaje o škole v zostave">
+                            <v:UdajeOSkoleVZostave DataContext="{Binding UdajeOSkole}" Margin="4,6,0,4" />
+                        </Expander>
                     </StackPanel>
                     <CheckBox IsChecked="{Binding Nespracovane}" Margin="0,8,0,0">
                         <TextBlock TextWrapping="Wrap" Text="Aj predmety, ktorých osnova ešte nemá text" />
                     </CheckBox>
                     <TextBlock Style="{StaticResource Popis}" Margin="0,16,0,0" TextWrapping="Wrap"
-                               Text="Hlavička strán a úvodná strana sa riadia nastavením v Tlač a zostavy → Upraviť úvodnú stranu, logo a hlavičku." />
+                               Text="Texty úvodnej strany a hlavičky upravíte v Tlač a zostavy → Upraviť úvodnú stranu, logo a hlavičku. Údaje o škole v zostave sú spoločné s tlačou. Pri exporte každého predmetu zvlášť sa ukladajú samotné osnovy (bez úvodnej strany)." />
                 </StackPanel>
             </ScrollViewer>
         </Grid>

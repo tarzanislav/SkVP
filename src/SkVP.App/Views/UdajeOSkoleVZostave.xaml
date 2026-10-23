@@ -1,0 +1,51 @@
+<UserControl x:Class="SkVP.Views.UdajeOSkoleVZostave"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- DataContext = UdajeOSkoleVZostaveVM -->
+    <UserControl.Resources>
+        <Style x:Key="Hodnota" TargetType="TextBlock" BasedOn="{StaticResource Popis}">
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Setter Property="Margin" Value="0,0,0,2" />
+        </Style>
+    </UserControl.Resources>
+    <StackPanel>
+        <TextBlock Text="Úvodná strana" Style="{StaticResource Stitok}" Margin="0,0,0,2" />
+        <CheckBox IsChecked="{Binding Skola}">
+            <StackPanel><TextBlock Text="Názov školy" /><TextBlock Text="{Binding TextSkoly}" Style="{StaticResource Hodnota}" /></StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding Zlozka}">
+            <StackPanel><TextBlock Text="Organizačná zložka" /><TextBlock Text="{Binding TextZlozky}" Style="{StaticResource Hodnota}" /></StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding Adresa}">
+            <StackPanel><TextBlock Text="Adresa" /><TextBlock Text="{Binding TextAdresy}" Style="{StaticResource Hodnota}" /></StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding IcoDic}">
+            <StackPanel><TextBlock Text="IČO a DIČ" /><TextBlock Text="{Binding TextIcoDic}" Style="{StaticResource Hodnota}" /></StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding Kontakt}">
+            <StackPanel><TextBlock Text="E-mail a telefón" /><TextBlock Text="{Binding TextKontaktu}" Style="{StaticResource Hodnota}" /></StackPanel>
+        </CheckBox>
+        <CheckBox IsChecked="{Binding Logo}">
+            <StackPanel><TextBlock Text="Logo školy" /><TextBlock Text="{Binding TextLoga}" Style="{StaticResource Hodnota}" /></StackPanel>
+        </CheckBox>
+
+        <TextBlock Text="Hlavička ďalších strán (vpravo)" Style="{StaticResource Stitok}" Margin="0,10,0,2" />
+        <CheckBox Content="Názov školy" IsChecked="{Binding SkolaVHlavicke}" />
+        <CheckBox Content="Organizačná zložka za názvom školy" IsChecked="{Binding ZlozkaVHlavicke}" Margin="0,2,0,0" />
+        <CheckBox Content="Logo školy" IsChecked="{Binding LogoVHlavicke}" Margin="0,2,0,0" />
+
+        <TextBlock Text="Päta strán (vľavo, vpravo číslo strany)" Style="{StaticResource Stitok}" Margin="0,10,0,2" />
+        <CheckBox Content="Názov školy" IsChecked="{Binding SkolaVPate}" />
+        <CheckBox Content="E-mail a telefón" IsChecked="{Binding KontaktVPate}" Margin="0,2,0,0" />
+
+        <TextBlock Text="Súbor PDF a Word" Style="{StaticResource Stitok}" Margin="0,10,0,2" />
+        <CheckBox IsChecked="{Binding Metadata}">
+            <TextBlock TextWrapping="Wrap" Text="Názov školy ako autor vo vlastnostiach súboru" />
+        </CheckBox>
+
+        <TextBlock Style="{StaticResource Popis}" FontSize="11.5" TextWrapping="Wrap" Margin="0,8,0,0"
+                   Visibility="{Binding ChybajuUdaje, Converter={StaticResource BoolNaViditelnost}}"
+                   Text="Niektoré údaje nie sú vyplnené – doplníte ich v Nastaveniach → Údaje o organizácii." />
+    </StackPanel>
+</UserControl>

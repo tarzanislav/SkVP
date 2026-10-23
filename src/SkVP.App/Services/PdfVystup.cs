@@ -50,7 +50,7 @@ public static class PdfVystup
         var doc = new Document();
         doc.Info.Title = dokument.Titul.Hlavicka;
         doc.Info.Subject = dokument.Titul.Podnadpis;
-        doc.Info.Author = dokument.Udaje.Skola;
+        doc.Info.Author = dokument.Titul.AutorSuboru ?? "";
         Styly(doc);
 
         if (dokument.Volby.TitulnaStrana)
@@ -279,12 +279,28 @@ public static class PdfVystup
         skola.Format.Font.Bold = true;
         skola.Format.SpaceBefore = Unit.FromPoint(18);
         skola.Format.SpaceAfter = Unit.FromPoint(1);
+        if (t.ZlozkaNaStrane is { } zlozka)
+        {
+            var odsekZlozky = sekcia.AddParagraph(zlozka);
+            odsekZlozky.Format.Font.Name = PismaDokumentu.Nadpis;
+            odsekZlozky.Format.Font.Size = 11;
+            odsekZlozky.Format.SpaceAfter = Unit.FromPoint(1);
+        }
+
         if (t.AdresaZobrazit && t.Adresa.Length > 0)
         {
             var adresa = sekcia.AddParagraph(t.Adresa);
             adresa.Format.Font.Name = PismaDokumentu.Nadpis;
             adresa.Format.Font.Size = 10;
             adresa.Format.Font.Color = Siva;
+        }
+
+        foreach (var riadokOrganizacie in t.RiadkyPodAdresou())
+        {
+            var odsek = sekcia.AddParagraph(riadokOrganizacie);
+            odsek.Format.Font.Name = PismaDokumentu.Nadpis;
+            odsek.Format.Font.Size = 9;
+            odsek.Format.Font.Color = Siva;
         }
 
         // nadpis ostáva na rovnakom mieste, aj keď je vypnutý
@@ -426,6 +442,16 @@ public static class PdfVystup
         }
 
         var pata = sekcia.Footers.Primary.AddParagraph();
+        if (t.TextVPate is { } textPaty)
+        {
+            // vľavo škola / kontakt, vpravo číslo strany
+            pata.Format.Alignment = ParagraphAlignment.Left;
+            pata.Format.TabStops.ClearAll();
+            pata.Format.TabStops.AddTabStop(SirkaTextu, TabAlignment.Right);
+            pata.AddText(textPaty);
+            pata.AddTab();
+        }
+
         pata.AddText("Strana ");
         pata.AddPageField();
         pata.AddText(" z ");

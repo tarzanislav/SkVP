@@ -16,8 +16,11 @@ public sealed partial class NastaveniaViewModel : ObservableObject
     {
         Hlavny = hlavny;
         var udaje = UdajeSkVP.Nacitaj();
-        _skola = udaje.Skola;
-        _adresa = udaje.Adresa;
+        Organizacia = new UdajeOrganizacieVM(UdajeOrganizacie.Nacitaj(), u =>
+        {
+            u.Uloz();
+            Hlavny.NacitajUdaje();
+        });
         _nazovProgramu = udaje.NazovProgramu;
         _typ = udaje.Typ;
         _obdobie = udaje.Obdobie;
@@ -75,8 +78,9 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         try
         {
             var subor = NastaveniaProgramu.Nacitaj(cesta);
-            if (!Dialogy.Potvrd($"Importovať nastavenia zo súboru {System.IO.Path.GetFileName(cesta)} (SkVP {subor.Verzia}, {subor.Vytvorene:d. M. yyyy})?\n\n" +
-                                "Doterajšie nastavenia sa prepíšu (pred tým sa urobí záloha). Osnovy sa nemenia."))
+            if (!Dialogy.Potvrd($"Importovať nastavenia programu zo súboru {System.IO.Path.GetFileName(cesta)} (SkVP {subor.Verzia}, {subor.Vytvorene:d. M. yyyy})?\n\n" +
+                                $"Súbor obsahuje: {string.Join(", ", NastaveniaProgramu.Prehlad(subor))}.\n\n" +
+                                "Doterajšie nastavenia sa prepíšu (pred tým sa urobí záloha databázy). Oblasti, predmety ani osnovy sa nemenia."))
             {
                 return;
             }
@@ -97,11 +101,11 @@ public sealed partial class NastaveniaViewModel : ObservableObject
 
     public MainViewModel Hlavny { get; }
 
-    [ObservableProperty]
-    private string _skola;
+    /// <summary>Čo sa pri exporte nastavení programu uloží (podľa terajších nastavení).</summary>
+    public string ObsahNastaveni => string.Join(", ", NastaveniaProgramu.Prehlad(NastaveniaProgramu.Vytvor()));
 
-    [ObservableProperty]
-    private string _adresa;
+    /// <summary>Údaje o organizácii – názov, zložka, adresa, IČO, DIČ, e-mail, telefón (ukladajú sa hneď).</summary>
+    public UdajeOrganizacieVM Organizacia { get; }
 
     [ObservableProperty]
     private string _nazovProgramu;
@@ -158,8 +162,6 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         }
     }
 
-    partial void OnSkolaChanged(string value) => Zapis(UdajeSkVP.KlucSkola, value.Trim());
-    partial void OnAdresaChanged(string value) => Zapis(UdajeSkVP.KlucAdresa, value.Trim());
     partial void OnNazovProgramuChanged(string value) =>
         Zapis(UdajeSkVP.KlucNazov, string.IsNullOrWhiteSpace(value) ? UdajeSkVP.PredvolenyNazov : value.Trim());
     partial void OnTypChanged(string value) => Zapis(UcebnyPlanService.KlucTypSkoly, value.Trim());

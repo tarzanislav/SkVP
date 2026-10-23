@@ -265,6 +265,9 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
 
     public bool JedenDokument => !Jednotlivo;
 
+    /// <summary>Údaje o škole v zostave (spoločné s Tlač a zostavy).</summary>
+    public UdajeOSkoleVZostaveVM UdajeOSkole { get; } = new();
+
     [ObservableProperty] private bool _titulnaStrana = true;
     [ObservableProperty] private bool _obsah = true;
     [ObservableProperty] private bool _oddelovacOblasti = true;

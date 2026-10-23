@@ -79,7 +79,7 @@ public static class DocxVystup
             }));
 
         docx.PackageProperties.Title = dokument.Titul.Hlavicka;
-        docx.PackageProperties.Creator = dokument.Udaje.Skola;
+        docx.PackageProperties.Creator = dokument.Titul.AutorSuboru ?? "";
         docx.PackageProperties.Subject = dokument.Titul.Podnadpis;
 
         if (dokument.Volby.TitulnaStrana)
@@ -128,7 +128,20 @@ public static class DocxVystup
         }
 
         var pata = hlavna.AddNewPart<FooterPart>();
-        var odsekPaty = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" }, new Justification { Val = JustificationValues.Center }));
+        Paragraph odsekPaty;
+        if (dokument.Titul.TextVPate is { } textPaty)
+        {
+            // vľavo škola / kontakt, vpravo číslo strany (šírka textu 11906 − 1361 − 1247)
+            odsekPaty = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" },
+                new Tabs(new TabStop { Val = TabStopValues.Right, Position = 9298 }), new Justification { Val = JustificationValues.Left }));
+            odsekPaty.Append(Beh(textPaty));
+            odsekPaty.Append(new Run(new TabChar()));
+        }
+        else
+        {
+            odsekPaty = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" }, new Justification { Val = JustificationValues.Center }));
+        }
+
         odsekPaty.Append(Beh("Strana "));
         odsekPaty.Append(Pole("PAGE", "1"));
         odsekPaty.Append(Beh(" z "));
@@ -203,9 +216,19 @@ public static class DocxVystup
         }
 
         telo.Append(Odsek(t.SkolaZobrazit && t.Skola.Length > 0 ? t.Skola : " ", "SkvpSkola"));
+        if (t.ZlozkaNaStrane is { } zlozka)
+        {
+            telo.Append(Odsek(zlozka, "SkvpAdresa"));
+        }
+
         if (t.AdresaZobrazit && t.Adresa.Length > 0)
         {
             telo.Append(Odsek(t.Adresa, "SkvpAdresa"));
+        }
+
+        foreach (var riadokOrganizacie in t.RiadkyPodAdresou())
+        {
+            telo.Append(Odsek(riadokOrganizacie, "SkvpAdresa"));
         }
 
         var nadpis = Odsek(t.NadpisZobrazit && t.Nadpis.Length > 0 ? t.Nadpis : " ", "Title");

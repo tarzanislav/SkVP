@@ -28,6 +28,10 @@ public static class TestovaciaSada
 
     public const string SkolaSady = "Gymnázium Javorová";
     public const string AdresaSady = "Javorová 21, 999 01 Hviezdany";
+    public const string IcoSady = "12345678";
+    public const string DicSady = "2020123456";
+    public const string EmailSady = "skola@gymnazium-javorova.example";
+    public const string TelefonSady = "+421 999 123 456";
     public const string ProgramSady = "Školský vzdelávací program „Hviezdy na dosah“";
     public const string ObdobieSady = "od 1. septembra 2026";
     public const string RiadkySady = "Schválené pedagogickou radou dňa 28. augusta 2026\nPrerokované v rade školy dňa 29. augusta 2026";
@@ -38,6 +42,14 @@ public static class TestovaciaSada
     {
         (UdajeSkVP.KlucSkola, SkolaSady),
         (UdajeSkVP.KlucAdresa, AdresaSady),
+        (UdajeOrganizacie.KlucUlica, "Javorová 21"),
+        (UdajeOrganizacie.KlucPsc, "999 01"),
+        (UdajeOrganizacie.KlucMesto, "Hviezdany"),
+        (UdajeOrganizacie.KlucStat, UdajeOrganizacie.PredvolenyStat),
+        (UdajeOrganizacie.KlucIco, IcoSady),
+        (UdajeOrganizacie.KlucDic, DicSady),
+        (UdajeOrganizacie.KlucEmail, EmailSady),
+        (UdajeOrganizacie.KlucTelefon, TelefonSady),
         (UdajeSkVP.KlucNazov, ProgramSady),
         (UdajeSkVP.KlucObdobie, ObdobieSady),
         (UcebnyPlanService.KlucTypSkoly, TitulnaStrana.AktualnyStupenGymnazia),

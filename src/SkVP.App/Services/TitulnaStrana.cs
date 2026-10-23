@@ -29,6 +29,32 @@ public sealed class TitulnaStrana
     public bool SkolaZobrazit { get; set; } = true;
     public string Adresa { get; set; } = "";
     public bool AdresaZobrazit { get; set; } = true;
+
+    // ---- údaje o organizácii (Nastavenia → Údaje o organizácii); text sa berie z nastavení, tu sa len zapína ----
+
+    /// <summary>Organizačná zložka (spojená škola) – pod názvom školy.</summary>
+    public string Zlozka { get; set; } = "";
+    public bool ZlozkaZobrazit { get; set; } = true;
+
+    /// <summary>„IČO: …  •  DIČ: …“ pod adresou.</summary>
+    public string IcoDic { get; set; } = "";
+    public bool IcoDicZobrazit { get; set; }
+
+    /// <summary>„e-mail: …  •  tel.: …“ pod adresou.</summary>
+    public string Kontakt { get; set; } = "";
+    public bool KontaktZobrazit { get; set; }
+
+    /// <summary>Organizačná zložka za názvom školy v hlavičke („Spojená škola – Gymnázium“).</summary>
+    public bool ZlozkaVHlavickeZobrazit { get; set; } = true;
+
+    /// <summary>Názov školy vľavo v päte strán (vpravo číslo strany).</summary>
+    public bool SkolaVPateZobrazit { get; set; }
+
+    /// <summary>E-mail a telefón v päte strán.</summary>
+    public bool KontaktVPateZobrazit { get; set; }
+
+    /// <summary>Názov školy ako autor a organizácia vo vlastnostiach súboru PDF a Word.</summary>
+    public bool MetadataZobrazit { get; set; } = true;
     public string Nadpis { get; set; } = UdajeSkVP.PredvolenyNazov;
     public bool NadpisZobrazit { get; set; } = true;
     public string Podnadpis { get; set; } = PredvolenyPodnadpis;
@@ -75,8 +101,70 @@ public sealed class TitulnaStrana
     /// <summary>Text vľavo v hlavičke, ak sa má vytlačiť.</summary>
     public string? TextVHlavicke => HlavickaZobrazit && TextHlavickyZobrazit && TextHlavickyVysledny.Length > 0 ? TextHlavickyVysledny : null;
 
-    /// <summary>Názov školy vpravo v hlavičke, ak sa má vytlačiť.</summary>
-    public string? SkolaVHlavicke => HlavickaZobrazit && SkolaVHlavickeZobrazit && Skola.Trim().Length > 0 ? Skola.Trim() : null;
+    /// <summary>Názov školy (a organizačnej zložky) vpravo v hlavičke, ak sa má vytlačiť.</summary>
+    public string? SkolaVHlavicke
+    {
+        get
+        {
+            if (!HlavickaZobrazit)
+            {
+                return null;
+            }
+
+            var casti = new List<string>();
+            if (SkolaVHlavickeZobrazit && Skola.Trim().Length > 0)
+            {
+                casti.Add(Skola.Trim());
+            }
+
+            if (ZlozkaVHlavickeZobrazit && Zlozka.Trim().Length > 0)
+            {
+                casti.Add(Zlozka.Trim());
+            }
+
+            return casti.Count > 0 ? string.Join(" – ", casti) : null;
+        }
+    }
+
+    /// <summary>Organizačná zložka na úvodnej strane, ak sa má vytlačiť.</summary>
+    public string? ZlozkaNaStrane => ZlozkaZobrazit && Zlozka.Trim().Length > 0 ? Zlozka.Trim() : null;
+
+    /// <summary>Riadky pod adresou na úvodnej strane (IČO a DIČ, kontakt), ak sa majú vytlačiť.</summary>
+    public IEnumerable<string> RiadkyPodAdresou()
+    {
+        if (IcoDicZobrazit && IcoDic.Trim().Length > 0)
+        {
+            yield return IcoDic.Trim();
+        }
+
+        if (KontaktZobrazit && Kontakt.Trim().Length > 0)
+        {
+            yield return Kontakt.Trim();
+        }
+    }
+
+    /// <summary>Text vľavo v päte strán (názov školy, kontakt), alebo null – vtedy je číslo strany v strede.</summary>
+    public string? TextVPate
+    {
+        get
+        {
+            var casti = new List<string>();
+            if (SkolaVPateZobrazit && Skola.Trim().Length > 0)
+            {
+                casti.Add(string.Join(" – ", new[] { Skola.Trim(), Zlozka.Trim() }.Where(x => x.Length > 0)));
+            }
+
+            if (KontaktVPateZobrazit && Kontakt.Trim().Length > 0)
+            {
+                casti.Add(Kontakt.Trim());
+            }
+
+            return casti.Count > 0 ? string.Join("  •  ", casti) : null;
+        }
+    }
+
+    /// <summary>Autor (názov školy) do vlastností súboru, alebo null.</summary>
+    public string? AutorSuboru => MetadataZobrazit && Skola.Trim().Length > 0 ? Skola.Trim() : null;
 
     /// <summary>Cesta k logu vpravo v hlavičke, ak sa má vytlačiť (a obrázok sa dá načítať).</summary>
     public string? LogoVHlavicke(string? logo) =>
@@ -137,10 +225,21 @@ public sealed class TitulnaStrana
     public static TitulnaStrana Nacitaj()
     {
         var udaje = UdajeSkVP.Nacitaj();
+        var org = UdajeOrganizacie.Nacitaj();
         return new TitulnaStrana
         {
             Skola = udaje.Skola,
-            Adresa = udaje.Adresa,
+            Adresa = udaje.Adresa.Length > 0 ? udaje.Adresa : org.AdresaRiadok,
+            Zlozka = org.Zlozka,
+            ZlozkaZobrazit = Bool("zlozka"),
+            IcoDic = org.IcoDicRiadok,
+            IcoDicZobrazit = Bool("icodic", false),
+            Kontakt = org.KontaktRiadok,
+            KontaktZobrazit = Bool("kontakt", false),
+            ZlozkaVHlavickeZobrazit = Bool("hlavicka.zlozka"),
+            SkolaVPateZobrazit = Bool("pata.skola", false),
+            KontaktVPateZobrazit = Bool("pata.kontakt", false),
+            MetadataZobrazit = Bool("metadata"),
             Typ = udaje.Typ,
             LogoZobrazit = Bool("logo"),
             SkolaZobrazit = Bool("skola"),
@@ -234,6 +333,24 @@ public sealed class TitulnaStrana
         Zapis("hlavicka.text", TextHlavickyZobrazit);
         Zapis("hlavicka.skola", SkolaVHlavickeZobrazit);
         Zapis("hlavicka.logo", LogoVHlavickeZobrazit);
+        UlozUdajeOSkole();
+    }
+
+    /// <summary>Uloží len zapnutie údajov o škole v zostave (Tlač a zostavy, export).</summary>
+    public void UlozUdajeOSkole()
+    {
+        Zapis("skola", SkolaZobrazit);
+        Zapis("adresa", AdresaZobrazit);
+        Zapis("logo", LogoZobrazit);
+        Zapis("zlozka", ZlozkaZobrazit);
+        Zapis("icodic", IcoDicZobrazit);
+        Zapis("kontakt", KontaktZobrazit);
+        Zapis("hlavicka.skola", SkolaVHlavickeZobrazit);
+        Zapis("hlavicka.zlozka", ZlozkaVHlavickeZobrazit);
+        Zapis("hlavicka.logo", LogoVHlavickeZobrazit);
+        Zapis("pata.skola", SkolaVPateZobrazit);
+        Zapis("pata.kontakt", KontaktVPateZobrazit);
+        Zapis("metadata", MetadataZobrazit);
     }
 
     /// <summary>Vráti texty úvodnej strany a hlavičky na predvolené (škola, adresa, druh školy a logo zostanú).</summary>
@@ -243,7 +360,8 @@ public sealed class TitulnaStrana
         Databaza.Vykonaj(db, "DELETE FROM nastavenie WHERE kluc LIKE 'titul.%'; DELETE FROM objekt WHERE typ = $t;", ("$t", TypPaty));
     }
 
-    private static bool Bool(string nazov) => Databaza.Citaj(K + nazov + ".zobrazit") != "0";
+    private static bool Bool(string nazov, bool predvolene = true) =>
+        Databaza.Citaj(K + nazov + ".zobrazit") is { } h ? h != "0" : predvolene;
 
     private static void Zapis(string nazov, bool hodnota) => Databaza.Zapis(K + nazov + ".zobrazit", hodnota ? "1" : "0");
 }
