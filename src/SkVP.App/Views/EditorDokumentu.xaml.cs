@@ -120,6 +120,14 @@ public partial class EditorDokumentu : UserControl
         }
     }
 
+    /// <summary>Na užšom liste menšie okraje.</summary>
+    private void Papier_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var okraj = Math.Clamp((e.NewSize.Width - 420) / 5, 28, 76);
+        Papier.Padding = new Thickness(okraj, 64, okraj - 4, 72);
+        PruhPapiera.Margin = new Thickness(-(okraj - 30), 4, 0, 0);
+    }
+
     private void NastavFarbu()
     {
         PruhPapiera.Background = FarbaNaStetec.Stetec(Farba);

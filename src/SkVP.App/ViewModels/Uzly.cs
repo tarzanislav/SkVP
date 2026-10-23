@@ -91,11 +91,11 @@ public sealed partial class PredmetVM : ObservableObject
     private bool _jePosledny;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Stav), nameof(StavText))]
+    [NotifyPropertyChangedFor(nameof(Stav), nameof(StavText), nameof(UpraveneText))]
     private string? _stavKod;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(Stav), nameof(StavText))]
+    [NotifyPropertyChangedFor(nameof(Stav), nameof(StavText), nameof(UpraveneText))]
     private int _dlzkaTextu;
 
     [ObservableProperty]
@@ -116,7 +116,7 @@ public sealed partial class PredmetVM : ObservableObject
     public string StavText => StavyOsnovy.Text(Stav);
 
     public string UpraveneText =>
-        Upravene == DateTime.MinValue ? "" :
+        Upravene == DateTime.MinValue || Stav == StavOsnovy.Prazdna ? "" :
         Upravene.Date == DateTime.Today ? $"dnes {Upravene:H:mm}" :
         Upravene.Date == DateTime.Today.AddDays(-1) ? $"včera {Upravene:H:mm}" :
         Upravene.ToString("d. M. yyyy", CultureInfo.GetCultureInfo("sk-SK"));

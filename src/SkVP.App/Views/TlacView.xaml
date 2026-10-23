@@ -104,7 +104,7 @@
                     <TextBlock Text="{Binding Popis}" Style="{StaticResource Popis}" VerticalAlignment="Center" Margin="14,0,0,0" />
                 </DockPanel>
             </Border>
-            <ListBox ItemsSource="{Binding Strany}" Background="Transparent" BorderThickness="0" Focusable="False"
+            <ListBox x:Name="Nahlad" ItemsSource="{Binding Strany}" Background="Transparent" BorderThickness="0" Focusable="False"
                      VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.ScrollUnit="Pixel" VirtualizingPanel.VirtualizationMode="Recycling"
                      ScrollViewer.HorizontalScrollBarVisibility="Auto" HorizontalContentAlignment="Center" Padding="0,18">
                 <ListBox.ItemContainerStyle>

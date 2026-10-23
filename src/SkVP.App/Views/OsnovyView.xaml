@@ -16,7 +16,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:OblastVM}">
-                        <Grid Width="372" Margin="0,0,16,16" x:Name="Karta">
+                        <Grid Width="336" Margin="0,0,16,16" x:Name="Karta">
                             <Button Style="{StaticResource RiadokTlacidlo}" Padding="0"
                                     Command="{Binding DataContext.Hlavny.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}">
@@ -77,7 +77,7 @@
             </ItemsControl>
 
             <!-- nová oblasť -->
-            <Border Style="{StaticResource Karta}" Width="372" HorizontalAlignment="Left" Padding="22,18" BorderThickness="1.5"
+            <Border Style="{StaticResource Karta}" Width="336" HorizontalAlignment="Left" Padding="22,18" BorderThickness="1.5"
                     Background="Transparent">
                 <StackPanel>
                     <TextBlock Text="Nová vzdelávacia oblasť" FontWeight="SemiBold" Margin="0,0,0,8" />

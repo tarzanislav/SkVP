@@ -53,6 +53,16 @@ public sealed partial class DashboardViewModel : ObservableObject
     public string PodielText => PocetPredmetov == 0 ? "–" : $"{Math.Round(Podiel * 100):0} %";
     public IReadOnlyList<PredmetVM> Naposledy { get; }
     public bool NicNebolo => Naposledy.Count == 0;
+
+    /// <summary>Zhrnutie stavu osnov v jednej vete (so správnymi tvarmi slov).</summary>
+    public string Zhrnutie => PocetPredmetov == 0
+        ? "Zatiaľ nie sú zadané žiadne predmety. Pridajte vzdelávacie oblasti a predmety v sekcii Osnovy."
+        : $"Stav {PocetPredmetov} osnov: {Tvar(PocetHotovych, "hotová", "hotové", "hotových")}, " +
+          $"{Tvar(PocetRozpracovanych, "rozpracovaná", "rozpracované", "rozpracovaných")} a " +
+          $"{Tvar(PocetNezacatych, "nezačatá", "nezačaté", "nezačatých")}.";
+
+    private static string Tvar(int pocet, string jeden, string dvaAzStyri, string viac) =>
+        $"{pocet} " + (pocet == 1 ? jeden : pocet is >= 2 and <= 4 ? dvaAzStyri : viac);
 }
 
 /// <summary>Prehľad všetkých vzdelávacích oblastí (sekcia Osnovy).</summary>
@@ -195,6 +205,7 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         Predmet = predmet;
         _nazov = predmet.Nazov;
         _vybranyStav = VsetkyStavy.First(s => s.Kod == predmet.StavKod);
+        _zobrazitSuvislosti = new ObjektService().Suvislosti(predmet.Id).Count > 0;
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id, () => $"{Predmet.Cislo} {Predmet.Nazov}", sablonaOsnovy: true);
         NacitajSuvislosti();
     }
@@ -226,7 +237,7 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
     private VolbaStavu _vybranyStav;
 
     [ObservableProperty]
-    private bool _zobrazitSuvislosti = true;
+    private bool _zobrazitSuvislosti;
 
     public ObservableCollection<SuvislostVM> Suvislosti { get; } = new();
 

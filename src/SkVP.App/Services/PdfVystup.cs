@@ -369,6 +369,13 @@ public static class PdfVystup
     private static void Oblast(Section sekcia, KapitolaOblasti oblast, bool novaStrana, bool oddelovac)
     {
         var farba = Farba(oblast.Farba);
+        if (oddelovac)
+        {
+            // oddeľujúca strana: nadpis oblasti nižšie na strane (medzera hore na strane sa inak vynechá)
+            Medzera(sekcia, 4.5, novaStrana);
+            novaStrana = false;
+        }
+
         var nadpis = sekcia.AddParagraph();
         nadpis.Style = StyleNames.Heading1;
         nadpis.Format.PageBreakBefore = novaStrana;
@@ -442,9 +449,8 @@ public static class PdfVystup
     private static void OddelovacPredmetu(Section sekcia, KapitolaOblasti oblast, KapitolaPredmetu predmet)
     {
         var farba = Farba(oblast.Farba);
+        Medzera(sekcia, 7, novaStrana: true);
         var cislo = sekcia.AddParagraph(predmet.Cislo);
-        cislo.Format.PageBreakBefore = true;
-        cislo.Format.SpaceBefore = Unit.FromCentimeter(6.5);
         cislo.Format.Font.Name = PismaDokumentu.Nadpis;
         cislo.Format.Font.Size = 72;
         cislo.Format.Font.Bold = true;
@@ -729,6 +735,17 @@ public static class PdfVystup
     }
 
     // ---- pomocné ----
+
+    /// <summary>Prázdny odsek pevnej výšky – posunie obsah nižšie aj na začiatku strany.</summary>
+    private static void Medzera(Section sekcia, double cm, bool novaStrana)
+    {
+        var medzera = sekcia.AddParagraph("\u00A0");
+        medzera.Format.PageBreakBefore = novaStrana;
+        medzera.Format.LineSpacingRule = LineSpacingRule.Exactly;
+        medzera.Format.LineSpacing = Unit.FromCentimeter(cm);
+        medzera.Format.SpaceAfter = 0;
+        medzera.Format.SpaceBefore = 0;
+    }
 
     public static string PocetPredmetov(int pocet) => pocet switch
     {
