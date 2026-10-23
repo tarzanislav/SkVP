@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Vitajte v programe SkVP" Icon="pack://application:,,,/Assets/skvp.ico"
-        Width="760" Height="680" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Width="760" Height="720" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <!-- voľba ako karta -->
         <Style x:Key="Volba" TargetType="RadioButton">
@@ -72,6 +72,10 @@
                 <StackPanel>
                     <TextBlock Text="Učebný plán gymnázia" FontWeight="SemiBold" FontSize="14" />
                     <TextBlock x:Name="PopisGymnazia" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,2,0,0" />
+                    <CheckBox x:Name="TestovaciaSada" Margin="0,8,0,0"
+                              IsEnabled="{Binding IsChecked, ElementName=VolbaGymnazium}">
+                        <TextBlock TextWrapping="Wrap">Nainštalovať testovaciu sadu učebných osnov (ukážkové osnovy všetkých predmetov na vyskúšanie programu – dajú sa neskôr vymazať)</TextBlock>
+                    </CheckBox>
                 </StackPanel>
             </RadioButton>
             <RadioButton x:Name="VolbaExcel" Style="{StaticResource Volba}">

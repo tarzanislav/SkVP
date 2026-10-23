@@ -239,6 +239,19 @@ public sealed partial class NastaveniaViewModel : ObservableObject
     private void OtvoritData() => Dialogy.OtvorVSysteme(Databaza.Priecinok);
 
     [RelayCommand]
+    private void NahratTestovaciuSadu()
+    {
+        if (Dialogy.Potvrd("Do predmetov učebného plánu gymnázia sa nahrajú ukážkové učebné osnovy (chýbajúce oblasti a predmety sa doplnia).\n\n" +
+                           "Osnovy predmetov s rovnakým názvom sa nahradia – doterajšia verzia sa zarchivuje.\n\nPokračovať?"))
+        {
+            Hlavny.NahrajTestovaciuSadu();
+        }
+    }
+
+    [RelayCommand]
+    private void VymazatUdaje() => Hlavny.VymazatUdaje();
+
+    [RelayCommand]
     private async Task SkontrolovatAktualizacie()
     {
         StavAktualizacie = "Kontrolujem…";

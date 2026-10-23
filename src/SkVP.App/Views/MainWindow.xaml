@@ -132,7 +132,26 @@
 
         <!-- obsah -->
         <Grid Grid.Column="1" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
-            <ContentControl x:Name="Obsah" Content="{Binding Stranka}" Focusable="False" />
+            <DockPanel>
+                <!-- upozornenie na testovaciu sadu učebných osnov -->
+                <Border DockPanel.Dock="Top" Padding="44,10,24,10"
+                        Background="{DynamicResource SystemFillColorAttentionBackgroundBrush}"
+                        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1"
+                        Visibility="{Binding JeTestovaciaSada, Converter={StaticResource BoolNaViditelnost}}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Padding="12,4" Margin="16,0,0,0" Command="{Binding VymazatUdajeCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Text="Vymazať testovaciu sadu…" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE946;" Margin="0,0,10,0" />
+                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
+                                   Text="Pracujete s testovacou sadou učebných osnov – ukážkovými dátami na vyskúšanie programu. Keď začnete s reálnymi osnovami, vymažte ju." />
+                    </DockPanel>
+                </Border>
+                <ContentControl x:Name="Obsah" Content="{Binding Stranka}" Focusable="False" />
+            </DockPanel>
 
             <!-- oznámenie dole (s možnosťou vrátiť späť) -->
             <Border VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,26" CornerRadius="10" Padding="18,10,10,10"

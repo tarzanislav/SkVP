@@ -125,6 +125,19 @@
                         <Button Content="Otvoriť priečinok záloh" Padding="14,6" Margin="8,0,0,0" Command="{Binding OtvoritZalohyCommand}" />
                         <Button Content="Otvoriť priečinok databázy" Padding="14,6" Margin="8,0,0,0" Command="{Binding OtvoritDataCommand}" />
                     </StackPanel>
+                    <Separator Margin="0,18,0,14" />
+                    <TextBlock Text="Testovacia sada a vymazanie údajov" FontWeight="SemiBold" />
+                    <TextBlock Style="{StaticResource Popis}" Margin="0,2,0,10"
+                               Text="Testovacia sada obsahuje ukážkové učebné osnovy všetkých predmetov gymnázia na vyskúšanie programu. Pred vymazaním údajov sa vždy vytvorí záloha." />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Nahrať testovaciu sadu…" Padding="14,6" Command="{Binding NahratTestovaciuSaduCommand}" />
+                        <Button Padding="14,6" Margin="8,0,0,0" Command="{Binding VymazatUdajeCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Text="Vymazať údaje…" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
             </Border>
 

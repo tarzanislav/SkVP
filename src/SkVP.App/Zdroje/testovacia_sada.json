@@ -1,0 +1,4892 @@
+{
+ "popis": "Testovacia sada učebných osnov – ukážkové osnovy podľa ŠVP pre gymnáziá a návrhy osnov školských predmetov. Slúži na vyskúšanie programu, nie je to oficiálny školský vzdelávací program.",
+ "oblasti": [
+  {
+   "nazov": "Jazyk a komunikácia",
+   "charakteristika": [
+    "Vzdelávacia oblasť Jazyk a komunikácia rozvíja komunikačné kompetencie žiakov v materinskom a v cudzích jazykoch. Jazyk chápe ako nástroj myslenia, poznávania, dorozumievania a osobného i profesijného rastu.",
+    "Žiaci sa učia s porozumením počúvať a čítať, ústne aj písomne sa vyjadrovať primerane situácii, kriticky pracovať s informáciami a interpretovať umelecké texty. V cudzích jazykoch smeruje vzdelávanie k úrovni B2 (prvý cudzí jazyk) a B1 (druhý cudzí jazyk) podľa Spoločného európskeho referenčného rámca pre jazyky."
+   ]
+  },
+  {
+   "nazov": "Matematika a práca s informáciami",
+   "charakteristika": [
+    "Vzdelávacia oblasť Matematika a práca s informáciami rozvíja matematické a informatické myslenie, schopnosť riešiť problémy, pracovať s údajmi a používať digitálne technológie zodpovedne a tvorivo.",
+    "Matematika vedie žiakov k presnému vyjadrovaniu, logickému usudzovaniu a modelovaniu situácií z reálneho sveta. Informatika rozvíja algoritmické myslenie, porozumenie princípom fungovania počítačov a sietí a schopnosť riešiť problémy pomocou programovania."
+   ]
+  },
+  {
+   "nazov": "Človek a príroda",
+   "charakteristika": [
+    "Vzdelávacia oblasť Človek a príroda umožňuje žiakom poznávať prírodu, jej zákonitosti a vzťahy medzi živou a neživou prírodou. Rozvíja prírodovednú gramotnosť a vedecký spôsob myslenia – kladenie otázok, formulovanie hypotéz, experimentovanie a vyvodzovanie záverov.",
+    "Predmety fyzika, chémia a biológia vedú žiakov k zodpovednému vzťahu k zdraviu a k životnému prostrediu a k porozumeniu významu prírodných vied pre technický pokrok a udržateľný rozvoj."
+   ]
+  },
+  {
+   "nazov": "Človek a spoločnosť",
+   "charakteristika": [
+    "Vzdelávacia oblasť Človek a spoločnosť vedie žiakov k poznaniu minulosti a súčasnosti ľudskej spoločnosti, vzťahov medzi človekom, spoločnosťou a priestorom a k porozumeniu princípom demokracie, právneho štátu a ekonomiky.",
+    "Rozvíja historické a geografické myslenie, kritickú prácu s informáciami a prameňmi, občiansku zodpovednosť a toleranciu k odlišným kultúram a názorom."
+   ]
+  },
+  {
+   "nazov": "Umenie a kultúra",
+   "charakteristika": [
+    "Vzdelávacia oblasť Umenie a kultúra rozvíja estetické vnímanie, kultúrne povedomie a tvorivosť žiakov. Vedie ich k porozumeniu umeleckým dielam, k rešpektu ku kultúrnemu dedičstvu a k vlastnému tvorivému vyjadreniu."
+   ]
+  },
+  {
+   "nazov": "Človek a hodnoty",
+   "charakteristika": [
+    "Vzdelávacia oblasť Človek a hodnoty vedie žiakov k rozvoju morálneho úsudku, k úcte k sebe a druhým, k zodpovednosti a k prosociálnemu správaniu. Žiak si volí etickú výchovu alebo náboženskú výchovu."
+   ]
+  },
+  {
+   "nazov": "Zdravie a pohyb",
+   "charakteristika": [
+    "Vzdelávacia oblasť Zdravie a pohyb vedie žiakov k starostlivosti o vlastné zdravie, k pravidelnej pohybovej aktivite a k zdravému životnému štýlu. Rozvíja pohybové schopnosti a zručnosti, fair play a zodpovednosť za vlastné telo."
+   ]
+  }
+ ],
+ "predmety": [
+  {
+   "nazov": "Slovenský jazyk a literatúra",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Predmet Slovenský jazyk a literatúra je kľúčovým predmetom gymnaziálneho vzdelávania. Spája jazykovú, slohovú a literárnu zložku do jedného celku, ktorý rozvíja čitateľskú gramotnosť, komunikačné zručnosti a estetické cítenie žiakov.",
+    "Jazyková zložka vedie žiakov k uvedomelému používaniu spisovného jazyka a k poznaniu jeho systému. Slohová zložka rozvíja schopnosť tvoriť ústne a písomné prejavy rôznych slohových postupov a žánrov. Literárna zložka sprostredkúva poznanie slovenskej a svetovej literatúry a rozvíja schopnosť interpretovať umelecký text.",
+    "Predmet pripravuje žiakov na maturitnú skúšku zo slovenského jazyka a literatúry (externá časť, písomná forma internej časti a ústna forma)."
+   ],
+   "ciele": [
+    "používať spisovný jazyk v ústnej aj písomnej podobe v súlade s jazykovou normou",
+    "s porozumením čítať náučné, publicistické aj umelecké texty a kriticky hodnotiť informácie",
+    "tvoriť jazykovo správne a štylisticky vhodné texty rôznych slohových postupov a žánrov",
+    "poznať vývin slovenskej a svetovej literatúry v kontexte literárnych smerov a obdobia",
+    "interpretovať umelecký text a vyjadriť vlastný čitateľský zážitok a názor",
+    "rozvíjať vzťah k materinskému jazyku a k národnej kultúre"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Jazyk a komunikácia",
+       "obsah": [
+        "jazyk a reč",
+        "spisovný jazyk, nárečia, slang",
+        "jazyková kultúra",
+        "zvuková stránka jazyka – spisovná výslovnosť, prozodické vlastnosti reči"
+       ],
+       "vykon": [
+        "rozlíši spisovnú a nespisovnú podobu jazyka",
+        "dodržiava zásady spisovnej výslovnosti",
+        "vysvetlí význam jazykovej kultúry"
+       ]
+      },
+      {
+       "nazov": "Lexikológia",
+       "obsah": [
+        "slovná zásoba, jednovýznamové a viacvýznamové slová",
+        "synonymá, antonymá, homonymá",
+        "tvorenie slov – odvodzovanie, skladanie, skracovanie",
+        "slovníky"
+       ],
+       "vykon": [
+        "určí spôsob tvorenia slova",
+        "vyhľadá informáciu v Krátkom slovníku slovenského jazyka a v pravidlách",
+        "použije synonymá na štylistické spestrenie textu"
+       ]
+      },
+      {
+       "nazov": "Sloh – informačný a rozprávací slohový postup",
+       "obsah": [
+        "správa, oznámenie, inzerát",
+        "rozprávanie, kompozícia rozprávania",
+        "opis a charakteristika"
+       ],
+       "vykon": [
+        "napíše rozprávanie s využitím priamej reči a dejových zvratov",
+        "zostaví správu a oznámenie",
+        "rozlíši statický a dynamický opis"
+       ]
+      },
+      {
+       "nazov": "Úvod do literatúry. Lyrika a epika",
+       "obsah": [
+        "literatúra ako umenie",
+        "literárne druhy a žánre",
+        "báseň, verš, rým, rytmus",
+        "umelecké jazykové prostriedky – metafora, epiteton, personifikácia",
+        "ľudová slovesnosť",
+        "staroveká a stredoveká literatúra"
+       ],
+       "vykon": [
+        "rozlíši lyriku, epiku a drámu",
+        "vyhľadá umelecké jazykové prostriedky a vysvetlí ich funkciu",
+        "porovná ľudovú a umelú slovesnosť",
+        "interpretuje vybraný úryvok z antickej literatúry"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Morfológia",
+       "obsah": [
+        "slovné druhy – plnovýznamové a neplnovýznamové",
+        "gramatické kategórie podstatných mien, prídavných mien, zámen, čísloviek a slovies",
+        "vzory"
+       ],
+       "vykon": [
+        "určí slovný druh a gramatické kategórie",
+        "správne skloňuje a časuje podľa vzorov",
+        "opraví morfologické chyby v texte"
+       ]
+      },
+      {
+       "nazov": "Sloh – výkladový slohový postup",
+       "obsah": [
+        "výklad, odborný text, odborný termín",
+        "citácia a parafráza",
+        "osnova, konspekt, výpisky"
+       ],
+       "vykon": [
+        "napíše výklad na zvolenú tému s dodržaním kompozície",
+        "správne cituje zdroj",
+        "vytvorí konspekt z odborného textu"
+       ]
+      },
+      {
+       "nazov": "Renesancia, barok, klasicizmus",
+       "obsah": [
+        "renesančná a humanistická literatúra",
+        "barok",
+        "klasicizmus a slovenské národné obrodenie – A. Bernolák, J. Hollý, J. Kollár, P. J. Šafárik"
+       ],
+       "vykon": [
+        "charakterizuje literárny smer a jeho znaky",
+        "zaradí dielo a autora do obdobia",
+        "interpretuje úryvok zo Slávy dcery"
+       ]
+      },
+      {
+       "nazov": "Romantizmus",
+       "obsah": [
+        "európsky romantizmus",
+        "štúrovská generácia a kodifikácia spisovnej slovenčiny",
+        "S. Chalupka, J. Kráľ, A. Sládkovič, J. Botto"
+       ],
+       "vykon": [
+        "vysvetlí význam kodifikácie spisovnej slovenčiny Ľ. Štúrom",
+        "analyzuje romantického hrdinu",
+        "porovná dielo romantizmu s klasicizmom"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Syntax",
+       "obsah": [
+        "veta, súvetie, vetné členy",
+        "jednoduchá veta, priraďovacie a podraďovacie súvetie",
+        "interpunkcia",
+        "slovosled"
+       ],
+       "vykon": [
+        "urobí vetný rozbor",
+        "určí druh súvetia",
+        "správne používa interpunkciu v jednoduchej vete a v súvetí"
+       ]
+      },
+      {
+       "nazov": "Sloh – úvaha a rečnícky prejav",
+       "obsah": [
+        "úvaha, argumentácia, argument a protiargument",
+        "rečnícky prejav, prednáška, diskusný príspevok"
+       ],
+       "vykon": [
+        "napíše úvahu s jasnou tézou a argumentmi",
+        "pripraví a prednesie rečnícky prejav",
+        "rozlíši fakt a názor"
+       ]
+      },
+      {
+       "nazov": "Realizmus",
+       "obsah": [
+        "európsky realizmus",
+        "slovenský realizmus – S. H. Vajanský, M. Kukučín, P. O. Hviezdoslav, B. Slančíková-Timrava, J. Gregor Tajovský"
+       ],
+       "vykon": [
+        "charakterizuje realizmus a jeho postavy",
+        "interpretuje novelu alebo poviedku slovenského realizmu",
+        "porovná dedinu v diele M. Kukučína a B. S. Timravy"
+       ]
+      },
+      {
+       "nazov": "Moderna a medzivojnová literatúra",
+       "obsah": [
+        "symbolizmus, slovenská moderna – I. Krasko",
+        "avantgarda",
+        "medzivojnová próza a poézia – M. Urban, J. C. Hronský, nadrealizmus"
+       ],
+       "vykon": [
+        "vysvetlí znaky symbolizmu",
+        "interpretuje báseň slovenskej moderny",
+        "charakterizuje lyrizovanú prózu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Jazyk a jeho štýly",
+       "obsah": [
+        "jazykové štýly – hovorový, náučný, publicistický, administratívny, rečnícky, umelecký",
+        "vývin slovenského jazyka",
+        "jazykovedné disciplíny"
+       ],
+       "vykon": [
+        "určí jazykový štýl textu a zdôvodní ho",
+        "opíše hlavné etapy vývinu slovenčiny",
+        "napíše žiadosť a životopis"
+       ]
+      },
+      {
+       "nazov": "Literatúra po roku 1945",
+       "obsah": [
+        "literatúra druhej svetovej vojny",
+        "existencializmus",
+        "literatúra 50. a 60. rokov",
+        "postmoderna",
+        "súčasná slovenská literatúra"
+       ],
+       "vykon": [
+        "zaradí dielo do kontextu obdobia",
+        "interpretuje dielo s vojnovou tematikou",
+        "porovná prozaické diela rôznych období"
+       ]
+      },
+      {
+       "nazov": "Svetová a slovenská dráma",
+       "obsah": [
+        "antická a Shakespearova dráma",
+        "moderná dráma, absurdná dráma",
+        "slovenská dráma – J. Palárik, J. Gregor Tajovský, P. Karvaš"
+       ],
+       "vykon": [
+        "rozlíši tragédiu, komédiu a drámu",
+        "analyzuje kompozíciu drámy",
+        "porovná klasickú a absurdnú drámu"
+       ]
+      },
+      {
+       "nazov": "Príprava na maturitnú skúšku",
+       "obsah": [
+        "opakovanie jazyka a slohu",
+        "maturitné zadania písomnej formy",
+        "systematizácia literárnych smerov"
+       ],
+       "vykon": [
+        "samostatne rieši úlohy externej časti maturity",
+        "napíše slohovú prácu v časovom limite",
+        "ústne interpretuje text podľa maturitného zadania"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)",
+    "interpretácia umeleckého textu, literárne besedy a návštevy divadelných predstavení"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.",
+    "V každom polroku žiak píše jednu slohovú prácu; hodnotí sa obsah, kompozícia, jazyková správnosť a štylistika."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "Krátky slovník slovenského jazyka, Pravidlá slovenského pravopisu",
+    "čítanky a výber umeleckých diel podľa odporúčaného zoznamu literatúry"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Anglický jazyk",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Anglický jazyk je prvým cudzím jazykom; vzdelávanie smeruje k úrovni B2 podľa Spoločného európskeho referenčného rámca pre jazyky. Predmet rozvíja receptívne (počúvanie, čítanie), produktívne (hovorenie, písanie) a interaktívne jazykové činnosti.",
+    "Obsah je usporiadaný do tematických okruhov, ktoré zodpovedajú témam maturitnej skúšky, a do komunikačných jazykových funkcií. Gramatika a slovná zásoba sú prostriedkom, nie cieľom komunikácie."
+   ],
+   "ciele": [
+    "porozumieť hlavným myšlienkam aj podrobnostiam rozsiahlejšieho ústneho a písomného prejavu",
+    "plynulo a spontánne komunikovať v bežných aj odborných situáciách",
+    "napísať zrozumiteľný a súdržný text na známe témy (list, e-mail, esej, článok)",
+    "používať jazykové prostriedky na úrovni B2 a opraviť vlastné chyby",
+    "poznať reálie anglicky hovoriacich krajín a rozvíjať interkultúrnu kompetenciu"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Rodina a spoločnosť. Domov a bývanie",
+       "obsah": [
+        "osobné údaje, rodinné vzťahy",
+        "typy bývania, opis bytu",
+        "present simple a continuous",
+        "there is / are"
+       ],
+       "vykon": [
+        "predstaví seba a svoju rodinu",
+        "opíše svoje bydlisko",
+        "porozumie krátkej nahrávke o bývaní"
+       ]
+      },
+      {
+       "nazov": "Ľudské telo, zdravie. Výživa",
+       "obsah": [
+        "časti tela, choroby, u lekára",
+        "stravovacie návyky",
+        "počítateľné a nepočítateľné podstatné mená",
+        "some, any, much, many"
+       ],
+       "vykon": [
+        "opíše zdravotné ťažkosti",
+        "objedná jedlo v reštaurácii",
+        "vyjadrí, čo má a nemá rád"
+       ]
+      },
+      {
+       "nazov": "Voľný čas a záľuby. Šport",
+       "obsah": [
+        "záľuby, kultúrne a športové aktivity",
+        "past simple, past continuous",
+        "frekvenčné príslovky"
+       ],
+       "vykon": [
+        "rozpráva o minulých udalostiach",
+        "napíše neformálny e-mail kamarátovi",
+        "zúčastní sa rozhovoru o voľnom čase"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Doprava a cestovanie",
+       "obsah": [
+        "dopravné prostriedky, ubytovanie, cestovné doklady",
+        "present perfect",
+        "budúci čas – will, going to"
+       ],
+       "vykon": [
+        "kúpi si cestovný lístok a opýta sa na cestu",
+        "porovná dopravné prostriedky",
+        "napíše pohľadnicu z dovolenky"
+       ]
+      },
+      {
+       "nazov": "Vzdelávanie a práca",
+       "obsah": [
+        "školský systém, predmety, povolania",
+        "modálne slovesá",
+        "podmienkové vety typu 0 a 1"
+       ],
+       "vykon": [
+        "porovná slovenský a britský školský systém",
+        "vyjadrí povinnosť a možnosť",
+        "opíše svoje plány do budúcnosti"
+       ]
+      },
+      {
+       "nazov": "Obchod a služby. Obliekanie a móda",
+       "obsah": [
+        "nakupovanie, reklamácia, služby",
+        "stupňovanie prídavných mien",
+        "trpný rod v prítomnom a minulom čase"
+       ],
+       "vykon": [
+        "zreklamuje tovar",
+        "opíše a porovná oblečenie",
+        "porozumie reklamnému textu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Človek a príroda. Veda a technika",
+       "obsah": [
+        "počasie, životné prostredie, ekológia",
+        "vynálezy, technológie",
+        "podmienkové vety typu 2 a 3",
+        "trpný rod"
+       ],
+       "vykon": [
+        "vyjadrí názor na ekologický problém a zdôvodní ho",
+        "opíše vynález a jeho dopad",
+        "napíše esej s argumentáciou"
+       ]
+      },
+      {
+       "nazov": "Multikultúrna spoločnosť. Krajiny a mestá",
+       "obsah": [
+        "zvyky a tradície, cudzinci",
+        "anglicky hovoriace krajiny",
+        "nepriama reč"
+       ],
+       "vykon": [
+        "porovná tradície rôznych krajín",
+        "prerozpráva, čo niekto povedal",
+        "predstaví mesto alebo krajinu"
+       ]
+      },
+      {
+       "nazov": "Kultúra a umenie. Mládež a jej svet",
+       "obsah": [
+        "film, hudba, literatúra",
+        "problémy mladých ľudí",
+        "vzťažné vety",
+        "frázové slovesá"
+       ],
+       "vykon": [
+        "napíše recenziu filmu alebo knihy",
+        "diskutuje o problémoch mládeže",
+        "porozumie autentickému článku"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Zamestnanie. Človek a spoločnosť",
+       "obsah": [
+        "trh práce, žiadosť o zamestnanie, pohovor",
+        "formálny list",
+        "komunikačné stratégie"
+       ],
+       "vykon": [
+        "napíše motivačný list a životopis",
+        "simuluje prijímací pohovor",
+        "zdvorilo vyjadrí nesúhlas"
+       ]
+      },
+      {
+       "nazov": "Vzory a ideály. Slovensko – moja vlasť",
+       "obsah": [
+        "osobnosti, hodnoty",
+        "Slovensko – história, kultúra, prírodné krásy"
+       ],
+       "vykon": [
+        "opíše svoj vzor a zdôvodní výber",
+        "predstaví Slovensko zahraničnému návštevníkovi"
+       ]
+      },
+      {
+       "nazov": "Príprava na maturitnú skúšku",
+       "obsah": [
+        "testy úrovne B2",
+        "písomná forma – esej, list, článok",
+        "ústna forma – maturitné témy"
+       ],
+       "vykon": [
+        "úspešne rieši úlohy na počúvanie, čítanie a jazykové prostriedky",
+        "samostatne rozpráva na maturitnú tému 10 – 12 minút"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.",
+    "Hodnotí sa porozumenie, ústny prejav, písomný prejav a používanie jazykových prostriedkov s porovnateľnou váhou."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "učebnicový komplet úrovne B1+/B2 s pracovným zošitom a nahrávkami",
+    "výkladové slovníky a online jazykové zdroje"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Nemecký jazyk",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Nemecký jazyk sa vyučuje ako druhý cudzí jazyk; vzdelávanie smeruje k úrovni B1 podľa Spoločného európskeho referenčného rámca pre jazyky.",
+    "Predmet rozvíja všetky jazykové činnosti s dôrazom na bežnú komunikáciu v každodenných situáciách. Žiaci sa oboznamujú s reáliami krajín, v ktorých sa jazyk používa, a s ich kultúrou."
+   ],
+   "ciele": [
+    "porozumieť hlavným bodom jasného prejavu o známych témach",
+    "zvládnuť bežné situácie počas pobytu v krajine, kde sa jazykom hovorí",
+    "napísať jednoduchý súvislý text na známu tému",
+    "opísať zážitky, udalosti, sny a nádeje a stručne zdôvodniť názor"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Zoznámenie a rodina",
+       "obsah": [
+        "pozdravy, predstavenie sa",
+        "rodina",
+        "prítomný čas pravidelných slovies",
+        "člen",
+        "zápor"
+       ],
+       "vykon": [
+        "pozdraví a predstaví sa",
+        "opýta sa na základné osobné údaje",
+        "opíše svoju rodinu"
+       ]
+      },
+      {
+       "nazov": "Škola a voľný čas",
+       "obsah": [
+        "školské predmety, rozvrh",
+        "záľuby",
+        "čísla, čas",
+        "modálne slovesá"
+       ],
+       "vykon": [
+        "povie, čo robí vo voľnom čase",
+        "dohodne si stretnutie",
+        "porozumie jednoduchému rozvrhu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Bývanie a mesto",
+       "obsah": [
+        "byt, izba, nábytok",
+        "orientácia v meste",
+        "predložky miesta",
+        "rozkazovací spôsob"
+       ],
+       "vykon": [
+        "opíše svoju izbu",
+        "opýta sa na cestu a vysvetlí ju",
+        "porozumie jednoduchému plánu mesta"
+       ]
+      },
+      {
+       "nazov": "Jedlo a nakupovanie",
+       "obsah": [
+        "potraviny, obchody, reštaurácia",
+        "množstvo",
+        "minulý čas"
+       ],
+       "vykon": [
+        "nakúpi potraviny",
+        "objedná si jedlo",
+        "rozpráva o tom, čo robil cez víkend"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Cestovanie a dovolenka",
+       "obsah": [
+        "doprava, ubytovanie, počasie",
+        "budúci čas",
+        "vedľajšie vety"
+       ],
+       "vykon": [
+        "rezervuje ubytovanie",
+        "opíše minulú dovolenku",
+        "napíše krátky list z dovolenky"
+       ]
+      },
+      {
+       "nazov": "Zdravie a šport",
+       "obsah": [
+        "telo, choroby, u lekára",
+        "šport",
+        "zvratné slovesá"
+       ],
+       "vykon": [
+        "opíše zdravotný problém",
+        "porovná športy",
+        "vyjadrí odporúčanie"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Krajiny a reálie",
+       "obsah": [
+        "geografia, osobnosti a tradície krajín cieľového jazyka",
+        "Slovensko"
+       ],
+       "vykon": [
+        "predstaví krajinu cieľového jazyka",
+        "porovná zvyky so Slovenskom"
+       ]
+      },
+      {
+       "nazov": "Práca a budúcnosť",
+       "obsah": [
+        "povolania, plány",
+        "podmieňovací spôsob",
+        "životopis"
+       ],
+       "vykon": [
+        "opíše svoje plány do budúcnosti",
+        "napíše jednoduchý životopis",
+        "zúčastní sa rozhovoru o práci"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "učebnicový komplet úrovne A1 – B1 s pracovným zošitom a nahrávkami"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Ruský jazyk",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Ruský jazyk sa vyučuje ako druhý cudzí jazyk; vzdelávanie smeruje k úrovni B1 podľa Spoločného európskeho referenčného rámca pre jazyky.",
+    "Predmet rozvíja všetky jazykové činnosti s dôrazom na bežnú komunikáciu v každodenných situáciách. Žiaci sa oboznamujú s reáliami krajín, v ktorých sa jazyk používa, a s ich kultúrou."
+   ],
+   "ciele": [
+    "porozumieť hlavným bodom jasného prejavu o známych témach",
+    "zvládnuť bežné situácie počas pobytu v krajine, kde sa jazykom hovorí",
+    "napísať jednoduchý súvislý text na známu tému",
+    "opísať zážitky, udalosti, sny a nádeje a stručne zdôvodniť názor"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Zoznámenie a rodina",
+       "obsah": [
+        "pozdravy, predstavenie sa",
+        "rodina",
+        "prítomný čas pravidelných slovies",
+        "člen",
+        "zápor"
+       ],
+       "vykon": [
+        "pozdraví a predstaví sa",
+        "opýta sa na základné osobné údaje",
+        "opíše svoju rodinu"
+       ]
+      },
+      {
+       "nazov": "Škola a voľný čas",
+       "obsah": [
+        "školské predmety, rozvrh",
+        "záľuby",
+        "čísla, čas",
+        "modálne slovesá"
+       ],
+       "vykon": [
+        "povie, čo robí vo voľnom čase",
+        "dohodne si stretnutie",
+        "porozumie jednoduchému rozvrhu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Bývanie a mesto",
+       "obsah": [
+        "byt, izba, nábytok",
+        "orientácia v meste",
+        "predložky miesta",
+        "rozkazovací spôsob"
+       ],
+       "vykon": [
+        "opíše svoju izbu",
+        "opýta sa na cestu a vysvetlí ju",
+        "porozumie jednoduchému plánu mesta"
+       ]
+      },
+      {
+       "nazov": "Jedlo a nakupovanie",
+       "obsah": [
+        "potraviny, obchody, reštaurácia",
+        "množstvo",
+        "minulý čas"
+       ],
+       "vykon": [
+        "nakúpi potraviny",
+        "objedná si jedlo",
+        "rozpráva o tom, čo robil cez víkend"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Cestovanie a dovolenka",
+       "obsah": [
+        "doprava, ubytovanie, počasie",
+        "budúci čas",
+        "vedľajšie vety"
+       ],
+       "vykon": [
+        "rezervuje ubytovanie",
+        "opíše minulú dovolenku",
+        "napíše krátky list z dovolenky"
+       ]
+      },
+      {
+       "nazov": "Zdravie a šport",
+       "obsah": [
+        "telo, choroby, u lekára",
+        "šport",
+        "zvratné slovesá"
+       ],
+       "vykon": [
+        "opíše zdravotný problém",
+        "porovná športy",
+        "vyjadrí odporúčanie"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Krajiny a reálie",
+       "obsah": [
+        "geografia, osobnosti a tradície krajín cieľového jazyka",
+        "Slovensko"
+       ],
+       "vykon": [
+        "predstaví krajinu cieľového jazyka",
+        "porovná zvyky so Slovenskom"
+       ]
+      },
+      {
+       "nazov": "Práca a budúcnosť",
+       "obsah": [
+        "povolania, plány",
+        "podmieňovací spôsob",
+        "životopis"
+       ],
+       "vykon": [
+        "opíše svoje plány do budúcnosti",
+        "napíše jednoduchý životopis",
+        "zúčastní sa rozhovoru o práci"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "učebnicový komplet úrovne A1 – B1 s pracovným zošitom a nahrávkami"
+   ],
+   "stav": "na_kontrolu",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Seminár zo slovenského jazyka a literatúry",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Seminár je voliteľný predmet pre žiakov, ktorí chcú prehĺbiť vedomosti zo slovenského jazyka a literatúry, pripravujú sa na maturitnú skúšku alebo na štúdium humanitných odborov.",
+    "Nadväzuje na obsahový a výkonový štandard predmetu Slovenský jazyk a literatúra a systematizuje učivo. Dôraz kladie na interpretáciu textu, argumentáciu a tvorbu vlastných textov."
+   ],
+   "ciele": [
+    "systematizovať učivo z jazyka, slohu a literatúry",
+    "zdokonaliť sa v interpretácii umeleckého a vecného textu",
+    "rozvíjať tvorivé písanie a argumentáciu",
+    "pripraviť sa na externú časť, písomnú formu internej časti aj ústnu formu maturity"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Práca s textom",
+       "obsah": [
+        "typy textov",
+        "súvislý a nesúvislý text",
+        "kľúčové slová, tvrdenia, fakty a názory"
+       ],
+       "vykon": [
+        "vyhľadá a porovná informácie z viacerých textov",
+        "posúdi spoľahlivosť zdroja",
+        "sformuluje hlavnú myšlienku textu"
+       ]
+      },
+      {
+       "nazov": "Tvorivé písanie",
+       "obsah": [
+        "esej, fejtón, glosa",
+        "štylistické prostriedky",
+        "kompozícia textu"
+       ],
+       "vykon": [
+        "napíše esej s osobitým štýlom",
+        "použije štylistické prostriedky zámerne",
+        "zreviduje a upraví vlastný text"
+       ]
+      },
+      {
+       "nazov": "Interpretácia lyriky",
+       "obsah": [
+        "lyrický subjekt, motív, téma",
+        "verzifikácia",
+        "básnické figúry a trópy"
+       ],
+       "vykon": [
+        "interpretuje báseň podľa osnovy",
+        "porovná dve básne s podobnou témou"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Literatúra 20. a 21. storočia",
+       "obsah": [
+        "kľúčové diela slovenskej a svetovej prózy",
+        "postmoderna",
+        "súčasní autori"
+       ],
+       "vykon": [
+        "zaradí dielo do kontextu",
+        "porovná spracovanie témy v rôznych dielach",
+        "prezentuje vlastnú čitateľskú skúsenosť"
+       ]
+      },
+      {
+       "nazov": "Jazykové a slohové opakovanie",
+       "obsah": [
+        "pravopis, morfológia, syntax",
+        "slohové postupy a útvary"
+       ],
+       "vykon": [
+        "bezchybne rieši pravopisné úlohy",
+        "určí slohový postup a útvar ukážky"
+       ]
+      },
+      {
+       "nazov": "Maturitný tréning",
+       "obsah": [
+        "testy externej časti",
+        "slohové zadania",
+        "ústna odpoveď podľa zadaní"
+       ],
+       "vykon": [
+        "rieši test v časovom limite",
+        "napíše slohovú prácu do 150 minút",
+        "prednesie súvislú ústnu odpoveď"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa aktivita na seminároch, písomné práce, referát a priebežné testy maturitného typu."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "zbierky maturitných testov a zadaní",
+    "odporúčaná literatúra pre maturantov"
+   ],
+   "stav": "na_kontrolu",
+   "suvisi": [
+    {
+     "predmet": "Slovenský jazyk a literatúra",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Jazykom k maturite",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Konverzácia v anglickom jazyku",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozširuje hodinovú dotáciu anglického jazyka o hodiny zamerané na ústny prejav. Žiaci rozvíjajú plynulosť, slovnú zásobu a schopnosť spontánne reagovať v diskusii.",
+    "Témy nadväzujú na maturitné tematické okruhy; konverzácia pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "rozvíjať plynulosť a spontánnosť ústneho prejavu",
+    "rozšíriť slovnú zásobu o idiomatické výrazy a frázové slovesá",
+    "argumentovať, vyjadriť súhlas a nesúhlas, viesť diskusiu",
+    "opísať a porovnať obrázky a riešiť situačné úlohy"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Diskusia a argumentácia",
+       "obsah": [
+        "vyjadrenie názoru, súhlas a nesúhlas",
+        "zdvorilé prerušenie",
+        "debatné formáty"
+       ],
+       "vykon": [
+        "vyjadrí a zdôvodní názor",
+        "reaguje na protiargument",
+        "zúčastní sa debaty"
+       ]
+      },
+      {
+       "nazov": "Opis a porovnanie obrázkov",
+       "obsah": [
+        "opisné frázy, špekulácia, porovnávanie"
+       ],
+       "vykon": [
+        "opíše a porovná dva obrázky a vyvodí z nich závery"
+       ]
+      },
+      {
+       "nazov": "Aktuálne témy",
+       "obsah": [
+        "médiá, technológie, životné prostredie, zdravý životný štýl"
+       ],
+       "vykon": [
+        "rozpráva o aktuálnej téme 3 – 5 minút",
+        "položí doplňujúce otázky"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Maturitné témy",
+       "obsah": [
+        "20 tematických okruhov ústnej maturity"
+       ],
+       "vykon": [
+        "samostatne rozpráva na každú maturitnú tému",
+        "prepojí tému so svojou skúsenosťou"
+       ]
+      },
+      {
+       "nazov": "Situačné úlohy",
+       "obsah": [
+        "rolové hry, riešenie problému, plánovanie"
+       ],
+       "vykon": [
+        "zvládne situačnú úlohu bez prípravy",
+        "použije vhodné komunikačné stratégie"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa najmä ústny prejav: plynulosť, rozsah slovnej zásoby, gramatická správnosť, výslovnosť a interakcia."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "autentické materiály – články, podcasty, videá",
+    "zbierky maturitných zadaní ústnej formy"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Anglický jazyk",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Reálie v anglickom jazyku",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Konverzácia z nemeckého jazyka",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozvíja ústny prejav v nemeckom jazyku a pripravuje žiakov na ústnu formu maturitnej skúšky na úrovni B1."
+   ],
+   "ciele": [
+    "zvýšiť plynulosť a istotu v ústnom prejave",
+    "rozšíriť slovnú zásobu k maturitným témam",
+    "reagovať v bežných komunikačných situáciách"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Každodenný život",
+       "obsah": [
+        "rodina, bývanie, škola, voľný čas – rozšírená slovná zásoba"
+       ],
+       "vykon": [
+        "rozpráva o svojom živote súvisle 3 minúty",
+        "reaguje na otázky"
+       ]
+      },
+      {
+       "nazov": "Situačné rozhovory",
+       "obsah": [
+        "nákup, cestovanie, u lekára, telefonovanie"
+       ],
+       "vykon": [
+        "zvládne rozhovor v bežnej situácii",
+        "vyžiada si informáciu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Maturitné témy",
+       "obsah": [
+        "tematické okruhy ústnej maturity B1"
+       ],
+       "vykon": [
+        "samostatne rozpráva na maturitnú tému",
+        "opíše obrázok a vyjadrí názor"
+       ]
+      },
+      {
+       "nazov": "Reálie nemecky hovoriacich krajín",
+       "obsah": [
+        "Nemecko, Rakúsko, Švajčiarsko – kultúra a tradície"
+       ],
+       "vykon": [
+        "porovná tradície nemecky hovoriacich krajín so Slovenskom"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Nemecký jazyk",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Reálie v anglickom jazyku",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet oboznamuje žiakov s geografiou, históriou, politickým systémom a kultúrou Spojeného kráľovstva, USA a ďalších anglicky hovoriacich krajín. Vyučuje sa v anglickom jazyku a rozvíja interkultúrnu kompetenciu."
+   ],
+   "ciele": [
+    "poznať základné reálie anglicky hovoriacich krajín",
+    "porozumieť kultúrnym rozdielom a tolerovať ich",
+    "rozšíriť slovnú zásobu z oblasti histórie, politiky a kultúry"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Spojené kráľovstvo",
+       "obsah": [
+        "geografia, história, monarchia a parlament, sviatky a tradície"
+       ],
+       "vykon": [
+        "opíše politický systém Spojeného kráľovstva",
+        "predstaví významnú historickú udalosť"
+       ]
+      },
+      {
+       "nazov": "Spojené štáty americké",
+       "obsah": [
+        "štáty a regióny, história, ústava, americký sen"
+       ],
+       "vykon": [
+        "porovná politický systém USA a Spojeného kráľovstva",
+        "prezentuje vybraný štát USA"
+       ]
+      },
+      {
+       "nazov": "Ďalšie anglicky hovoriace krajiny",
+       "obsah": [
+        "Írsko, Kanada, Austrália, Nový Zéland"
+       ],
+       "vykon": [
+        "pripraví projekt o vybranej krajine a odprezentuje ho"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií",
+    "práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov",
+    "projektové vyučovanie a prezentácie, debaty a diskusie",
+    "samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi",
+    "sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Súčasťou hodnotenia je projekt o vybranej krajine."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Anglický jazyk",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Dejepis",
+     "typ": "medzipredmetovy"
+    },
+    {
+     "predmet": "Geografia",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Jazykom k maturite",
+   "oblast": "Jazyk a komunikácia",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet pomáha maturantom zvládnuť jazykovú a komunikačnú stránku maturitnej skúšky zo slovenského jazyka a literatúry. Zameriava sa na čítanie s porozumením, jazykovú správnosť a tvorbu slohovej práce v časovom limite."
+   ],
+   "ciele": [
+    "zlepšiť čítanie s porozumením náučných a umeleckých textov",
+    "odstrániť najčastejšie pravopisné a štylistické chyby",
+    "naučiť sa plánovať a písať slohovú prácu v časovom limite"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Čítanie s porozumením",
+       "obsah": [
+        "typy úloh externej časti",
+        "stratégie čítania"
+       ],
+       "vykon": [
+        "zvolí vhodnú stratégiu čítania",
+        "správne odpovedá na úlohy s výberom aj s krátkou odpoveďou"
+       ]
+      },
+      {
+       "nazov": "Jazyková správnosť",
+       "obsah": [
+        "pravopis, interpunkcia, frazeológia, štylistika"
+       ],
+       "vykon": [
+        "opraví chyby v texte",
+        "zdôvodní pravopisné javy"
+       ]
+      },
+      {
+       "nazov": "Slohová práca",
+       "obsah": [
+        "výber témy, osnova, argumentácia, úprava textu"
+       ],
+       "vykon": [
+        "napíše slohovú prácu požadovaného útvaru a rozsahu",
+        "skontroluje a opraví vlastný text"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "testy z predchádzajúcich ročníkov externej časti maturity"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Slovenský jazyk a literatúra",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Matematika",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Matematika rozvíja matematickú kompetenciu – schopnosť používať matematické myslenie na riešenie problémov v bežnom živote, v ďalšom štúdiu a v povolaní. Dôraz sa kladie na porozumenie, postupy a aktivitu žiaka, nie na mechanické zapamätanie.",
+    "Obsah je rozdelený do tematických okruhov: Čísla, premenné a počtové výkony s číslami; Vzťahy, funkcie, tabuľky, diagramy; Geometria a meranie; Kombinatorika, pravdepodobnosť, štatistika; Logika, dôvodenie, dôkazy. Žiaci, ktorí z matematiky maturujú, dosahujú vyšší stupeň formalizácie a abstrakcie."
+   ],
+   "ciele": [
+    "rozvíjať logické a kritické myslenie a argumentáciu",
+    "čítať s porozumením texty s číslami, tabuľky, grafy a diagramy",
+    "získavať a spracúvať informácie a interpretovať výsledky",
+    "osvojiť si základné matematické pojmy a postupy a používať ich v praxi",
+    "chápať matematiku ako súčasť ľudskej kultúry"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Logika, dôvodenie, dôkazy",
+       "obsah": [
+        "výrok, pravdivostná hodnota",
+        "logické spojky – negácia, konjunkcia, disjunkcia, implikácia, ekvivalencia",
+        "kvantifikátory",
+        "de Morganove pravidlá",
+        "protipríklad"
+       ],
+       "vykon": [
+        "rozhodne, či je tvrdenie výrok, a určí pravdivosť zloženého výroku",
+        "utvorí negáciu výroku s kvantifikátorom",
+        "vyvráti tvrdenie protipríkladom"
+       ]
+      },
+      {
+       "nazov": "Čísla a počtové výkony",
+       "obsah": [
+        "množiny čísel N, Z, Q, R",
+        "deliteľnosť, prvočísla",
+        "mocniny s celočíselným exponentom, odmocniny",
+        "vedecký zápis",
+        "zaokrúhľovanie, platné číslice"
+       ],
+       "vykon": [
+        "zvolí vhodný spôsob výpočtu a správne zaokrúhli výsledok",
+        "zapíše číslo vo vedeckom tvare a použije ho pri odhadoch",
+        "upraví výraz s mocninami a odmocninami"
+       ]
+      },
+      {
+       "nazov": "Rovnice a nerovnice",
+       "obsah": [
+        "lineárne rovnice a nerovnice",
+        "sústava dvoch lineárnych rovníc",
+        "kvadratická rovnica, diskriminant",
+        "rovnice s absolútnou hodnotou"
+       ],
+       "vykon": [
+        "nájde všetky riešenia lineárnej a kvadratickej rovnice a zdôvodní úpravy",
+        "rieši sústavu rovníc dosadzovacou aj sčítacou metódou",
+        "rieši slovné úlohy vedúce na rovnice"
+       ]
+      },
+      {
+       "nazov": "Planimetria",
+       "obsah": [
+        "uhly, trojuholník a jeho prvky",
+        "zhodnosť a podobnosť trojuholníkov",
+        "Pytagorova a Euklidove vety",
+        "kružnica, kruh, obsah a obvod rovinných útvarov"
+       ],
+       "vykon": [
+        "rozhodne o zhodnosti a podobnosti trojuholníkov",
+        "vypočíta dĺžky pomocou Pytagorovej a Euklidových viet",
+        "zostrojí trojuholník podľa rozboru"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Funkcie",
+       "obsah": [
+        "funkcia, definičný obor, obor hodnôt, graf",
+        "monotónnosť, extrémy, ohraničenosť",
+        "lineárna, kvadratická, lineárna lomená funkcia",
+        "inverzná funkcia"
+       ],
+       "vykon": [
+        "zostrojí graf lineárnej a kvadratickej funkcie a určí vrchol paraboly",
+        "z grafu určí vlastnosti funkcie",
+        "rieši rovnice a nerovnice graficky"
+       ]
+      },
+      {
+       "nazov": "Exponenciálna a logaritmická funkcia",
+       "obsah": [
+        "mocninová, exponenciálna a logaritmická funkcia",
+        "logaritmus, vety o logaritmoch",
+        "exponenciálne a logaritmické rovnice",
+        "exponenciálny rast a pokles"
+       ],
+       "vykon": [
+        "rozlíši lineárnu a exponenciálnu závislosť",
+        "vyrieši jednoduchú exponenciálnu rovnicu",
+        "použije logaritmus pri úlohách z praxe (úroky, rozpad)"
+       ]
+      },
+      {
+       "nazov": "Goniometria",
+       "obsah": [
+        "oblúková miera",
+        "goniometrické funkcie ostrého uhla a všeobecného uhla",
+        "grafy",
+        "goniometrické rovnice",
+        "sínusová a kosínusová veta"
+       ],
+       "vykon": [
+        "vypočíta prvky pravouhlého a všeobecného trojuholníka",
+        "načrtne graf goniometrickej funkcie",
+        "rieši jednoduché goniometrické rovnice"
+       ]
+      },
+      {
+       "nazov": "Percentá a finančná matematika",
+       "obsah": [
+        "percento, promile",
+        "jednoduché a zložené úrokovanie",
+        "úver, splátka, inflácia"
+       ],
+       "vykon": [
+        "porovná výhodnosť pôžičiek a vkladov",
+        "vypočíta zložené úrokovanie",
+        "interpretuje údaje o úveroch v percentách"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Analytická geometria v rovine",
+       "obsah": [
+        "súradnice bodu a vektora",
+        "operácie s vektormi",
+        "parametrické a všeobecné vyjadrenie priamky",
+        "vzájomná poloha priamok",
+        "vzdialenosť bodu od priamky",
+        "kružnica"
+       ],
+       "vykon": [
+        "vypočíta súradnice vektora a jeho veľkosť",
+        "napíše rovnicu priamky a určí vzájomnú polohu dvoch priamok",
+        "určí stred a polomer kružnice z rovnice"
+       ]
+      },
+      {
+       "nazov": "Stereometria",
+       "obsah": [
+        "polohové a metrické vlastnosti v priestore",
+        "voľné rovnobežné premietanie",
+        "rezy kocky",
+        "hranoly, ihlany, valec, kužeľ, guľa – objem a povrch"
+       ],
+       "vykon": [
+        "zobrazí teleso vo voľnom rovnobežnom premietaní",
+        "zostrojí rez kocky rovinou",
+        "vypočíta objem a povrch telesa v úlohe z praxe"
+       ]
+      },
+      {
+       "nazov": "Kombinatorika",
+       "obsah": [
+        "pravidlo súčtu a súčinu",
+        "permutácie, variácie, kombinácie (aj s opakovaním)",
+        "faktoriál, kombinačné číslo",
+        "binomická veta"
+       ],
+       "vykon": [
+        "zistí počet možností systematickým vypisovaním aj vzorcom",
+        "rozlíši variácie a kombinácie",
+        "použije binomickú vetu"
+       ]
+      },
+      {
+       "nazov": "Pravdepodobnosť a štatistika",
+       "obsah": [
+        "náhodný jav, pravdepodobnosť, doplnkový jav, nezávislé javy",
+        "štatistický súbor, početnosť",
+        "priemer, modus, medián, rozptyl, smerodajná odchýlka",
+        "diagramy"
+       ],
+       "vykon": [
+        "vypočíta pravdepodobnosť javu klasickou definíciou",
+        "spracuje údaje do tabuľky a diagramu",
+        "vypočíta a interpretuje charakteristiky polohy a variability"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Postupnosti a rady",
+       "obsah": [
+        "postupnosť a jej vlastnosti",
+        "aritmetická a geometrická postupnosť",
+        "limita postupnosti",
+        "nekonečný geometrický rad"
+       ],
+       "vykon": [
+        "určí člen a súčet aritmetickej a geometrickej postupnosti",
+        "rieši úlohy z praxe (úroky, rast populácie)",
+        "vypočíta súčet nekonečného geometrického radu"
+       ]
+      },
+      {
+       "nazov": "Úvod do diferenciálneho počtu",
+       "obsah": [
+        "limita a spojitosť funkcie",
+        "derivácia a jej geometrický význam",
+        "extrémy funkcie",
+        "priebeh funkcie"
+       ],
+       "vykon": [
+        "vypočíta deriváciu elementárnych funkcií",
+        "nájde lokálne extrémy a intervaly monotónnosti",
+        "rieši jednoduché optimalizačné úlohy"
+       ]
+      },
+      {
+       "nazov": "Systematizácia učiva",
+       "obsah": [
+        "opakovanie tematických okruhov",
+        "úlohy maturitného typu"
+       ],
+       "vykon": [
+        "rieši komplexné úlohy kombinujúce viac tematických okruhov",
+        "zdôvodní postup riešenia"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor",
+    "riešenie úloh rôznymi spôsobmi a porovnanie postupov, dynamická geometria (GeoGebra)"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.",
+    "Po každom tematickom celku žiaci píšu písomnú prácu; súčasťou hodnotenia je aj ústna odpoveď a riešenie domácich úloh."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "zbierky úloh pre gymnáziá",
+    "GeoGebra, tabuľkový kalkulátor"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Informatika",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Informatika rozvíja informatické myslenie: schopnosť formulovať problém, navrhnúť algoritmus, zapísať ho v programovacom jazyku a overiť jeho správnosť. Žiaci spoznávajú princípy fungovania počítačov, sietí a softvéru a zodpovedné správanie v digitálnom svete.",
+    "Obsah je rozdelený do oblastí: Reprezentácie a nástroje; Komunikácia a spolupráca; Algoritmické riešenie problémov; Softvér a hardvér; Informačná spoločnosť."
+   ],
+   "ciele": [
+    "riešiť problémy algoritmicky a programovať v textovom programovacom jazyku",
+    "reprezentovať a spracúvať údaje – text, obraz, zvuk, tabuľky, databázy",
+    "porozumieť princípom počítačových sietí a internetu",
+    "dodržiavať pravidlá bezpečnosti, ochrany údajov a autorských práv"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Reprezentácie a nástroje",
+       "obsah": [
+        "kódovanie informácií, dvojková sústava",
+        "reprezentácia textu, obrazu a zvuku",
+        "tabuľkový kalkulátor – vzorce, funkcie, grafy"
+       ],
+       "vykon": [
+        "prevedie číslo medzi desiatkovou a dvojkovou sústavou",
+        "vysvetlí rozdiel medzi rastrovou a vektorovou grafikou",
+        "spracuje údaje v tabuľkovom kalkulátore a vytvorí graf"
+       ]
+      },
+      {
+       "nazov": "Algoritmické riešenie problémov I",
+       "obsah": [
+        "algoritmus, program",
+        "premenné, vstup, výstup",
+        "podmienený príkaz, cyklus",
+        "ladenie programu"
+       ],
+       "vykon": [
+        "zapíše algoritmus v programovacom jazyku (Python)",
+        "použije premenné, podmienky a cykly",
+        "nájde a opraví chybu v programe"
+       ]
+      },
+      {
+       "nazov": "Informačná spoločnosť",
+       "obsah": [
+        "bezpečnosť na internete, heslá, phishing",
+        "autorské právo, licencie",
+        "digitálna stopa"
+       ],
+       "vykon": [
+        "vytvorí bezpečné heslo a vysvetlí zásady jeho používania",
+        "rozpozná podvodnú správu",
+        "rešpektuje licencie pri použití cudzieho diela"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Algoritmické riešenie problémov II",
+       "obsah": [
+        "funkcie s parametrami",
+        "zoznamy, reťazce",
+        "práca so súbormi",
+        "jednoduché triedenie a vyhľadávanie"
+       ],
+       "vykon": [
+        "napíše funkciu s parametrami a návratovou hodnotou",
+        "spracuje zoznam údajov",
+        "naprogramuje vyhľadávanie v zozname"
+       ]
+      },
+      {
+       "nazov": "Softvér a hardvér",
+       "obsah": [
+        "časti počítača, operačný systém",
+        "súborový systém",
+        "počítačové siete, IP adresa, DNS",
+        "internet a jeho služby"
+       ],
+       "vykon": [
+        "opíše funkciu hlavných častí počítača",
+        "vysvetlí, ako sa prenáša informácia v sieti",
+        "rozlíši klienta a server"
+       ]
+      },
+      {
+       "nazov": "Komunikácia a spolupráca",
+       "obsah": [
+        "spolupráca v cloude",
+        "prezentácia informácií",
+        "databázy – tabuľka, záznam, dopyt"
+       ],
+       "vykon": [
+        "spolupracuje na spoločnom dokumente",
+        "vyhľadá údaje v databáze pomocou dopytu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Projekt",
+       "obsah": [
+        "analýza problému, návrh riešenia, implementácia, testovanie a prezentácia"
+       ],
+       "vykon": [
+        "samostatne alebo v tíme navrhne a naprogramuje projekt",
+        "zdokumentuje a odprezentuje riešenie"
+       ]
+      },
+      {
+       "nazov": "Umelá inteligencia a spoločnosť",
+       "obsah": [
+        "princípy strojového učenia",
+        "etika a riziká digitálnych technológií"
+       ],
+       "vykon": [
+        "vysvetlí princíp učenia z údajov",
+        "zhodnotí prínosy a riziká umelej inteligencie"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor",
+    "programovanie na počítači, párové programovanie, riešenie úloh súťaže iBobor"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotia sa praktické úlohy na počítači, projekty a krátke testy porozumenia."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "programovacie prostredie Python, tabuľkový kalkulátor, databázový systém"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Aplikovaná informatika",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozširuje informatiku o praktické zručnosti potrebné v štúdiu a v práci: pokročilú prácu s dokumentmi, tabuľkami, grafikou, tvorbu webu a základy spracovania údajov."
+   ],
+   "ciele": [
+    "efektívne pracovať s kancelárskym softvérom",
+    "vytvoriť jednoduchú webovú stránku",
+    "spracovať a vizualizovať údaje"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Pokročilá práca s dokumentmi",
+       "obsah": [
+        "štýly, obsah, číslovanie strán, citácie",
+        "hromadná korešpondencia"
+       ],
+       "vykon": [
+        "naformátuje rozsiahly dokument pomocou štýlov",
+        "vygeneruje obsah a zoznam literatúry"
+       ]
+      },
+      {
+       "nazov": "Tabuľky a údaje",
+       "obsah": [
+        "kontingenčné tabuľky, podmienené formátovanie, overovanie údajov"
+       ],
+       "vykon": [
+        "vytvorí kontingenčnú tabuľku a graf",
+        "overí správnosť vstupných údajov"
+       ]
+      },
+      {
+       "nazov": "Tvorba webu",
+       "obsah": [
+        "HTML, CSS, štruktúra stránky",
+        "zverejnenie"
+       ],
+       "vykon": [
+        "vytvorí jednoduchú webovú stránku s textom, obrázkami a odkazmi"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa najmä praktická práca a záverečný projekt."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Informatika",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Aplikovaná matematika",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet ukazuje využitie matematiky v praxi – vo financiách, technike, prírodných vedách a v spracovaní údajov. Žiaci riešia úlohy z reálneho života a pracujú s tabuľkovým kalkulátorom a dynamickou geometriou."
+   ],
+   "ciele": [
+    "modelovať reálne situácie matematickými prostriedkami",
+    "interpretovať výsledky výpočtov a posúdiť ich reálnosť",
+    "používať digitálne nástroje pri riešení úloh"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Matematika v hospodárstve",
+       "obsah": [
+        "percentá, úroky, inflácia",
+        "rozpočet domácnosti"
+       ],
+       "vykon": [
+        "zostaví rozpočet",
+        "porovná ponuky bánk"
+       ]
+      },
+      {
+       "nazov": "Matematické modely",
+       "obsah": [
+        "lineárny a exponenciálny model",
+        "optimalizácia"
+       ],
+       "vykon": [
+        "zostaví model situácie a interpretuje výsledok"
+       ]
+      },
+      {
+       "nazov": "Spracovanie údajov",
+       "obsah": [
+        "štatistika v praxi, prieskum, grafy"
+       ],
+       "vykon": [
+        "uskutoční jednoduchý prieskum a spracuje ho"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Matematika",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Finančná gramotnosť",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Technika",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozvíja technické myslenie a praktické zručnosti. Žiaci sa oboznamujú s technickým zobrazovaním, základmi elektrotechniky, robotiky a 3D modelovania a riešia jednoduché konštrukčné úlohy."
+   ],
+   "ciele": [
+    "čítať a kresliť jednoduchý technický výkres",
+    "zostaviť jednoduchý elektrický obvod a naprogramovať mikrokontrolér",
+    "navrhnúť a vymodelovať jednoduchý výrobok"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Technické zobrazovanie",
+       "obsah": [
+        "pravouhlé premietanie, kótovanie, mierka",
+        "náčrt a výkres"
+       ],
+       "vykon": [
+        "nakreslí náčrt jednoduchého telesa v troch priemetoch",
+        "okótuje výkres"
+       ]
+      },
+      {
+       "nazov": "Elektrotechnika a robotika",
+       "obsah": [
+        "elektrický obvod, súčiastky",
+        "mikrokontrolér, senzory, programovanie"
+       ],
+       "vykon": [
+        "zostaví obvod podľa schémy",
+        "naprogramuje reakciu na údaj zo senzora"
+       ]
+      },
+      {
+       "nazov": "3D modelovanie",
+       "obsah": [
+        "modelovací softvér, 3D tlač"
+       ],
+       "vykon": [
+        "vymodeluje jednoduchý predmet a pripraví ho na tlač"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor",
+    "praktické činnosti v dielni a v laboratóriu"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotia sa praktické výrobky a projekty."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Fyzika",
+     "typ": "medzipredmetovy"
+    },
+    {
+     "predmet": "Informatika",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Cvičenia z matematiky",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí sa chcú v matematike zdokonaliť, pripravujú sa na maturitu alebo na štúdium technických a prírodovedných odborov. Prehlbuje a precvičuje učivo predmetu Matematika."
+   ],
+   "ciele": [
+    "upevniť a prehĺbiť učivo matematiky",
+    "zdokonaliť sa v riešení náročnejších úloh",
+    "rozvíjať matematickú argumentáciu"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Výrazy, rovnice a nerovnice",
+       "obsah": [
+        "úpravy výrazov",
+        "rovnice a nerovnice s parametrom",
+        "sústavy rovníc"
+       ],
+       "vykon": [
+        "rieši rovnice s parametrom a diskutuje o riešiteľnosti"
+       ]
+      },
+      {
+       "nazov": "Funkcie a ich grafy",
+       "obsah": [
+        "transformácie grafov",
+        "zložená a inverzná funkcia"
+       ],
+       "vykon": [
+        "načrtne graf transformovanej funkcie",
+        "určí inverznú funkciu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Geometria",
+       "obsah": [
+        "analytická geometria, stereometria – náročnejšie úlohy"
+       ],
+       "vykon": [
+        "rieši úlohy kombinujúce syntetickú a analytickú metódu"
+       ]
+      },
+      {
+       "nazov": "Kombinatorika a pravdepodobnosť",
+       "obsah": [
+        "úlohy maturitného a prijímacieho typu"
+       ],
+       "vykon": [
+        "rieši komplexné úlohy z kombinatoriky a pravdepodobnosti"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "zbierky úloh na prijímacie skúšky na vysoké školy"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Matematika",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Matematika pre maturantov",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Matematika pre maturantov",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí si zvolili matematiku ako maturitný predmet. Systematizuje celé gymnaziálne učivo a pripravuje žiakov na externú časť a ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo všetkých tematických okruhov",
+    "zvládnuť úlohy externej časti maturity v časovom limite",
+    "pripraviť sa na ústnu odpoveď s dôkazom a zdôvodnením"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Čísla, výrazy, rovnice",
+       "obsah": [
+        "opakovanie a systematizácia"
+       ],
+       "vykon": [
+        "rieši úlohy maturitného typu bez chýb v úpravách"
+       ]
+      },
+      {
+       "nazov": "Funkcie, postupnosti",
+       "obsah": [
+        "vlastnosti funkcií, grafy, postupnosti"
+       ],
+       "vykon": [
+        "analyzuje funkciu a jej graf",
+        "rieši úlohy s postupnosťami"
+       ]
+      },
+      {
+       "nazov": "Geometria",
+       "obsah": [
+        "planimetria, stereometria, analytická geometria"
+       ],
+       "vykon": [
+        "vyrieši geometrickú úlohu a zdôvodní postup"
+       ]
+      },
+      {
+       "nazov": "Kombinatorika, pravdepodobnosť, štatistika, logika",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "rieši úlohy a interpretuje výsledky v kontexte"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Pravidelne sa píšu cvičné maturitné testy."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "testy externej časti maturity z predchádzajúcich rokov"
+   ],
+   "stav": "na_kontrolu",
+   "suvisi": [
+    {
+     "predmet": "Matematika",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Informatika pre maturantov",
+   "oblast": "Matematika a práca s informáciami",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet pripravuje žiakov na maturitnú skúšku z informatiky. Systematizuje teóriu a rozvíja programátorské zručnosti potrebné na praktickú časť maturity."
+   ],
+   "ciele": [
+    "systematizovať učivo informatiky",
+    "zdokonaliť sa v programovaní a riešení algoritmických úloh",
+    "pripraviť maturitný projekt alebo praktickú úlohu"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Algoritmy a programovanie",
+       "obsah": [
+        "triedenie, rekurzia, práca so súbormi, zložitosť algoritmov"
+       ],
+       "vykon": [
+        "naprogramuje riešenie maturitnej úlohy",
+        "porovná efektívnosť algoritmov"
+       ]
+      },
+      {
+       "nazov": "Reprezentácia údajov a siete",
+       "obsah": [
+        "kódovanie, kompresia, šifrovanie",
+        "siete a internet"
+       ],
+       "vykon": [
+        "vysvetlí princíp kompresie a šifrovania",
+        "opíše cestu paketu sieťou"
+       ]
+      },
+      {
+       "nazov": "Maturitné témy",
+       "obsah": [
+        "systematizácia oblastí informatiky"
+       ],
+       "vykon": [
+        "súvisle odpovie na maturitnú tému s ukážkou na počítači"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Informatika",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Fyzika",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Fyzika poskytuje žiakom poznatky o základných fyzikálnych javoch a zákonoch a rozvíja schopnosť skúmať prírodu vedeckými metódami. Obsah je koncipovaný tak, aby žiaci javy pozorovali, merali, opisovali modelmi a vysvetľovali ich.",
+    "Dôraz sa kladie na bádateľské aktivity, prácu s meracími prístrojmi, spracovanie a interpretáciu nameraných údajov."
+   ],
+   "ciele": [
+    "pozorovať a skúmať fyzikálne javy a formulovať hypotézy",
+    "navrhnúť a uskutočniť experiment, spracovať a vyhodnotiť namerané údaje",
+    "používať fyzikálne zákony pri riešení úloh z praxe",
+    "chápať význam fyziky pre techniku a spoločnosť"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Skúmanie vlastností kvapalín a plynov",
+       "obsah": [
+        "hustota, tlak, hydrostatický a atmosférický tlak",
+        "Pascalov a Archimedov zákon",
+        "prúdenie, rovnica spojitosti, Bernoulliho rovnica"
+       ],
+       "vykon": [
+        "vypočíta hydrostatický tlak a vztlakovú silu",
+        "vysvetlí plávanie telies",
+        "navrhne experiment na overenie Archimedovho zákona"
+       ]
+      },
+      {
+       "nazov": "Teplo a teplota",
+       "obsah": [
+        "teplota, teplotná rozťažnosť",
+        "vnútorná energia, teplo, merná tepelná kapacita",
+        "kalorimetrická rovnica",
+        "zmeny skupenstva"
+       ],
+       "vykon": [
+        "zostaví kalorimetrickú rovnicu a vypočíta výslednú teplotu",
+        "zmeria mernú tepelnú kapacitu látky",
+        "vysvetlí zmeny skupenstva pomocou časticovej stavby látok"
+       ]
+      },
+      {
+       "nazov": "Pohyb",
+       "obsah": [
+        "poloha, dráha, rýchlosť, zrýchlenie",
+        "rovnomerný a rovnomerne zrýchlený pohyb",
+        "voľný pád",
+        "pohyb po kružnici"
+       ],
+       "vykon": [
+        "zostrojí a interpretuje graf závislosti dráhy a rýchlosti od času",
+        "vypočíta veličiny rovnomerného a rovnomerne zrýchleného pohybu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Sila a pohyb",
+       "obsah": [
+        "Newtonove zákony",
+        "gravitačná sila, trenie",
+        "hybnosť a zákon zachovania hybnosti",
+        "mechanická práca, energia, výkon"
+       ],
+       "vykon": [
+        "použije Newtonove zákony pri riešení úloh",
+        "vysvetlí zákon zachovania mechanickej energie",
+        "vypočíta prácu a výkon"
+       ]
+      },
+      {
+       "nazov": "Elektrický náboj a elektrické pole",
+       "obsah": [
+        "elektrický náboj, Coulombov zákon",
+        "intenzita a potenciál",
+        "kondenzátor, kapacita"
+       ],
+       "vykon": [
+        "vypočíta silu medzi nábojmi",
+        "opíše elektrické pole pomocou siločiar",
+        "vysvetlí funkciu kondenzátora"
+       ]
+      },
+      {
+       "nazov": "Elektrický prúd",
+       "obsah": [
+        "prúd, napätie, odpor",
+        "Ohmov zákon",
+        "zapojenie rezistorov",
+        "práca a výkon elektrického prúdu",
+        "prúd v polovodičoch"
+       ],
+       "vykon": [
+        "zostaví obvod podľa schémy a zmeria prúd a napätie",
+        "vypočíta odpor sériového a paralelného zapojenia",
+        "vypočíta spotrebu elektrickej energie"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Elektromagnetizmus",
+       "obsah": [
+        "magnetické pole, magnetická indukcia",
+        "elektromagnetická indukcia",
+        "striedavý prúd, transformátor"
+       ],
+       "vykon": [
+        "opíše magnetické pole vodiča s prúdom",
+        "vysvetlí princíp elektromagnetickej indukcie a transformátora"
+       ]
+      },
+      {
+       "nazov": "Kmitanie, vlnenie, optika",
+       "obsah": [
+        "mechanické kmitanie a vlnenie, zvuk",
+        "elektromagnetické vlnenie",
+        "odraz a lom svetla",
+        "šošovky"
+       ],
+       "vykon": [
+        "určí periódu a frekvenciu kmitania",
+        "vysvetlí lom svetla",
+        "zostrojí obraz predmetu šošovkou"
+       ]
+      },
+      {
+       "nazov": "Fyzika mikrosveta",
+       "obsah": [
+        "fotoelektrický jav",
+        "model atómu",
+        "jadro, rádioaktivita, polčas rozpadu",
+        "jadrová energetika"
+       ],
+       "vykon": [
+        "vysvetlí fotoelektrický jav",
+        "opíše druhy žiarenia a ochranu pred ním",
+        "zhodnotí výhody a riziká jadrovej energetiky"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.",
+    "Súčasťou hodnotenia sú protokoly z laboratórnych prác."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "laboratórne pomôcky a súpravy na meranie, simulácie fyzikálnych javov"
+   ],
+   "stav": "hotova",
+   "suvisi": [
+    {
+     "predmet": "Matematika",
+     "typ": "predpoklad"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Chémia",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Chémia vedie žiakov k poznaniu zloženia, štruktúry a vlastností látok a ich premien. Spája teoretické poznatky s experimentálnou činnosťou a s využitím chémie v každodennom živote, priemysle a ochrane životného prostredia."
+   ],
+   "ciele": [
+    "vysvetliť vlastnosti látok na základe ich zloženia a štruktúry",
+    "zapisovať a vyčísľovať chemické rovnice a riešiť chemické výpočty",
+    "bezpečne pracovať s chemickými látkami a laboratórnym vybavením",
+    "posúdiť vplyv chemických látok na zdravie a životné prostredie"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Zloženie a štruktúra látok",
+       "obsah": [
+        "sústavy látok, zmesi a ich oddeľovanie",
+        "atóm, protón, neutrón, elektrón",
+        "elektrónový obal, periodická sústava prvkov",
+        "chemická väzba"
+       ],
+       "vykon": [
+        "navrhne postup oddelenia zložiek zmesi",
+        "zapíše elektrónovú konfiguráciu prvku",
+        "vysvetlí vznik kovalentnej a iónovej väzby"
+       ]
+      },
+      {
+       "nazov": "Chemické reakcie",
+       "obsah": [
+        "chemická rovnica, zákon zachovania hmotnosti",
+        "látkové množstvo, mol, molárna hmotnosť",
+        "zloženie roztokov",
+        "chemická kinetika a rovnováha"
+       ],
+       "vykon": [
+        "vyčísli chemickú rovnicu",
+        "vypočíta látkové množstvo a hmotnosť",
+        "pripraví roztok požadovanej koncentrácie"
+       ]
+      },
+      {
+       "nazov": "Protolytické a redoxné reakcie",
+       "obsah": [
+        "kyseliny a zásady, pH",
+        "neutralizácia",
+        "oxidácia a redukcia",
+        "elektrolýza, galvanický článok"
+       ],
+       "vykon": [
+        "určí pH roztoku indikátorom",
+        "zapíše rovnicu neutralizácie",
+        "vysvetlí princíp galvanického článku"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Prvky a ich zlúčeniny",
+       "obsah": [
+        "vodík, kyslík, voda",
+        "prvky skupín periodickej sústavy – vlastnosti a zlúčeniny",
+        "kovy a ich výroba"
+       ],
+       "vykon": [
+        "porovná vlastnosti prvkov v skupine",
+        "opíše výrobu železa",
+        "uvedie využitie významných zlúčenín"
+       ]
+      },
+      {
+       "nazov": "Úvod do organickej chémie",
+       "obsah": [
+        "vlastnosti atómu uhlíka",
+        "vzorce organických zlúčenín",
+        "izoméria",
+        "typy organických reakcií"
+       ],
+       "vykon": [
+        "napíše štruktúrny a racionálny vzorec",
+        "určí typ izomérie",
+        "rozlíši adíciu, substitúciu a elimináciu"
+       ]
+      },
+      {
+       "nazov": "Uhľovodíky",
+       "obsah": [
+        "alkány, alkény, alkíny, arény",
+        "ropa a zemný plyn"
+       ],
+       "vykon": [
+        "pomenuje uhľovodík podľa názvoslovia",
+        "opíše spracovanie ropy a jeho vplyv na životné prostredie"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Deriváty uhľovodíkov",
+       "obsah": [
+        "halogénderiváty, alkoholy, fenoly, aldehydy, ketóny, karboxylové kyseliny a ich deriváty"
+       ],
+       "vykon": [
+        "zaradí zlúčeninu podľa funkčnej skupiny",
+        "opíše vlastnosti a využitie etanolu a kyseliny octovej"
+       ]
+      },
+      {
+       "nazov": "Biochémia",
+       "obsah": [
+        "lipidy, sacharidy, bielkoviny, nukleové kyseliny",
+        "enzýmy",
+        "metabolizmus"
+       ],
+       "vykon": [
+        "opíše stavbu a význam biomolekúl",
+        "vysvetlí funkciu enzýmov"
+       ]
+      },
+      {
+       "nazov": "Chémia v živote",
+       "obsah": [
+        "liečivá, potravinové aditíva, plasty, drogy",
+        "chémia a životné prostredie"
+       ],
+       "vykon": [
+        "posúdi riziká látok v domácnosti",
+        "navrhne spôsob triedenia a recyklácie odpadu"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.",
+    "Súčasťou hodnotenia sú protokoly z laboratórnych prác a chemické výpočty."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "tabuľky a periodická sústava prvkov, laboratórne vybavenie"
+   ],
+   "stav": "hotova",
+   "suvisi": [
+    {
+     "predmet": "Biológia",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Biológia",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Biológia vedie žiakov k poznaniu živých organizmov, ich stavby, funkcií, vývinu a vzťahov k prostrediu. Rozvíja porozumenie ľudskému telu a zdraviu a buduje zodpovedný vzťah k prírode."
+   ],
+   "ciele": [
+    "poznať stavbu a funkcie buniek, organizmov a ekosystémov",
+    "pozorovať biologické objekty a javy a pracovať s mikroskopom",
+    "vysvetliť princípy dedičnosti a evolúcie",
+    "chrániť si zdravie a prírodu na základe poznatkov"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Biológia ako veda. Bunka",
+       "obsah": [
+        "metódy biológie",
+        "znaky živých sústav",
+        "stavba prokaryotickej a eukaryotickej bunky",
+        "bunkový cyklus, mitóza, meióza"
+       ],
+       "vykon": [
+        "rozlíši prokaryotickú a eukaryotickú bunku",
+        "pripraví mikroskopický preparát",
+        "porovná mitózu a meiózu"
+       ]
+      },
+      {
+       "nazov": "Vírusy, baktérie, huby",
+       "obsah": [
+        "stavba a rozmnožovanie vírusov a baktérií",
+        "huby a lišajníky",
+        "význam pre človeka"
+       ],
+       "vykon": [
+        "vysvetlí rozdiel medzi vírusom a baktériou",
+        "uvedie choroby spôsobené vírusmi a baktériami a prevenciu"
+       ]
+      },
+      {
+       "nazov": "Rastliny",
+       "obsah": [
+        "rastlinné pletivá a orgány",
+        "fotosyntéza a dýchanie",
+        "rozmnožovanie rastlín",
+        "systém rastlín"
+       ],
+       "vykon": [
+        "opíše stavbu rastlinných orgánov",
+        "vysvetlí podstatu fotosyntézy",
+        "určí rastlinu pomocou kľúča"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Živočíchy",
+       "obsah": [
+        "stavba tela a orgánové sústavy živočíchov",
+        "systém bezstavovcov a stavovcov",
+        "etológia"
+       ],
+       "vykon": [
+        "porovná orgánové sústavy vybraných skupín živočíchov",
+        "zaradí živočícha do systému"
+       ]
+      },
+      {
+       "nazov": "Biológia človeka",
+       "obsah": [
+        "oporná a pohybová sústava",
+        "obehová, dýchacia, tráviaca, vylučovacia sústava",
+        "nervová a hormonálna regulácia",
+        "zmysly",
+        "rozmnožovanie"
+       ],
+       "vykon": [
+        "opíše stavbu a funkciu orgánových sústav človeka",
+        "vysvetlí zásady prvej pomoci",
+        "zdôvodní zásady zdravého životného štýlu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Genetika",
+       "obsah": [
+        "nukleové kyseliny, gén, genetický kód",
+        "Mendelove zákony",
+        "dedičnosť pohlavia",
+        "mutácie",
+        "genetické inžinierstvo"
+       ],
+       "vykon": [
+        "rieši genetické úlohy s jedným a dvoma znakmi",
+        "vysvetlí príčiny a dôsledky mutácií",
+        "zhodnotí využitie a riziká genetického inžinierstva"
+       ]
+      },
+      {
+       "nazov": "Ekológia a evolúcia",
+       "obsah": [
+        "organizmus a prostredie",
+        "populácia, spoločenstvo, ekosystém",
+        "kolobeh látok a tok energie",
+        "evolúcia a jej dôkazy",
+        "ochrana prírody"
+       ],
+       "vykon": [
+        "zostaví potravový reťazec",
+        "vysvetlí kolobeh uhlíka",
+        "uvedie dôkazy evolúcie",
+        "navrhne opatrenia na ochranu prírody"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor",
+    "terénne pozorovania a exkurzie, práca s mikroskopom a určovacími kľúčmi"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.",
+    "Súčasťou hodnotenia sú protokoly z laboratórnych prác a projekty."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "mikroskopy, preparáty, určovacie kľúče, atlasy"
+   ],
+   "stav": "hotova",
+   "suvisi": [
+    {
+     "predmet": "Chémia",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Experimentálna prírodoveda",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozvíja bádateľské zručnosti žiakov prvého ročníka. Prepája fyziku, chémiu a biológiu prostredníctvom experimentov a projektov, pri ktorých žiaci kladú otázky, navrhujú pokusy a vyhodnocujú výsledky."
+   ],
+   "ciele": [
+    "formulovať výskumnú otázku a hypotézu",
+    "navrhnúť a bezpečne uskutočniť experiment",
+    "spracovať údaje, vyvodiť závery a prezentovať ich"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Vedecká metóda",
+       "obsah": [
+        "pozorovanie, otázka, hypotéza, premenné, kontrolný pokus"
+       ],
+       "vykon": [
+        "rozlíši závislú a nezávislú premennú",
+        "navrhne kontrolovaný experiment"
+       ]
+      },
+      {
+       "nazov": "Meranie a údaje",
+       "obsah": [
+        "meracie prístroje, chyba merania, tabuľka, graf"
+       ],
+       "vykon": [
+        "vykoná opakované meranie, vypočíta priemer a znázorní údaje v grafe"
+       ]
+      },
+      {
+       "nazov": "Prírodovedné projekty",
+       "obsah": [
+        "voda, vzduch, pôda, energia v domácnosti"
+       ],
+       "vykon": [
+        "realizuje projekt v tíme a odprezentuje výsledky"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce",
+    "riešenie problémových úloh a úloh z praxe, práca s grafmi a tabuľkami",
+    "skupinová a projektová práca, prezentácie výsledkov",
+    "využitie digitálnych technológií – simulácie, meracie systémy, tabuľkový kalkulátor"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa aktivita, protokoly a projekt; predmet môže byť hodnotený aj slovne podľa rozhodnutia pedagogickej rady."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Fyzika",
+     "typ": "medzipredmetovy"
+    },
+    {
+     "predmet": "Chémia",
+     "typ": "medzipredmetovy"
+    },
+    {
+     "predmet": "Biológia",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Seminár z biológie",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Seminár je určený žiakom so záujmom o biológiu, medicínu, veterinu, farmáciu a príbuzné odbory.",
+    "Nadväzuje na obsahový a výkonový štandard predmetu Biológia; učivo rozširuje, prehlbuje a dopĺňa o laboratórne a projektové aktivity."
+   ],
+   "ciele": [
+    "prehĺbiť vedomosti z predmetu Biológia nad rámec štátneho vzdelávacieho programu",
+    "rozvíjať experimentálne zručnosti a samostatnú prácu s odbornou literatúrou",
+    "pripraviť sa na maturitnú skúšku, prijímacie skúšky a predmetové olympiády"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Cytológia a molekulová biológia",
+       "obsah": [
+        "bunkové organely, membránový transport",
+        "replikácia, transkripcia, translácia"
+       ],
+       "vykon": [
+        "vysvetlí proteosyntézu",
+        "porovná pasívny a aktívny transport"
+       ]
+      },
+      {
+       "nazov": "Fyziológia rastlín a živočíchov",
+       "obsah": [
+        "vodný režim, výživa, rast",
+        "regulácia u živočíchov"
+       ],
+       "vykon": [
+        "navrhne pokus z fyziológie rastlín a vyhodnotí ho"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Anatómia a fyziológia človeka",
+       "obsah": [
+        "orgánové sústavy – podrobne",
+        "imunita",
+        "hormóny"
+       ],
+       "vykon": [
+        "vysvetlí mechanizmus imunitnej odpovede",
+        "rieši úlohy prijímacích skúšok na lekárske fakulty"
+       ]
+      },
+      {
+       "nazov": "Genetika a ekológia",
+       "obsah": [
+        "populačná genetika",
+        "ekologické faktory",
+        "globálne problémy"
+       ],
+       "vykon": [
+        "rieši úlohy z populačnej genetiky",
+        "zhodnotí globálny ekologický problém"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov",
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "vysokoškolské učebnice a odborné časopisy",
+    "zadania predmetovej olympiády"
+   ],
+   "stav": "na_kontrolu",
+   "suvisi": [
+    {
+     "predmet": "Biológia",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Biológia pre maturantov",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Seminár z chémie",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Seminár je určený žiakom so záujmom o chémiu, medicínu, farmáciu, chemické a potravinárske odbory.",
+    "Nadväzuje na obsahový a výkonový štandard predmetu Chémia; učivo rozširuje, prehlbuje a dopĺňa o laboratórne a projektové aktivity."
+   ],
+   "ciele": [
+    "prehĺbiť vedomosti z predmetu Chémia nad rámec štátneho vzdelávacieho programu",
+    "rozvíjať experimentálne zručnosti a samostatnú prácu s odbornou literatúrou",
+    "pripraviť sa na maturitnú skúšku, prijímacie skúšky a predmetové olympiády"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Všeobecná chémia",
+       "obsah": [
+        "štruktúra atómu, väzby, termochémia",
+        "chemické výpočty – náročnejšie úlohy"
+       ],
+       "vykon": [
+        "rieši stechiometrické úlohy",
+        "vypočíta reakčné teplo"
+       ]
+      },
+      {
+       "nazov": "Anorganická chémia",
+       "obsah": [
+        "komplexné zlúčeniny",
+        "prvky d-bloku"
+       ],
+       "vykon": [
+        "pomenuje komplexnú zlúčeninu",
+        "opíše vlastnosti prechodných kovov"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Organická chémia",
+       "obsah": [
+        "reakčné mechanizmy",
+        "syntéza organických látok"
+       ],
+       "vykon": [
+        "opíše mechanizmus substitúcie a adície",
+        "navrhne jednoduchú syntézu"
+       ]
+      },
+      {
+       "nazov": "Analytická chémia",
+       "obsah": [
+        "kvalitatívna a kvantitatívna analýza",
+        "titrácia"
+       ],
+       "vykon": [
+        "uskutoční acidobázickú titráciu a vypočíta koncentráciu"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov",
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "vysokoškolské učebnice a odborné časopisy",
+    "zadania predmetovej olympiády"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Chémia",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Chémia pre maturantov",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Seminár z fyziky",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Seminár je určený žiakom so záujmom o fyziku, techniku, informatiku a prírodovedné odbory.",
+    "Nadväzuje na obsahový a výkonový štandard predmetu Fyzika; učivo rozširuje, prehlbuje a dopĺňa o laboratórne a projektové aktivity."
+   ],
+   "ciele": [
+    "prehĺbiť vedomosti z predmetu Fyzika nad rámec štátneho vzdelávacieho programu",
+    "rozvíjať experimentálne zručnosti a samostatnú prácu s odbornou literatúrou",
+    "pripraviť sa na maturitnú skúšku, prijímacie skúšky a predmetové olympiády"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Mechanika",
+       "obsah": [
+        "kinematika a dynamika – náročnejšie úlohy",
+        "gravitačné pole",
+        "mechanika tuhého telesa"
+       ],
+       "vykon": [
+        "rieši úlohy s pohybom v gravitačnom poli",
+        "vypočíta moment sily"
+       ]
+      },
+      {
+       "nazov": "Termodynamika",
+       "obsah": [
+        "stavová rovnica ideálneho plynu",
+        "termodynamické zákony",
+        "tepelné stroje"
+       ],
+       "vykon": [
+        "použije stavovú rovnicu",
+        "vypočíta účinnosť tepelného stroja"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Elektrina a magnetizmus",
+       "obsah": [
+        "obvody striedavého prúdu",
+        "elektromagnetické vlny"
+       ],
+       "vykon": [
+        "rieši úlohy s obvodmi striedavého prúdu"
+       ]
+      },
+      {
+       "nazov": "Moderná fyzika",
+       "obsah": [
+        "špeciálna teória relativity",
+        "kvantová fyzika",
+        "astrofyzika"
+       ],
+       "vykon": [
+        "vysvetlí dilatáciu času",
+        "opíše vývoj hviezd"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov",
+    "bádateľsky orientované vyučovanie – formulovanie hypotéz, pozorovanie, pokus, vyhodnotenie",
+    "laboratórne práce a demonštračné pokusy s dôrazom na bezpečnosť práce"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "vysokoškolské učebnice a odborné časopisy",
+    "zadania predmetovej olympiády"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Fyzika",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Fyzika pre maturantov",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Biológia pre maturantov",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí si zvolili predmet Biológia ako maturitný. Systematizuje učivo celého gymnaziálneho štúdia a pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo podľa maturitných zadaní",
+    "naučiť sa súvisle a odborne odpovedať a interpretovať pokus či graf",
+    "prepojiť poznatky z rôznych tematických celkov"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Bunka a organizmy",
+       "obsah": [
+        "cytológia, mikrobiológia, botanika, zoológia"
+       ],
+       "vykon": [
+        "súvisle odpovie na maturitné zadanie s využitím obrazového materiálu"
+       ]
+      },
+      {
+       "nazov": "Človek a zdravie",
+       "obsah": [
+        "anatómia a fyziológia človeka, prvá pomoc"
+       ],
+       "vykon": [
+        "vysvetlí funkciu orgánovej sústavy a súvis so zdravím"
+       ]
+      },
+      {
+       "nazov": "Genetika, ekológia, evolúcia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "rieši genetickú úlohu a interpretuje ekologický problém"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Súčasťou hodnotenia sú cvičné ústne odpovede podľa maturitných zadaní."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "maturitné zadania a súbory úloh"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Biológia",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Chémia pre maturantov",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí si zvolili predmet Chémia ako maturitný. Systematizuje učivo celého gymnaziálneho štúdia a pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo podľa maturitných zadaní",
+    "naučiť sa súvisle a odborne odpovedať a interpretovať pokus či graf",
+    "prepojiť poznatky z rôznych tematických celkov"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Všeobecná chémia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "vysvetlí štruktúru látok a priebeh reakcií",
+        "rieši chemické výpočty"
+       ]
+      },
+      {
+       "nazov": "Anorganická chémia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "charakterizuje skupinu prvkov a ich zlúčeniny"
+       ]
+      },
+      {
+       "nazov": "Organická chémia a biochémia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "charakterizuje skupinu organických zlúčenín a biomolekúl"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Súčasťou hodnotenia sú cvičné ústne odpovede podľa maturitných zadaní."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "maturitné zadania a súbory úloh"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Chémia",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Fyzika pre maturantov",
+   "oblast": "Človek a príroda",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí si zvolili predmet Fyzika ako maturitný. Systematizuje učivo celého gymnaziálneho štúdia a pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo podľa maturitných zadaní",
+    "naučiť sa súvisle a odborne odpovedať a interpretovať pokus či graf",
+    "prepojiť poznatky z rôznych tematických celkov"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Mechanika a termika",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "vysvetlí jav, uvedie zákon a vyrieši úlohu"
+       ]
+      },
+      {
+       "nazov": "Elektrina a magnetizmus",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "navrhne a opíše experiment"
+       ]
+      },
+      {
+       "nazov": "Vlnenie, optika, mikrosvet",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "interpretuje graf a vyvodí závery"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Súčasťou hodnotenia sú cvičné ústne odpovede podľa maturitných zadaní."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "maturitné zadania a súbory úloh"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Fyzika",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Dejepis",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Dejepis rozvíja historické vedomie a historické myslenie žiakov. Učí ich pracovať s historickými prameňmi, rozlišovať fakty a interpretácie, chápať príčiny a dôsledky udalostí a porovnávať dejiny Slovenska s európskymi a svetovými dejinami.",
+    "Dôraz sa kladie na dejiny 19. a 20. storočia, na vývoj demokracie a na pamäť obetí totalitných režimov."
+   ],
+   "ciele": [
+    "orientovať sa v historickom čase a priestore",
+    "kriticky pracovať s historickými prameňmi a rozlišovať fakt, názor a propagandu",
+    "vysvetliť príčiny a dôsledky kľúčových historických udalostí",
+    "chápať hodnotu demokracie, ľudských práv a historickej pamäti"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Úvod do štúdia dejepisu",
+       "obsah": [
+        "historický prameň, historiografia",
+        "historický čas, periodizácia"
+       ],
+       "vykon": [
+        "rozlíši primárny a sekundárny prameň",
+        "zaradí udalosť do historického obdobia"
+       ]
+      },
+      {
+       "nazov": "Antika a stredovek",
+       "obsah": [
+        "grécka demokracia, Rím",
+        "Veľká Morava",
+        "stredoveký štát a cirkev",
+        "Uhorsko"
+       ],
+       "vykon": [
+        "porovná aténsku demokraciu s modernou",
+        "vysvetlí význam cyrilo-metodskej misie"
+       ]
+      },
+      {
+       "nazov": "Raný novovek",
+       "obsah": [
+        "humanizmus a renesancia, reformácia",
+        "objavné plavby",
+        "Habsburská monarchia, osvietenstvo"
+       ],
+       "vykon": [
+        "vysvetlí príčiny a dôsledky reformácie",
+        "zhodnotí reformy osvietenských panovníkov"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Dlhé 19. storočie",
+       "obsah": [
+        "francúzska revolúcia, priemyselná revolúcia",
+        "národné hnutia",
+        "slovenské národné hnutie, revolúcia 1848/49",
+        "Rakúsko-Uhorsko"
+       ],
+       "vykon": [
+        "vysvetlí príčiny a dôsledky priemyselnej revolúcie",
+        "charakterizuje požiadavky slovenského národného hnutia"
+       ]
+      },
+      {
+       "nazov": "Prvá svetová vojna a vznik ČSR",
+       "obsah": [
+        "príčiny a priebeh vojny",
+        "zahraničný a domáci odboj",
+        "vznik Československa"
+       ],
+       "vykon": [
+        "vysvetlí príčiny prvej svetovej vojny",
+        "zhodnotí úlohu M. R. Štefánika pri vzniku ČSR"
+       ]
+      },
+      {
+       "nazov": "Medzivojnové obdobie",
+       "obsah": [
+        "demokracia a totalitné režimy",
+        "Československá republika 1918 – 1938",
+        "Mníchov"
+       ],
+       "vykon": [
+        "porovná demokratický a totalitný režim",
+        "vysvetlí dôsledky Mníchovskej dohody"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Druhá svetová vojna",
+       "obsah": [
+        "Slovenská republika 1939 – 1945",
+        "holokaust",
+        "SNP",
+        "priebeh a dôsledky vojny"
+       ],
+       "vykon": [
+        "zhodnotí charakter Slovenskej republiky 1939 – 1945",
+        "vysvetlí podstatu holokaustu",
+        "zhodnotí význam SNP"
+       ]
+      },
+      {
+       "nazov": "Svet a Československo po roku 1945",
+       "obsah": [
+        "studená vojna",
+        "komunistický režim v ČSR, rok 1968, normalizácia",
+        "nežná revolúcia 1989"
+       ],
+       "vykon": [
+        "vysvetlí podstatu studenej vojny",
+        "analyzuje pramene k udalostiam roku 1968",
+        "zhodnotí význam novembra 1989"
+       ]
+      },
+      {
+       "nazov": "Slovenská republika a súčasný svet",
+       "obsah": [
+        "vznik SR 1993",
+        "integrácia do EÚ a NATO",
+        "globalizácia"
+       ],
+       "vykon": [
+        "opíše vznik samostatnej SR",
+        "zhodnotí význam vstupu SR do EÚ a NATO"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "výklad a riadený rozhovor, heuristická metóda",
+    "práca s historickými prameňmi, mapami, štatistikami a médiami",
+    "diskusia, debata, argumentácia a obhajoba vlastného názoru",
+    "projektová a skupinová práca, exkurzie a besedy",
+    "kritické myslenie – overovanie informácií, rozlišovanie faktov a názorov",
+    "návšteva múzeí a pamätných miest, rozhovory s pamätníkmi"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "historické atlasy, pramenné čítanky, dokumentárne filmy"
+   ],
+   "stav": "hotova",
+   "suvisi": [
+    {
+     "predmet": "Občianska náuka",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Geografia",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Geografia skúma vzťahy medzi prírodou a spoločnosťou v priestore. Rozvíja schopnosť čítať a interpretovať mapy, pracovať s geografickými informáciami a chápať regionálne a globálne problémy súčasného sveta."
+   ],
+   "ciele": [
+    "orientovať sa na mape a v teréne, používať GIS a digitálne mapy",
+    "vysvetliť zákonitosti prírodných a spoločenských procesov",
+    "charakterizovať regióny Slovenska, Európy a sveta",
+    "posúdiť globálne problémy a možnosti udržateľného rozvoja"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Planéta Zem a mapa",
+       "obsah": [
+        "Zem vo vesmíre",
+        "geografická sieť, časové pásma",
+        "mapa, mierka, kartografické zobrazenia",
+        "GIS"
+       ],
+       "vykon": [
+        "určí geografické súradnice miesta",
+        "vypočíta časový rozdiel",
+        "použije mierku mapy"
+       ]
+      },
+      {
+       "nazov": "Prírodná sféra",
+       "obsah": [
+        "litosféra, atmosféra, hydrosféra, pedosféra, biosféra",
+        "podnebné pásma"
+       ],
+       "vykon": [
+        "vysvetlí vznik pohorí a zemetrasení",
+        "opíše cirkuláciu atmosféry",
+        "priradí krajinu k podnebnému pásmu"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Humánna geografia",
+       "obsah": [
+        "obyvateľstvo a sídla",
+        "hospodárstvo – poľnohospodárstvo, priemysel, služby, doprava",
+        "globalizácia"
+       ],
+       "vykon": [
+        "interpretuje vekovú pyramídu",
+        "vysvetlí faktory lokalizácie priemyslu",
+        "zhodnotí dôsledky globalizácie"
+       ]
+      },
+      {
+       "nazov": "Regionálna geografia sveta",
+       "obsah": [
+        "Afrika, Ázia, Amerika, Austrália a Oceánia – prírodné a spoločenské pomery"
+       ],
+       "vykon": [
+        "porovná vybrané regióny sveta",
+        "vysvetlí príčiny rozdielov vo vyspelosti štátov"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Európa",
+       "obsah": [
+        "prírodné pomery, obyvateľstvo, hospodárstvo",
+        "Európska únia",
+        "štáty Európy"
+       ],
+       "vykon": [
+        "charakterizuje región Európy",
+        "vysvetlí princípy fungovania EÚ"
+       ]
+      },
+      {
+       "nazov": "Slovensko",
+       "obsah": [
+        "poloha, prírodné pomery, obyvateľstvo, sídla, hospodárstvo",
+        "regióny Slovenska",
+        "ochrana prírody"
+       ],
+       "vykon": [
+        "charakterizuje región Slovenska",
+        "zhodnotí regionálne rozdiely",
+        "navrhne trasu exkurzie po regióne"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "výklad a riadený rozhovor, heuristická metóda",
+    "práca s historickými prameňmi, mapami, štatistikami a médiami",
+    "diskusia, debata, argumentácia a obhajoba vlastného názoru",
+    "projektová a skupinová práca, exkurzie a besedy",
+    "kritické myslenie – overovanie informácií, rozlišovanie faktov a názorov",
+    "práca s mapami a GIS, terénne cvičenia"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "školský atlas sveta a Slovenska, digitálne mapy"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Občianska náuka",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Občianska náuka pripravuje žiakov na aktívny a zodpovedný život v demokratickej spoločnosti. Prepája psychológiu, sociológiu, politológiu, právo, ekonómiu a filozofiu."
+   ],
+   "ciele": [
+    "poznať seba a rozvíjať vzťahy s inými ľuďmi",
+    "chápať princípy demokracie a právneho štátu a uplatňovať svoje práva",
+    "rozumieť fungovaniu trhovej ekonomiky a hospodáriť s financiami",
+    "kriticky myslieť a filozoficky uvažovať o otázkach človeka a sveta"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Človek ako jednotlivec",
+       "obsah": [
+        "psychológia – osobnosť, poznávacie procesy, učenie sa",
+        "stres a jeho zvládanie"
+       ],
+       "vykon": [
+        "opíše štruktúru osobnosti",
+        "navrhne efektívny spôsob učenia sa",
+        "uvedie spôsoby zvládania stresu"
+       ]
+      },
+      {
+       "nazov": "Človek v spoločnosti",
+       "obsah": [
+        "sociológia – socializácia, sociálne skupiny, rodina",
+        "sociálne problémy"
+       ],
+       "vykon": [
+        "vysvetlí proces socializácie",
+        "analyzuje sociálny problém a navrhne riešenie"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Občan a štát",
+       "obsah": [
+        "štát, formy vlády",
+        "ústava SR",
+        "demokracia, voľby, politické strany",
+        "ľudské práva"
+       ],
+       "vykon": [
+        "opíše zloženie a právomoci orgánov štátnej moci SR",
+        "vysvetlí princípy volebného systému"
+       ]
+      },
+      {
+       "nazov": "Občan a právo",
+       "obsah": [
+        "právny poriadok",
+        "občianske, rodinné, pracovné a trestné právo"
+       ],
+       "vykon": [
+        "rozlíši oblasti práva",
+        "uvedie práva a povinnosti zamestnanca"
+       ]
+      },
+      {
+       "nazov": "Ekonomický život",
+       "obsah": [
+        "trh, dopyt a ponuka",
+        "peniaze, banky, dane",
+        "rodinný rozpočet"
+       ],
+       "vykon": [
+        "vysvetlí mechanizmus trhu",
+        "zostaví rodinný rozpočet"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Filozofia",
+       "obsah": [
+        "vznik filozofie",
+        "antická, stredoveká, novoveká a súčasná filozofia",
+        "etika"
+       ],
+       "vykon": [
+        "porovná názory filozofov na vybranú otázku",
+        "sformuluje vlastný argumentovaný postoj"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "výklad a riadený rozhovor, heuristická metóda",
+    "práca s historickými prameňmi, mapami, štatistikami a médiami",
+    "diskusia, debata, argumentácia a obhajoba vlastného názoru",
+    "projektová a skupinová práca, exkurzie a besedy",
+    "kritické myslenie – overovanie informácií, rozlišovanie faktov a názorov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "Ústava SR, aktuálne právne predpisy, publicistické texty"
+   ],
+   "stav": "hotova",
+   "suvisi": [
+    {
+     "predmet": "Dejepis",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Finančná gramotnosť",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozvíja finančnú gramotnosť žiakov v súlade s národným štandardom finančnej gramotnosti. Žiaci sa učia rozhodovať o financiách, plánovať rozpočet, sporiť, investovať a rozpoznávať riziká úverov a podvodov."
+   ],
+   "ciele": [
+    "zodpovedne hospodáriť s osobnými financiami",
+    "porovnávať finančné produkty a posúdiť ich výhodnosť a riziká",
+    "chrániť sa pred finančnými podvodmi a predlžením"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Človek vo sfére peňazí",
+       "obsah": [
+        "potreby a túžby",
+        "rozhodovanie",
+        "spotrebiteľské práva"
+       ],
+       "vykon": [
+        "zdôvodní finančné rozhodnutie",
+        "uplatní reklamáciu ako spotrebiteľ"
+       ]
+      },
+      {
+       "nazov": "Finančná zodpovednosť a rozpočet",
+       "obsah": [
+        "príjmy a výdavky, osobný a rodinný rozpočet"
+       ],
+       "vykon": [
+        "zostaví osobný rozpočet a navrhne úspory"
+       ]
+      },
+      {
+       "nazov": "Úver, dlh, sporenie a investovanie",
+       "obsah": [
+        "úroková miera, RPMN",
+        "sporiace a investičné produkty",
+        "riziko a výnos"
+       ],
+       "vykon": [
+        "vypočíta celkové náklady úveru",
+        "porovná sporenie a investovanie"
+       ]
+      },
+      {
+       "nazov": "Riadenie rizika a poistenie",
+       "obsah": [
+        "poistenie, finančné podvody, ochrana údajov"
+       ],
+       "vykon": [
+        "rozpozná znaky podvodnej ponuky",
+        "vyberie vhodný typ poistenia"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "výklad a riadený rozhovor, heuristická metóda",
+    "práca s historickými prameňmi, mapami, štatistikami a médiami",
+    "diskusia, debata, argumentácia a obhajoba vlastného názoru",
+    "projektová a skupinová práca, exkurzie a besedy",
+    "kritické myslenie – overovanie informácií, rozlišovanie faktov a názorov",
+    "prípadové štúdie, simulácie a výpočty v tabuľkovom kalkulátore"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "Národný štandard finančnej gramotnosti",
+    "kalkulačky finančných produktov"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Občianska náuka",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Aplikovaná matematika",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Seminár z dejepisu",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Seminár je určený žiakom so záujmom o históriu, právo, žurnalistiku, politológiu a učiteľstvo. Prehlbuje kľúčové témy dejepisu a rozvíja prácu s historickými prameňmi."
+   ],
+   "ciele": [
+    "prehĺbiť poznatky z dejín Slovenska a sveta",
+    "samostatne analyzovať a interpretovať pramene",
+    "pripraviť sa na maturitu a prijímacie skúšky"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Práca historika",
+       "obsah": [
+        "heuristika, kritika prameňov, interpretácia"
+       ],
+       "vykon": [
+        "analyzuje prameň a posúdi jeho dôveryhodnosť"
+       ]
+      },
+      {
+       "nazov": "Kľúčové obdobia slovenských dejín",
+       "obsah": [
+        "Veľká Morava, Uhorsko, národné hnutie"
+       ],
+       "vykon": [
+        "porovná interpretácie udalosti v rôznych prameňoch"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Dejiny 20. storočia",
+       "obsah": [
+        "totalitné režimy, studená vojna, rok 1989"
+       ],
+       "vykon": [
+        "napíše esej na historickú tému s využitím prameňov"
+       ]
+      },
+      {
+       "nazov": "Regionálne dejiny",
+       "obsah": [
+        "dejiny obce a regiónu školy"
+       ],
+       "vykon": [
+        "spracuje projekt z regionálnej histórie"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov",
+    "práca s historickými prameňmi, mapami, štatistikami a médiami",
+    "diskusia, debata, argumentácia a obhajoba vlastného názoru"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Dejepis",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Dejepis pre maturantov",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Seminár z geografie",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Seminár prehlbuje fyzickú, humánnu a regionálnu geografiu a rozvíja prácu s GIS a terénny výskum."
+   ],
+   "ciele": [
+    "prehĺbiť geografické poznatky",
+    "zvládnuť prácu s GIS",
+    "pripraviť sa na maturitu a geografickú olympiádu"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "3. ročník",
+     "celky": [
+      {
+       "nazov": "Geografické informačné systémy",
+       "obsah": [
+        "vrstvy, priestorová analýza, tvorba mapy"
+       ],
+       "vykon": [
+        "vytvorí tematickú mapu v GIS"
+       ]
+      },
+      {
+       "nazov": "Fyzická geografia",
+       "obsah": [
+        "geomorfológia, klimatológia, hydrológia"
+       ],
+       "vykon": [
+        "interpretuje klimadiagram a hydrologický režim rieky"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Humánna a regionálna geografia",
+       "obsah": [
+        "demografia, urbanizácia, geopolitika"
+       ],
+       "vykon": [
+        "analyzuje demografický vývoj štátu"
+       ]
+      },
+      {
+       "nazov": "Terénny výskum",
+       "obsah": [
+        "dotazník, mapovanie, spracovanie údajov"
+       ],
+       "vykon": [
+        "uskutoční terénny výskum v okolí školy"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov",
+    "práca v teréne a s GIS"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Geografia",
+     "typ": "nadvazuje"
+    },
+    {
+     "predmet": "Geografia pre maturantov",
+     "typ": "suvisi"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Dejepis pre maturantov",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí z predmetu Dejepis maturujú. Systematizuje učivo a pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo podľa maturitných zadaní",
+    "súvisle a argumentovane odpovedať",
+    "pracovať s prameňmi, mapami a grafmi"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Staroveké a stredoveké dejiny",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "súvisle odpovie s využitím mapy a prameňa"
+       ]
+      },
+      {
+       "nazov": "Novovek a 19. storočie",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "vysvetlí príčiny a dôsledky udalostí"
+       ]
+      },
+      {
+       "nazov": "20. storočie a súčasnosť",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "porovná udalosti slovenských a svetových dejín"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "maturitné zadania"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Dejepis",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Geografia pre maturantov",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí z predmetu Geografia maturujú. Systematizuje učivo a pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo podľa maturitných zadaní",
+    "súvisle a argumentovane odpovedať",
+    "pracovať s prameňmi, mapami a grafmi"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Fyzická geografia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "vysvetlí prírodný proces na príklade"
+       ]
+      },
+      {
+       "nazov": "Humánna geografia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "interpretuje štatistické údaje"
+       ]
+      },
+      {
+       "nazov": "Regionálna geografia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "charakterizuje región podľa osnovy"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "maturitné zadania"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Geografia",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Občianska náuka pre maturantov",
+   "oblast": "Človek a spoločnosť",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom, ktorí z predmetu Občianska náuka maturujú. Systematizuje učivo a pripravuje žiakov na ústnu formu internej časti maturitnej skúšky."
+   ],
+   "ciele": [
+    "systematizovať učivo podľa maturitných zadaní",
+    "súvisle a argumentovane odpovedať",
+    "pracovať s prameňmi, mapami a grafmi"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Psychológia a sociológia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "uvedie príklady z praxe"
+       ]
+      },
+      {
+       "nazov": "Politológia a právo",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "vysvetlí fungovanie štátu a práva na príklade"
+       ]
+      },
+      {
+       "nazov": "Ekonómia a filozofia",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "porovná ekonomické a filozofické koncepcie"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "maturitné zadania"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Občianska náuka",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Umenie a kultúra",
+   "oblast": "Umenie a kultúra",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Predmet Umenie a kultúra integruje výtvarné umenie, hudbu, film, divadlo, architektúru a dizajn. Žiaci poznávajú umenie v kontexte doby, rozvíjajú vizuálnu a mediálnu gramotnosť a vlastný kultúrny vkus."
+   ],
+   "ciele": [
+    "vnímať a interpretovať umelecké diela rôznych druhov a období",
+    "poznať slovenské a európske kultúrne dedičstvo",
+    "kriticky posudzovať mediálne a reklamné posolstvá",
+    "tvorivo sa vyjadriť prostriedkami umenia"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Kultúra a umenie",
+       "obsah": [
+        "pojem kultúra, druhy umenia",
+        "kultúrne dedičstvo, pamiatky UNESCO na Slovensku"
+       ],
+       "vykon": [
+        "vysvetlí pojmy kultúra a umenie",
+        "predstaví pamiatku UNESCO na Slovensku"
+       ]
+      },
+      {
+       "nazov": "Vizuálna kultúra",
+       "obsah": [
+        "výtvarné umenie od praveku po súčasnosť – kľúčové diela a štýly",
+        "architektúra"
+       ],
+       "vykon": [
+        "rozpozná umelecký sloh podľa znakov",
+        "interpretuje vybrané výtvarné dielo"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Hudba a hudobná kultúra",
+       "obsah": [
+        "hudobné obdobia, žánre, ľudová hudba",
+        "súčasná populárna hudba"
+       ],
+       "vykon": [
+        "zaradí skladbu do hudobného obdobia",
+        "porovná ľudovú a umelú hudbu"
+       ]
+      },
+      {
+       "nazov": "Médiá, film a dizajn",
+       "obsah": [
+        "mediálna výchova, reklama",
+        "filmová reč",
+        "dizajn v každodennom živote"
+       ],
+       "vykon": [
+        "analyzuje reklamu a jej manipulatívne prvky",
+        "napíše recenziu filmu"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "návštevy galérií, koncertov a divadelných predstavení",
+    "analýza a interpretácia diel, diskusia",
+    "tvorivé projekty – fotografia, video, plagát",
+    "práca s digitálnymi zbierkami múzeí a galérií"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa aktivita, projekty a prezentácie; predmet môže byť hodnotený aj slovne."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie",
+    "digitálne zbierky galérií a múzeí"
+   ],
+   "stav": "hotova",
+   "suvisi": [
+    {
+     "predmet": "Slovenský jazyk a literatúra",
+     "typ": "medzipredmetovy"
+    },
+    {
+     "predmet": "Dejepis",
+     "typ": "medzipredmetovy"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Etická výchova",
+   "oblast": "Človek a hodnoty",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Etická výchova rozvíja morálne usudzovanie a prosociálne správanie žiakov. Pracuje zážitkovou formou, cez reflexiu skúseností, diskusiu a riešenie modelových situácií."
+   ],
+   "ciele": [
+    "rozvíjať sebapoznanie, sebaúctu a empatiu",
+    "riešiť konflikty a dilemy na základe etických princípov",
+    "zaujať zodpovedný postoj k aktuálnym etickým otázkam"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Komunikácia a vzťahy",
+       "obsah": [
+        "asertivita, empatia, aktívne počúvanie",
+        "riešenie konfliktov"
+       ],
+       "vykon": [
+        "uplatní asertívne správanie v modelovej situácii",
+        "navrhne riešenie konfliktu"
+       ]
+      },
+      {
+       "nazov": "Etika a morálka",
+       "obsah": [
+        "hodnoty, svedomie, morálny úsudok",
+        "etické teórie"
+       ],
+       "vykon": [
+        "vysvetlí rozdiel medzi etikou a morálkou",
+        "zdôvodní riešenie etickej dilemy"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Aplikovaná etika",
+       "obsah": [
+        "bioetika, etika médií, ekologická etika",
+        "ľudská dôstojnosť"
+       ],
+       "vykon": [
+        "zaujme argumentovaný postoj k bioetickej otázke"
+       ]
+      },
+      {
+       "nazov": "Prosociálnosť a dobrovoľníctvo",
+       "obsah": [
+        "pomoc druhým, solidarita",
+        "dobrovoľnícky projekt"
+       ],
+       "vykon": [
+        "naplánuje a zrealizuje dobrovoľnícku aktivitu"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "zážitkové aktivity a hry s reflexiou",
+    "diskusia, riešenie dilem a prípadových štúdií",
+    "projektová práca"
+   ],
+   "hodnotenie": [
+    "Predmet sa hodnotí slovne: absolvoval / neabsolvoval, v súlade s rozhodnutím pedagogickej rady."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Náboženská výchova",
+   "oblast": "Človek a hodnoty",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Náboženská výchova sa vyučuje podľa učebných osnov schválených príslušnou cirkvou alebo náboženskou spoločnosťou. Vedie žiakov k poznaniu náboženskej tradície, k hľadaniu zmyslu života a k úcte k druhým."
+   ],
+   "ciele": [
+    "poznať základy viery a náboženskej tradície",
+    "uvažovať o zmysle života a hodnotách",
+    "rozvíjať dialóg a toleranciu medzi ľuďmi rôzneho vyznania"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Človek a viera",
+       "obsah": [
+        "otázky zmyslu života",
+        "viera a rozum",
+        "Biblia"
+       ],
+       "vykon": [
+        "formuluje otázky o zmysle života",
+        "interpretuje biblický text"
+       ]
+      },
+      {
+       "nazov": "Svedectvo a tradícia",
+       "obsah": [
+        "dejiny cirkvi",
+        "sviatosti a sviatky"
+       ],
+       "vykon": [
+        "opíše význam kresťanských sviatkov"
+       ]
+      }
+     ]
+    },
+    {
+     "rocnik": "2. ročník",
+     "celky": [
+      {
+       "nazov": "Morálka a svedomie",
+       "obsah": [
+        "Desatoro, láska k blížnemu",
+        "svedomie"
+       ],
+       "vykon": [
+        "aplikuje morálne princípy na situácie zo života"
+       ]
+      },
+      {
+       "nazov": "Náboženstvá sveta",
+       "obsah": [
+        "judaizmus, islam, budhizmus, hinduizmus",
+        "medzináboženský dialóg"
+       ],
+       "vykon": [
+        "porovná základné znaky svetových náboženstiev"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "rozhovor, práca s textom, reflexia",
+    "projekty a návštevy sakrálnych pamiatok"
+   ],
+   "hodnotenie": [
+    "Predmet sa hodnotí slovne: absolvoval / neabsolvoval, v súlade s rozhodnutím pedagogickej rady."
+   ],
+   "zdroje": [
+    "učebné osnovy a učebnice schválené cirkvou alebo náboženskou spoločnosťou"
+   ],
+   "stav": "na_kontrolu",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Telesná a športová výchova",
+   "oblast": "Zdravie a pohyb",
+   "zdroj": "ŠVP",
+   "charakteristika": [
+    "Telesná a športová výchova rozvíja pohybové schopnosti a zručnosti žiakov, ich telesnú zdatnosť a vzťah k pravidelnej pohybovej aktivite. Obsah je rozdelený do modulov: Zdravie a jeho poruchy, Zdravý životný štýl, Telesná zdatnosť a pohybová výkonnosť, Športové činnosti pohybového režimu."
+   ],
+   "ciele": [
+    "rozvíjať kondičné a koordinačné schopnosti",
+    "zdokonaliť pohybové zručnosti v zvolených športoch",
+    "uplatňovať zásady zdravého životného štýlu a bezpečnosti",
+    "dodržiavať pravidlá fair play"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. – 4. ročník",
+     "celky": [
+      {
+       "nazov": "Zdravie a jeho poruchy",
+       "obsah": [
+        "zdravie, civilizačné ochorenia, prevencia",
+        "prvá pomoc"
+       ],
+       "vykon": [
+        "vysvetlí vplyv pohybu na zdravie",
+        "poskytne prvú pomoc pri úraze"
+       ]
+      },
+      {
+       "nazov": "Zdravý životný štýl",
+       "obsah": [
+        "pohybový režim, výživa, regenerácia",
+        "škodlivé návyky"
+       ],
+       "vykon": [
+        "zostaví vlastný týždenný pohybový režim",
+        "zdôvodní riziká drog a fajčenia"
+       ]
+      },
+      {
+       "nazov": "Telesná zdatnosť a pohybová výkonnosť",
+       "obsah": [
+        "kondičné a koordinačné schopnosti",
+        "testovanie zdatnosti"
+       ],
+       "vykon": [
+        "vykoná testy telesnej zdatnosti a vyhodnotí svoj pokrok"
+       ]
+      },
+      {
+       "nazov": "Športové činnosti",
+       "obsah": [
+        "atletika, gymnastika, športové hry, plávanie, turistika a pobyt v prírode, úpoly"
+       ],
+       "vykon": [
+        "predvedie herné činnosti jednotlivca v športovej hre",
+        "zvládne techniku vybraných atletických disciplín"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "metódy nácviku pohybových zručností – názorná ukážka, slovný výklad, opakovanie a korekcia",
+    "hra a súťaž, kruhový a intervalový tréning",
+    "testovanie pohybovej výkonnosti a sebahodnotenie pokroku",
+    "individuálny prístup podľa zdravotného stavu a výkonnosti žiaka"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa prístup, aktivita, zlepšenie výkonnosti a osvojenie pohybových zručností; zohľadňuje sa zdravotný stav žiaka."
+   ],
+   "zdroje": [
+    "športové náradie a náčinie, telocvičňa, posilňovňa, atletický areál",
+    "pravidlá športov a metodické materiály"
+   ],
+   "stav": "hotova",
+   "suvisi": [],
+   "poznamka": null
+  },
+  {
+   "nazov": "Športová príprava",
+   "oblast": "Zdravie a pohyb",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet je určený žiakom tried so športovou prípravou. Rozvíja všeobecnú a špeciálnu pohybovú prípravu v zvolenom športe v spolupráci s trénermi športových klubov."
+   ],
+   "ciele": [
+    "rozvíjať špeciálne pohybové schopnosti v zvolenom športe",
+    "zdokonaliť techniku a taktiku",
+    "viesť k regenerácii, správnej výžive a prevencii zranení"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. – 4. ročník",
+     "celky": [
+      {
+       "nazov": "Všeobecná pohybová príprava",
+       "obsah": [
+        "sila, rýchlosť, vytrvalosť, obratnosť, flexibilita"
+       ],
+       "vykon": [
+        "zvládne tréningový program všeobecnej prípravy"
+       ]
+      },
+      {
+       "nazov": "Špeciálna príprava",
+       "obsah": [
+        "technika a taktika zvoleného športu"
+       ],
+       "vykon": [
+        "predvedie techniku a taktické riešenia herných situácií"
+       ]
+      },
+      {
+       "nazov": "Regenerácia a teória tréningu",
+       "obsah": [
+        "zaťaženie, regenerácia, výživa športovca, doping"
+       ],
+       "vykon": [
+        "naplánuje regeneráciu po zaťažení",
+        "vysvetlí riziká dopingu"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "metódy nácviku pohybových zručností – názorná ukážka, slovný výklad, opakovanie a korekcia",
+    "hra a súťaž, kruhový a intervalový tréning",
+    "testovanie pohybovej výkonnosti a sebahodnotenie pokroku",
+    "individuálny prístup podľa zdravotného stavu a výkonnosti žiaka",
+    "tréningové jednotky pod vedením trénera, sústredenia"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.",
+    "Hodnotí sa plnenie tréningového plánu a výkonnostný rast."
+   ],
+   "zdroje": [
+    "športoviská a tréningové pomôcky klubov"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Telesná a športová výchova",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Základy športovej prípravy",
+   "oblast": "Zdravie a pohyb",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet rozširuje telesnú výchovu o základy športového tréningu pre žiakov, ktorí sa chcú venovať športu na rekreačnej úrovni."
+   ],
+   "ciele": [
+    "osvojiť si princípy športového tréningu",
+    "naplánovať vlastný tréning",
+    "zlepšiť telesnú zdatnosť"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "1. ročník",
+     "celky": [
+      {
+       "nazov": "Princípy tréningu",
+       "obsah": [
+        "zaťaženie, adaptácia, superkompenzácia"
+       ],
+       "vykon": [
+        "vysvetlí princípy zaťaženia a adaptácie"
+       ]
+      },
+      {
+       "nazov": "Vlastný tréningový plán",
+       "obsah": [
+        "ciele, testovanie, plánovanie"
+       ],
+       "vykon": [
+        "zostaví a realizuje vlastný tréningový plán"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "metódy nácviku pohybových zručností – názorná ukážka, slovný výklad, opakovanie a korekcia",
+    "hra a súťaž, kruhový a intervalový tréning",
+    "testovanie pohybovej výkonnosti a sebahodnotenie pokroku",
+    "individuálny prístup podľa zdravotného stavu a výkonnosti žiaka"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "telocvičňa, posilňovňa, monitor srdcovej frekvencie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Telesná a športová výchova",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  },
+  {
+   "nazov": "Športová príprava pre maturantov",
+   "oblast": "Zdravie a pohyb",
+   "zdroj": "ŠkVP",
+   "charakteristika": [
+    "Predmet pripravuje žiakov tried so športovou prípravou na maturitnú skúšku z teórie a didaktiky športovej prípravy."
+   ],
+   "ciele": [
+    "systematizovať teóriu športového tréningu",
+    "pripraviť sa na ústnu formu maturity"
+   ],
+   "rocniky": [
+    {
+     "rocnik": "4. ročník",
+     "celky": [
+      {
+       "nazov": "Teória športového tréningu",
+       "obsah": [
+        "systematizácia"
+       ],
+       "vykon": [
+        "súvisle odpovie na maturitné zadanie"
+       ]
+      },
+      {
+       "nazov": "Didaktika a organizácia športu",
+       "obsah": [
+        "plánovanie tréningu, organizácia súťaží"
+       ],
+       "vykon": [
+        "naplánuje tréningovú jednotku a súťaž"
+       ]
+      }
+     ]
+    }
+   ],
+   "metody": [
+    "riešenie úloh maturitného typu a úloh z predchádzajúcich ročníkov maturity",
+    "samostatná práca s odbornou literatúrou a internetovými zdrojmi",
+    "referáty, prezentácie a obhajoba vlastnej práce",
+    "skupinové riešenie problémov a vzájomné vysvetľovanie",
+    "individuálne konzultácie podľa potrieb žiakov"
+   ],
+   "hodnotenie": [
+    "Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.",
+    "Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.",
+    "Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania."
+   ],
+   "zdroje": [
+    "schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva",
+    "učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie",
+    "digitálne vzdelávacie zdroje a školské e-learningové prostredie"
+   ],
+   "stav": null,
+   "suvisi": [
+    {
+     "predmet": "Športová príprava",
+     "typ": "nadvazuje"
+    }
+   ],
+   "poznamka": null
+  }
+ ]
+}

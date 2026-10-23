@@ -14,6 +14,7 @@ public partial class PrveSpustenieWindow : Window
     {
         InitializeComponent();
         PopisGymnazia.Text = $"{_gymnazium.Typ} – {_gymnazium.Oblasti.Count} vzdelávacích oblastí a {_gymnazium.PocetPredmetov} predmetov z tabuľky školy.";
+        TestovaciaSada.IsChecked = Services.TestovaciaSada.ZvolenaPriInstalacii;
         Loaded += (_, _) => Skola.Focus();
     }
 
@@ -29,6 +30,10 @@ public partial class PrveSpustenieWindow : Window
             if (VolbaGymnazium.IsChecked == true)
             {
                 UcebnyPlanService.Vytvor(_gymnazium, nahradit: false);
+                if (TestovaciaSada.IsChecked == true)
+                {
+                    Dialogy.Cakaj(() => Services.TestovaciaSada.Nainstaluj());
+                }
             }
             else if (VolbaExcel.IsChecked == true)
             {

@@ -30,6 +30,7 @@
   <ItemGroup>
     <Resource Include="Assets\skvp.ico" />
     <EmbeddedResource Include="Zdroje\ucebny_plan_gymnazium.json" LogicalName="SkVP.UcebnyPlanGymnazium.json" />
+    <EmbeddedResource Include="Zdroje\testovacia_sada.json" LogicalName="SkVP.TestovaciaSada.json" />
   </ItemGroup>
 
 </Project>

@@ -43,6 +43,79 @@ public sealed partial class MainViewModel : ObservableObject
         OtvorDashboard();
     }
 
+    /// <summary>V programe je testovacia sada učebných osnov (ukážkové dáta).</summary>
+    [ObservableProperty]
+    private bool _jeTestovaciaSada;
+
+    /// <summary>Vymazanie údajov (testovacej sady alebo všetkého) so zálohou pred vymazaním.</summary>
+    [RelayCommand]
+    public void VymazatUdaje()
+    {
+        var okno = new Views.VymazanieWindow { Owner = Dialogy.Vlastnik };
+        if (!Dialogy.TichyRezim && okno.ShowDialog() != true)
+        {
+            return;
+        }
+
+        Vymaz(okno.VsetkoVrataneOblasti);
+    }
+
+    public void Vymaz(bool vsetko)
+    {
+        (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
+        UkonciUpravyVoWorde();
+        try
+        {
+            Dialogy.Cakaj(() =>
+            {
+                new ZalohaService().Zalohuj();
+                if (vsetko)
+                {
+                    TestovaciaSada.VymazVsetko();
+                }
+                else
+                {
+                    TestovaciaSada.VymazOsnovy();
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Dialogy.Chyba("Údaje sa nepodarilo vymazať.", ex);
+            return;
+        }
+
+        if (vsetko && !Dialogy.TichyRezim)
+        {
+            new Views.PrveSpustenieWindow { Owner = Dialogy.Vlastnik }.ShowDialog();
+        }
+
+        NacitajOblasti();
+        NacitajUdaje();
+        OtvorDashboard();
+        Oznam(vsetko
+            ? "Všetky údaje sú vymazané. Záloha pred vymazaním je v priečinku záloh."
+            : "Osnovy sú vymazané, oblasti a predmety zostali. Záloha pred vymazaním je v priečinku záloh.");
+    }
+
+    /// <summary>Nahrá testovaciu sadu učebných osnov.</summary>
+    public void NahrajTestovaciuSadu()
+    {
+        (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
+        try
+        {
+            TestovaciaSada.Vysledok? vysledok = null;
+            Dialogy.Cakaj(() => vysledok = TestovaciaSada.Nainstaluj());
+            NacitajOblasti();
+            OtvorDashboard();
+            Oznam($"Testovacia sada je nahratá: {vysledok!.Osnovy} osnov, {vysledok.Charakteristiky} charakteristík oblastí, {vysledok.Suvislosti} súvislostí.");
+        }
+        catch (Exception ex)
+        {
+            Dialogy.Chyba("Testovaciu sadu sa nepodarilo nahrať.", ex);
+        }
+    }
+
     public ObservableCollection<OblastVM> Oblasti { get; } = new();
 
     [ObservableProperty]
@@ -102,6 +175,7 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(PocetPredmetov));
+        JeTestovaciaSada = TestovaciaSada.JeNainstalovana;
     }
 
     public void NacitajUdaje()

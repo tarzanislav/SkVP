@@ -45,6 +45,12 @@ Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+; ukážkové dáta – program ich pri prvom spustení nahrá (dajú sa neskôr vymazať v programe)
+Name: "testovaciasada"; Description: "Nainštalovať testovaciu sadu učebných osnov (ukážkové osnovy všetkých predmetov na vyskúšanie programu)"; GroupDescription: "Ukážkové dáta:"
+
+[Registry]
+Root: HKLM; Subkey: "Software\tarzanislav\SkVP"; ValueType: dword; ValueName: "TestovaciaSada"; ValueData: 1; Tasks: testovaciasada; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\tarzanislav\SkVP"; ValueType: dword; ValueName: "TestovaciaSada"; ValueData: 0; Tasks: not testovaciasada; Flags: uninsdeletekey
 
 [Dirs]
 ; spoločný priečinok s databázou – zapisovať doň môžu všetci používatelia počítača

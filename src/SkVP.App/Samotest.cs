@@ -580,6 +580,52 @@ internal static class Samotest
         App.NastavTemu(NastaveniaSkoly.TemaSvetla);
         Pumpuj();
 
+        // testovacia sada učebných osnov
+        var sada = TestovaciaSada.Nacitaj();
+        Over(sada.Predmety.Count == 43 && sada.Oblasti.Count == 7, "testovacia sada: 43 osnov a 7 charakteristík oblastí");
+        var osnovaSjl = TestovaciaSada.Osnova(sada.Predmety.First(p => p.Nazov == "Slovenský jazyk a literatúra"));
+        var dataSjl = DocxVystup.Osnova(osnovaSjl);
+        OverDocx(dataSjl, "testovacia osnova SJL");
+        PorovnajBloky(osnovaSjl, DocxCitac.Nacitaj(new MemoryStream(dataSjl)).Bloky, "testovacia osnova Word → program");
+        model.NahrajTestovaciuSadu();
+        Pumpuj();
+        Over(model.JeTestovaciaSada && TestovaciaSada.JeNainstalovana, "testovacia sada je nahratá (upozornenie v programe)");
+        Over(model.Oblasti.SelectMany(o => o.Predmety).Count(p => p.Stav != StavOsnovy.Prazdna) == 43, "všetkých 43 predmetov má osnovu");
+        Over(model.Oblasti.SelectMany(o => o.Predmety).Count(p => p.Stav == StavOsnovy.Hotova) >= 10, "testovacia sada obsahuje hotové osnovy");
+        Over(new ObjektService().Suvislosti(model.Oblasti[2].Predmety.First(p => p.Nazov == "Seminár z biológie").Id).Count >= 2, "testovacia sada obsahuje súvislosti");
+        Snimka(okno, "19_sada_dashboard");
+        model.OtvorOblast(model.Oblasti[2]);
+        Pumpuj();
+        Snimka(okno, "20_sada_oblast");
+        model.OtvorPredmet(model.Oblasti[1].Predmety[0]);
+        Pumpuj();
+        Snimka(okno, "21_sada_matematika");
+        model.OtvorPredmet(model.Oblasti[2].Predmety.First(p => p.Nazov == "Seminár z biológie"));
+        Pumpuj();
+        Snimka(okno, "22_sada_seminar");
+        var celaSada = ZostavaOsnov.Zostav(new VolbyZostavy());
+        var pdfSady = Path.Combine(Databaza.PriecinokDokumentov, "samotest_testovacia_sada.pdf");
+        PdfVystup.UlozPdf(celaSada, pdfSady);
+        var vykreslenieSady = NahladDokumentu.Priprav(PdfVystup.Vytvor(celaSada));
+        Over(NahladDokumentu.PocetStran(vykreslenieSady) > 100, $"PDF testovacej sady ({NahladDokumentu.PocetStran(vykreslenieSady)} strán)");
+        DocxVystup.Uloz(celaSada, Path.Combine(Databaza.PriecinokDokumentov, "samotest_testovacia_sada.docx"));
+        var stranaOsnovy = Enumerable.Range(1, NahladDokumentu.PocetStran(vykreslenieSady)).Skip(8).First();
+        UlozObrazokStrany(vykreslenieSady, stranaOsnovy, Path.Combine(Databaza.PriecinokDokumentov, "sada_strana_a.png"));
+        UlozObrazokStrany(vykreslenieSady, stranaOsnovy + 1, Path.Combine(Databaza.PriecinokDokumentov, "sada_strana_b.png"));
+
+        var zalohyPred = new ZalohaService().Zalohy().Count;
+        model.Vymaz(vsetko: false);
+        Over(!model.JeTestovaciaSada && model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "vymazanie osnov – oblasti a predmety zostali");
+        Over(model.Oblasti.SelectMany(o => o.Predmety).All(p => p.Stav == StavOsnovy.Prazdna) && new DokumentService().Verzie(sjl.Id).Count == 0, "osnovy aj archív sú vymazané");
+        Over(new ZalohaService().Zalohy().Count == zalohyPred + 1, "pred vymazaním sa vytvorila záloha");
+        model.NahrajTestovaciuSadu();
+        model.Vymaz(vsetko: true);
+        Over(model.Oblasti.Count == 0 && !model.JeTestovaciaSada, "vymazanie všetkého");
+        model.NahrajTestovaciuSadu();
+        Over(model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "testovacia sada do prázdneho programu doplní aj oblasti a predmety");
+        Pumpuj();
+        Snimka(okno, "23_sada_po_obnoveni");
+
         var uvod = new PrveSpustenieWindow();
         uvod.Show();
         Pumpuj();
