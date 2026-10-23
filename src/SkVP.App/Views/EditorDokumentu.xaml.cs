@@ -24,6 +24,9 @@ public partial class EditorDokumentu : UserControl
         nameof(Farba), typeof(string), typeof(EditorDokumentu),
         new PropertyMetadata("#3B5BDB", (d, _) => ((EditorDokumentu)d).NastavFarbu()));
 
+    public static readonly DependencyProperty KompaktnyProperty = DependencyProperty.Register(
+        nameof(Kompaktny), typeof(bool), typeof(EditorDokumentu), new PropertyMetadata(false, (d, _) => ((EditorDokumentu)d).NastavKompaktny()));
+
     private static readonly SolidColorBrush Linka = Zmrazeny(Color.FromRgb(0xC5, 0xCC, 0xD6));
     private static readonly SolidColorBrush Hlavicka = Zmrazeny(Color.FromRgb(0xF3, 0xF4, 0xF6));
 
@@ -42,6 +45,28 @@ public partial class EditorDokumentu : UserControl
     {
         get => (bool)GetValue(JeUpravaProperty);
         set => SetValue(JeUpravaProperty, value);
+    }
+
+    /// <summary>Menší list bez okrajov – na krátke texty v dialógových oknách.</summary>
+    public bool Kompaktny
+    {
+        get => (bool)GetValue(KompaktnyProperty);
+        set => SetValue(KompaktnyProperty, value);
+    }
+
+    private void NastavKompaktny()
+    {
+        if (!Kompaktny)
+        {
+            return;
+        }
+
+        Papier.MinHeight = 150;
+        Papier.MaxWidth = double.PositiveInfinity;
+        Papier.Padding = new Thickness(20, 16, 20, 16);
+        PruhPapiera.Visibility = Visibility.Collapsed;
+        PlochaStola.Margin = new Thickness(0, 8, 0, 8);
+        Nastroje.Padding = new Thickness(0, 4, 0, 4);
     }
 
     public string Farba
@@ -123,6 +148,11 @@ public partial class EditorDokumentu : UserControl
     /// <summary>Na užšom liste menšie okraje.</summary>
     private void Papier_SizeChanged(object sender, SizeChangedEventArgs e)
     {
+        if (Kompaktny)
+        {
+            return;
+        }
+
         var okraj = Math.Clamp((e.NewSize.Width - 420) / 5, 28, 76);
         Papier.Padding = new Thickness(okraj, 64, okraj - 4, 72);
         PruhPapiera.Margin = new Thickness(-(okraj - 30), 4, 0, 0);

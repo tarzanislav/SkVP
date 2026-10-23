@@ -63,7 +63,7 @@ public static class DocxVystup
 
         if (dokument.Volby.TitulnaStrana)
         {
-            TitulnaStrana(telo, dokument, hlavna);
+            TitulnaStrana(telo, dokument, hlavna, stav);
         }
 
         var prvy = !dokument.Volby.TitulnaStrana;
@@ -137,7 +137,7 @@ public static class DocxVystup
 
     // ---- časti dokumentu ----
 
-    private static void TitulnaStrana(Body telo, CelyDokument dokument, MainDocumentPart hlavna)
+    private static void TitulnaStrana(Body telo, CelyDokument dokument, MainDocumentPart hlavna, Stav stav)
     {
         var u = dokument.Udaje;
         if (dokument.Oblasti.Count > 0)
@@ -208,11 +208,23 @@ public static class DocxVystup
             telo.Append(p);
         }
 
-        if (t.PataZobrazit && t.Pata.Trim().Length > 0)
+        var pata = t.PataNaStranu(dokument.Vytvorene);
+        if (pata.Count > 0 && DokumentOsnovy.Text(pata).Trim().Length > 0)
         {
-            var datum = Odsek(t.PataText(dokument.Vytvorene), "SkvpAdresa");
-            datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1100" };
-            telo.Append(datum);
+            if (TitulnaStrana.JeJednaVeta(pata))
+            {
+                var datum = Odsek(string.Concat(((Odsek)pata[0]).Useky.Select(u => u.Text)), "SkvpAdresa");
+                datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1100" };
+                telo.Append(datum);
+            }
+            else
+            {
+                telo.Append(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = "900", After = "0" })));
+                foreach (var prvok in Bloky(pata, "3B5BDB", stav))
+                {
+                    telo.Append(prvok);
+                }
+            }
         }
         telo.Append(new Paragraph(new Run(new Break { Type = BreakValues.Page })));
     }

@@ -388,7 +388,8 @@ internal static class Samotest
 
         // texty úvodnej strany – úprava a vypnutie riadkov
         var titul = TitulnaStrana.Nacitaj();
-        Over(titul.PataZobrazit && titul.PataText(new DateTime(2026, 10, 23)) == "Vytvorené 23. 10. 2026 v programe SkVP", "predvolený text dole na úvodnej strane");
+        Over(titul.PataZobrazit && DokumentOsnovy.Text(titul.PataNaStranu(new DateTime(2026, 10, 23))).Trim() == "Vytvorené 23. 10. 2026 v programe SkVP",
+            "predvolený text dole na úvodnej strane");
         titul.Typ = TitulnaStrana.AktualnyStupenGymnazia;
         titul.PataZobrazit = false;
         titul.VlastneRiadky = "Schválené pedagogickou radou dňa 28. 8. 2026\n\nPrerokované so zriaďovateľom";
@@ -405,8 +406,35 @@ internal static class Samotest
              && textTitulu.Contains("ISCED 344", StringComparison.Ordinal) && !textTitulu.Contains("ISCED 3A", StringComparison.Ordinal), "úvodná strana bez vypnutého riadku a s vlastnými textami");
         var vykreslenieTitulu = NahladDokumentu.Priprav(PdfVystup.Vytvor(sTitulom));
         UlozObrazokStrany(vykreslenieTitulu, 1, Path.Combine(export, "uvodna_strana_upravena.png"));
+
+        // text dole na strane s tabuľkou (schválenie a podpisy)
+        var sTabulkou = TitulnaStrana.Nacitaj();
+        sTabulkou.PataZobrazit = true;
+        sTabulkou.PataBloky = new List<Blok>
+        {
+            new Odsek(new[] { new Usek("Školský vzdelávací program bol prerokovaný v pedagogickej rade a schválený v roku {rok}.") }),
+            new Tabulka(new IReadOnlyList<Bunka>[]
+            {
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Prerokované v pedagogickej rade", Tucne: true) }) }, Hlavicka: true),
+                        new Bunka(new Blok[] { new Odsek(new[] { new Usek("Schválil riaditeľ školy", Tucne: true) }) }, Hlavicka: true) },
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("dňa {datum}") }) }),
+                        new Bunka(new Blok[] { new Odsek(new[] { new Usek("podpis a pečiatka") }) }) },
+            }, 2),
+        };
+        sTabulkou.Uloz();
+        var nacitanaPata = TitulnaStrana.Nacitaj();
+        Over(nacitanaPata.PataBloky.OfType<Tabulka>().Count() == 1, "text dole na úvodnej strane môže obsahovať tabuľku");
+        var dokumentSTabulkou = ZostavaOsnov.Zostav(new VolbyZostavy { Oblasti = new[] { plne.Oblasti[4].Id } });
+        var docxPata = Path.Combine(export, "samotest_uvodna_strana_tabulka.docx");
+        DocxVystup.Uloz(dokumentSTabulkou, docxPata);
+        OverDocx(File.ReadAllBytes(docxPata), "úvodná strana s tabuľkou");
+        var textPaty = DokumentOsnovy.Text(DocxCitac.Nacitaj(docxPata).Bloky);
+        Over(textPaty.Contains("Schválil riaditeľ školy", StringComparison.Ordinal) && textPaty.Contains($"schválený v roku {DateTime.Now.Year}", StringComparison.Ordinal),
+            "tabuľka a doplnený rok na úvodnej strane");
+        UlozObrazokStrany(NahladDokumentu.Priprav(PdfVystup.Vytvor(dokumentSTabulkou)), 1, Path.Combine(export, "uvodna_strana_tabulka.png"));
         TitulnaStrana.Predvolene();
-        Over(TitulnaStrana.Nacitaj().PataZobrazit && TitulnaStrana.Nacitaj().Podnadpis == "Učebné osnovy", "predvolené texty úvodnej strany");
+        Over(TitulnaStrana.Nacitaj().PataZobrazit && TitulnaStrana.Nacitaj().Podnadpis == "Učebné osnovy"
+             && TitulnaStrana.Nacitaj().PataBloky.Count == 1, "predvolené texty úvodnej strany");
 
         var docx = Path.Combine(export, "samotest_cele_osnovy.docx");
         DocxVystup.Uloz(plne, docx);

@@ -68,7 +68,7 @@
         <!-- stôl s listom papiera -->
         <ScrollViewer x:Name="Stol" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                       Background="{DynamicResource SolidBackgroundFillColorSecondaryBrush}">
-            <Grid Margin="28,26,28,48">
+            <Grid x:Name="PlochaStola" Margin="28,26,28,48">
                 <!-- list A4 – na užšej obrazovke sa zúži -->
                 <Border x:Name="Papier" MaxWidth="794" MinHeight="1000" HorizontalAlignment="Stretch" VerticalAlignment="Top"
                         Background="{StaticResource PapierStetec}" CornerRadius="3" Padding="76,64,72,72" SizeChanged="Papier_SizeChanged">

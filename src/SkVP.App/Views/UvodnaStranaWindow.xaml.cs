@@ -28,7 +28,7 @@ public partial class UvodnaStranaWindow : Window
         PlatnostZobrazit.IsChecked = t.PlatnostZobrazit;
         VlastneRiadky.Text = t.VlastneRiadky;
         OblastiZobrazit.IsChecked = t.OblastiZobrazit;
-        Pata.Text = t.Pata;
+        Pata.Nacitaj(t.PataBloky);
         PataZobrazit.IsChecked = t.PataZobrazit;
     }
 
@@ -69,7 +69,7 @@ public partial class UvodnaStranaWindow : Window
             PlatnostZobrazit = PlatnostZobrazit.IsChecked == true,
             VlastneRiadky = VlastneRiadky.Text,
             OblastiZobrazit = OblastiZobrazit.IsChecked == true,
-            Pata = Pata.Text,
+            PataBloky = Pata.Uloz(),
             PataZobrazit = PataZobrazit.IsChecked == true,
         }.Uloz();
         DialogResult = true;

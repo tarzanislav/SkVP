@@ -324,16 +324,27 @@ public static class PdfVystup
     /// <summary>Text dole na úvodnej strane (napr. „Vytvorené 23. 10. 2026 v programe SkVP“), ak je zapnutý.</summary>
     private static void Pata(Section sekcia, TitulnaStrana t, DateTime vytvorene)
     {
-        if (!t.PataZobrazit || t.Pata.Trim().Length == 0)
+        var bloky = t.PataNaStranu(vytvorene);
+        if (bloky.Count == 0 || DokumentOsnovy.Text(bloky).Trim().Length == 0)
         {
             return;
         }
 
-        var datum = sekcia.AddParagraph(t.PataText(vytvorene));
-        datum.Format.Font.Name = PismaDokumentu.Nadpis;
-        datum.Format.Font.Size = 8.5;
-        datum.Format.Font.Color = Siva;
-        datum.Format.SpaceBefore = Unit.FromCentimeter(2);
+        if (TitulnaStrana.JeJednaVeta(bloky))
+        {
+            var datum = sekcia.AddParagraph(string.Concat(((Odsek)bloky[0]).Useky.Select(u => u.Text)));
+            datum.Format.Font.Name = PismaDokumentu.Nadpis;
+            datum.Format.Font.Size = 8.5;
+            datum.Format.Font.Color = Siva;
+            datum.Format.SpaceBefore = Unit.FromCentimeter(2);
+            return;
+        }
+
+        // ľubovoľný obsah – odseky, zoznamy, tabuľka (napr. schválenie pedagogickou radou s podpismi)
+        var medzera = sekcia.AddParagraph();
+        medzera.Format.SpaceBefore = Unit.FromCentimeter(1.6);
+        medzera.Format.SpaceAfter = 0;
+        Bloky(sekcia, bloky, Farba("#3B5BDB"), 0);
     }
 
     private static void HlavickaAPata(Section sekcia, CelyDokument dokument)

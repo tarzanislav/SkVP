@@ -1,7 +1,8 @@
 <Window x:Class="SkVP.Views.UvodnaStranaWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Úvodná strana zostavy" Width="680" Height="760" MinWidth="560" MinHeight="520"
+        xmlns:v="clr-namespace:SkVP.Views"
+        Title="Úvodná strana zostavy" Width="820" Height="860" MinWidth="620" MinHeight="560"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
         <!-- riadok úvodnej strany: zapnúť/vypnúť a text -->
@@ -79,12 +80,13 @@
                 <CheckBox x:Name="OblastiZobrazit" Content="Zoznam vzdelávacích oblastí s počtom predmetov" Margin="0,16,0,0" />
 
                 <TextBlock Text="Text dole na strane" Style="{StaticResource Stitok}" />
-                <DockPanel>
-                    <CheckBox x:Name="PataZobrazit" Style="{StaticResource Prepinac}" />
-                    <TextBox x:Name="Pata" />
-                </DockPanel>
-                <TextBlock Style="{StaticResource Popis}" Margin="30,4,0,0"
-                           Text="{}{datum} sa nahradí dátumom vytvorenia zostavy, {rok} rokom." />
+                <CheckBox x:Name="PataZobrazit" Content="Zobraziť text dole na strane" />
+                <TextBlock Style="{StaticResource Popis}" Margin="0,4,0,4"
+                           Text="Napíšte ľubovoľný text – aj s formátovaním, odrážkami alebo tabuľkou (napr. prerokovanie v pedagogickej rade a podpisy). {datum} sa nahradí dátumom vytvorenia zostavy, {rok} rokom." />
+                <Border BorderThickness="1" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" CornerRadius="6" Height="300"
+                        IsEnabled="{Binding IsChecked, ElementName=PataZobrazit}">
+                    <v:EditorDokumentu x:Name="Pata" Kompaktny="True" JeUprava="True" Farba="#6B7280" />
+                </Border>
             </StackPanel>
         </ScrollViewer>
     </DockPanel>
