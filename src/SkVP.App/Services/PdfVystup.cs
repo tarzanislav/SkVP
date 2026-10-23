@@ -55,7 +55,7 @@ public static class PdfVystup
 
         if (dokument.Volby.TitulnaStrana)
         {
-            TitulnaStrana(doc, dokument);
+            TitulnaStrana(doc, dokument, StupenZhustenia(dokument));
         }
 
         var sekcia = doc.AddSection();
@@ -203,7 +203,39 @@ public static class PdfVystup
         sekcia.PageSetup.FooterDistance = Unit.FromCentimeter(1.1);
     }
 
-    private static void TitulnaStrana(Document doc, CelyDokument dokument)
+    /// <summary>Najväčší stupeň zhustenia úvodnej strany (0 = bežné rozloženie, 3 = najhustejšie).</summary>
+    public const int MaxZhustenie = 3;
+
+    /// <summary>
+    /// Ako veľmi treba zhustiť úvodnú stranu, aby sa zmestila na jednu stranu (veľa riadkov, dlhý nadpis, tabuľka dole):
+    /// úvodná strana sa skúšobne vysádza od bežného rozloženia po najhustejšie. Rovnaký stupeň použije aj export do Wordu.
+    /// </summary>
+    public static int StupenZhustenia(CelyDokument dokument)
+    {
+        for (var stupen = 0; stupen < MaxZhustenie; stupen++)
+        {
+            try
+            {
+                var skuska = new Document();
+                Styly(skuska);
+                TitulnaStrana(skuska, dokument, stupen);
+                var vykreslenie = new DocumentRenderer(skuska);
+                vykreslenie.PrepareDocument();
+                if (vykreslenie.FormattedDocument!.PageCount <= 1)
+                {
+                    return stupen;
+                }
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        return MaxZhustenie;
+    }
+
+    private static void TitulnaStrana(Document doc, CelyDokument dokument, int z)
     {
         var sekcia = doc.AddSection();
         NastavStranu(sekcia);
@@ -233,12 +265,12 @@ public static class PdfVystup
         if (t.LogoNaUvodnejStrane(u.Logo) is { } cestaLoga)
         {
             var odsekLoga = sekcia.AddParagraph();
-            odsekLoga.Format.SpaceBefore = Unit.FromPoint(22);
+            odsekLoga.Format.SpaceBefore = Unit.FromPoint(z >= 2 ? 12 : 22);
             odsekLoga.Format.SpaceAfter = 0;
             odsekLoga.Format.LineSpacingRule = LineSpacingRule.Single;
             var logo = odsekLoga.AddImage(cestaLoga);
             logo.LockAspectRatio = true;
-            logo.Height = Unit.FromCentimeter(2.6);
+            logo.Height = Unit.FromCentimeter(z >= 3 ? 1.8 : 2.6);
         }
 
         var skola = sekcia.AddParagraph(t.SkolaZobrazit && t.Skola.Length > 0 ? t.Skola : " ");
@@ -258,11 +290,11 @@ public static class PdfVystup
         // nadpis ostáva na rovnakom mieste, aj keď je vypnutý
         var program = sekcia.AddParagraph(t.NadpisZobrazit && t.Nadpis.Length > 0 ? t.Nadpis : " ");
         program.Format.Font.Name = PismaDokumentu.Nadpis;
-        program.Format.Font.Size = 34;
+        program.Format.Font.Size = z >= 3 ? 28 : 34;
         program.Format.Font.Bold = true;
         program.Format.LineSpacingRule = LineSpacingRule.Multiple;
         program.Format.LineSpacing = 1.0;
-        program.Format.SpaceBefore = Unit.FromCentimeter(6.5);
+        program.Format.SpaceBefore = Unit.FromCentimeter(new[] { 6.5, 3.5, 2.0, 1.2 }[z]);
         program.Format.SpaceAfter = Unit.FromPoint(10);
 
         if (t.PodnadpisZobrazit && t.Podnadpis.Length > 0)
@@ -272,7 +304,7 @@ public static class PdfVystup
             podtitul.Format.Font.Size = 24;
             podtitul.Format.Font.Italic = true;
             podtitul.Format.Font.Color = Farba("#3B5BDB");
-            podtitul.Format.SpaceAfter = Unit.FromPoint(26);
+            podtitul.Format.SpaceAfter = Unit.FromPoint(z >= 2 ? 14 : 26);
         }
 
         foreach (var riadok in t.RiadkyPodNadpisom())
@@ -286,44 +318,59 @@ public static class PdfVystup
         // zoznam oblastí s farebnou značkou
         if (!t.OblastiZobrazit)
         {
-            Pata(sekcia, t, dokument.Vytvorene);
+            Pata(sekcia, t, dokument.Vytvorene, z);
             return;
         }
 
+        // pri zhustení od stupňa 2 sú oblasti v dvoch stĺpcoch
+        var stlpce = z >= 2 && dokument.Oblasti.Count > 3 ? 2 : 1;
+        var riadkov = (dokument.Oblasti.Count + stlpce - 1) / stlpce;
         var zoznam = sekcia.AddTable();
         zoznam.Borders.Visible = false;
         zoznam.TopPadding = Unit.FromPoint(2.5);
         zoznam.BottomPadding = Unit.FromPoint(2.5);
-        zoznam.AddColumn(Unit.FromPoint(14));
-        zoznam.AddColumn(Unit.FromPoint(SirkaTextu.Point - 14));
-        var prvy = true;
-        foreach (var oblast in dokument.Oblasti)
+        for (var s = 0; s < stlpce; s++)
         {
-            var r = zoznam.AddRow();
-            if (prvy)
-            {
-                r.TopPadding = Unit.FromCentimeter(3);
-                prvy = false;
-            }
-
-            var znacka = r.Cells[0].AddParagraph();
-            znacka.Format.SpaceAfter = 0;
-            var stvorcek = znacka.AddFormattedText("■");
-            stvorcek.Font.Name = PismaDokumentu.Nadpis;
-            stvorcek.Font.Color = Farba(oblast.Farba);
-            var nazov = r.Cells[1].AddParagraph($"{oblast.Nazov}   ");
-            nazov.Format.Font.Name = PismaDokumentu.Nadpis;
-            nazov.Format.Font.Size = 10;
-            nazov.Format.SpaceAfter = 0;
-            var pocet = nazov.AddFormattedText(PocetPredmetov(oblast.Predmety.Count));
-            pocet.Font.Color = Siva;
+            zoznam.AddColumn(Unit.FromPoint(14));
+            zoznam.AddColumn(Unit.FromPoint(SirkaTextu.Point / stlpce - 14));
         }
 
-        Pata(sekcia, t, dokument.Vytvorene);
+        for (var r = 0; r < riadkov; r++)
+        {
+            var riadok = zoznam.AddRow();
+            if (r == 0)
+            {
+                riadok.TopPadding = Unit.FromCentimeter(new[] { 3.0, 1.5, 0.8, 0.6 }[z]);
+            }
+
+            for (var s = 0; s < stlpce; s++)
+            {
+                var i = s * riadkov + r;
+                if (i >= dokument.Oblasti.Count)
+                {
+                    continue;
+                }
+
+                var oblast = dokument.Oblasti[i];
+                var znacka = riadok.Cells[2 * s].AddParagraph();
+                znacka.Format.SpaceAfter = 0;
+                var stvorcek = znacka.AddFormattedText("■");
+                stvorcek.Font.Name = PismaDokumentu.Nadpis;
+                stvorcek.Font.Color = Farba(oblast.Farba);
+                var nazov = riadok.Cells[2 * s + 1].AddParagraph($"{oblast.Nazov}   ");
+                nazov.Format.Font.Name = PismaDokumentu.Nadpis;
+                nazov.Format.Font.Size = 10;
+                nazov.Format.SpaceAfter = 0;
+                var pocet = nazov.AddFormattedText(PocetPredmetov(oblast.Predmety.Count));
+                pocet.Font.Color = Siva;
+            }
+        }
+
+        Pata(sekcia, t, dokument.Vytvorene, z);
     }
 
     /// <summary>Text dole na úvodnej strane (napr. „Vytvorené 23. 10. 2026 v programe SkVP“), ak je zapnutý.</summary>
-    private static void Pata(Section sekcia, TitulnaStrana t, DateTime vytvorene)
+    private static void Pata(Section sekcia, TitulnaStrana t, DateTime vytvorene, int z)
     {
         var bloky = t.PataNaStranu(vytvorene);
         if (bloky.Count == 0 || DokumentOsnovy.Text(bloky).Trim().Length == 0)
@@ -337,13 +384,13 @@ public static class PdfVystup
             datum.Format.Font.Name = PismaDokumentu.Nadpis;
             datum.Format.Font.Size = 8.5;
             datum.Format.Font.Color = Siva;
-            datum.Format.SpaceBefore = Unit.FromCentimeter(2);
+            datum.Format.SpaceBefore = Unit.FromCentimeter(new[] { 2.0, 1.2, 0.8, 0.5 }[z]);
             return;
         }
 
         // ľubovoľný obsah – odseky, zoznamy, tabuľka (napr. schválenie pedagogickou radou s podpismi)
         var medzera = sekcia.AddParagraph();
-        medzera.Format.SpaceBefore = Unit.FromCentimeter(1.6);
+        medzera.Format.SpaceBefore = Unit.FromCentimeter(new[] { 1.6, 1.0, 0.6, 0.4 }[z]);
         medzera.Format.SpaceAfter = 0;
         Bloky(sekcia, bloky, Farba("#3B5BDB"), 0);
     }

@@ -56,6 +56,8 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   (vymyslené mená) a logo kreslené v programe (`TestovaciaSada.VytvorLogo`). Zapíše sa len do programu bez vlastnej školy a loga;
   zápis sa zaznamená v `testovacia_sada.skola` (pôvodná a nová hodnota, hash loga, text päty). Vymazanie sady (osnovy aj všetko)
   vráti pôvodný stav; čo používateľ medzitým zmenil, zostane.
+- Úvodná strana sa automaticky zhustí (stupne 0–3: menšie medzery, oblasti v dvoch stĺpcoch, menšie logo a nadpis), aby sa
+  zmestila na jednu stranu; stupeň sa určí skúšobným vysádzaním (`PdfVystup.StupenZhustenia`) a použije aj pre Word.
 - Samotest `TestLogaAHlavicky`: hľadá body skúšobného loga na vykreslených stranách, kontroluje hlavičky a obrázky vo Worde,
   snímky `uvodna_strana_logo.png`, `hlavicka_*.png` na vetve `vystupy`.
 

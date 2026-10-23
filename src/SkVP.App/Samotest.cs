@@ -856,6 +856,8 @@ internal static class Samotest
         Pumpuj();
         Snimka(okno, "22_sada_seminar");
         var celaSada = ZostavaOsnov.Zostav(new VolbyZostavy());
+        var zhustenie = PdfVystup.StupenZhustenia(celaSada);
+        Over(zhustenie > 0 && zhustenie < PdfVystup.MaxZhustenie, $"úvodná strana sady sa zhustením zmestí na jednu stranu (stupeň {zhustenie})");
         var pdfSady = Path.Combine(Databaza.PriecinokDokumentov, "samotest_testovacia_sada.pdf");
         PdfVystup.UlozPdf(celaSada, pdfSady);
         var vykreslenieSady = NahladDokumentu.Priprav(PdfVystup.Vytvor(celaSada));

@@ -138,6 +138,9 @@ public static class DocxVystup
     private static void TitulnaStrana(Body telo, CelyDokument dokument, MainDocumentPart hlavna, Stav stav)
     {
         var u = dokument.Udaje;
+
+        // rovnaké zhustenie ako v PDF, aby sa úvodná strana zmestila na jednu stranu
+        var z = PdfVystup.StupenZhustenia(dokument);
         if (dokument.Oblasti.Count > 0)
         {
             // pás farieb oblastí
@@ -170,11 +173,11 @@ public static class DocxVystup
         var t = dokument.Titul;
         if (t.LogoNaUvodnejStrane(u.Logo) is { } cestaLoga && NastaveniaSkoly.Rozmer(cestaLoga) is { } rozmer)
         {
-            const double vyska = 2.6;
+            var vyska = z >= 3 ? 1.8 : 2.6;
             var beh = Obrazok(hlavna, cestaLoga, vyska * rozmer.Sirka / rozmer.Vyska, vyska, 1U, "Logo školy");
             if (beh is not null)
             {
-                telo.Append(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = "400", After = "0" }), beh));
+                telo.Append(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = z >= 2 ? "240" : "400", After = "0" }), beh));
             }
         }
 
@@ -184,10 +187,29 @@ public static class DocxVystup
             telo.Append(Odsek(t.Adresa, "SkvpAdresa"));
         }
 
-        telo.Append(Odsek(t.NadpisZobrazit && t.Nadpis.Length > 0 ? t.Nadpis : " ", "Title"));
+        var nadpis = Odsek(t.NadpisZobrazit && t.Nadpis.Length > 0 ? t.Nadpis : " ", "Title");
+        if (z > 0)
+        {
+            nadpis.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = new[] { "3400", "1985", "1134", "680" }[z] };
+            if (z >= 3)
+            {
+                foreach (var beh in nadpis.Elements<Run>())
+                {
+                    beh.PrependChild(new RunProperties(new FontSize { Val = "56" }));
+                }
+            }
+        }
+
+        telo.Append(nadpis);
         if (t.PodnadpisZobrazit && t.Podnadpis.Length > 0)
         {
-            telo.Append(Odsek(t.Podnadpis, "Subtitle"));
+            var podnadpis = Odsek(t.Podnadpis, "Subtitle");
+            if (z >= 2)
+            {
+                podnadpis.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { After = "280" };
+            }
+
+            telo.Append(podnadpis);
         }
 
         foreach (var r in t.RiadkyPodNadpisom())
@@ -201,7 +223,7 @@ public static class DocxVystup
             var p = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "SkvpTitulOblast" }));
             if (prvy)
             {
-                p.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1700", After = "40" };
+                p.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = new[] { "1700", "850", "454", "340" }[z], After = "40" };
                 prvy = false;
             }
 
@@ -217,12 +239,12 @@ public static class DocxVystup
             if (SkVP.Services.TitulnaStrana.JeJednaVeta(pata))
             {
                 var datum = Odsek(string.Concat(((Odsek)pata[0]).Useky.Select(u => u.Text)), "SkvpAdresa");
-                datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1100" };
+                datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = new[] { "1100", "680", "454", "283" }[z] };
                 telo.Append(datum);
             }
             else
             {
-                telo.Append(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = "900", After = "0" })));
+                telo.Append(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = new[] { "900", "567", "340", "227" }[z], After = "0" })));
                 foreach (var prvok in Bloky(pata, "3B5BDB", stav))
                 {
                     telo.Append(prvok);
