@@ -24,7 +24,8 @@ C# .NET 10, WPF (ThemeMode Fluent – svetlý/tmavý/podľa Windows), SQLite (Mi
 ClosedXML (import Excelu), DocumentFormat.OpenXml (čítanie/zápis Wordu), PDFsharp-MigraDoc-WPF (náhľad, tlač, PDF). Inno Setup.
 
 - Databáza „čokoľvek s čímkoľvek“: tabuľky `objekt` (oblasť, predmet, …), `vazba` (súvislosti), `dokument`
-  (osnova ako **.docx priamo v DB**), `verzia` (archív starších verzií), `nastavenie`.
+  (osnova ako **.docx priamo v DB**), `verzia` (archív starších verzií), `nastavenie`; od schémy 2 aj `archiv_rok`
+  a `archiv_polozka` (snímka osnov za školský rok).
 - Spoločný model textu `Blok` (Nadpis, Odsek, Zoznam, Tabulka so zlúčenými bunkami) – DOCX ↔ model ↔ editor (FlowDocument)
   ↔ PDF/Word výstup. Súbory: `Services/Dokument.cs`, `DocxCitac.cs`, `DocxVystup.cs`, `PdfVystup.cs`.
 - Úprava vo Worde: pracovná kópia v %LOCALAPPDATA%\SkVP\Úpravy vo Worde, sledovanie uloženia, prevzatie do DB s archiváciou
@@ -111,9 +112,22 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   zapíše do tabuľky dokumentu (verzia sa zarchivuje). Po každej zmene dokumentu (`PoZmeneDokumentu`) sa údaje znova
   načítajú. Testovacia sada má v osnovách úvodnú tabuľku.
 - Servis: archív osnov za školský rok (`Services/ArchivSkolskehoRoka`) – kópia do archívu verzií („Archív školského roka
-  2025/2026“) a priečinok Dokumenty\SkVP\Archív školských rokov\2025-2026 (Word po oblastiach, celé osnovy Word + PDF/A-2b),
-  zoznam v `archiv.skolske_roky`.
+  2025/2026“) a priečinok Dokumenty\SkVP\Archív školských rokov\2025-2026 (Word po oblastiach, celé osnovy Word + PDF/A-2b).
 - Export „Doc“ = .docx; starý .doc by vyžadoval Word (zatiaľ nerobené, čaká na rozhodnutie používateľa).
+
+## Sekcia Archív (na vetve vyvoj/etapa1, zatiaľ nevydané)
+- Menu Archív (medzi Import a export a Servis), `ViewModels/ArchivViewModel`, `Views/ArchivView`. Archivácia roka
+  (`ArchivSkolskehoRoka.Archivuj`) okrem priečinka a archívu verzií uloží snímku do DB: `archiv_rok` + `archiv_polozka`
+  (charakteristiky oblastí a všetky predmety: oblasť, farba, číslo, názov, stav, dĺžka, profilácie, platnosť, rok osnovy,
+  úroveň, „zmenená v roku“ = úprava/verzia od 1. 9. do 31. 8. okrem archivácie, SHA-256 a kópia .docx).
+- Prehľad: roky ako karty, dlaždice štatistík (predmety, % hotových, na kontrolu, zmenené v roku, normostrany, jazyky
+  B1/B2), pruh stavu osnov, porovnanie s predchádzajúcim archivovaným rokom (nové / zmenené / bez zmeny / odstránené podľa
+  objekt_id a SHA), osnovy po oblastiach s hľadaním a značkami; klik → `ArchivnaOsnovaWindow` (len na čítanie, kópia vo
+  Worde, Uložiť ako). Celé PDF roka, priečinok, štatistiky do Excelu (hárky Štatistiky, Oblasti, Predmety), odstránenie
+  z programu (súbory na disku zostanú). Servis má pri rokoch „Prezerať v Archíve“; po archivácii sa otvorí Archív.
+- Archívy z v0.1.37 (kľúč `archiv.skolske_roky`) sa pri spustení prenesú (`Migracie` → `PrenesStareZaznamy`) – bez
+  prehľadu predmetov. Vymazanie osnov / všetkého maže aj archív rokov v programe.
+- Samotest: snímky 13k, 22f–22i, `samotest_statistiky_archivu.xlsx`.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,

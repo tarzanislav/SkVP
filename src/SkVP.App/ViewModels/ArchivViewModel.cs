@@ -209,7 +209,7 @@ public sealed partial class ArchivViewModel : ObservableObject
             "úpravy, importy a obnovy osnov", "#AE3EC9", ""));
         Dlazdice.Add(new DlazdicaStatistiky(s.Normostrany.ToString("0.#", CultureInfo.GetCultureInfo("sk-SK")), "normostrán",
             $"{s.Znakov.ToString("N0", CultureInfo.GetCultureInfo("sk-SK"))} znakov textu", "#1098AD", ""));
-        Dlazdice.Add(new DlazdicaStatistiky($"{s.UrovenB1} / {s.UrovenB2}", "cudzie jazyky B1 / B2",
+        Dlazdice.Add(new DlazdicaStatistiky($"{s.UrovenB1} / {s.UrovenB2}", "jazyky B1 / B2",
             $"profilácie v {s.SProfilaciami}, platnosť v {s.SPlatnostou} osnovách", "#E8590C", ""));
 
         OblastArchivuVM? oblast = null;
