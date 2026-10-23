@@ -20,6 +20,8 @@ public static class Sekcie
     public const string Dashboard = "dashboard";
     public const string Osnovy = "osnovy";
     public const string Tlac = "tlac";
+    public const string ImportExport = "import";
+    public const string Servis = "servis";
     public const string Nastavenia = "nastavenia";
 }
 
@@ -122,13 +124,15 @@ public sealed partial class MainViewModel : ObservableObject
     private object? _stranka;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia))]
+    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia), nameof(JeImportExport), nameof(JeServis))]
     private string _sekcia = Sekcie.Dashboard;
 
     public bool JeDashboard => Sekcia == Sekcie.Dashboard;
     public bool JeOsnovy => Sekcia == Sekcie.Osnovy;
     public bool JeTlac => Sekcia == Sekcie.Tlac;
     public bool JeNastavenia => Sekcia == Sekcie.Nastavenia;
+    public bool JeImportExport => Sekcia == Sekcie.ImportExport;
+    public bool JeServis => Sekcia == Sekcie.Servis;
 
     [ObservableProperty]
     private string _skola = "";
@@ -233,6 +237,12 @@ public sealed partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     public void OtvorNastavenia() => Prejdi(Sekcie.Nastavenia, new NastaveniaViewModel(this));
+
+    [RelayCommand]
+    public void OtvorImportExport() => Prejdi(Sekcie.ImportExport, new ImportExportViewModel(this));
+
+    [RelayCommand]
+    public void OtvorServis() => Prejdi(Sekcie.Servis, new ServisViewModel(this));
 
     // ---- oblasti ----
 

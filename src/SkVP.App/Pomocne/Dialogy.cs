@@ -91,6 +91,38 @@ public static class Dialogy
         return dialog.ShowDialog(Vlastnik) == true ? dialog.FileName : null;
     }
 
+    /// <summary>Súbory, ktoré v tichom režime vráti okno „Otvoriť“ s viacerými súbormi.</summary>
+    public static IReadOnlyList<string>? TicheSubory { get; set; }
+
+    /// <summary>Okno „Otvoriť“ s výberom viacerých súborov.</summary>
+    public static IReadOnlyList<string> OtvoritViac(string titulok, string filter)
+    {
+        if (TichyRezim)
+        {
+            TicheHlasenia.Add($"[Otvoriť viac] {titulok}");
+            return TicheSubory ?? Array.Empty<string>();
+        }
+
+        var dialog = new Microsoft.Win32.OpenFileDialog { Title = titulok, Filter = filter, CheckFileExists = true, Multiselect = true };
+        return dialog.ShowDialog(Vlastnik) == true ? dialog.FileNames : Array.Empty<string>();
+    }
+
+    /// <summary>Priečinok, ktorý v tichom režime vráti výber priečinka.</summary>
+    public static string? TichyPriecinok { get; set; }
+
+    /// <summary>Výber priečinka. Vráti cestu alebo null.</summary>
+    public static string? VybratPriecinok(string titulok)
+    {
+        if (TichyRezim)
+        {
+            TicheHlasenia.Add($"[Priečinok] {titulok}");
+            return TichyPriecinok;
+        }
+
+        var dialog = new Microsoft.Win32.OpenFolderDialog { Title = titulok, Multiselect = false };
+        return dialog.ShowDialog(Vlastnik) == true ? dialog.FolderName : null;
+    }
+
     /// <summary>Otvorí súbor alebo priečinok v predvolenom programe Windows.</summary>
     public static void OtvorVSysteme(string cesta)
     {

@@ -22,11 +22,35 @@ public static class Databaza
 
     public static string Cesta => Path.Combine(Priecinok, "skvp.db");
 
-    /// <summary>Priečinok záloh (Dokumenty\SkVP\Zálohy, pri samoteste v dočasnom priečinku).</summary>
-    public static string PriecinokZaloh =>
+    /// <summary>Kľúč nastavenia: vlastný priečinok záloh (USB kľúč, sieťový disk, OneDrive …).</summary>
+    public const string KlucPriecinokZaloh = "zaloha.priecinok";
+
+    /// <summary>Predvolený priečinok záloh (Dokumenty\SkVP\Zálohy, pri samoteste v dočasnom priečinku).</summary>
+    public static string PredvolenyPriecinokZaloh =>
         Environment.GetEnvironmentVariable("SKVP_DATA_DIR") is { Length: > 0 }
             ? Path.Combine(Priecinok, "Zalohy")
             : Path.Combine(PriecinokDokumentov, "Zálohy");
+
+    /// <summary>Priečinok záloh – vlastný z nastavení (Servis), inak predvolený.</summary>
+    public static string PriecinokZaloh
+    {
+        get
+        {
+            try
+            {
+                if (Existuje && Citaj(KlucPriecinokZaloh) is { Length: > 0 } vlastny)
+                {
+                    return vlastny;
+                }
+            }
+            catch (Exception)
+            {
+                // databáza ešte nie je – predvolený priečinok
+            }
+
+            return PredvolenyPriecinokZaloh;
+        }
+    }
 
     /// <summary>Predvolený priečinok pre exporty (Dokumenty\SkVP).</summary>
     public static string PriecinokDokumentov =>

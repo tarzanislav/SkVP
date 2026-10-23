@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 using SkVP.Data;
+using SkVP.Models;
 
 namespace SkVP.Services;
 
@@ -13,7 +14,26 @@ namespace SkVP.Services;
 public sealed partial class ZalohaService
 {
     private const string KlucPoslednaAutomaticka = "zaloha.posledna_automaticka";
-    private const int PocetAutomatickych = 30;
+    public const string KlucFrekvencia = "zaloha.frekvencia";
+    public const string KlucPonechat = "zaloha.ponechat";
+
+    public const string Denne = "denne";
+    public const string Tyzdenne = "tyzdenne";
+    public const string Vypnute = "vypnute";
+
+    /// <summary>Ako často sa zálohuje automaticky (pri spustení programu): denne, týždenne alebo vypnuté.</summary>
+    public static string Frekvencia
+    {
+        get => Databaza.Citaj(KlucFrekvencia) is Tyzdenne or Vypnute ? Databaza.Citaj(KlucFrekvencia)! : Denne;
+        set => Databaza.Zapis(KlucFrekvencia, value);
+    }
+
+    /// <summary>Koľko automatických záloh sa ponechá (staršie sa zmažú).</summary>
+    public static int Ponechat
+    {
+        get => int.TryParse(Databaza.Citaj(KlucPonechat), out var n) ? Math.Clamp(n, 3, 999) : 30;
+        set => Databaza.Zapis(KlucPonechat, Math.Clamp(value, 3, 999).ToString(CultureInfo.InvariantCulture));
+    }
 
     [GeneratedRegex(@"^SkVP_zaloha_(\d{4,})_", RegexOptions.IgnoreCase)]
     private static partial Regex VzorNazvu();
@@ -55,18 +75,28 @@ public sealed partial class ZalohaService
         return ciel;
     }
 
-    /// <summary>Automatická záloha raz za deň (pri spustení programu). Staré automatické zálohy nad 30 sa zmažú.</summary>
+    /// <summary>
+    /// Automatická záloha pri spustení programu podľa nastavenia (raz za deň alebo raz za týždeň). Staršie automatické
+    /// zálohy nad nastavený počet sa zmažú.
+    /// </summary>
     public string? AutomatickaAkTreba()
     {
         var dnes = DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-        if (Databaza.Citaj(KlucPoslednaAutomaticka) == dnes)
+        var posledna = Databaza.Citaj(KlucPoslednaAutomaticka);
+        if (Frekvencia == Vypnute || posledna == dnes)
+        {
+            return null;
+        }
+
+        if (Frekvencia == Tyzdenne && DateTime.TryParseExact(posledna, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datum)
+            && (DateTime.Today - datum).TotalDays < 7)
         {
             return null;
         }
 
         var cesta = Zalohuj(automaticka: true);
         Databaza.Zapis(KlucPoslednaAutomaticka, dnes);
-        foreach (var stara in Zalohy().Where(z => z.Name.Contains("_auto", StringComparison.OrdinalIgnoreCase)).Skip(PocetAutomatickych))
+        foreach (var stara in Zalohy().Where(z => z.Name.Contains("_auto", StringComparison.OrdinalIgnoreCase)).Skip(Ponechat))
         {
             try
             {
@@ -91,6 +121,168 @@ public sealed partial class ZalohaService
 
         return new DirectoryInfo(Databaza.PriecinokZaloh).GetFiles("SkVP_zaloha_*.zip")
             .OrderByDescending(f => Cislo(f.Name)).ThenByDescending(f => f.LastWriteTime).ToList();
+    }
+
+    /// <summary>Posledná záloha (alebo null).</summary>
+    public FileInfo? Posledna() => Zalohy().FirstOrDefault();
+
+    /// <summary>
+    /// Obnoví databázu zo zálohy (ZIP zo SkVP). Najprv overí, že záloha je v poriadku a nie je z novšej verzie programu,
+    /// a zálohuje súčasný stav. Program sa potom musí spustiť znova.
+    /// </summary>
+    public void Obnov(string zip)
+    {
+        var docasna = Path.Combine(Path.GetTempPath(), $"skvp_obnova_{Guid.NewGuid():N}.db");
+        string? logo = null;
+        byte[]? dataLoga = null;
+        try
+        {
+            using (var archiv = ZipFile.OpenRead(zip))
+            {
+                var db = archiv.GetEntry("skvp.db") ?? throw new SkvpException("Súbor nie je záloha SkVP (chýba v ňom databáza).");
+                db.ExtractToFile(docasna, true);
+                if (archiv.Entries.FirstOrDefault(e => e.Name.StartsWith("logo_skoly", StringComparison.OrdinalIgnoreCase)) is { } polozkaLoga)
+                {
+                    logo = polozkaLoga.Name;
+                    using var prud = polozkaLoga.Open();
+                    using var pamat = new MemoryStream();
+                    prud.CopyTo(pamat);
+                    dataLoga = pamat.ToArray();
+                }
+            }
+
+            OverZalohu(docasna);
+            Zalohuj();
+            foreach (var pripona in new[] { "-wal", "-shm" })
+            {
+                File.Delete(Databaza.Cesta + pripona);
+            }
+
+            File.Copy(docasna, Databaza.Cesta, true);
+            if (logo is not null && dataLoga is not null)
+            {
+                File.WriteAllBytes(Path.Combine(Databaza.Priecinok, logo), dataLoga);
+            }
+
+            Databaza.Inicializuj();
+        }
+        catch (InvalidDataException)
+        {
+            throw new SkvpException("Súbor nie je platný archív ZIP.");
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            throw new SkvpException($"Zálohu sa nepodarilo obnoviť.\n\n{ex.Message}");
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(docasna);
+            }
+            catch (IOException)
+            {
+            }
+        }
+    }
+
+    private static void OverZalohu(string cesta)
+    {
+        using var db = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={cesta};Mode=ReadOnly;Pooling=False");
+        db.Open();
+        var verzia = Convert.ToInt32(Databaza.Skalar(db, "PRAGMA user_version;") ?? 0L, CultureInfo.InvariantCulture);
+        if (verzia > Databaza.VerziaSchemy)
+        {
+            throw new SkvpException("Zálohu vytvorila novšia verzia programu SkVP. Najprv nainštalujte najnovšiu verziu.");
+        }
+
+        if (Databaza.Skalar(db, "PRAGMA integrity_check;") as string != "ok")
+        {
+            throw new SkvpException("Záloha je poškodená a nedá sa obnoviť. Vyberte inú zálohu.");
+        }
+    }
+
+    /// <summary>Kontrola databázy (integrita). Vráti text výsledku.</summary>
+    public static string Skontroluj()
+    {
+        using var db = Databaza.Otvor();
+        var vysledok = Databaza.Skalar(db, "PRAGMA integrity_check;") as string;
+        return vysledok == "ok" ? "Databáza je v poriadku." : $"Databáza má chyby: {vysledok}. Obnovte ju zo zálohy.";
+    }
+
+    /// <summary>Zmenší databázu (uvoľní nepoužité miesto). Vráti veľkosť pred a po v bajtoch.</summary>
+    public static (long Pred, long Po) Zmensi()
+    {
+        var pred = new FileInfo(Databaza.Cesta).Length;
+        using (var db = Databaza.Otvor())
+        {
+            Databaza.Vykonaj(db, "PRAGMA wal_checkpoint(TRUNCATE); VACUUM;");
+        }
+
+        return (pred, new FileInfo(Databaza.Cesta).Length);
+    }
+
+    /// <summary>
+    /// Záloha učebných osnov vo Worde (ZIP): aktuálne osnovy „01 Jazyk a komunikácia\01 Slovenský jazyk a literatúra 2026.docx“,
+    /// charakteristiky oblastí a celý archív starších verzií („Archív\… – archív 2025.docx“). Dá sa otvoriť aj bez programu.
+    /// </summary>
+    public static string ZalohujOsnovy(string? ciel = null)
+    {
+        Directory.CreateDirectory(Databaza.PriecinokZaloh);
+        ciel ??= Path.Combine(Databaza.PriecinokZaloh, $"SkVP_osnovy_{DateTime.Now:yyyy-MM-dd_HH-mm}.zip");
+        var sluzba = new ObjektService();
+        var dokumenty = new DokumentService();
+        if (File.Exists(ciel))
+        {
+            File.Delete(ciel);
+        }
+
+        using var archiv = ZipFile.Open(ciel, ZipArchiveMode.Create);
+        var pouzite = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        void Pridaj(string cesta, byte[] data)
+        {
+            var zaklad = cesta[..^5];
+            for (var i = 2; !pouzite.Add(cesta); i++)
+            {
+                cesta = $"{zaklad} ({i}).docx";
+            }
+
+            using var prud = archiv.CreateEntry(cesta, CompressionLevel.Optimal).Open();
+            prud.Write(data);
+        }
+
+        var cisloOblasti = 0;
+        foreach (var oblast in sluzba.Oblasti())
+        {
+            cisloOblasti++;
+            var priecinok = ImportOsnov.BezpecnyNazov($"{cisloOblasti:00} {oblast.Nazov}");
+            if (dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
+            {
+                Pridaj($"{priecinok}/00 Charakteristika – {ImportOsnov.BezpecnyNazov(oblast.Nazov)}.docx", charakteristika);
+            }
+
+            var cislo = 0;
+            foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            {
+                cislo++;
+                var c = cislo.ToString("00", CultureInfo.InvariantCulture);
+                if (dokumenty.NacitajData(predmet.Id) is { Length: > 0 } osnova)
+                {
+                    var rok = InfoOsnovyService.Nacitaj(predmet.Id).Rok;
+                    Pridaj($"{priecinok}/{ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, rok))}.docx", osnova);
+                }
+
+                foreach (var verzia in dokumenty.Verzie(predmet.Id))
+                {
+                    if (dokumenty.DataVerzie(verzia.Id) is { Length: > 0 } stara)
+                    {
+                        Pridaj($"{priecinok}/Archív/{ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovArchivu(c, predmet.Nazov, verzia.Vytvorene.Year))} {verzia.Vytvorene:yyyy-MM-dd HH-mm}.docx", stara);
+                    }
+                }
+            }
+        }
+
+        return ciel;
     }
 
     private int DalsieCislo() => Zalohy().Select(f => Cislo(f.Name)).DefaultIfEmpty(0).Max() + 1;

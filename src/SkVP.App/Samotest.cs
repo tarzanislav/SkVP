@@ -60,6 +60,8 @@ internal static class Samotest
             TestLogaAHlavicky();
             TestPremenovania();
             TestVystupov();
+            TestImportuAExportu();
+            TestServisu();
             TestZaloh();
             TestObrazoviek(aplikacia);
 
@@ -628,6 +630,158 @@ internal static class Samotest
         Krok("premenovanie v dokumentoch v poriadku");
     }
 
+    /// <summary>Import osnov z Wordu a PDF (archivácia s rokom), oblasti a predmety z dokumentu, export osnov.</summary>
+    private static void TestImportuAExportu()
+    {
+        var export = Databaza.PriecinokDokumentov;
+        Directory.CreateDirectory(export);
+        var sluzba = new ObjektService();
+        var dokumenty = new DokumentService();
+        var predmety = ImportOsnov.Predmety();
+
+        // rozpoznanie predmetu
+        Over(ImportOsnov.CistyNazov("05_Fyzika_2026") == "Fyzika", "čistý názov zo súboru");
+        Over(ImportOsnov.Rozpoznaj("07 Fyzika 2025", "", predmety).Id is long, "predmet podľa názvu súboru");
+        Over(ImportOsnov.Rozpoznaj("osnova", "Učebné osnovy\nPredmet: Chémia\nCharakteristika predmetu", predmety).Navrh == "Chémia", "predmet podľa textu dokumentu");
+        Over(ImportOsnov.Rozpoznaj("Astronómia a vesmír", "", predmety).Id is null, "neznámy predmet → nový");
+
+        // prevod textu PDF na osnovu
+        var bloky = TextNaOsnovu.Rozober("CHARAKTERISTIKA PREDMETU\nPredmet rozvíja prírodovedné myslenie\nžiakov a ich zručnosti.\n\nCiele predmetu\n• pozorovať javy\n• merať veličiny\n\n1. ročník\nTéma\tObsah\tVýkon\nPohyb\trýchlosť\tvypočíta rýchlosť\n");
+        Over(bloky.OfType<Nadpis>().Count() == 3 && bloky.OfType<Zoznam>().Single().Polozky.Count == 2 && bloky.OfType<Tabulka>().Count() == 1
+             && bloky.OfType<Odsek>().Any(o => DokumentOsnovy.Text(new Blok[] { o }).Contains("myslenie žiakov", StringComparison.Ordinal)),
+            $"text PDF → nadpisy, odseky, zoznam a tabuľka ({string.Join(", ", bloky.Select(b => b.GetType().Name))})");
+
+        // import z Wordu do existujúceho predmetu – archivácia s rokom
+        var fyzika = predmety.First(p => p.Nazov == "Fyzika");
+        dokumenty.UlozBloky(fyzika.Id, new List<Blok> { new Odsek(new[] { new Usek("Pôvodná osnova fyziky.") }) }, null);
+        var verziePred = dokumenty.Verzie(fyzika.Id).Count;
+        var zdroj = Path.Combine(export, "07 Fyzika 2025.docx");
+        File.WriteAllBytes(zdroj, DocxVystup.Osnova(new List<Blok> { new Nadpis(1, "Charakteristika predmetu"), new Odsek(new[] { new Usek("Nová osnova fyziky z roku 2025.") }) }));
+        var subor = ImportOsnov.Nacitaj(zdroj, predmety);
+        Over(subor.PredmetId == fyzika.Id && subor.Rok == 2025 && !subor.JePdf, "import: rozpoznaný predmet a rok zo súboru");
+        var vysledok = ImportOsnov.Importuj(subor, fyzika.Id, 2025);
+        var cislo = ImportOsnov.Cislo(fyzika.Id);
+        Over(vysledok.Archivovane && dokumenty.Verzie(fyzika.Id).Count == verziePred + 1
+             && dokumenty.Verzie(fyzika.Id)[0].Dovod!.Contains($"rok {DateTime.Now.Year}", StringComparison.Ordinal), "stará osnova je zarchivovaná s rokom a záznamom");
+        Over(DokumentOsnovy.Text(dokumenty.Nacitaj(fyzika.Id).Bloky).Contains("z roku 2025", StringComparison.Ordinal), "nová osnova je uložená");
+        Over(InfoOsnovyService.Nacitaj(fyzika.Id) is { Rok: 2025, Zdroj: "07 Fyzika 2025.docx" }, "rok zmeny osnov a zdroj importu");
+        Over(File.Exists(Path.Combine(ImportOsnov.PriecinokOsnov, "2025", $"{cislo} Fyzika 2025.docx")), "kópia novej osnovy „číslo názov rok“");
+        Over(File.Exists(Path.Combine(ImportOsnov.PriecinokOsnov, "Archív", $"{cislo} Fyzika – archív {DateTime.Now.Year}.docx")), "súbor archivovanej osnovy „… – archív rok“");
+        Over(File.ReadAllBytes(zdroj).Length > 0 && File.Exists(zdroj), "zdrojový súbor zostal");
+
+        // import do nového predmetu cez sprievodcu (bez okna)
+        var model = new MainViewModel();
+        var novy = Path.Combine(export, "Astronómia.docx");
+        File.WriteAllBytes(novy, DocxVystup.Osnova(new List<Blok> { new Odsek(new[] { new Usek("Osnova astronómie.") }) }));
+        var sprievodca = new ImportOsnovViewModel(model);
+        sprievodca.PridajSubory(new[] { novy });
+        var polozka = sprievodca.Polozky.Single();
+        Over(polozka.JeNovy && polozka.NovyNazov == "Astronómia", "sprievodca navrhne nový predmet");
+        polozka.NovaOblast = model.Oblasti.First(o => o.Nazov == "Človek a príroda");
+        Over(sprievodca.Importovat() == 1 && model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Any(p => p.Nazov == "Astronómia"),
+            "import do nového predmetu");
+        var astronomia = model.Oblasti.SelectMany(o => o.Predmety).First(p => p.Nazov == "Astronómia");
+
+        // import z PDF (čítanie PDF a rozpoznávanie textu Windows)
+        var pdf = Path.Combine(export, "Chémia osnova.pdf");
+        PdfVystup.UlozPdf(ZostavaOsnov.Zostav(new VolbyZostavy
+        {
+            Predmety = new[] { fyzika.Id }, TitulnaStrana = false, Obsah = false, OddelovacOblasti = false, CharakteristikyOblasti = false,
+        }), pdf);
+        try
+        {
+            var zPdf = ImportOsnov.Nacitaj(pdf, predmety);
+            Over(zPdf.JePdf && zPdf.Text.Length > 20 && zPdf.Docx.Length > 1000, $"PDF prevedené na Word bez Wordu ({zPdf.Text.Length} znakov)");
+            OverDocx(zPdf.Docx, "osnova z PDF");
+            Krok($"text z PDF: {zPdf.Text.Replace('\n', ' ')[..Math.Min(120, zPdf.Text.Length)]}");
+        }
+        catch (SkvpException ex)
+        {
+            Krok($"import z PDF: {ex.Message} (OCR na tomto počítači nie je – preskočené)");
+        }
+
+        // oblasti a predmety z dokumentu
+        var plan = StrukturaOsnov.Aktualna();
+        var xlsx = Path.Combine(export, "samotest_oblasti.xlsx");
+        StrukturaOsnov.UlozExcel(plan, xlsx);
+        var zExcelu = StrukturaOsnov.NacitajZoSuboru(xlsx);
+        Over(zExcelu.Oblasti.Count == plan.Oblasti.Count && zExcelu.PocetPredmetov == plan.PocetPredmetov, "oblasti a predmety: Excel tam a späť");
+        var docx = Path.Combine(export, "samotest_oblasti.docx");
+        StrukturaOsnov.UlozWord(plan, docx);
+        OverDocx(File.ReadAllBytes(docx), "oblasti a predmety vo Worde");
+        var zWordu = StrukturaOsnov.NacitajZoSuboru(docx);
+        Over(zWordu.Oblasti.Count == plan.Oblasti.Count && zWordu.PocetPredmetov == plan.PocetPredmetov,
+            $"oblasti a predmety: Word tam a späť ({zWordu.Oblasti.Count}/{zWordu.PocetPredmetov})");
+        var zTextu = StrukturaOsnov.ZTextu("Vzdelávacie oblasti a predmety\nJazyk a komunikácia\nSlovenský jazyk a literatúra\nAnglický jazyk\nMATEMATIKA A PRÁCA S INFORMÁCIAMI\nMatematika\nInformatika\n");
+        Over(zTextu.Oblasti.Count == 2 && zTextu.PocetPredmetov == 4, $"oblasti a predmety z textu PDF ({zTextu.Oblasti.Count}/{zTextu.PocetPredmetov})");
+        var zZoznamu = StrukturaOsnov.ZBlokov(new List<Blok>
+        {
+            new Nadpis(1, "Človek a príroda"),
+            new Zoznam(false, new[] { (IReadOnlyList<Blok>)new Blok[] { new Odsek(new[] { new Usek("Fyzika") }) }, new Blok[] { new Odsek(new[] { new Usek("Chémia") }) } }),
+            new Odsek(new[] { new Usek("Zdravie a pohyb", Tucne: true) }),
+            new Zoznam(false, new[] { (IReadOnlyList<Blok>)new Blok[] { new Odsek(new[] { new Usek("Telesná a športová výchova") }) } }),
+        });
+        Over(zZoznamu.Oblasti.Count == 2 && zZoznamu.PocetPredmetov == 3, "oblasti a predmety z nadpisov a zoznamov Wordu");
+        SuboryZostavy.Uloz(StrukturaOsnov.Dokument(plan), Path.Combine(export, "samotest_oblasti.pdf"), new VolbyPdf());
+
+        // export osnov
+        var exportModel = new ExportOsnovViewModel(model) { Len = true };
+        foreach (var o in exportModel.Oblasti)
+        {
+            o.Zahrnut = o.Oblast.Nazov == "Človek a príroda";
+        }
+
+        var volby = exportModel.Volby();
+        Over(volby.Predmety!.Count == model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Count, "export: výber predmetov oblasti");
+        var cesty = ExportOsnov.Uloz(ZostavaOsnov.Zostav(volby), FormatExportu.Word, Path.Combine(export, "export_priroda.docx"));
+        OverDocx(File.ReadAllBytes(cesty[0]), "export osnov do Wordu");
+        var jpg = ExportOsnov.Uloz(ZostavaOsnov.Zostav(volby with { TitulnaStrana = false, Obsah = false }), FormatExportu.Jpeg, Path.Combine(export, "export_priroda.jpg"));
+        Over(jpg.Count > 1 && jpg.All(File.Exists), $"export osnov do JPEG ({jpg.Count} strán)");
+        var priecinok = Path.Combine(export, "Export jednotlivo");
+        var jednotlivo = ExportOsnov.UlozJednotlivo(volby with { NespracovanePredmety = true }, FormatExportu.Pdf, priecinok);
+        Over(jednotlivo.Count == volby.Predmety.Count && jednotlivo.Any(c => Path.GetFileName(c) == $"{cislo} Fyzika 2025.pdf"),
+            $"každý predmet zvlášť s rokom v názve ({jednotlivo.Count}): {string.Join(", ", jednotlivo.Select(Path.GetFileName).Take(4))}");
+
+        // upratať – nový predmet a rok fyziky
+        sluzba.Odstran(astronomia.Id);
+        InfoOsnovyService.Uloz(fyzika.Id, InfoOsnovy.Prazdne);
+        Krok("import a export v poriadku");
+    }
+
+    /// <summary>Servis: záloha osnov vo Worde, obnova zo zálohy, kontrola databázy, export a import nastavení.</summary>
+    private static void TestServisu()
+    {
+        var zipOsnov = ZalohaService.ZalohujOsnovy();
+        using (var archiv = System.IO.Compression.ZipFile.OpenRead(zipOsnov))
+        {
+            Over(archiv.Entries.Count > 5 && archiv.Entries.Any(e => e.FullName.Contains("/Archív/", StringComparison.Ordinal))
+                 && archiv.Entries.Any(e => e.FullName.StartsWith("03 Človek a príroda/", StringComparison.Ordinal)),
+                $"záloha učebných osnov vo Worde ({archiv.Entries.Count} súborov)");
+        }
+
+        Over(ZalohaService.Skontroluj() == "Databáza je v poriadku.", "kontrola databázy");
+        var zaloha = new ZalohaService().Zalohuj();
+        var sluzba = new ObjektService();
+        var navyse = sluzba.Pridaj(TypObjektu.Oblast, null, "Oblasť po zálohe");
+        new ZalohaService().Obnov(zaloha);
+        Over(new ObjektService().Oblasti().All(o => o.Id != navyse.Id), "obnova všetkých dát zo zálohy");
+        Over(new ZalohaService().Zalohy().Count >= 2, "pred obnovou sa zálohoval súčasný stav");
+
+        ZalohaService.Frekvencia = ZalohaService.Tyzdenne;
+        Over(ZalohaService.Frekvencia == ZalohaService.Tyzdenne, "nastavenie pravidelnej zálohy");
+        ZalohaService.Frekvencia = ZalohaService.Denne;
+
+        // export a import nastavení
+        var subor = Path.Combine(Databaza.PriecinokDokumentov, "samotest_nastavenia.json");
+        Databaza.Zapis(UdajeSkVP.KlucAdresa, "Skúšobná 1, Vzorovo");
+        NastaveniaProgramu.Export(subor);
+        Databaza.Zapis(UdajeSkVP.KlucAdresa, "iná");
+        var pocet = NastaveniaProgramu.Import(NastaveniaProgramu.Nacitaj(subor));
+        Over(pocet > 3 && Databaza.Citaj(UdajeSkVP.KlucAdresa) == "Skúšobná 1, Vzorovo", $"export a import nastavení ({pocet})");
+        Databaza.Zapis(UdajeSkVP.KlucAdresa, "");
+        Krok("servis v poriadku");
+    }
+
     /// <summary>Uloženie zostavy do PDF, PDF/A-2b, PDF/A-3b, PDF/X-4, PNG, JPEG, TIFF a zašifrovaného PDF.</summary>
     private static void TestVystupov()
     {
@@ -946,6 +1100,34 @@ internal static class Samotest
         Pumpuj();
         Snimka(oknoPdf, "13e_okno_pdf");
         oknoPdf.Close();
+
+        // Import a export, Servis
+        model.OtvorImportExport();
+        Pumpuj();
+        Snimka(okno, "13f_import_export");
+        var exportOkno = new ExportOsnovWindow(new ExportOsnovViewModel(model) { Len = true }) { Owner = okno };
+        exportOkno.Show();
+        Pumpuj();
+        Snimka(exportOkno, "13g_okno_export");
+        exportOkno.Close();
+        var importModel = new ImportOsnovViewModel(model);
+        var vzor = Path.Combine(Databaza.PriecinokDokumentov, "05 Biológia 2026.docx");
+        File.WriteAllBytes(vzor, DocxVystup.Osnova(new List<Blok> { new Odsek(new[] { new Usek("Osnova biológie.") }) }));
+        importModel.PridajSubory(new[] { vzor, Path.Combine(Databaza.PriecinokDokumentov, "Astronómia.docx") });
+        var importOkno = new ImportOsnovWindow(importModel) { Owner = okno };
+        importOkno.Show();
+        Pumpuj();
+        Snimka(importOkno, "13h_okno_import");
+        importOkno.Close();
+        var archivOkno = new ArchivOsnovyWindow(sjl.Id, sjl.Cislo, sjl.Nazov) { Owner = okno };
+        archivOkno.Show();
+        Pumpuj();
+        Over(archivOkno.PocetVerzii > 0, "archív osnovy s verziami");
+        Snimka(archivOkno, "13i_okno_archiv");
+        archivOkno.Close();
+        model.OtvorServis();
+        Pumpuj();
+        Snimka(okno, "13j_servis");
         tlacOblasti.UlozitPdfCommand.Execute(null);
         tlacOblasti.UlozitWordCommand.Execute(null);
 

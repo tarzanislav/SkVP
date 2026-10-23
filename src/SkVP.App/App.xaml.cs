@@ -15,6 +15,14 @@ public partial class App : Application
         NastavTemu(NastaveniaSkoly.TemaSystem);
         DispatcherUnhandledException += NeosetrenaChyba;
 
+        if (e.Args.Length == 3 && e.Args[0] == CitaniePdf.Parameter)
+        {
+            // pomocný proces na prečítanie PDF (import osnovy z PDF)
+            CitaniePdf.SpustiPomocnyProces(e.Args[1], e.Args[2]);
+            Shutdown(0);
+            return;
+        }
+
         if (e.Args.Contains("--samotest", StringComparer.OrdinalIgnoreCase))
         {
             Dialogy.TichyRezim = true;
@@ -33,6 +41,7 @@ public partial class App : Application
         {
             Databaza.Inicializuj();
             Services.Migracie.Spusti();
+            Preklad.Nacitaj();
         }
         catch (Exception ex)
         {

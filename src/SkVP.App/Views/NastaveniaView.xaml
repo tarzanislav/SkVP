@@ -109,36 +109,54 @@
                 </StackPanel>
             </Border>
 
-            <!-- údaje a zálohy -->
+            <!-- jazyk -->
             <Border Style="{StaticResource Karta}" Margin="0,0,0,16">
                 <StackPanel>
-                    <TextBlock Text="Údaje a zálohy" Style="{StaticResource Podnadpis}" />
+                    <TextBlock Text="Jazyk programu" Style="{StaticResource Podnadpis}" />
+                    <ComboBox ItemsSource="{Binding Jazyky}" SelectedItem="{Binding Jazyk}" DisplayMemberPath="Nazov" Width="240" HorizontalAlignment="Left" />
+                    <TextBlock Style="{StaticResource Popis}" Margin="0,8,0,0" TextWrapping="Wrap"
+                               Text="Program je pripravený na viac jazykov (ako EviTA). Zatiaľ je k dispozícii slovenčina, ďalšie jazyky pribudnú s aktualizáciou." />
+                </StackPanel>
+            </Border>
+
+            <!-- prenos nastavení -->
+            <Border Style="{StaticResource Karta}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Export a import nastavení" Style="{StaticResource Podnadpis}" />
                     <TextBlock Style="{StaticResource Popis}" FontSize="13" TextWrapping="Wrap"
-                               Text="Všetko – oblasti, predmety, osnovy aj ich staršie verzie – je v jednej databáze. Pri prvom spustení dňa sa automaticky zálohuje." />
-                    <TextBlock Style="{StaticResource Stitok}" Text="Databáza" />
-                    <TextBlock Text="{Binding PriecinokDat}" TextWrapping="Wrap" />
-                    <TextBlock Style="{StaticResource Stitok}" Text="Zálohy" />
-                    <TextBlock Text="{Binding PriecinokZaloh}" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding PoslednaZaloha}" Style="{StaticResource Popis}" Margin="0,4,0,0" />
-                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
-                        <Button Content="Zálohovať teraz" Style="{DynamicResource AccentButtonStyle}" Padding="14,6" Command="{Binding ZalohovatCommand}" />
-                        <Button Content="Otvoriť priečinok záloh" Padding="14,6" Margin="8,0,0,0" Command="{Binding OtvoritZalohyCommand}" />
-                        <Button Content="Otvoriť priečinok databázy" Padding="14,6" Margin="8,0,0,0" Command="{Binding OtvoritDataCommand}" />
-                    </StackPanel>
-                    <Separator Margin="0,18,0,14" />
-                    <TextBlock Text="Testovacia sada a vymazanie údajov" FontWeight="SemiBold" />
-                    <TextBlock Style="{StaticResource Popis}" Margin="0,2,0,10"
-                               Text="Testovacia sada obsahuje ukážkové učebné osnovy všetkých predmetov gymnázia na vyskúšanie programu. Pred vymazaním údajov sa vždy vytvorí záloha." />
-                    <StackPanel Orientation="Horizontal">
-                        <Button Content="Nahrať testovaciu sadu…" Padding="14,6" Command="{Binding NahratTestovaciuSaduCommand}" />
-                        <Button Padding="14,6" Margin="8,0,0,0" Command="{Binding VymazatUdajeCommand}">
+                               Text="Všetky nastavenia v jednom súbore – škola, logo, program, úvodná strana a hlavička, vzhľad, jazyk, úprava osnov, voľby tlače a PDF, zálohovanie. Napr. na prenesenie na iný počítač. Osnovy sa prenášajú zálohou v sekcii Servis." />
+                    <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Padding="14,6" Command="{Binding ExportovatNastaveniaCommand}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
-                                <TextBlock Text="Vymazať údaje…" />
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xEDE1;" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Text="Exportovať nastavenia…" />
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="14,6" Margin="8,0,0,0" Command="{Binding ImportovatNastaveniaCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE8B5;" FontSize="13" Margin="0,0,8,0" />
+                                <TextBlock Text="Importovať nastavenia…" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </StackPanel>
+            </Border>
+
+            <!-- údaje -->
+            <Border Style="{StaticResource Karta}" Margin="0,0,0,16">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Padding="14,6" VerticalAlignment="Center" Command="{Binding Hlavny.OtvorServisCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE90F;" FontSize="13" Margin="0,0,8,0" />
+                            <TextBlock Text="Servis" />
+                        </StackPanel>
+                    </Button>
+                    <StackPanel Margin="0,0,16,0">
+                        <TextBlock Text="Údaje a zálohy" Style="{StaticResource Podnadpis}" />
+                        <TextBlock Style="{StaticResource Popis}" FontSize="13" TextWrapping="Wrap"
+                                   Text="Zálohy učebných osnov a všetkých dát, pravidelná záloha, obnova, kontrola databázy a testovacia sada sú v sekcii Servis." />
+                    </StackPanel>
+                </DockPanel>
             </Border>
 
             <!-- aktualizácie -->

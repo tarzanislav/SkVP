@@ -9,6 +9,9 @@ public sealed record VolbyZostavy
     /// <summary>Vybrané oblasti (null = všetky).</summary>
     public IReadOnlyCollection<long>? Oblasti { get; init; }
 
+    /// <summary>Vybrané predmety (null = všetky predmety vybraných oblastí).</summary>
+    public IReadOnlyCollection<long>? Predmety { get; init; }
+
     /// <summary>Úvodná strana: škola, logo, „Školský vzdelávací program – Učebné osnovy“.</summary>
     public bool TitulnaStrana { get; init; } = true;
     public bool Obsah { get; init; } = true;
@@ -84,6 +87,11 @@ public static class ZostavaOsnov
             foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
             {
                 poradie++;
+                if (volby.Predmety is not null && !volby.Predmety.Contains(predmet.Id))
+                {
+                    continue;
+                }
+
                 var stav = StavyOsnovy.Urci(predmet.Stav, predmet.DlzkaTextu);
                 if (stav == StavOsnovy.Prazdna && !volby.NespracovanePredmety)
                 {
@@ -91,6 +99,11 @@ public static class ZostavaOsnov
                 }
 
                 predmety.Add(new KapitolaPredmetu(predmet.Id, poradie, predmet.Nazov, NacitajBloky(dokumenty, predmet.Id), stav));
+            }
+
+            if (volby.Predmety is not null && predmety.Count == 0)
+            {
+                continue; // z oblasti nie je vybraný žiadny predmet
             }
 
             var charakteristika = volby.CharakteristikyOblasti ? NacitajBloky(dokumenty, oblast.Id) : new List<Blok>();

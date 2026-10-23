@@ -26,6 +26,12 @@
         <DataTemplate DataType="{x:Type vm:NastaveniaViewModel}">
             <v:NastaveniaView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ImportExportViewModel}">
+            <v:ImportExportView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ServisViewModel}">
+            <v:ServisView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -123,6 +129,20 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE749;" Margin="0,0,14,0" />
                                 <TextBlock Text="Tlač a zostavy" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeImportExport, Mode=OneWay}"
+                                     Command="{Binding OtvorImportExportCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE8AB;" Margin="0,0,14,0" />
+                                <TextBlock Text="Import a export" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeServis, Mode=OneWay}"
+                                     Command="{Binding OtvorServisCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE90F;" Margin="0,0,14,0" />
+                                <TextBlock Text="Servis" />
                             </StackPanel>
                         </RadioButton>
                     </StackPanel>

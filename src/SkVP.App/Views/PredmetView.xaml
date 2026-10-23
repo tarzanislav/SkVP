@@ -44,12 +44,33 @@
                             </StackPanel>
                         </ToggleButton>
                     </StackPanel>
-                    <WrapPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Predmet.StavText}" Style="{StaticResource Popis}" FontSize="13" />
-                        <TextBlock Text="  •  upravené " Style="{StaticResource Popis}" FontSize="13"
-                                   Visibility="{Binding Predmet.UpraveneText, Converter={StaticResource NieJePrazdne}}" />
-                        <TextBlock Text="{Binding Predmet.UpraveneText}" Style="{StaticResource Popis}" FontSize="13" />
-                    </WrapPanel>
+                    <StackPanel VerticalAlignment="Center">
+                        <WrapPanel>
+                            <TextBlock Text="{Binding Predmet.StavText}" Style="{StaticResource Popis}" FontSize="13" />
+                            <TextBlock Text="  •  upravené " Style="{StaticResource Popis}" FontSize="13"
+                                       Visibility="{Binding Predmet.UpraveneText, Converter={StaticResource NieJePrazdne}}" />
+                            <TextBlock Text="{Binding Predmet.UpraveneText}" Style="{StaticResource Popis}" FontSize="13" />
+                        </WrapPanel>
+                        <TextBlock Text="{Binding PoznamkaOsnovy}" FontSize="12.5" Margin="0,2,0,0" TextWrapping="Wrap"
+                                   Foreground="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}}"
+                                   Visibility="{Binding PoznamkaOsnovy, Converter={StaticResource NieJePrazdne}}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Button Padding="10,3" Command="{Binding ImportovatOsnovuCommand}"
+                                    ToolTip="Nová osnova z Wordu alebo PDF – doterajšia sa zarchivuje s rokom archivácie">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE8B5;" FontSize="12" Margin="0,0,6,0" />
+                                    <TextBlock Text="Importovať novú osnovu…" FontSize="12.5" />
+                                </StackPanel>
+                            </Button>
+                            <Button Padding="10,3" Margin="6,0,0,0" Command="{Binding ArchivCommand}"
+                                    ToolTip="Staršie verzie osnovy – otvoriť, uložiť alebo obnoviť">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" FontSize="12" Margin="0,0,6,0" />
+                                    <TextBlock FontSize="12.5"><Run Text="Archív (" /><Run Text="{Binding PocetArchivovanych, Mode=OneWay}" /><Run Text=")" /></TextBlock>
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
                 </DockPanel>
             </StackPanel>
         </Border>

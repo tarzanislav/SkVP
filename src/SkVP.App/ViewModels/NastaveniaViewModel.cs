@@ -25,7 +25,74 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         _kontrolovatAktualizacie = new AktualizaciaService().KontrolovatPriSpusteni();
         _upravaVoWorde = Databaza.Citaj(Word.KlucRezimUpravy, Word.RezimWord) == Word.RezimWord;
         NacitajLogo();
+        _jazyk = Preklad.Aktualny;
         _nacitane = true;
+    }
+
+    public IReadOnlyList<Jazyk> Jazyky => Preklad.Jazyky;
+
+    [ObservableProperty]
+    private Jazyk _jazyk;
+
+    partial void OnJazykChanged(Jazyk value)
+    {
+        if (_nacitane && value is not null)
+        {
+            Databaza.Zapis(Preklad.KlucJazyk, value.Kod);
+            Preklad.Nastav(value.Kod);
+        }
+    }
+
+    [RelayCommand]
+    private void ExportovatNastavenia()
+    {
+        var cesta = Dialogy.UlozitAko("Exportovať nastavenia", NastaveniaProgramu.Filter, $"SkVP_nastavenia_{DateTime.Now:yyyy-MM-dd}.json");
+        if (cesta is null)
+        {
+            return;
+        }
+
+        try
+        {
+            NastaveniaProgramu.Export(cesta);
+            Hlavny.Oznam($"Nastavenia sú uložené: {System.IO.Path.GetFileName(cesta)}");
+        }
+        catch (System.IO.IOException ex)
+        {
+            Dialogy.Chyba("Nastavenia sa nepodarilo uložiť.", ex);
+        }
+    }
+
+    [RelayCommand]
+    private void ImportovatNastavenia()
+    {
+        var cesta = Dialogy.Otvorit("Importovať nastavenia", NastaveniaProgramu.Filter);
+        if (cesta is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var subor = NastaveniaProgramu.Nacitaj(cesta);
+            if (!Dialogy.Potvrd($"Importovať nastavenia zo súboru {System.IO.Path.GetFileName(cesta)} (SkVP {subor.Verzia}, {subor.Vytvorene:d. M. yyyy})?\n\n" +
+                                "Doterajšie nastavenia sa prepíšu (pred tým sa urobí záloha). Osnovy sa nemenia."))
+            {
+                return;
+            }
+
+            new ZalohaService().Zalohuj();
+            var pocet = NastaveniaProgramu.Import(subor);
+            Preklad.Nacitaj();
+            App.NastavTemu(Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem));
+            Hlavny.NacitajUdaje();
+            Hlavny.Oznam($"Nastavenia sú importované ({pocet}).");
+            Hlavny.OtvorNastavenia();
+        }
+        catch (SkvpException ex)
+        {
+            Dialogy.Upozornenie(ex.Message);
+        }
     }
 
     public MainViewModel Hlavny { get; }

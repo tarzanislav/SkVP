@@ -206,8 +206,55 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         _nazov = predmet.Nazov;
         _vybranyStav = VsetkyStavy.First(s => s.Kod == predmet.StavKod);
         _zobrazitSuvislosti = new ObjektService().Suvislosti(predmet.Id).Count > 0;
-        Dokument = new DokumentStrankyVM(hlavny, predmet.Id, () => $"{Predmet.Cislo} {Predmet.Nazov}", sablonaOsnovy: true);
+        Dokument = new DokumentStrankyVM(hlavny, predmet.Id,
+            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: true);
         NacitajSuvislosti();
+        NacitajInfo();
+    }
+
+    /// <summary>Rok zmeny osnov a import („Osnovy zmenené v roku 2026 • importované …“).</summary>
+    [ObservableProperty]
+    private string _poznamkaOsnovy = "";
+
+    [ObservableProperty]
+    private int _pocetArchivovanych;
+
+    private void NacitajInfo()
+    {
+        PoznamkaOsnovy = InfoOsnovyService.Nacitaj(Predmet.Id).Poznamka;
+        PocetArchivovanych = new DokumentService().Verzie(Predmet.Id).Count;
+    }
+
+    /// <summary>Archív starších verzií osnovy (s rokom archivácie v názve).</summary>
+    [RelayCommand]
+    private void Archiv()
+    {
+        Dokument.UlozTeraz();
+        var okno = new Views.ArchivOsnovyWindow(Predmet.Id, Predmet.Cislo, Predmet.Nazov) { Owner = Dialogy.Vlastnik };
+        okno.ShowDialog();
+        if (okno.Obnovene)
+        {
+            Hlavny.PoZmeneDokumentu(Predmet.Id, oznamit: true);
+        }
+
+        NacitajInfo();
+    }
+
+    /// <summary>Nová osnova tohto predmetu z Wordu alebo PDF (doterajšia sa zarchivuje).</summary>
+    [RelayCommand]
+    private void ImportovatOsnovu()
+    {
+        var subory = Dialogy.OtvoritViac("Nová osnova predmetu " + Predmet.Nazov, ImportOsnov.FilterSuborov);
+        if (subory.Count == 0)
+        {
+            return;
+        }
+
+        Dokument.UlozTeraz();
+        var model = new ImportOsnovViewModel(Hlavny, Predmet.Id);
+        model.PridajSubory(subory.Take(1));
+        new Views.ImportOsnovWindow(model) { Owner = Dialogy.Vlastnik }.ShowDialog();
+        NacitajInfo();
     }
 
     /// <summary>Učebná osnova predmetu (dokument Word).</summary>

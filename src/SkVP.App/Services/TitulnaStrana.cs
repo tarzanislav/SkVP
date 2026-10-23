@@ -196,6 +196,12 @@ public sealed class TitulnaStrana
         return vytvorit ? new ObjektService().Pridaj(TypPaty, null, "Text dole na úvodnej strane").Id : null;
     }
 
+    /// <summary>Text dole na úvodnej strane ako dokument Word (null, ak nie je vlastný).</summary>
+    public static byte[]? DataPaty() => IdPaty(vytvorit: false) is long id ? new DokumentService().NacitajData(id) : null;
+
+    /// <summary>Uloží text dole na úvodnej strane z dokumentu Word (import nastavení).</summary>
+    public static void UlozDataPaty(byte[] data) => new DokumentService().Uloz(IdPaty(vytvorit: true)!.Value, data, "Pred importom nastavení");
+
     /// <summary>Uloží len text dole na úvodnej strane (bez ostatných nastavení).</summary>
     public static void UlozPatu(List<Blok> bloky, string dovod) =>
         new DokumentService().UlozBloky(IdPaty(vytvorit: true)!.Value, bloky, dovod);
