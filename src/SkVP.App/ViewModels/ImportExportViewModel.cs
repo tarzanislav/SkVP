@@ -92,11 +92,7 @@ public sealed partial class ImportExportViewModel : ObservableObject
                 $"V dokumente sa našlo {plan.Oblasti.Count} oblastí a {plan.PocetPredmetov} predmetov:\n\n{ukazka}\n\n" +
                 "Áno – nahradiť doterajšie oblasti a predmety (pred tým sa urobí záloha).\n" +
                 "Nie – doplniť chýbajúce oblasti a predmety k doterajším.");
-            new ZalohaService().Zalohuj();
-            var vysledok = UcebnyPlanService.Vytvor(plan, nahradit);
-            Hlavny.NacitajOblasti();
-            OnPropertyChanged(nameof(Suhrn));
-            Hlavny.Oznam($"Z dokumentu: {vysledok.NoveOblasti} nových oblastí, {vysledok.NovePredmety} nových predmetov, {vysledok.Preskocene} už v programe boli.");
+            PouzitPlan(plan, nahradit, "Z dokumentu");
         }
         catch (SkvpException ex)
         {
@@ -105,6 +101,41 @@ public sealed partial class ImportExportViewModel : ObservableObject
         catch (Exception ex)
         {
             Dialogy.Chyba("Oblasti a predmety sa z dokumentu nepodarilo načítať.", ex);
+        }
+    }
+
+    /// <summary>Vytvorí oblasti a predmety z rozpoznaného plánu (pred tým záloha).</summary>
+    public VysledokImportu PouzitPlan(UcebnyPlan plan, bool nahradit, string zdroj)
+    {
+        new ZalohaService().Zalohuj();
+        var vysledok = UcebnyPlanService.Vytvor(plan, nahradit);
+        Hlavny.NacitajOblasti();
+        OnPropertyChanged(nameof(Suhrn));
+        Hlavny.Oznam($"{zdroj}: {vysledok.NoveOblasti} nových oblastí, {vysledok.NovePredmety} nových predmetov, {vysledok.Preskocene} už v programe boli.");
+        return vysledok;
+    }
+
+    /// <summary>Oblasti a predmety z webovej stránky (online).</summary>
+    [RelayCommand]
+    private void ImportovatZWebu() => OtvoritImportStruktury(Views.ImportStrukturyWindow.Rezim.Web, "Z webovej stránky");
+
+    /// <summary>Oblasti a predmety diktovaním (hlasové písanie Windows) alebo napísaným textom.</summary>
+    [RelayCommand]
+    private void DiktovatStrukturu() => OtvoritImportStruktury(Views.ImportStrukturyWindow.Rezim.Diktovanie, "Z diktovania");
+
+    private void OtvoritImportStruktury(Views.ImportStrukturyWindow.Rezim rezim, string zdroj)
+    {
+        var okno = new Views.ImportStrukturyWindow(rezim) { Owner = Dialogy.Vlastnik };
+        if (okno.ShowDialog() == true && okno.Plan is { } plan)
+        {
+            try
+            {
+                PouzitPlan(plan, okno.NahraditDoterajsie, zdroj);
+            }
+            catch (SkvpException ex)
+            {
+                Dialogy.Upozornenie(ex.Message);
+            }
         }
     }
 
@@ -123,6 +154,37 @@ public sealed partial class ImportExportViewModel : ObservableObject
                     if (cesta is not null)
                     {
                         Dialogy.Cakaj(() => StrukturaOsnov.UlozExcel(plan, cesta));
+                        Hlavny.Oznam($"Uložené: {Path.GetFileName(cesta)}");
+                        Dialogy.OtvorVSysteme(cesta);
+                    }
+
+                    break;
+                }
+
+                case "json" or "xml" or "html":
+                {
+                    var (filter, pripona) = format switch
+                    {
+                        "json" => ("JSON (*.json)|*.json", ".json"),
+                        "xml" => ("XML (*.xml)|*.xml", ".xml"),
+                        _ => ("Webová stránka HTML (*.html)|*.html", ".html"),
+                    };
+                    var cesta = Dialogy.UlozitAko($"Oblasti a predmety do {format.ToUpperInvariant()}", filter, "Oblasti_a_predmety" + pripona);
+                    if (cesta is not null)
+                    {
+                        switch (format)
+                        {
+                            case "json":
+                                ImportStruktury.UlozJson(plan, cesta);
+                                break;
+                            case "xml":
+                                ImportStruktury.UlozXml(plan, cesta);
+                                break;
+                            default:
+                                ImportStruktury.UlozHtml(plan, cesta);
+                                break;
+                        }
+
                         Hlavny.Oznam($"Uložené: {Path.GetFileName(cesta)}");
                         Dialogy.OtvorVSysteme(cesta);
                     }

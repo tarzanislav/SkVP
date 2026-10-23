@@ -13,17 +13,22 @@ namespace SkVP.Services;
 /// </summary>
 public static class StrukturaOsnov
 {
-    public const string FilterImportu = "Excel, Word alebo PDF (*.xlsx;*.docx;*.pdf)|*.xlsx;*.docx;*.pdf";
+    public const string FilterImportu = ImportStruktury.FilterSuborov;
 
     /// <summary>Načíta oblasti a predmety zo súboru – program ich sám vyhľadá v tabuľke alebo v texte.</summary>
     public static UcebnyPlan NacitajZoSuboru(string cesta)
     {
+        if (ImportStruktury.ZTextovehoSuboru(cesta) is { } plan)
+        {
+            return plan;
+        }
+
         return Path.GetExtension(cesta).ToLowerInvariant() switch
         {
             ".xlsx" => UcebnyPlanService.NacitajZExcelu(cesta),
             ".docx" => ZWordu(cesta),
             ".pdf" => ZTextu(Task.Run(() => CitaniePdf.PrecitajAsync(cesta)).GetAwaiter().GetResult().Text),
-            _ => throw new SkvpException("Podporované sú súbory Excel (.xlsx), Word (.docx) a PDF."),
+            _ => throw new SkvpException("Podporované sú súbory Excel (.xlsx), Word (.docx), PDF, HTML, XML, JSON a text (.txt)."),
         };
     }
 

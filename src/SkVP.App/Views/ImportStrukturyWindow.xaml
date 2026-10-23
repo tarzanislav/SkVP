@@ -1,0 +1,86 @@
+<Window x:Class="SkVP.Views.ImportStrukturyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Vzdelávacie oblasti a predmety" Width="940" Height="640" MinWidth="720" MinHeight="460"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <DockPanel Margin="24,18,24,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock x:Name="Nadpis" Style="{StaticResource Podnadpis}" FontSize="20" />
+            <TextBlock x:Name="Popis" Style="{StaticResource Popis}" TextWrapping="Wrap" Margin="0,0,0,12" />
+
+            <!-- webová stránka -->
+            <DockPanel x:Name="PanelWebu" Margin="0,0,0,10">
+                <Button x:Name="Nacitat" DockPanel.Dock="Right" Padding="14,6" Margin="8,0,0,0" Style="{DynamicResource AccentButtonStyle}"
+                        Click="Nacitat_Click" IsDefault="True">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE774;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Načítať" />
+                    </StackPanel>
+                </Button>
+                <TextBox x:Name="Adresa" FontSize="14" ToolTip="Adresa stránky alebo súboru (HTML, PDF, Word, Excel, JSON, XML)" />
+            </DockPanel>
+
+            <!-- diktovanie -->
+            <WrapPanel x:Name="PanelDiktovania" Margin="0,0,0,8">
+                <Button x:Name="Diktovat" Padding="14,6" Margin="0,0,8,4" Style="{DynamicResource AccentButtonStyle}" Click="Diktovat_Click"
+                        ToolTip="Hlasové písanie Windows (Win+H) – hovorte, text sa píše do poľa nižšie">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE720;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Diktovať" />
+                    </StackPanel>
+                </Button>
+                <TextBlock x:Name="StavDiktovania" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="640" Style="{StaticResource Popis}" />
+            </WrapPanel>
+        </StackPanel>
+
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <Button DockPanel.Dock="Right" Content="Zrušiť" Padding="16,6" IsCancel="True" Margin="8,0,0,0" />
+            <Button x:Name="Nahradit" DockPanel.Dock="Right" Padding="14,6" Margin="8,0,0,0" Click="Nahradit_Click"
+                    Content="Nahradiť doterajšie…" ToolTip="Doterajšie oblasti a predmety sa nahradia (pred tým sa urobí záloha)" />
+            <Button x:Name="Doplnit" DockPanel.Dock="Right" Padding="14,6" Style="{DynamicResource AccentButtonStyle}" Click="Doplnit_Click"
+                    Content="Doplniť do programu" ToolTip="Pridajú sa chýbajúce oblasti a predmety, doterajšie zostanú" />
+            <TextBlock x:Name="Suhrn" VerticalAlignment="Center" TextWrapping="Wrap" />
+        </DockPanel>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="StlpecTextu" Width="*" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <DockPanel x:Name="PanelTextu">
+                <TextBlock DockPanel.Dock="Top" Text="Text (diktovaný alebo napísaný)" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                <TextBox x:Name="Text" AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" FontSize="14"
+                         VerticalContentAlignment="Top" TextChanged="Text_TextChanged" />
+            </DockPanel>
+            <DockPanel Grid.Column="2">
+                <TextBlock DockPanel.Dock="Top" Text="Rozpoznané oblasti a predmety" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                <Border BorderThickness="1" CornerRadius="6" BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}" Padding="10,8">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <TextBlock x:Name="Chyba" TextWrapping="Wrap" Style="{StaticResource Popis}" />
+                            <ItemsControl x:Name="Nahlad" Focusable="False">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,0,0,8">
+                                            <TextBlock FontWeight="SemiBold">
+                                                <Run Text="{Binding Nazov, Mode=OneWay}" /><Run Text="{Binding PocetText, Mode=OneWay}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" FontWeight="Normal" />
+                                            </TextBlock>
+                                            <ItemsControl ItemsSource="{Binding Predmety}" Margin="14,2,0,0" Focusable="False">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding StringFormat=• {0}}" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

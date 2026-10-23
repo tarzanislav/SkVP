@@ -60,18 +60,40 @@
                         <TextBlock Text="Vzdelávacie oblasti a predmety" Style="{StaticResource Podnadpis}" Margin="0" />
                     </StackPanel>
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12"
-                               Text="Import zo súboru Excel, Word alebo PDF – program v dokumente sám vyhľadá oblasti a predmety (tabuľka, nadpisy a zoznamy) a doplní ich alebo nahradí doterajšie. Pred zmenou sa urobí záloha." />
+                               Text="Import zo súboru (Excel, Word, PDF, HTML, XML, JSON, text), z webovej stránky alebo diktovaním – program sám vyhľadá oblasti a predmety (tabuľka, nadpisy, zoznamy) a doplní ich alebo nahradí doterajšie. Pred zmenou sa urobí záloha." />
+                    <TextBlock Text="Import" Style="{StaticResource Stitok}" Margin="0,0,0,6" />
                     <WrapPanel>
-                        <Button Padding="14,7" Margin="0,0,8,6" Command="{Binding ImportovatStrukturuCommand}">
+                        <Button Padding="14,7" Margin="0,0,8,6" Command="{Binding ImportovatStrukturuCommand}"
+                                ToolTip="Excel, Word, PDF, HTML, XML, JSON alebo text">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE8B5;" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock Text="Importovať z dokumentu…" />
+                                <TextBlock Text="Zo súboru…" />
                             </StackPanel>
                         </Button>
-                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="xlsx" Content="Export do Excelu…" />
-                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="docx" Content="Export do Wordu…" />
+                        <Button Padding="14,7" Margin="0,0,8,6" Command="{Binding ImportovatZWebuCommand}"
+                                ToolTip="Webová stránka (napr. učebný plán na webe školy) alebo súbor na internete">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE774;" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Z webovej stránky…" />
+                            </StackPanel>
+                        </Button>
+                        <Button Padding="14,7" Margin="0,0,8,6" Command="{Binding DiktovatStrukturuCommand}"
+                                ToolTip="Hlasové písanie Windows – „Človek a príroda: fyzika, chémia, biológia.“">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE720;" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Diktovať…" />
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+                    <TextBlock Text="Export" Style="{StaticResource Stitok}" Margin="0,8,0,6" />
+                    <WrapPanel>
+                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="xlsx" Content="Excel…" />
+                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="docx" Content="Word…" />
                         <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="pdf" Content="PDF, obrázky…"
                                 ToolTip="PDF, PDF/A-2b, PDF/A-3b, PDF/X-4, JPEG, PNG, TIFF" />
+                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="html" Content="HTML…" />
+                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="xml" Content="XML…" />
+                        <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ExportovatStrukturuCommand}" CommandParameter="json" Content="JSON…" />
                     </WrapPanel>
                 </StackPanel>
             </Border>
