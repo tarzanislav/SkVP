@@ -104,6 +104,17 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   súborom v zozname sa znova nepoužije (druhá profilácia KAJ = nový predmet).
 - Import celého priečinka (Import a export → Z priečinka…, v sprievodcovi Pridať priečinok…), súbory sa len čítajú.
 
+## Údaje z úvodnej tabuľky a archív školského roka (23. 10. 2026, na vetve vyvoj/etapa1)
+- Pod názvom predmetu v zozname oblasti (aj na stránke predmetu) profilácie vľavo a platnosť vpravo – čítajú sa
+  z úvodnej tabuľky dokumentu osnovy (`Services/UvodnaTabulka`: bunka „Profilácia/Profilácie“, „Platnosť“, hodnota vedľa
+  alebo za dvojbodkou; platnosť aj podľa textu „od d.m.rrrr“). Políčko „opraviť údaje“ → úprava a „Uložiť do osnovy“
+  zapíše do tabuľky dokumentu (verzia sa zarchivuje). Po každej zmene dokumentu (`PoZmeneDokumentu`) sa údaje znova
+  načítajú. Testovacia sada má v osnovách úvodnú tabuľku.
+- Servis: archív osnov za školský rok (`Services/ArchivSkolskehoRoka`) – kópia do archívu verzií („Archív školského roka
+  2025/2026“) a priečinok Dokumenty\SkVP\Archív školských rokov\2025-2026 (Word po oblastiach, celé osnovy Word + PDF/A-2b),
+  zoznam v `archiv.skolske_roky`.
+- Export „Doc“ = .docx; starý .doc by vyžadoval Word (zatiaľ nerobené, čaká na rozhodnutie používateľa).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
