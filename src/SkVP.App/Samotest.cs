@@ -1326,7 +1326,11 @@ internal static class Samotest
         Over(NovinkyService.TemaSpravy("Termíny prijímacích skúšok na stredné školy", "") == "prijimacky"
              && NovinkyService.TemaSpravy("Školské prázdniny v školskom roku 2027/2028", "") == "skolskyrok"
              && NovinkyService.TemaSpravy("Ministerstvo schválilo dodatok k štátnemu vzdelávaciemu programu", "") == "osnovy"
-             && NovinkyService.TemaSpravy("Spolupráca s Francúzskom v jadrovom odvetví", "") is null, "témy správ podľa kľúčových slov");
+             && NovinkyService.TemaSpravy("Spolupráca s Francúzskom v jadrovom odvetví", "") is null
+             && NovinkyService.TemaSpravy("Skvelý štart na Chemickú olympiádu", "Súťaž pre žiakov gymnázií a maturantov") is null
+             && NovinkyService.TemaSpravy("Dvojzmenné vyučovanie sa končí", "Nová škola v školskom roku 2026/2027") is null
+             && NovinkyService.TemaSpravy("Matematika je základná zručnosť", "Povinná maturita z matematiky od roku 2031") == "maturita",
+            "témy správ podľa kľúčových slov (súťaže a výstavba škôl nie sú vzdelávací obsah)");
 
         // overenie údaja na zdrojovej stránke
         var zdroj = new ZdrojNovinky { Url = "https://www2.nucem.sk/x", Overit = new() { "9. marec 2027 (utorok)" } };
@@ -1416,8 +1420,8 @@ internal static class Samotest
     {
         var kalendar = Kalendarium.KalendariumDb.Spolocna;
         Over(kalendar.Cesta.StartsWith(Databaza.Priecinok, StringComparison.OrdinalIgnoreCase), "Kalendárium samotestu je v dočasnom priečinku");
-        Over(kalendar.Meniny(new DateOnly(2026, 10, 23)).Contains("Alojz") && kalendar.SviatkyDna(new DateOnly(2026, 1, 1)).Any(s => s.DenPracovnehoPokoja),
-            "Kalendárium: meniny (23. 10. Alojz) a sviatky (1. 1.)");
+        Over(kalendar.Meniny(new DateOnly(2026, 10, 23)).Contains("Alojzia") && kalendar.SviatkyDna(new DateOnly(2026, 1, 1)).Any(s => s.DenPracovnehoPokoja),
+            "Kalendárium: meniny (23. 10. Alojzia) a sviatky (1. 1.)");
 
         var citaty = CitatyService.Zbierka;
         var zakazani = new[] { "Danko", "Kiska", "Schwarzenegger", "Slota", "Čaputová", "Harabin", "Dalajláma", "Fico", "Pellegrini", "Matovič", "Orbán", "Putin", "Trump" };

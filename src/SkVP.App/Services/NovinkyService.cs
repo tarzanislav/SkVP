@@ -375,24 +375,61 @@ public static partial class NovinkyService
 
     // ------------------------------------------------------------------ RSS kanály oficiálnych stránok
 
-    /// <summary>Témy aktuálnych správ podľa kľúčových slov (bez diakritiky, malými písmenami).</summary>
+    /// <summary>Témy aktuálnych správ podľa kľúčových slov v nadpise (bez diakritiky, malými písmenami).</summary>
     private static readonly (string Kategoria, string[] Slova)[] TemySprav =
     {
         ("maturita", new[] { "matur", "emat", "ec ms", "pfic" }),
         ("prijimacky", new[] { "prijimac", "prijimani", "testovanie 9", "testovania 9", "t9", "eprihlask", "prihlask" }),
-        ("ciele", new[] { "cielove poziadavk", "cielovych poziadav", "vzdelavaci standard", "vzdelavacie standard" }),
-        ("osnovy", new[] { "vzdelavaci program", "vzdelavacieho programu", "svp", "osnov", "kurikul", "dodatok", "dodatku", "gymnazi", "reforma", "gramotnost" }),
-        ("tematicke", new[] { "tematick", "metodick", "ucebnic", "didaktick", "edukacn" }),
-        ("skolskyrok", new[] { "prazdnin", "skolsky rok", "skolskeho roka", "skolskom roku", "vyucovani", "pedagogicko-organizacn", "zapis" }),
+        ("ciele", new[] { "cielove poziadavk", "cielovych poziadav", "vzdelavaci standard", "vzdelavacie standard", "vzdelavacich standard" }),
+        ("osnovy", new[] { "vzdelavaci program", "vzdelavacieho programu", "vzdelavaciemu programu", "vzdelavacich programov", "svp", "skvp", "osnov",
+                           "kurikul", "dodatok", "dodatku", "reforma", "reformy", "gramotnost", "pisa", "timss", "pirls" }),
+        ("tematicke", new[] { "tematick", "metodick", "ucebnic", "didaktick" }),
+        ("skolskyrok", new[] { "prazdnin", "pedagogicko-organizacn", "organizacia skolskeho roka", "organizacii skolskeho roka", "zaciatok skolskeho roka",
+                               "koniec skolskeho roka", "polrok", "vysvedcen" }),
+    };
+
+    /// <summary>Kľúčové slová v popise – len jednoznačné témy (aby sa nezaradili správy, ktoré tému len spomínajú).</summary>
+    private static readonly (string Kategoria, string[] Slova)[] TemyPopisu =
+    {
+        ("maturita", new[] { "maturitn", "maturita z", "maturitu z", "ematurit" }),
+        ("prijimacky", new[] { "prijimacie skusk", "prijimacich skusok", "prijimacie konanie", "testovanie 9" }),
+        ("ciele", new[] { "cielove poziadavk", "cielovych poziadav" }),
+        ("osnovy", new[] { "statny vzdelavaci program", "statneho vzdelavacieho programu", "ucebne osnovy", "ucebnych osnov", "kurikularn" }),
+        ("skolskyrok", new[] { "skolske prazdniny", "skolskych prazdnin", "pedagogicko-organizacne pokyny" }),
+    };
+
+    /// <summary>Témy, ktoré nie sú vzdelávacím obsahom (súťaže, šport, veda, vysoké školy, výstavba) – podľa nadpisu.</summary>
+    private static readonly string[] MimoTemy =
+    {
+        "olympiad", "sutaz", "medail", "sport", "cern", "jadrov", "univerzit", "vysok", "vedc", "vyskum", "grant", "stavb", "rekonstrukc",
+        "investic", "plan obnovy", "mladez", "dobrovoln",
     };
 
     /// <summary>Téma správy (kategória sekcie Novinky) alebo null, ak správa nesúvisí so vzdelávacím obsahom.</summary>
     public static string? TemaSpravy(string titulok, string popis)
     {
-        var text = " " + ImportOsnov.BezDiakritiky($"{titulok} {popis}").ToLowerInvariant() + " ";
+        static string Uprav(string t) => " " + Regex.Replace(ImportOsnov.BezDiakritiky(t).ToLowerInvariant(), @"\s+", " ") + " ";
+        static bool Obsahuje(string text, string slovo) =>
+            slovo.Length <= 4 ? Regex.IsMatch(text, $@"\b{Regex.Escape(slovo)}\b") : text.Contains(slovo, StringComparison.Ordinal);
+
+        var nadpis = Uprav(titulok);
+        var text = Uprav(popis);
         foreach (var (kategoria, slova) in TemySprav)
         {
-            if (slova.Any(s => s.Length <= 3 ? Regex.IsMatch(text, $@"\b{Regex.Escape(s)}\b") : text.Contains(s, StringComparison.Ordinal)))
+            if (slova.Any(s => Obsahuje(nadpis, s)))
+            {
+                return kategoria;
+            }
+        }
+
+        if (MimoTemy.Any(s => nadpis.Contains(s, StringComparison.Ordinal)))
+        {
+            return null;
+        }
+
+        foreach (var (kategoria, slova) in TemyPopisu)
+        {
+            if (slova.Any(s => Obsahuje(text, s)))
             {
                 return kategoria;
             }
