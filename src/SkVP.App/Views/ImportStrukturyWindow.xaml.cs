@@ -25,6 +25,7 @@ public partial class ImportStrukturyWindow : Window
     }
 
     private readonly Rezim _rezim;
+    private DiktovanieDoPola? _diktovanie;
     private readonly DispatcherTimer _odklad = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
     public ImportStrukturyWindow(Rezim rezim)
@@ -52,9 +53,9 @@ public partial class ImportStrukturyWindow : Window
             Popis.Text = "Kliknite na Diktovať a hovorte, napr. „Človek a príroda dvojbodka fyzika čiarka chémia čiarka biológia bodka“. " +
                          "Oblasť je pred dvojbodkou, predmety oddeľte čiarkou, ďalšiu oblasť začnite bodkou alebo novým riadkom. Text môžete aj napísať alebo vložiť.";
             PanelWebu.Visibility = Visibility.Collapsed;
-            StavDiktovania.Text = HlasovePisanie.Slovencina is null
-                ? "Pre diktovanie po slovensky pridajte v Nastaveniach Windows slovenskú klávesnicu (Čas a jazyk → Jazyk a oblasť)."
-                : "Diktovanie používa hlasové písanie Windows (Win+H) – potrebuje internet.";
+            _diktovanie = new DiktovanieDoPola(Text, Diktovat, IkonaDiktovania, TextDiktovania, StavDiktovania, Hlasitost);
+            UkazSposob();
+            Closing += (_, _) => _diktovanie.ZrusNahravanie();
             Loaded += (_, _) => Text.Focus();
         }
 
@@ -105,13 +106,33 @@ public partial class ImportStrukturyWindow : Window
         }
     }
 
-    private void Diktovat_Click(object sender, RoutedEventArgs e)
+    private void UkazSposob() => _diktovanie?.UkazStav(Diktovanie.Sposob == SposobDiktovania.Offline
+        ? Diktovanie.Model.JeStiahnuty
+            ? $"Prepis v počítači bez internetu (model {Diktovanie.Model.Nazov}) – kliknite Diktovať, hovorte a potom Zastaviť a prepísať."
+            : "Prepis bez internetu: model ešte nie je stiahnutý – otvorte nastavenie diktovania (ozubené koliesko)."
+        : HlasovePisanie.Slovencina is null
+            ? "Hlasové písanie Windows (Win+H) – pre slovenčinu pridajte v Nastaveniach Windows slovenskú klávesnicu (Čas a jazyk → Jazyk a oblasť)."
+            : "Hlasové písanie Windows (Win+H) – potrebuje internet. Bez internetu: ozubené koliesko → Prepis v počítači.");
+
+    private async void Diktovat_Click(object sender, RoutedEventArgs e)
     {
-        var slovencina = HlasovePisanie.Spusti(Text);
-        StavDiktovania.Text = slovencina
-            ? "Hovorte – Windows píše text do poľa. Ukončíte znova klávesmi Win+H alebo kliknutím mimo."
-            : "Hovorte… Pre slovenčinu pridajte v Nastaveniach Windows slovenskú klávesnicu.";
+        if (_diktovanie is not null)
+        {
+            await _diktovanie.KlikAsync(novyRiadok: true);
+        }
     }
+
+    private void NastavenieDiktovania_Click(object sender, RoutedEventArgs e)
+    {
+        _diktovanie?.ZrusNahravanie();
+        if (new DiktovanieWindow { Owner = this }.ShowDialog() == true)
+        {
+            UkazSposob();
+        }
+    }
+
+    /// <summary>Prepíše nahrávku (samotest so súborom WAV) a vloží text.</summary>
+    public Task PrepisAsync(float[] zvuk) => _diktovanie?.PrepisAVlozAsync(zvuk, novyRiadok: true) ?? Task.CompletedTask;
 
     private async void Nacitat_Click(object sender, RoutedEventArgs e) => await NacitajAsync();
 

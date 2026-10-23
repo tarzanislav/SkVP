@@ -21,16 +21,22 @@
             </DockPanel>
 
             <!-- diktovanie -->
-            <WrapPanel x:Name="PanelDiktovania" Margin="0,0,0,8">
-                <Button x:Name="Diktovat" Padding="14,6" Margin="0,0,8,4" Style="{DynamicResource AccentButtonStyle}" Click="Diktovat_Click"
-                        ToolTip="Hlasové písanie Windows (Win+H) – hovorte, text sa píše do poľa nižšie">
+            <DockPanel x:Name="PanelDiktovania" Margin="0,0,0,8">
+                <Button DockPanel.Dock="Left" x:Name="Diktovat" Padding="14,6" Margin="0,0,6,0" Style="{DynamicResource AccentButtonStyle}" Click="Diktovat_Click"
+                        ToolTip="Hovorte do mikrofónu – text sa zapíše do poľa nižšie">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE720;" FontSize="13" Margin="0,0,8,0" />
-                        <TextBlock Text="Diktovať" />
+                        <TextBlock x:Name="IkonaDiktovania" Style="{StaticResource Ikona}" Text="&#xE720;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock x:Name="TextDiktovania" Text="Diktovať" />
                     </StackPanel>
                 </Button>
-                <TextBlock x:Name="StavDiktovania" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="640" Style="{StaticResource Popis}" />
-            </WrapPanel>
+                <Button DockPanel.Dock="Left" Padding="8,6" Margin="0,0,10,0" Click="NastavenieDiktovania_Click"
+                        ToolTip="Nastavenie diktovania – hlasové písanie Windows alebo prepis v počítači bez internetu (Whisper)">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE713;" FontSize="13" />
+                </Button>
+                <Rectangle DockPanel.Dock="Left" x:Name="Hlasitost" Height="6" Width="0" RadiusX="3" RadiusY="3" Margin="0,0,10,0"
+                           Fill="{DynamicResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
+                <TextBlock x:Name="StavDiktovania" VerticalAlignment="Center" TextWrapping="Wrap" Style="{StaticResource Popis}" />
+            </DockPanel>
         </StackPanel>
 
         <DockPanel DockPanel.Dock="Bottom" Margin="0,12,0,0">

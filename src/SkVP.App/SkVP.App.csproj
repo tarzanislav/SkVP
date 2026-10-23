@@ -36,4 +36,11 @@
     <EmbeddedResource Include="Zdroje\svp_gymnazia.json" LogicalName="SkVP.SvpGymnazia.json" />
   </ItemGroup>
 
+  <ItemGroup Condition="Exists('Native\SkvpHlas.dll')">
+    <!-- prepis diktovania bez internetu: whisper.cpp (MIT) – zostavuje ju GitHub Actions zo zdrojového kódu overenej verzie -->
+    <None Include="Native\SkvpHlas.dll" Link="SkvpHlas.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="Native\LICENSE-whisper.cpp.txt" Link="LICENSE-whisper.cpp.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest"
+          Condition="Exists('Native\LICENSE-whisper.cpp.txt')" />
+  </ItemGroup>
+
 </Project>

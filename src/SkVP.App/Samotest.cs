@@ -1523,6 +1523,23 @@ internal static class Samotest
         Pumpuj();
         Snimka(okno, "23_sada_po_obnoveni");
 
+        // diktovanie oblastí a predmetov: hlasové písanie Windows alebo prepis bez internetu (whisper.cpp)
+        Over(PrepisHlasu.Prekazka() is null && PrepisHlasu.KniznicaFunguje(), $"prepis hlasu bez internetu – knižnica whisper.cpp ({PrepisHlasu.Prekazka() ?? "v poriadku"})");
+        Over(File.Exists(Path.Combine(AppContext.BaseDirectory, "LICENSE-whisper.cpp.txt")), "licencia whisper.cpp je priložená k programu");
+        var diktovanieOkno = new ImportStrukturyWindow(ImportStrukturyWindow.Rezim.Diktovanie) { Owner = okno };
+        diktovanieOkno.Show();
+        diktovanieOkno.Vstup = "Človek a príroda: fyzika, chémia, biológia.\nZdravie a pohyb: telesná a športová výchova.";
+        diktovanieOkno.Rozpoznaj();
+        Pumpuj();
+        Over(diktovanieOkno.Plan is { Oblasti.Count: 2 }, "okno diktovania rozpozná oblasti a predmety");
+        Snimka(diktovanieOkno, "18e_diktovanie_oblasti");
+        diktovanieOkno.Close();
+        var nastavenieDiktovania = new DiktovanieWindow { Owner = okno };
+        nastavenieDiktovania.Show();
+        Pumpuj();
+        Snimka(nastavenieDiktovania, "18f_nastavenie_diktovania");
+        nastavenieDiktovania.Close();
+
         // prvé spustenie: údaje o škole, oblasti podľa ŠVP, predmety z priečinka osnov podľa úvodnej tabuľky
         model.Vymaz(vsetko: true);
         var uvod = new PrveSpustenieWindow();

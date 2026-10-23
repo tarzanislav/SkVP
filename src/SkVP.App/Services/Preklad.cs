@@ -42,6 +42,9 @@ public static class Preklad
     }
 
     /// <summary>Preložený text (bez prekladu slovenský).</summary>
+    /// <summary>Text na neskorší preklad (označenie pre slovník).</summary>
+    public static string N(string text) => text;
+
     public static string T(string text) => _slovnik is not null && _slovnik.TryGetValue(text, out var p) ? p : text;
 
     /// <summary>Preložený text s doplnenými hodnotami.</summary>

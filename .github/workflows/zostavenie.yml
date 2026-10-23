@@ -34,6 +34,62 @@ jobs:
           "cislo=$v" >> $env:GITHUB_OUTPUT
           Write-Host "Verzia: $v"
 
+      - name: Vyrovnávacia pamäť – prepis hlasu (whisper.cpp)
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/skvp-hlas-dll
+          key: skvp-hlas-d1be6fde11ac6e0407606b4e42fe72d34add8037-${{ hashFiles('nastroje/hlas/**') }}
+
+      - name: Prepis hlasu whisper.cpp zo zdrojového kódu (overená verzia)
+        # prepis diktovania bez internetu (whisper.cpp, licencia MIT): skompiluje sa z pevne určeného commitu spolu
+        # s tenkou vrstvou nastroje/hlas/skvp_hlas.c; kontroluje sa, z ktorých knižníc Windows volá funkcie
+        shell: pwsh
+        run: |
+          $verzia = "v1.9.5"
+          $overenyCommit = "d1be6fde11ac6e0407606b4e42fe72d34add8037"
+          $ciel = Join-Path $env:RUNNER_TEMP "skvp-hlas-dll"
+          if (-not (Test-Path (Join-Path $ciel "SkvpHlas.dll"))) {
+            $zdroj = Join-Path $env:RUNNER_TEMP "whisper.cpp"
+            git clone --quiet --depth 1 --branch $verzia https://github.com/ggml-org/whisper.cpp $zdroj
+            $commit = (git -C $zdroj rev-parse HEAD).Trim()
+            if ($commit -ne $overenyCommit) {
+              Write-Host "::error::whisper.cpp $verzia má commit $commit, overený je $overenyCommit"
+              exit 1
+            }
+            $zostava = Join-Path $env:RUNNER_TEMP "skvp-hlas-build"
+            cmake -S nastroje/hlas -B $zostava -A x64 "-DWHISPER_ZDROJ=$zdroj"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            cmake --build $zostava --config Release --target SkvpHlas --parallel
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            $dll = Get-ChildItem $zostava -Recurse -Filter SkvpHlas.dll | Where-Object FullName -match '\\Release\\' | Select-Object -First 1
+            if (-not $dll) { Write-Host "::error::SkvpHlas.dll sa nezostavila"; exit 1 }
+            New-Item -ItemType Directory -Force $ciel | Out-Null
+            Copy-Item $dll.FullName (Join-Path $ciel "SkvpHlas.dll")
+            Copy-Item (Join-Path $zdroj "LICENSE") (Join-Path $ciel "LICENSE-whisper.cpp.txt")
+          }
+          $dll = Get-Item (Join-Path $ciel "SkvpHlas.dll")
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          $dumpbin = Get-ChildItem (Join-Path $vs "VC\Tools\MSVC") -Recurse -Filter dumpbin.exe |
+            Where-Object FullName -match 'Hostx64\\x64' | Select-Object -First 1
+          $importy = & $dumpbin.FullName /nologo /imports $dll.FullName
+          $kniznice = $importy | ForEach-Object { if ($_ -match '^\s+(\S+\.dll)\s*$') { $Matches[1].ToLowerInvariant() } } | Sort-Object -Unique
+          Write-Host "::notice::SkvpHlas.dll používa len tieto knižnice Windows: $($kniznice -join ', ')"
+          $povolene = '^(kernel32\.dll|advapi32\.dll|vcruntime140(_1)?\.dll|msvcp140\.dll|api-ms-win-crt-[a-z0-9-]+\.dll)$'
+          $zakazane = $kniznice | Where-Object { $_ -notmatch $povolene }
+          if ($zakazane) {
+            Write-Host "::error::Prepis hlasu používa nepovolené knižnice: $($zakazane -join ', ')"
+            exit 1
+          }
+          $exporty = (& $dumpbin.FullName /nologo /exports $dll.FullName) -join "`n"
+          foreach ($f in @("skvp_hlas_otvor", "skvp_hlas_prepis", "skvp_hlas_zavri")) {
+            if ($exporty -notmatch $f) { Write-Host "::error::SkvpHlas.dll nemá funkciu $f"; exit 1 }
+          }
+          $hash = (Get-FileHash $dll.FullName -Algorithm SHA256).Hash
+          Write-Host "::notice::SkvpHlas.dll z whisper.cpp $verzia ($overenyCommit), SHA-256 $hash"
+          New-Item -ItemType Directory -Force src/SkVP.App/Native | Out-Null
+          Copy-Item $dll.FullName src/SkVP.App/Native/SkvpHlas.dll
+          Copy-Item (Join-Path $ciel "LICENSE-whisper.cpp.txt") src/SkVP.App/Native/LICENSE-whisper.cpp.txt
+
       - name: Zostaviť program
         shell: pwsh
         run: >

@@ -14,3 +14,6 @@ installer/Output/
 *.db
 *.db-wal
 *.db-shm
+
+## Natívna knižnica prepisu hlasu (zostavuje GitHub Actions)
+src/SkVP.App/Native/
