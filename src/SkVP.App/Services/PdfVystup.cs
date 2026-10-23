@@ -48,8 +48,8 @@ public static class PdfVystup
     public static Document Vytvor(CelyDokument dokument)
     {
         var doc = new Document();
-        doc.Info.Title = $"{dokument.Udaje.NazovProgramu} – {CelyDokument.Podtitul}";
-        doc.Info.Subject = CelyDokument.Podtitul;
+        doc.Info.Title = dokument.Titul.Hlavicka;
+        doc.Info.Subject = dokument.Titul.Podnadpis;
         doc.Info.Author = dokument.Udaje.Skola;
         Styly(doc);
 
@@ -239,21 +239,23 @@ public static class PdfVystup
             logo.Height = Unit.FromCentimeter(2.6);
         }
 
-        var skola = sekcia.AddParagraph(u.Skola.Length > 0 ? u.Skola : " ");
+        var t = dokument.Titul;
+        var skola = sekcia.AddParagraph(t.SkolaZobrazit && t.Skola.Length > 0 ? t.Skola : " ");
         skola.Format.Font.Name = PismaDokumentu.Nadpis;
         skola.Format.Font.Size = 13;
         skola.Format.Font.Bold = true;
         skola.Format.SpaceBefore = Unit.FromPoint(18);
         skola.Format.SpaceAfter = Unit.FromPoint(1);
-        if (u.Adresa.Length > 0)
+        if (t.AdresaZobrazit && t.Adresa.Length > 0)
         {
-            var adresa = sekcia.AddParagraph(u.Adresa);
+            var adresa = sekcia.AddParagraph(t.Adresa);
             adresa.Format.Font.Name = PismaDokumentu.Nadpis;
             adresa.Format.Font.Size = 10;
             adresa.Format.Font.Color = Siva;
         }
 
-        var program = sekcia.AddParagraph(u.NazovProgramu);
+        // nadpis ostáva na rovnakom mieste, aj keď je vypnutý
+        var program = sekcia.AddParagraph(t.NadpisZobrazit && t.Nadpis.Length > 0 ? t.Nadpis : " ");
         program.Format.Font.Name = PismaDokumentu.Nadpis;
         program.Format.Font.Size = 34;
         program.Format.Font.Bold = true;
@@ -262,14 +264,17 @@ public static class PdfVystup
         program.Format.SpaceBefore = Unit.FromCentimeter(6.5);
         program.Format.SpaceAfter = Unit.FromPoint(10);
 
-        var podtitul = sekcia.AddParagraph(CelyDokument.Podtitul);
-        podtitul.Format.Font.Name = PismaDokumentu.Text;
-        podtitul.Format.Font.Size = 24;
-        podtitul.Format.Font.Italic = true;
-        podtitul.Format.Font.Color = Farba("#3B5BDB");
-        podtitul.Format.SpaceAfter = Unit.FromPoint(26);
+        if (t.PodnadpisZobrazit && t.Podnadpis.Length > 0)
+        {
+            var podtitul = sekcia.AddParagraph(t.Podnadpis);
+            podtitul.Format.Font.Name = PismaDokumentu.Text;
+            podtitul.Format.Font.Size = 24;
+            podtitul.Format.Font.Italic = true;
+            podtitul.Format.Font.Color = Farba("#3B5BDB");
+            podtitul.Format.SpaceAfter = Unit.FromPoint(26);
+        }
 
-        foreach (var riadok in new[] { u.Typ, u.Obdobie.Length > 0 ? "Platnosť: " + u.Obdobie : "" }.Where(r => r.Length > 0))
+        foreach (var riadok in t.RiadkyPodNadpisom())
         {
             var p = sekcia.AddParagraph(riadok);
             p.Format.Font.Name = PismaDokumentu.Nadpis;
@@ -278,6 +283,12 @@ public static class PdfVystup
         }
 
         // zoznam oblastí s farebnou značkou
+        if (!t.OblastiZobrazit)
+        {
+            Pata(sekcia, t, dokument.Vytvorene);
+            return;
+        }
+
         var zoznam = sekcia.AddTable();
         zoznam.Borders.Visible = false;
         zoznam.TopPadding = Unit.FromPoint(2.5);
@@ -307,7 +318,18 @@ public static class PdfVystup
             pocet.Font.Color = Siva;
         }
 
-        var datum = sekcia.AddParagraph($"Vytvorené {dokument.Vytvorene.ToString("d. M. yyyy", CultureInfo.GetCultureInfo("sk-SK"))} v programe SkVP");
+        Pata(sekcia, t, dokument.Vytvorene);
+    }
+
+    /// <summary>Text dole na úvodnej strane (napr. „Vytvorené 23. 10. 2026 v programe SkVP“), ak je zapnutý.</summary>
+    private static void Pata(Section sekcia, TitulnaStrana t, DateTime vytvorene)
+    {
+        if (!t.PataZobrazit || t.Pata.Trim().Length == 0)
+        {
+            return;
+        }
+
+        var datum = sekcia.AddParagraph(t.PataText(vytvorene));
         datum.Format.Font.Name = PismaDokumentu.Nadpis;
         datum.Format.Font.Size = 8.5;
         datum.Format.Font.Color = Siva;
@@ -317,7 +339,7 @@ public static class PdfVystup
     private static void HlavickaAPata(Section sekcia, CelyDokument dokument)
     {
         var hlavicka = sekcia.Headers.Primary.AddParagraph();
-        hlavicka.AddText($"{dokument.Udaje.NazovProgramu} – {CelyDokument.Podtitul}");
+        hlavicka.AddText(dokument.Titul.Hlavicka);
         if (dokument.Udaje.Skola.Length > 0)
         {
             hlavicka.AddTab();

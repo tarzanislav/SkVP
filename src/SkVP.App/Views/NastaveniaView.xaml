@@ -55,7 +55,7 @@
                         </Grid.ColumnDefinitions>
                         <StackPanel>
                             <TextBlock Text="Druh školy a stupeň vzdelania" Style="{StaticResource Stitok}" />
-                            <TextBox Text="{Binding Typ}" />
+                            <TextBox Text="{Binding Typ}" ToolTip="Napr. Gymnázium – úplné stredné všeobecné vzdelanie (ISCED 344); staršie označenie bolo ISCED 3A." />
                         </StackPanel>
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Platnosť (napr. od 1. 9. 2026)" Style="{StaticResource Stitok}" />

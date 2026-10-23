@@ -1,0 +1,91 @@
+<Window x:Class="SkVP.Views.UvodnaStranaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Úvodná strana zostavy" Width="680" Height="760" MinWidth="560" MinHeight="520"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Resources>
+        <!-- riadok úvodnej strany: zapnúť/vypnúť a text -->
+        <Style x:Key="Prepinac" TargetType="CheckBox">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="ToolTip" Value="Zobraziť na úvodnej strane" />
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="28,22,28,22">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Úvodná strana zostavy" Style="{StaticResource Podnadpis}" FontSize="20" />
+            <TextBlock Style="{StaticResource Popis}" FontSize="13" Margin="0,0,0,8"
+                       Text="Každý riadok môžete prepísať alebo vypnúť zaškrtávacím políčkom. Nadpis a podnadpis sa použijú aj v hlavičke strán." />
+        </StackPanel>
+
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+            <Button DockPanel.Dock="Left" Content="Predvolené texty" Padding="12,5" Click="Predvolene_Click"
+                    ToolTip="Vráti nadpis, podnadpis, platnosť, vlastné riadky a text dole na predvolené" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Uložiť" MinWidth="120" Style="{DynamicResource AccentButtonStyle}" IsDefault="True" Click="Ulozit_Click" />
+                <Button Content="Zrušiť" MinWidth="100" Margin="8,0,0,0" IsCancel="True" />
+            </StackPanel>
+        </DockPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="0,0,10,0">
+                <TextBlock Text="Názov školy" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="SkolaZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Skola" />
+                </DockPanel>
+
+                <TextBlock Text="Adresa" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="AdresaZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Adresa" />
+                </DockPanel>
+
+                <TextBlock Text="Nadpis" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="NadpisZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Nadpis" />
+                </DockPanel>
+
+                <TextBlock Text="Podnadpis" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="PodnadpisZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Podnadpis" />
+                </DockPanel>
+
+                <TextBlock Text="Druh školy a stupeň vzdelania" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="TypZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Typ" />
+                </DockPanel>
+                <StackPanel Orientation="Horizontal" Margin="30,4,0,0">
+                    <TextBlock Style="{StaticResource Popis}" VerticalAlignment="Center"
+                               Text="Namiesto staršieho „ISCED 3A“ sa dnes používa „úplné stredné všeobecné vzdelanie (ISCED 344)“." />
+                    <Button Content="Použiť" Padding="10,2" Margin="8,0,0,0" Click="AktualnyStupen_Click" />
+                </StackPanel>
+
+                <TextBlock Text="Platnosť" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="PlatnostZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Platnost" />
+                </DockPanel>
+
+                <TextBlock Text="Ďalšie riadky (napr. Schválené pedagogickou radou dňa …) – každý riadok zvlášť" Style="{StaticResource Stitok}" />
+                <TextBox x:Name="VlastneRiadky" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="72" Margin="30,0,0,0"
+                         VerticalScrollBarVisibility="Auto" />
+
+                <CheckBox x:Name="OblastiZobrazit" Content="Zoznam vzdelávacích oblastí s počtom predmetov" Margin="0,16,0,0" />
+
+                <TextBlock Text="Text dole na strane" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <CheckBox x:Name="PataZobrazit" Style="{StaticResource Prepinac}" />
+                    <TextBox x:Name="Pata" />
+                </DockPanel>
+                <TextBlock Style="{StaticResource Popis}" Margin="30,4,0,0"
+                           Text="{}{datum} sa nahradí dátumom vytvorenia zostavy, {rok} rokom." />
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

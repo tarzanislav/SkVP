@@ -54,6 +54,9 @@ public sealed record KapitolaOblasti(long Id, string Nazov, string Farba, List<B
 /// <summary>Učebné osnovy zostavené do jedného celku – podklad pre náhľad, tlač, PDF a Word.</summary>
 public sealed record CelyDokument(UdajeSkVP Udaje, VolbyZostavy Volby, List<KapitolaOblasti> Oblasti, DateTime Vytvorene)
 {
+    /// <summary>Texty úvodnej strany a hlavičky (dajú sa upraviť a vypnúť).</summary>
+    public TitulnaStrana Titul { get; init; } = new();
+
     public const string Podtitul = "Učebné osnovy";
 
     public int PocetPredmetov => Oblasti.Sum(o => o.Predmety.Count);
@@ -95,7 +98,7 @@ public static class ZostavaOsnov
                 charakteristika, predmety));
         }
 
-        return new CelyDokument(UdajeSkVP.Nacitaj(), volby, oblasti, DateTime.Now);
+        return new CelyDokument(UdajeSkVP.Nacitaj(), volby, oblasti, DateTime.Now) { Titul = TitulnaStrana.Nacitaj() };
     }
 
     private static List<Blok> NacitajBloky(DokumentService dokumenty, long id)

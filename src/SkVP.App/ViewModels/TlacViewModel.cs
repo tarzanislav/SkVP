@@ -139,6 +139,19 @@ public sealed partial class TlacViewModel : ObservableObject
         NespracovanePredmety = Nespracovane,
     };
 
+    /// <summary>Úprava textov úvodnej strany (každý riadok sa dá prepísať aj vypnúť).</summary>
+    [RelayCommand]
+    private void UpravitUvodnuStranu()
+    {
+        var okno = new Views.UvodnaStranaWindow { Owner = Dialogy.Vlastnik };
+        if (okno.ShowDialog() == true)
+        {
+            Hlavny.NacitajUdaje();
+            TitulnaStrana = true;
+            Obnovit();
+        }
+    }
+
     [RelayCommand]
     private void VybratVsetky()
     {
@@ -199,7 +212,7 @@ public sealed partial class TlacViewModel : ObservableObject
 
         if (_vykreslenie is not null)
         {
-            NahladDokumentu.Vytlac(_vykreslenie, $"{CelyDokument.Podtitul} – SkVP");
+            NahladDokumentu.Vytlac(_vykreslenie, $"{_dokument?.Titul.Podnadpis ?? TitulnaStrana.PredvolenyPodnadpis} – SkVP");
         }
     }
 

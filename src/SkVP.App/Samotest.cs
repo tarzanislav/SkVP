@@ -386,6 +386,28 @@ internal static class Samotest
         var vybrane = ZostavaOsnov.Zostav(new VolbyZostavy { Oblasti = new[] { plne.Oblasti[1].Id, plne.Oblasti[6].Id } });
         Over(vybrane.Oblasti.Select(o => o.Nazov).SequenceEqual(new[] { "Matematika a práca s informáciami", "Zdravie a pohyb" }), "zostava vybraných oblastí");
 
+        // texty úvodnej strany – úprava a vypnutie riadkov
+        var titul = TitulnaStrana.Nacitaj();
+        Over(titul.PataZobrazit && titul.PataText(new DateTime(2026, 10, 23)) == "Vytvorené 23. 10. 2026 v programe SkVP", "predvolený text dole na úvodnej strane");
+        titul.Typ = TitulnaStrana.AktualnyStupenGymnazia;
+        titul.PataZobrazit = false;
+        titul.VlastneRiadky = "Schválené pedagogickou radou dňa 28. 8. 2026\n\nPrerokované so zriaďovateľom";
+        titul.Podnadpis = "Učebné osnovy – testovacia verzia";
+        titul.Uloz();
+        var upravenyTitul = TitulnaStrana.Nacitaj();
+        Over(!upravenyTitul.PataZobrazit && upravenyTitul.RiadkyPodNadpisom().Count() == 3 && upravenyTitul.Typ.Contains("ISCED 344", StringComparison.Ordinal),
+            "uložené texty úvodnej strany");
+        var sTitulom = ZostavaOsnov.Zostav(new VolbyZostavy { Oblasti = new[] { plne.Oblasti[4].Id } });
+        var docxTitul = Path.Combine(export, "samotest_uvodna_strana.docx");
+        DocxVystup.Uloz(sTitulom, docxTitul);
+        var textTitulu = DokumentOsnovy.Text(DocxCitac.Nacitaj(docxTitul).Bloky);
+        Over(!textTitulu.Contains("Vytvorené", StringComparison.Ordinal) && textTitulu.Contains("Schválené pedagogickou radou", StringComparison.Ordinal)
+             && textTitulu.Contains("ISCED 344", StringComparison.Ordinal) && !textTitulu.Contains("ISCED 3A", StringComparison.Ordinal), "úvodná strana bez vypnutého riadku a s vlastnými textami");
+        var vykreslenieTitulu = NahladDokumentu.Priprav(PdfVystup.Vytvor(sTitulom));
+        UlozObrazokStrany(vykreslenieTitulu, 1, Path.Combine(export, "uvodna_strana_upravena.png"));
+        TitulnaStrana.Predvolene();
+        Over(TitulnaStrana.Nacitaj().PataZobrazit && TitulnaStrana.Nacitaj().Podnadpis == "Učebné osnovy", "predvolené texty úvodnej strany");
+
         var docx = Path.Combine(export, "samotest_cele_osnovy.docx");
         DocxVystup.Uloz(plne, docx);
         OverDocx(File.ReadAllBytes(docx), "celé osnovy vo Worde");
@@ -534,6 +556,11 @@ internal static class Samotest
         Over(suvislostiModel.Suvislosti.Count == 2, "súvislosti predmetu v rozhraní");
         Pumpuj();
         Snimka(okno, "10_predmet_suvislosti");
+        var uvodnaStrana = new UvodnaStranaWindow { Owner = okno };
+        uvodnaStrana.Show();
+        Pumpuj();
+        Snimka(uvodnaStrana, "11b_okno_uvodna_strana");
+        uvodnaStrana.Close();
         var vyber = new VyberObjektuWindow(model, sjl.Id) { Owner = okno };
         vyber.Show();
         Pumpuj();

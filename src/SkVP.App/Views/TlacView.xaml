@@ -69,8 +69,14 @@
 
                         <TextBlock Text="Strany" FontWeight="SemiBold" Margin="0,20,0,6" />
                         <CheckBox IsChecked="{Binding TitulnaStrana}">
-                            <TextBlock TextWrapping="Wrap">Úvodná strana – škola, logo, Školský vzdelávací program – Učebné osnovy</TextBlock>
+                            <TextBlock TextWrapping="Wrap">Úvodná strana – škola, logo, nadpis a ďalšie údaje</TextBlock>
                         </CheckBox>
+                        <Button HorizontalAlignment="Left" Margin="28,4,0,4" Padding="10,3" Command="{Binding UpravitUvodnuStranuCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE70F;" FontSize="12" Margin="0,0,6,0" />
+                                <TextBlock Text="Upraviť texty úvodnej strany…" />
+                            </StackPanel>
+                        </Button>
                         <TextBlock Style="{StaticResource Popis}" Margin="28,0,0,4" Text="Logo školy nastavíte v Nastaveniach."
                                    Visibility="{Binding MaLogo, Converter={StaticResource InverzBoolNaViditelnost}}" />
                         <CheckBox Content="Obsah s číslami strán" IsChecked="{Binding Obsah}" Margin="0,4,0,0" />

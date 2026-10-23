@@ -57,9 +57,9 @@ public static class DocxVystup
                 Val = "15",
             }));
 
-        docx.PackageProperties.Title = $"{dokument.Udaje.NazovProgramu} – {CelyDokument.Podtitul}";
+        docx.PackageProperties.Title = dokument.Titul.Hlavicka;
         docx.PackageProperties.Creator = dokument.Udaje.Skola;
-        docx.PackageProperties.Subject = CelyDokument.Podtitul;
+        docx.PackageProperties.Subject = dokument.Titul.Podnadpis;
 
         if (dokument.Volby.TitulnaStrana)
         {
@@ -100,7 +100,7 @@ public static class DocxVystup
 
         // hlavička a päta (nie na titulnej strane)
         var hlavicka = hlavna.AddNewPart<HeaderPart>();
-        var textHlavicky = $"{dokument.Udaje.NazovProgramu} – {CelyDokument.Podtitul}";
+        var textHlavicky = dokument.Titul.Hlavicka;
         var odsekHlavicky = new Paragraph(
             new ParagraphProperties(new ParagraphStyleId { Val = "Header" },
                 new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka, Space = 3 }),
@@ -174,21 +174,26 @@ public static class DocxVystup
             telo.Append(logo);
         }
 
-        telo.Append(Odsek(u.Skola.Length > 0 ? u.Skola : " ", "SkvpSkola"));
-        if (u.Adresa.Length > 0)
+        var t = dokument.Titul;
+        telo.Append(Odsek(t.SkolaZobrazit && t.Skola.Length > 0 ? t.Skola : " ", "SkvpSkola"));
+        if (t.AdresaZobrazit && t.Adresa.Length > 0)
         {
-            telo.Append(Odsek(u.Adresa, "SkvpAdresa"));
+            telo.Append(Odsek(t.Adresa, "SkvpAdresa"));
         }
 
-        telo.Append(Odsek(u.NazovProgramu, "Title"));
-        telo.Append(Odsek(CelyDokument.Podtitul, "Subtitle"));
-        foreach (var r in new[] { u.Typ, u.Obdobie.Length > 0 ? "Platnosť: " + u.Obdobie : "" }.Where(r => r.Length > 0))
+        telo.Append(Odsek(t.NadpisZobrazit && t.Nadpis.Length > 0 ? t.Nadpis : " ", "Title"));
+        if (t.PodnadpisZobrazit && t.Podnadpis.Length > 0)
+        {
+            telo.Append(Odsek(t.Podnadpis, "Subtitle"));
+        }
+
+        foreach (var r in t.RiadkyPodNadpisom())
         {
             telo.Append(Odsek(r, "SkvpTitulUdaj"));
         }
 
         var prvy = true;
-        foreach (var oblast in dokument.Oblasti)
+        foreach (var oblast in t.OblastiZobrazit ? dokument.Oblasti : new List<KapitolaOblasti>())
         {
             var p = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "SkvpTitulOblast" }));
             if (prvy)
@@ -203,9 +208,12 @@ public static class DocxVystup
             telo.Append(p);
         }
 
-        var datum = Odsek($"Vytvorené {dokument.Vytvorene.ToString("d. M. yyyy", CultureInfo.GetCultureInfo("sk-SK"))} v programe SkVP", "SkvpAdresa");
-        datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1100" };
-        telo.Append(datum);
+        if (t.PataZobrazit && t.Pata.Trim().Length > 0)
+        {
+            var datum = Odsek(t.PataText(dokument.Vytvorene), "SkvpAdresa");
+            datum.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "1100" };
+            telo.Append(datum);
+        }
         telo.Append(new Paragraph(new Run(new Break { Type = BreakValues.Page })));
     }
 
