@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
@@ -52,6 +53,11 @@ internal static class Samotest
             Databaza.Inicializuj(); // druhé spustenie nesmie nič pokaziť
             Krok("databáza vytvorená");
 
+            // Kalendárium (meniny, sviatky) v dočasnom priečinku, dashboard bez sťahovania zo siete
+            Environment.SetEnvironmentVariable("KALENDARIUM_DIR", Path.Combine(Databaza.Priecinok, "Kalendarium"));
+            App.PripravKalendarium();
+            DashboardViewModel.BezSiete = true;
+
             TestUcebnehoPlanu();
             TestObjektov();
             TestDokumentov();
@@ -68,6 +74,8 @@ internal static class Samotest
             TestJazykovychOsnov(aplikacia);
             TestUvodnejTabulky();
             TestZaloh();
+            TestNoviniek();
+            TestDashboarduDna();
             TestObrazoviek(aplikacia);
 
             if (Chyby.Count > 0)
@@ -1255,6 +1263,237 @@ internal static class Samotest
         Over(zalohy.AutomatickaAkTreba() is not null && zalohy.AutomatickaAkTreba() is null, "automatická záloha raz za deň");
     }
 
+    /// <summary>Sekcia Novinky: overené údaje, oficiálne zdroje, termíny, RSS, krížové potvrdenie, overenie na stránkach, kalendár.</summary>
+    private static void TestNoviniek()
+    {
+        var data = NovinkyService.Zabudovane();
+        var chyby = NovinkyService.Skontroluj(data, vyhodit: false);
+        Over(chyby.Count == 0, "údaje Noviniek sú platné" + (chyby.Count > 0 ? ": " + string.Join("; ", chyby) : ""));
+        Over(data.Polozky.Count >= 60 && data.Kategorie.Count == 6 && data.Stranky.Count >= 8,
+            $"Novinky: {data.Polozky.Count} overených informácií v 6 témach, {data.Stranky.Count} odporúčaných stránok");
+        foreach (var tema in new[] { "osnovy", "tematicke", "ciele", "maturita", "prijimacky", "skolskyrok" })
+        {
+            Over(data.Polozky.Count(p => p.Kategoria == tema) >= 3, $"Novinky: téma {tema} má aspoň 3 informácie");
+        }
+
+        Over(data.Polozky.SelectMany(p => p.Zdroje).All(z => NovinkyService.JeOficialna(z.Url)) && data.Stranky.All(s => NovinkyService.JeOficialna(s.Url)),
+            "všetky zdroje Noviniek sú oficiálne stránky (žiadne médiá)");
+        Over(NovinkyService.JeOficialna("https://www.minedu.sk/terminy-prazdnin/") && NovinkyService.JeOficialna("https://www2.nucem.sk/sk")
+             && !NovinkyService.JeOficialna("https://www.sme.sk/minedu") && !NovinkyService.JeOficialna("https://minedu.sk.priklad.com/")
+             && !NovinkyService.JeOficialna("ftp://minedu.sk/") && !NovinkyService.JeOficialna("javascript:alert(1)"),
+            "zoznam oficiálnych domén odmieta médiá a podvrhnuté adresy");
+        var viacZdrojov = data.Polozky.Count(p => p.Zdroje.Count >= 2);
+        Krok($"Novinky: {viacZdrojov} z {data.Polozky.Count} informácií má aspoň dva oficiálne zdroje");
+
+        PolozkaNoviniek P(string id) => data.Polozky.Single(p => p.Id == id);
+        Over(P("ms-nahradny-april").TerminText == "6. – 9. 4. 2027" && P("pr-vianocne").TerminText == "23. 12. 2026 – 7. 1. 2027"
+             && P("ms-zmena-eformy").TerminText == "do 13. 11. 2026" && P("ms-ec-mat").TerminText == "11. 3. 2027"
+             && P("svp-dodatok-6").TerminText == "od 1. 9. 2026", "texty termínov (rozsah, lehota, účinnosť)");
+        var den = new DateOnly(2026, 10, 23);
+        Over(NovinkyService.Odpocet(P("pr-jesenne"), den) == "o 6 dní" && NovinkyService.Odpocet(P("ms-zber-udajov"), den) == "prebieha (do 31. 10.)"
+             && NovinkyService.Odpocet(P("ms-zmena-eformy"), den) == "ešte 21 dní" && NovinkyService.Odpocet(P("sr-zaciatok"), den) == "uplynulo"
+             && NovinkyService.Odpocet(P("pr-jesenne"), new DateOnly(2026, 10, 26)) == "o 3 dni",
+            "odpočet termínov (o 6 dní, prebieha, ešte 21 dní, uplynulo)");
+        var najblizsie = NovinkyService.NajblizsieTerminy(data, den, 5);
+        Over(najblizsie.Count == 5 && najblizsie.Zip(najblizsie.Skip(1)).All(d => d.First.Zaciatok <= d.Second.Zaciatok)
+             && najblizsie.All(p => p.Koniec >= den), "najbližšie termíny sú nadchádzajúce a zoradené");
+
+        // RSS a krížové potvrdenie
+        const string rss = """
+            <?xml version="1.0" encoding="UTF-8"?>
+            <rss version="2.0"><channel><title>Test</title>
+            <item><title>Maturita 2027: elektronická maturita z matematiky a slovenčiny</title><link>https://www.minedu.sk/maturita-2027/</link>
+              <description><![CDATA[<p>Elektronická maturita z matematiky a slovenského jazyka sa rozširuje na ďalšie školy.</p>]]></description>
+              <pubDate>Tue, 20 Oct 2026 12:00:00 +0200</pubDate></item>
+            <item><title>Maturita v novinách</title><link>https://www.noviny.sk/maturita</link><description>Médiá</description></item>
+            <item><title>Športový deň ministerstva</title><link>https://www.minedu.sk/sport/</link><description>Beh</description></item>
+            </channel></rss>
+            """;
+        const string atom = """
+            <feed xmlns="http://www.w3.org/2005/Atom"><title>NIVaM</title>
+            <entry><title>Elektronická maturita 2027 – generálna skúška z matematiky a slovenského jazyka</title>
+              <link href="https://nivam.sk/maturita-2027/" /><summary>Informácie k elektronickej maturite z matematiky.</summary>
+              <updated>2026-10-22T10:00:00Z</updated></entry>
+            </feed>
+            """;
+        var spravy = NovinkyService.PrecitajRss(rss, "Ministerstvo").Concat(NovinkyService.PrecitajRss(atom, "NIVaM")).ToList();
+        Over(spravy.Count == 3 && spravy.All(s => NovinkyService.JeOficialna(s.Odkaz)), "RSS a Atom: správy iba s odkazom na oficiálnu stránku");
+        Over(spravy[0].Kategoria == "maturita" && spravy[1].Kategoria is null && spravy[2].Kategoria == "maturita"
+             && spravy[0].Popis.StartsWith("Elektronická maturita", StringComparison.Ordinal) && spravy[0].Datum?.Day == 20,
+            "správy sa zaradia do tém (nerelevantné bez témy), popis bez HTML, dátum");
+        var porovnane = NovinkyService.Porovnaj(spravy.Where(s => s.Kategoria is not null).ToList());
+        Over(porovnane.All(s => s.PotvrdeneInde.Count == 1), "krížové potvrdenie: o téme píšu dva oficiálne zdroje");
+        Over(NovinkyService.TemaSpravy("Termíny prijímacích skúšok na stredné školy", "") == "prijimacky"
+             && NovinkyService.TemaSpravy("Školské prázdniny v školskom roku 2027/2028", "") == "skolskyrok"
+             && NovinkyService.TemaSpravy("Ministerstvo schválilo dodatok k štátnemu vzdelávaciemu programu", "") == "osnovy"
+             && NovinkyService.TemaSpravy("Spolupráca s Francúzskom v jadrovom odvetví", "") is null, "témy správ podľa kľúčových slov");
+
+        // overenie údaja na zdrojovej stránke
+        var zdroj = new ZdrojNovinky { Url = "https://www2.nucem.sk/x", Overit = new() { "9. marec 2027 (utorok)" } };
+        var stranka = NovinkyService.TextZHtml("<html><script>var x='9. marec 2027';</script><p>9.&nbsp;marec\n 2027 (utorok) – SJL</p></html>");
+        Over(NovinkyService.Vyhodnot(zdroj, (true, stranka, "HTML")).Stav == StavOverenia.Potvrdene
+             && NovinkyService.Vyhodnot(zdroj, (true, NovinkyService.TextZHtml("<p>10. marec 2027</p>"), "HTML")).Stav == StavOverenia.Nenajdene
+             && NovinkyService.Vyhodnot(zdroj, (true, null, "PDF")).Stav == StavOverenia.Dostupne
+             && NovinkyService.Vyhodnot(zdroj, (false, null, "chyba")).Stav == StavOverenia.Nedostupne,
+            "overenie údaja na stránke (potvrdené, zmenené, PDF, nedostupné)");
+
+        // stiahnuté údaje: novšie sa použijú, neoficiálny zdroj sa odmietne
+        var novsie = NovinkyService.Precitaj(System.Text.Json.JsonSerializer.Serialize(data));
+        novsie.Aktualizovane = "2099-01-01";
+        Databaza.Zapis(NovinkyService.KlucData, System.Text.Json.JsonSerializer.Serialize(novsie));
+        Over(NovinkyService.Nacitaj().Aktualizovane == "2099-01-01", "novšie stiahnuté údaje Noviniek sa použijú");
+        novsie.Polozky[0].Zdroje[0].Url = "https://www.dennik.sk/clanok";
+        Databaza.Zapis(NovinkyService.KlucData, System.Text.Json.JsonSerializer.Serialize(novsie));
+        Over(NovinkyService.Nacitaj().Aktualizovane == data.Aktualizovane, "stiahnuté údaje s neoficiálnym zdrojom sa odmietnu");
+        Databaza.Zapis(NovinkyService.KlucData, null);
+
+        // kalendár
+        var ics = NovinkyViewModel.Kalendar(data.Polozky.Where(p => p.Druh == NovinkyService.DruhTermin), data);
+        Over(ics.StartsWith("BEGIN:VCALENDAR", StringComparison.Ordinal) && ics.Contains("DTSTART;VALUE=DATE:20270406") && ics.Contains("DTEND;VALUE=DATE:20270410")
+             && Regex.Matches(ics, "BEGIN:VEVENT").Count == data.Polozky.Count(p => p.Druh == NovinkyService.DruhTermin),
+            "termíny do kalendára (.ics, celodenné udalosti)");
+
+        // obrazovka bez siete
+        var model = new NovinkyViewModel(new MainViewModel()) { Dnes = den };
+        model.Obnov();
+        Over(model.Bloky.Count == 6 && model.Najblizsie.Count > 0 && model.Terminovnik.Count >= 6 && model.Temy.Count == 7,
+            "obrazovka Novinky: 6 blokov, najbližšie termíny, termínovník po mesiacoch, filtre tém");
+        model.VybranaTema = "maturita";
+        Over(model.Bloky.Count == 1 && model.Bloky[0].Kategoria.Id == "maturita", "filter témy");
+        model.VybranaTema = null;
+        model.Hladat = "ematurita";
+        Over(model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Polozka.Id == "ms-ematurita"), "hľadanie v Novinkách (bez diakritiky)");
+        model.Hladat = "";
+        model.VybranyKraj = "KE, PO";
+        Over(!model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Skupina is "BB, ZA, TN" or "BA, NR, TT")
+             && model.Bloky.SelectMany(b => b.Polozky).Any(p => p.Skupina == "KE, PO"), "jarné prázdniny podľa kraja");
+        model.VybranyKraj = NovinkyViewModel.VsetkyKraje;
+
+        // skutočné overenie na oficiálnych stránkach (informatívne – bez siete sa preskočí)
+        try
+        {
+            var uloha = Task.Run(() => NovinkyService.OverAsync(data));
+            if (uloha.Wait(TimeSpan.FromMinutes(4)))
+            {
+                var vysledky = uloha.Result.Polozky.SelectMany(p => p.Value.Select(v => (p.Key, v))).ToList();
+                var riadky = vysledky.Select(x => $"{x.Key}\t{x.v.Stav}\t{x.v.Url}\t{x.v.Sprava}").ToList();
+                File.WriteAllLines(Path.Combine(Databaza.PriecinokDokumentov, "novinky_overenie.txt"), riadky, Encoding.UTF8);
+                Krok($"overenie Noviniek na stránkach: {vysledky.Count(x => x.v.Stav == StavOverenia.Potvrdene)} potvrdených, " +
+                     $"{vysledky.Count(x => x.v.Stav == StavOverenia.Dostupne)} dostupných, {vysledky.Count(x => x.v.Stav == StavOverenia.Nenajdene)} nenájdených, " +
+                     $"{vysledky.Count(x => x.v.Stav == StavOverenia.Nedostupne)} nedostupných");
+                foreach (var x in vysledky.Where(x => x.v.Stav is StavOverenia.Nenajdene))
+                {
+                    Krok($"  na kontrolu: {x.Key} – {x.v.Url} – {x.v.Sprava}");
+                }
+            }
+            else
+            {
+                Krok("overenie Noviniek na stránkach: časový limit (preskočené)");
+            }
+
+            var rssUloha = Task.Run(() => NovinkyService.StiahniSpravyAsync(data));
+            if (rssUloha.Wait(TimeSpan.FromMinutes(1)))
+            {
+                var r = rssUloha.Result;
+                Krok($"RSS ministerstva a NIVaM: {r.Spravy.Count} správ k vzdelávaciemu obsahu, {r.Nerelevantnych} iných, " +
+                     $"{r.Spravy.Count(s => s.PotvrdeneInde.Count > 0)} krížovo potvrdených" + (r.Chyby.Count > 0 ? " · " + string.Join(", ", r.Chyby) : ""));
+                foreach (var s in r.Spravy.Take(8))
+                {
+                    Krok($"  [{s.Kategoria}] {s.Datum:d.M.yyyy} {s.Zdroj}: {s.Titulok}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Krok($"overenie Noviniek na stránkach: {ex.GetBaseException().Message} (bez siete – preskočené)");
+        }
+
+        Krok("Novinky v poriadku");
+    }
+
+    /// <summary>Dashboard: Kalendárium (meniny, sviatky), výroky slávnych osobností a počasie.</summary>
+    private static void TestDashboarduDna()
+    {
+        var kalendar = Kalendarium.KalendariumDb.Spolocna;
+        Over(kalendar.Cesta.StartsWith(Databaza.Priecinok, StringComparison.OrdinalIgnoreCase), "Kalendárium samotestu je v dočasnom priečinku");
+        Over(kalendar.Meniny(new DateOnly(2026, 10, 23)).Contains("Alojz") && kalendar.SviatkyDna(new DateOnly(2026, 1, 1)).Any(s => s.DenPracovnehoPokoja),
+            "Kalendárium: meniny (23. 10. Alojz) a sviatky (1. 1.)");
+
+        var citaty = CitatyService.Zbierka;
+        var zakazani = new[] { "Danko", "Kiska", "Schwarzenegger", "Slota", "Čaputová", "Harabin", "Dalajláma", "Fico", "Pellegrini", "Matovič", "Orbán", "Putin", "Trump" };
+        Over(citaty.Citaty.Count > 1900 && citaty.Zdroj == "citaty-slavnych.sk", $"databáza výrokov: {citaty.Citaty.Count} výrokov z citaty-slavnych.sk");
+        Over(!citaty.Citaty.Any(c => zakazani.Any(z => c.Autor.Contains(z, StringComparison.OrdinalIgnoreCase))), "v databáze nie sú výroky žijúcich politikov");
+        Over(citaty.Citaty.Where(c => c.Autor is "Josef Stalin" or "Vladimír Iljič Lenin" or "Gustáv Husák").All(c => c.Skryty),
+            "výroky diktátorov sú predvolene skryté");
+        Over(citaty.Citaty.Select(c => c.Id).Distinct().Count() == citaty.Citaty.Count, "výroky majú jedinečné čísla");
+        var dnes = CitatyService.CitatDna(new DateOnly(2026, 10, 23));
+        Over(dnes is { Skryty: false, JeKratky: true } && CitatyService.CitatDna(new DateOnly(2026, 10, 23))?.Id == dnes.Id
+             && CitatyService.CitatDna(new DateOnly(2026, 10, 24))?.Id != dnes.Id, "výrok dňa: krátky, rovnaký celý deň, zajtra iný");
+        CitatyService.Skry(dnes!.Id);
+        Over(!CitatyService.NaDashboard().Any(c => c.Id == dnes.Id) && CitatyService.Nahodny(null) is not null, "skrytý výrok sa nezobrazí");
+        CitatyService.Odkry(dnes.Id);
+        Over(CitatyService.NaDashboard().Any(c => c.Id == dnes.Id), "skrytie výroku sa dá vrátiť");
+        Over(dnes.AutorText.StartsWith("— ", StringComparison.Ordinal) && dnes.TextVUvodzovkach.StartsWith('„'), "výrok s autorom v úvodzovkách");
+
+        // počasie (údaje vo formáte Open-Meteo)
+        const string miesta = """{"results":[{"name":"Banská Bystrica","latitude":48.73946,"longitude":19.15349,"country_code":"SK","country":"Slovensko","admin1":"Banskobystrický kraj","admin2":"Okres Banská Bystrica"},{"name":"Bez súradníc"}]}""";
+        var najdene = PocasieService.PrecitajMiesta(miesta);
+        Over(najdene.Count == 1 && najdene[0].Popis == "Banská Bystrica, Okres Banská Bystrica, Banskobystrický kraj, Slovensko", "počasie: vyhľadanie miesta");
+        var predpoved = PocasieService.PrecitajPredpoved(VzorPocasia(), najdene[0], DateTime.Now);
+        Over(predpoved.TeplotaText == "12 °C" && predpoved.Popis == "Polooblačno" && predpoved.Dni.Count == 5 && predpoved.Dni[0].Den == "dnes"
+             && predpoved.Podrobnosti.Contains("vietor 14 km/h"), "počasie: aktuálny stav a predpoveď na 5 dní");
+        var sluzba = new PocasieService();
+        sluzba.UlozMiesto(najdene[0]);
+        Databaza.Zapis(PocasieService.KlucData, System.Text.Json.JsonSerializer.Serialize(predpoved));
+        Over(sluzba.ZVyrovnavacejPamate()?.TeplotaText == "12 °C", "počasie z vyrovnávacej pamäte (bez siete)");
+
+        try
+        {
+            var uloha = Task.Run(async () =>
+            {
+                var m = (await sluzba.HladajAsync("Banská Bystrica")).First(x => x.KodKrajiny == "SK");
+                return await new PocasieService().StiahniAsync(m);
+            });
+            if (uloha.Wait(TimeSpan.FromSeconds(40)))
+            {
+                Krok($"počasie zo siete: {uloha.Result.Miesto.Nazov} {uloha.Result.TeplotaText}, {uloha.Result.Popis}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Krok($"počasie zo siete: {ex.GetBaseException().Message} (preskočené)");
+        }
+
+        // na snímky dashboardu vzorové počasie
+        sluzba.UlozMiesto(najdene[0]);
+        Databaza.Zapis(PocasieService.KlucData, System.Text.Json.JsonSerializer.Serialize(predpoved with { Stiahnute = DateTime.Now }));
+
+        var dashboard = new DashboardViewModel(new MainViewModel());
+        dashboard.AktualizujDen(new DateOnly(2026, 10, 29));
+        Over(dashboard.MeninyDnes.Length > 0 && dashboard.StavSkolskehoRoka.StartsWith("Dnes: jesenné prázdniny", StringComparison.Ordinal)
+             && dashboard.NajblizsiTermin.Length > 0, "dashboard: meniny, prázdniny v školskom roku, najbližší termín z Noviniek");
+        dashboard.AktualizujDen(new DateOnly(2026, 11, 17));
+        Over(dashboard.JeDnesVolno || dashboard.Sviatky.Count > 0, "dashboard: sviatok 17. 11.");
+        dashboard.AktualizujDen();
+        Over(dashboard.JePocasie && dashboard.Citat is not null, "dashboard: počasie a výrok dňa");
+        Krok("dashboard – dátum, meniny, sviatky, počasie a výroky v poriadku");
+    }
+
+    private static string VzorPocasia()
+    {
+        var json = """
+            {"current":{"temperature_2m":12.3,"apparent_temperature":10.1,"relative_humidity_2m":71,"weather_code":2,"wind_speed_10m":14.2,"precipitation":0,"is_day":1},
+             "daily":{"time":["D0","D1","D2","D3","D4"],"weather_code":[2,61,3,0,80],"temperature_2m_max":[14,11,9,13,12],
+              "temperature_2m_min":[6,5,3,2,4],"precipitation_probability_max":[10,80,30,0,55]}}
+            """;
+        for (var i = 0; i < 5; i++)
+        {
+            json = json.Replace($"D{i}", DateTime.Today.AddDays(i).ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture));
+        }
+
+        return json;
+    }
+
     private static void TestObrazoviek(App aplikacia)
     {
         var okno = new MainWindow { Width = 1440, Height = 900, WindowStartupLocation = WindowStartupLocation.Manual, Left = 0, Top = 0 };
@@ -1264,6 +1503,31 @@ internal static class Samotest
         var model = okno.Model;
         Over(model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "hlavné okno: 7 oblastí, 43 predmetov");
         Snimka(okno, "01_dashboard");
+        if (Najdi<System.Windows.Controls.ScrollViewer>(okno.Obsah)?.Content is FrameworkElement dashboardCely)
+        {
+            SnimkaPrvku(dashboardCely, "01a_dashboard_cely");
+        }
+
+        // sekcia Novinky – všetky záložky
+        model.OtvorNovinky();
+        Pumpuj();
+        Over(model.Stranka is NovinkyViewModel, "sekcia Novinky sa otvorí z menu");
+        Snimka(okno, "01b_novinky");
+        var zalozky = Najdi<System.Windows.Controls.TabControl>(okno.Obsah);
+        Over(zalozky is { Items.Count: 4 }, "Novinky: 4 záložky (témy, termínovník, správy, odporúčané stránky)");
+        string[] nazvyZaloziek = { "01c_novinky_temy", "01d_novinky_terminovnik", "01e_novinky_spravy", "01f_novinky_stranky" };
+        for (var i = 0; i < 4; i++)
+        {
+            zalozky!.SelectedIndex = i;
+            Pumpuj();
+            if (Najdi<System.Windows.Controls.ScrollViewer>(okno.Obsah)?.Content is FrameworkElement novinkyCele)
+            {
+                SnimkaPrvku(novinkyCele, nazvyZaloziek[i]);
+            }
+        }
+
+        model.OtvorDashboard();
+        Pumpuj();
 
         model.OtvorOsnovy();
         Pumpuj();
@@ -1470,6 +1734,9 @@ internal static class Samotest
         model.OtvorDashboard();
         Pumpuj();
         Snimka(okno, "15_tmavy_dashboard");
+        model.OtvorNovinky();
+        Pumpuj();
+        Snimka(okno, "15b_tmavy_novinky");
         model.OtvorPredmet(sjl);
         Pumpuj();
         Snimka(okno, "16_tmavy_predmet");
@@ -2078,6 +2345,41 @@ internal static class Samotest
         ArchivSkolskehoRoka.Odstran(stary.Id);
         ArchivSkolskehoRoka.Odstran(prenesene.Id);
         Over(ArchivSkolskehoRoka.Zoznam().Count == 2, "odstránenie archívu školského roka z programu");
+    }
+
+    /// <summary>Snímka celého prvku (aj časti mimo viditeľnej plochy posúvača) – dlhé stránky ako Novinky.</summary>
+    private static void SnimkaPrvku(FrameworkElement prvok, string nazov)
+    {
+        try
+        {
+            var sirka = (int)Math.Ceiling(prvok.ActualWidth);
+            var vyska = (int)Math.Min(9000, Math.Ceiling(prvok.ActualHeight));
+            if (sirka < 1 || vyska < 1)
+            {
+                return;
+            }
+
+            var kresba = new DrawingVisual();
+            using (var kontext = kresba.RenderOpen())
+            {
+                var oblast = new Rect(0, 0, sirka, vyska);
+                kontext.DrawRectangle((Brush)(Application.Current.TryFindResource("SolidBackgroundFillColorBaseBrush") ?? Brushes.White), null, oblast);
+                kontext.DrawRectangle(new VisualBrush(prvok) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top,
+                    Viewbox = new Rect(0, 0, sirka, vyska), ViewboxUnits = BrushMappingMode.Absolute }, null, oblast);
+            }
+
+            var obrazok = new System.Windows.Media.Imaging.RenderTargetBitmap(sirka, vyska, 96, 96, PixelFormats.Pbgra32);
+            obrazok.Render(kresba);
+            var kodovac = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            kodovac.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(obrazok));
+            Directory.CreateDirectory(Databaza.PriecinokDokumentov);
+            using var subor = File.Create(Path.Combine(Databaza.PriecinokDokumentov, nazov + ".png"));
+            kodovac.Save(subor);
+        }
+        catch (Exception ex)
+        {
+            Krok($"snímka {nazov}: {ex.Message}");
+        }
     }
 
     private static void Snimka(Window okno, string nazov)

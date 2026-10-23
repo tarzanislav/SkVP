@@ -53,6 +53,7 @@ public partial class App : Application
         }
 
         NastavTemu(Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem));
+        PripravKalendarium();
 
         string? priecinokOsnov = null;
         if (prveSpustenie)
@@ -128,6 +129,22 @@ public partial class App : Application
             }
         };
         _ = okno.Model.SkontrolujAktualizaciuAsync();
+    }
+
+    /// <summary>
+    /// Kalendárium (meniny a sviatky na dashboarde) – spoločná databáza s programom EviTA v C:\ProgramData\Kalendarium.
+    /// Jeho chyba program nezastaví, dashboard ukáže, že nie je dostupné.
+    /// </summary>
+    public static void PripravKalendarium()
+    {
+        try
+        {
+            Kalendarium.KalendariumDb.Spolocna.Inicializuj();
+        }
+        catch (Exception)
+        {
+            // bez Kalendária program funguje ďalej
+        }
     }
 
     /// <summary>Vzhľad programu: svetlý, tmavý alebo podľa nastavenia Windows (Fluent – Windows 11).</summary>

@@ -22,6 +22,7 @@ public static class Sekcie
     public const string Tlac = "tlac";
     public const string ImportExport = "import";
     public const string Archiv = "archiv";
+    public const string Novinky = "novinky";
     public const string Servis = "servis";
     public const string Nastavenia = "nastavenia";
 }
@@ -125,7 +126,7 @@ public sealed partial class MainViewModel : ObservableObject
     private object? _stranka;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia), nameof(JeImportExport), nameof(JeArchiv), nameof(JeServis))]
+    [NotifyPropertyChangedFor(nameof(JeDashboard), nameof(JeOsnovy), nameof(JeTlac), nameof(JeNastavenia), nameof(JeImportExport), nameof(JeArchiv), nameof(JeServis), nameof(JeNovinky))]
     private string _sekcia = Sekcie.Dashboard;
 
     public bool JeDashboard => Sekcia == Sekcie.Dashboard;
@@ -134,6 +135,7 @@ public sealed partial class MainViewModel : ObservableObject
     public bool JeNastavenia => Sekcia == Sekcie.Nastavenia;
     public bool JeImportExport => Sekcia == Sekcie.ImportExport;
     public bool JeArchiv => Sekcia == Sekcie.Archiv;
+    public bool JeNovinky => Sekcia == Sekcie.Novinky;
     public bool JeServis => Sekcia == Sekcie.Servis;
 
     [ObservableProperty]
@@ -248,6 +250,9 @@ public sealed partial class MainViewModel : ObservableObject
 
     /// <summary>Sekcia Archív s vybraným archívom školského roka.</summary>
     public void OtvorArchivRoka(long archivId) => Prejdi(Sekcie.Archiv, new ArchivViewModel(this, archivId));
+
+    [RelayCommand]
+    public void OtvorNovinky() => Prejdi(Sekcie.Novinky, new NovinkyViewModel(this));
 
     [RelayCommand]
     public void OtvorServis() => Prejdi(Sekcie.Servis, new ServisViewModel(this));

@@ -22,6 +22,7 @@ public sealed partial class DashboardViewModel : ObservableObject
         PocetNezacatych = vsetky.Count(p => p.Stav == StavOsnovy.Prazdna);
         Naposledy = vsetky.Where(p => p.DlzkaTextu > 0 || p.StavKod is not null)
             .OrderByDescending(p => p.Upravene).Take(6).ToList();
+        PripravPanely();
     }
 
     public MainViewModel Hlavny { get; }

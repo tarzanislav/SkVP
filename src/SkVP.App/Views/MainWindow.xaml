@@ -32,6 +32,9 @@
         <DataTemplate DataType="{x:Type vm:ArchivViewModel}">
             <v:ArchivView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:NovinkyViewModel}">
+            <v:NovinkyView />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type vm:ServisViewModel}">
             <v:ServisView />
         </DataTemplate>
@@ -84,6 +87,13 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE80F;" Margin="0,0,14,0" />
                                 <TextBlock Text="Dashboard" />
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeNovinky, Mode=OneWay}"
+                                     Command="{Binding OtvorNovinkyCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE789;" Margin="0,0,14,0" />
+                                <TextBlock Text="Novinky" />
                             </StackPanel>
                         </RadioButton>
                         <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeOsnovy, Mode=OneWay}"

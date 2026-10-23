@@ -113,6 +113,15 @@ public static class CitatyService
         Databaza.Zapis(KlucSkryte, string.Join(",", skryte.Order()));
     }
 
+    public static void Odkry(int id)
+    {
+        var skryte = SkryteVlastne();
+        if (skryte.Remove(id))
+        {
+            Databaza.Zapis(KlucSkryte, skryte.Count == 0 ? null : string.Join(",", skryte.Order()));
+        }
+    }
+
     public static void ObnovSkryte() => Databaza.Zapis(KlucSkryte, null);
 
     public static int PocetSkrytychVlastnych => SkryteVlastne().Count;
