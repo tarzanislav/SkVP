@@ -263,19 +263,25 @@ public sealed partial class ZalohaService
         }
 
         var cisloOblasti = 0;
-        foreach (var oblast in sluzba.Oblasti())
+        // zálohujú sa aj vypnuté úvodné a záverečné časti učebných osnov (nič sa nestratí)
+        foreach (var oblast in CastiOsnov.SkupinyVPoradi(sluzba, ajVypnute: true))
         {
-            cisloOblasti++;
-            var farba = oblast.Farba ?? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1);
-            var priecinok = ImportOsnov.BezpecnyNazov($"{cisloOblasti:00} {oblast.Nazov}");
-            if (dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
+            var jeOblast = oblast.Typ == TypObjektu.Oblast;
+            if (jeOblast)
+            {
+                cisloOblasti++;
+            }
+
+            var farba = oblast.Farba ?? (jeOblast ? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1) : CastiOsnov.Farba(oblast.Typ));
+            var priecinok = ImportOsnov.BezpecnyNazov(jeOblast ? $"{cisloOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ));
+            if (jeOblast && dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
             {
                 Pridaj($"{priecinok}/00 Charakteristika – {ImportOsnov.BezpecnyNazov(oblast.Nazov)}.docx", charakteristika,
                     () => PdfDokumentu(charakteristika, udaje, titul, oblast.Nazov, farba, null, 0, StavOsnovy.Rozpracovana));
             }
 
             var cislo = 0;
-            foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            foreach (var predmet in CastiOsnov.Dokumenty(sluzba, oblast))
             {
                 cislo++;
                 var c = cislo.ToString("00", CultureInfo.InvariantCulture);

@@ -430,7 +430,7 @@ public static class TestovaciaSada
             DELETE FROM dokument;
             DELETE FROM vazba;
             DELETE FROM objekt;
-            DELETE FROM nastavenie WHERE kluc = $k;
+            DELETE FROM nastavenie WHERE kluc = $k OR kluc LIKE 'osnovy.%';
             """, ("$k", KlucNainstalovana));
         transakcia.Commit();
         using var dbVacuum = Databaza.Otvor();

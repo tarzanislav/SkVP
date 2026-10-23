@@ -217,12 +217,13 @@ public sealed partial class ArchivViewModel : ObservableObject
         {
             if (oblast is null || oblast.Nazov != p.Oblast)
             {
-                oblast = new OblastArchivuVM(p.Oblast, p.Farba ?? UcebnyPlanService.FarbaOblasti(p.PoradieOblasti - 1),
-                    p.JePredmet ? null : p);
+                oblast = new OblastArchivuVM(p.Oblast,
+                    p.Farba ?? (p.JeCast ? CastiOsnov.Farba(p.PoradieOblasti == 0 ? TypObjektu.Uvod : TypObjektu.Zaver) : UcebnyPlanService.FarbaOblasti(p.PoradieOblasti - 1)),
+                    p.Typ == "charakteristika" ? p : null);
                 _vsetkyOblasti.Add(oblast);
             }
 
-            if (p.JePredmet)
+            if (p.JeDokumentOsnov)
             {
                 var id = p.ObjektId ?? 0;
                 oblast.Predmety.Add(new PolozkaArchivuVM(p, oblast, Porovnanie?.Nove.Contains(id) == true, Porovnanie?.Zmenene.Contains(id) == true));
@@ -308,11 +309,11 @@ public sealed partial class ArchivViewModel : ObservableObject
             return null;
         }
 
-        var nazov = polozka.JePredmet
+        var nazov = polozka.JeDokumentOsnov
             ? InfoOsnovyService.NazovDokumentu(polozka.CisloText, polozka.Nazov, polozka.RokOsnovy)
             : $"Charakteristika – {polozka.Oblast}";
         return new ArchivnaOsnovaWindow(data, nazov, Vybrany.SkolskyRok, polozka.Oblast, farba,
-            string.Join("  •  ", new[] { polozka.JePredmet ? StavyOsnovy.Text(polozka.Stav) : null, polozka.Profilacie is { Length: > 0 } p ? $"Profilácie: {p}" : null,
+            string.Join("  •  ", new[] { polozka.JeDokumentOsnov ? StavyOsnovy.Text(polozka.Stav) : null, polozka.Profilacie is { Length: > 0 } p ? $"Profilácie: {p}" : null,
                 polozka.Platnost is { Length: > 0 } pl ? $"Platnosť: {pl}" : null }.Where(t => t is not null)))
         {
             Owner = Dialogy.Vlastnik,

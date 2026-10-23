@@ -367,6 +367,7 @@ public static partial class ImportStruktury
         var zname = SvpGymnazia.Oblasti.Select(o => o.Nazov)
             .Concat(UcebnyPlanService.Vstavany().Oblasti.Select(o => o.Nazov))
             .Concat(new ObjektService().Oblasti().Select(o => o.Nazov))
+            .Concat(new[] { CastiOsnov.NazovUvod, CastiOsnov.NazovZaver, "Úvodné časti", "Záverečné časti" })
             .Distinct().OrderByDescending(n => n.Length).ToList();
         var normalizovany = Regex.Replace(text.Replace("\r", ""), @"\b(dvojbodka|dvojbodku)\b", ":", RegexOptions.IgnoreCase);
         normalizovany = Regex.Replace(normalizovany, @"\b(čiarka|čiarku)\b", ",", RegexOptions.IgnoreCase);

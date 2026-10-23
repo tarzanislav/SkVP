@@ -38,6 +38,30 @@
         <DataTemplate DataType="{x:Type vm:ServisViewModel}">
             <v:ServisView />
         </DataTemplate>
+        <!-- vzdelávacia oblasť (aj úvodné a záverečné časti) ako farebná záložka v ľavom paneli -->
+        <DataTemplate x:Key="PolozkaOblasti" DataType="{x:Type vm:OblastVM}">
+                                    <Button x:Name="Polozka" Style="{StaticResource RiadokTlacidlo}" Padding="10,7,10,7" Margin="14,1,0,1"
+                                            Command="{Binding DataContext.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                            CommandParameter="{Binding}" AllowDrop="True" Tag="{Binding}"
+                                            Drop="Oblast_Drop" DragOver="Oblast_DragOver" ToolTip="{Binding HotoveText}">
+                                        <DockPanel>
+                                            <Border x:Name="Pruh" DockPanel.Dock="Left" Width="4" Height="18" CornerRadius="2" Margin="0,0,11,0"
+                                                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Pocet}" FontSize="12" Margin="8,0,0,0"
+                                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="Nazov" Text="{Binding Nazov}" FontSize="13.5" TextTrimming="CharacterEllipsis"
+                                                       VerticalAlignment="Center" />
+                                        </DockPanel>
+                                    </Button>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding JeVybrana}" Value="True">
+                                            <Setter TargetName="Polozka" Property="Background"
+                                                    Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}" />
+                                            <Setter TargetName="Nazov" Property="FontWeight" Value="SemiBold" />
+                                            <Setter TargetName="Pruh" Property="Height" Value="22" />
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
     </Window.Resources>
 
     <Grid>
@@ -109,33 +133,14 @@
                         </RadioButton>
 
                         <!-- vzdelávacie oblasti ako farebné záložky -->
-                        <ItemsControl x:Name="ZoznamOblasti" ItemsSource="{Binding Oblasti}" Margin="0,2,0,6" Focusable="False">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type vm:OblastVM}">
-                                    <Button x:Name="Polozka" Style="{StaticResource RiadokTlacidlo}" Padding="10,7,10,7" Margin="14,1,0,1"
-                                            Command="{Binding DataContext.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                            CommandParameter="{Binding}" AllowDrop="True" Tag="{Binding}"
-                                            Drop="Oblast_Drop" DragOver="Oblast_DragOver" ToolTip="{Binding HotoveText}">
-                                        <DockPanel>
-                                            <Border x:Name="Pruh" DockPanel.Dock="Left" Width="4" Height="18" CornerRadius="2" Margin="0,0,11,0"
-                                                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
-                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Pocet}" FontSize="12" Margin="8,0,0,0"
-                                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
-                                            <TextBlock x:Name="Nazov" Text="{Binding Nazov}" FontSize="13.5" TextTrimming="CharacterEllipsis"
-                                                       VerticalAlignment="Center" />
-                                        </DockPanel>
-                                    </Button>
-                                    <DataTemplate.Triggers>
-                                        <DataTrigger Binding="{Binding JeVybrana}" Value="True">
-                                            <Setter TargetName="Polozka" Property="Background"
-                                                    Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}" />
-                                            <Setter TargetName="Nazov" Property="FontWeight" Value="SemiBold" />
-                                            <Setter TargetName="Pruh" Property="Height" Value="22" />
-                                        </DataTrigger>
-                                    </DataTemplate.Triggers>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <!-- úvodné časti učebných osnov (len zapnuté) -->
+                        <ContentControl Content="{Binding UvodneCasti}" ContentTemplate="{StaticResource PolozkaOblasti}" Focusable="False" Margin="0,2,0,0"
+                                        Visibility="{Binding UvodneCasti.Aktivna, Converter={StaticResource BoolNaViditelnost}, FallbackValue=Collapsed}" />
+                        <ItemsControl x:Name="ZoznamOblasti" ItemsSource="{Binding Oblasti}" Margin="0,2,0,6" Focusable="False"
+                                      ItemTemplate="{StaticResource PolozkaOblasti}" />
+                        <!-- záverečné časti učebných osnov (len zapnuté) -->
+                        <ContentControl Content="{Binding ZaverecneCasti}" ContentTemplate="{StaticResource PolozkaOblasti}" Focusable="False" Margin="0,0,0,6"
+                                        Visibility="{Binding ZaverecneCasti.Aktivna, Converter={StaticResource BoolNaViditelnost}, FallbackValue=Collapsed}" />
 
                         <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeTlac, Mode=OneWay}"
                                      Command="{Binding OtvorTlacCommand}">

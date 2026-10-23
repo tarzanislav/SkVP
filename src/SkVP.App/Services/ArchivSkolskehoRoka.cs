@@ -19,6 +19,12 @@ public sealed record PolozkaArchivuRoka(
     int Dlzka, string? Profilacie, string? Platnost, int? RokOsnovy, string? Uroven, bool ZmenenaVRoku, string? Sha)
 {
     public bool JePredmet => Typ == TypObjektu.Predmet;
+
+    /// <summary>Úvodná alebo záverečná časť učebných osnov.</summary>
+    public bool JeCast => Typ == TypObjektu.Cast;
+
+    /// <summary>Dokument osnov – predmet alebo úvodná/záverečná časť (nie charakteristika oblasti).</summary>
+    public bool JeDokumentOsnov => JePredmet || JeCast;
     public string CisloText => Cislo.ToString("00", CultureInfo.InvariantCulture);
     public bool MaDokument => Sha is not null;
 }
@@ -126,7 +132,7 @@ public static class ArchivSkolskehoRoka
         var predmety = polozky.Where(p => p.JePredmet).ToList();
         string? Uroven(PolozkaArchivuRoka p) => p.Uroven ?? JazykovePravidla.UrovenZNazvu(p.Nazov);
         return new StatistikyArchivu(
-            polozky.Select(p => p.PoradieOblasti).Distinct().Count(), predmety.Count, predmety.Count(p => p.MaDokument),
+            polozky.Where(p => !p.JeCast).Select(p => p.PoradieOblasti).Distinct().Count(), predmety.Count, predmety.Count(p => p.MaDokument),
             predmety.Count(p => p.Stav == StavOsnovy.Hotova), predmety.Count(p => p.Stav == StavOsnovy.NaKontrolu),
             predmety.Count(p => p.Stav == StavOsnovy.Rozpracovana), predmety.Count(p => p.Stav == StavOsnovy.Prazdna),
             predmety.Count(p => p.ZmenenaVRoku), polozky.Sum(p => p.Dlzka),
@@ -223,26 +229,28 @@ public static class ArchivSkolskehoRoka
         var dokumenty = new DokumentService();
         var pocet = 0;
         var cisloOblasti = 0;
-        foreach (var oblast in sluzba.Oblasti())
+        foreach (var oblast in CastiOsnov.SkupinyVPoradi(sluzba))
         {
-            cisloOblasti++;
-            var farba = oblast.Farba ?? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1);
-            if (verzie.TryGetValue(oblast.Id, out var charakteristika))
+            var jeOblast = oblast.Typ == TypObjektu.Oblast;
+            var poradieSkupiny = jeOblast ? ++cisloOblasti : oblast.Typ == TypObjektu.Uvod ? 0 : 99;
+            var farba = oblast.Farba ?? (jeOblast ? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1) : CastiOsnov.Farba(oblast.Typ));
+            var typDokumentu = CastiOsnov.TypDokumentu(oblast.Typ);
+            if (jeOblast && verzie.TryGetValue(oblast.Id, out var charakteristika))
             {
-                Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, cisloOblasti, 0, "Charakteristika vzdelávacej oblasti",
+                Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, poradieSkupiny, 0, "Charakteristika vzdelávacej oblasti",
                     StavOsnovy.Rozpracovana, Dlzka(charakteristika.Data), UdajeOsnovy.Prazdne, InfoOsnovy.Prazdne,
                     ZmenenaVRoku(oblast.Id, od, po), charakteristika.Data);
                 pocet++;
             }
 
             var cislo = 0;
-            foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            foreach (var predmet in CastiOsnov.Dokumenty(sluzba, oblast))
             {
                 cislo++;
                 var info = InfoOsnovyService.Nacitaj(predmet.Id);
                 if (!verzie.TryGetValue(predmet.Id, out var verzia))
                 {
-                    Zapis(archivId, predmet.Id, TypObjektu.Predmet, oblast.Nazov, farba, cisloOblasti, cislo, predmet.Nazov, StavOsnovy.Prazdna, 0,
+                    Zapis(archivId, predmet.Id, typDokumentu, oblast.Nazov, farba, poradieSkupiny, cislo, predmet.Nazov, StavOsnovy.Prazdna, 0,
                         UdajeOsnovy.Prazdne, info, false, null);
                     continue;
                 }
@@ -252,7 +260,7 @@ public static class ArchivSkolskehoRoka
                 var stav = terajsiSha == verzia.Sha
                     ? StavyOsnovy.Urci(predmet.Stav, dlzka)
                     : dlzka > 0 ? StavOsnovy.Rozpracovana : StavOsnovy.Prazdna;
-                Zapis(archivId, predmet.Id, TypObjektu.Predmet, oblast.Nazov, farba, cisloOblasti, cislo, predmet.Nazov, stav, dlzka,
+                Zapis(archivId, predmet.Id, typDokumentu, oblast.Nazov, farba, poradieSkupiny, cislo, predmet.Nazov, stav, dlzka,
                     UvodnaTabulka.Precitaj(verzia.Data), info, ZmenenaVRoku(predmet.Id, od, po), verzia.Data);
                 pocet++;
             }
@@ -357,7 +365,7 @@ public static class ArchivSkolskehoRoka
         r = 2;
         foreach (var skupina in polozky.GroupBy(x => (x.PoradieOblasti, x.Oblast)))
         {
-            var pr = skupina.Where(x => x.JePredmet).ToList();
+            var pr = skupina.Where(x => x.JeDokumentOsnov).ToList();
             o.Cell(r, 1).Value = skupina.Key.Oblast;
             o.Cell(r, 2).Value = pr.Count;
             o.Cell(r, 3).Value = pr.Count(x => x.Stav == StavOsnovy.Hotova);
@@ -379,7 +387,7 @@ public static class ArchivSkolskehoRoka
         }
 
         r = 2;
-        foreach (var x in polozky.Where(x => x.JePredmet))
+        foreach (var x in polozky.Where(x => x.JeDokumentOsnov))
         {
             t.Cell(r, 1).Value = x.Oblast;
             t.Cell(r, 2).Value = x.Cislo;
@@ -435,12 +443,14 @@ public static class ArchivSkolskehoRoka
         var oblasti = new List<KapitolaOblasti>();
         foreach (var skupina in Polozky(archiv.Id).GroupBy(p => (p.PoradieOblasti, p.Oblast)).OrderBy(g => g.Key.PoradieOblasti))
         {
-            var charakteristika = skupina.FirstOrDefault(p => !p.JePredmet);
-            var predmety = skupina.Where(p => p.JePredmet)
+            var charakteristika = skupina.FirstOrDefault(p => p.Typ == "charakteristika");
+            var typ = !skupina.Any(p => p.JeCast) ? TypObjektu.Oblast : skupina.Key.PoradieOblasti == 0 ? TypObjektu.Uvod : TypObjektu.Zaver;
+            var predmety = skupina.Where(p => p.JeDokumentOsnov)
                 .Select(p => new KapitolaPredmetu(p.ObjektId ?? -p.Id, p.Cislo, p.Nazov, p.MaDokument ? Bloky(Data(p.Id)) : new List<Blok>(), p.Stav))
                 .ToList();
-            oblasti.Add(new KapitolaOblasti(charakteristika?.ObjektId ?? 0, skupina.Key.Oblast, skupina.First().Farba ?? UcebnyPlanService.FarbaOblasti(skupina.Key.PoradieOblasti - 1),
-                charakteristika is { MaDokument: true } ? Bloky(Data(charakteristika.Id)) : new List<Blok>(), predmety));
+            var farba = skupina.First().Farba ?? (typ == TypObjektu.Oblast ? UcebnyPlanService.FarbaOblasti(skupina.Key.PoradieOblasti - 1) : CastiOsnov.Farba(typ));
+            oblasti.Add(new KapitolaOblasti(charakteristika?.ObjektId ?? 0, skupina.Key.Oblast, farba,
+                charakteristika is { MaDokument: true } ? Bloky(Data(charakteristika.Id)) : new List<Blok>(), predmety, typ));
         }
 
         var titul = TitulnaStrana.Nacitaj();
@@ -491,24 +501,27 @@ public static class ArchivSkolskehoRoka
         }
 
         var cisloOblasti = 0;
-        foreach (var oblast in sluzba.Oblasti())
+        // úvodné časti (zapnuté), vzdelávacie oblasti, záverečné časti (zapnuté)
+        foreach (var oblast in CastiOsnov.SkupinyVPoradi(sluzba))
         {
-            cisloOblasti++;
-            var farba = oblast.Farba ?? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1);
-            var priecinokOblasti = Path.Combine(ciel, ImportOsnov.BezpecnyNazov($"{cisloOblasti:00} {oblast.Nazov}"));
-            if (dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
+            var jeOblast = oblast.Typ == TypObjektu.Oblast;
+            var poradieSkupiny = jeOblast ? ++cisloOblasti : oblast.Typ == TypObjektu.Uvod ? 0 : 99;
+            var farba = oblast.Farba ?? (jeOblast ? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1) : CastiOsnov.Farba(oblast.Typ));
+            var typDokumentu = CastiOsnov.TypDokumentu(oblast.Typ);
+            var priecinokOblasti = Path.Combine(ciel, ImportOsnov.BezpecnyNazov(jeOblast ? $"{cisloOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ)));
+            if (jeOblast && dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
             {
                 Directory.CreateDirectory(priecinokOblasti);
                 var cestaCharakteristiky = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov($"00 Charakteristika – {oblast.Nazov}") + ".docx");
                 File.WriteAllBytes(cestaCharakteristiky, charakteristika);
                 UlozPdf(cestaCharakteristiky, charakteristika, oblast.Nazov, farba, null, 0, StavOsnovy.Rozpracovana);
                 dokumenty.ArchivujAktualnu(oblast.Id, dovod);
-                Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, cisloOblasti, 0, "Charakteristika vzdelávacej oblasti",
+                Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, poradieSkupiny, 0, "Charakteristika vzdelávacej oblasti",
                     StavOsnovy.Rozpracovana, oblast.DlzkaTextu, UdajeOsnovy.Prazdne, InfoOsnovy.Prazdne, ZmenenaVRoku(oblast.Id, od, po), charakteristika);
             }
 
             var cislo = 0;
-            foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            foreach (var predmet in CastiOsnov.Dokumenty(sluzba, oblast))
             {
                 cislo++;
                 var osnova = dokumenty.NacitajData(predmet.Id);
@@ -524,7 +537,7 @@ public static class ArchivSkolskehoRoka
                     dokumenty.ArchivujAktualnu(predmet.Id, dovod);
                 }
 
-                Zapis(archivId, predmet.Id, TypObjektu.Predmet, oblast.Nazov, farba, cisloOblasti, cislo, predmet.Nazov, stav, predmet.DlzkaTextu,
+                Zapis(archivId, predmet.Id, typDokumentu, oblast.Nazov, farba, poradieSkupiny, cislo, predmet.Nazov, stav, predmet.DlzkaTextu,
                     UvodnaTabulka.Precitaj(osnova), info, ZmenenaVRoku(predmet.Id, od, po), osnova is { Length: > 0 } ? osnova : null);
             }
         }

@@ -76,6 +76,7 @@ internal static class Samotest
             TestZaloh();
             TestNoviniek();
             TestDashboarduDna();
+            TestCastiOsnov();
             TestObrazoviek(aplikacia);
 
             if (Chyby.Count > 0)
@@ -1585,6 +1586,102 @@ internal static class Samotest
         return json;
     }
 
+    /// <summary>Úvodné a záverečné časti učebných osnov: zapnutie, časti, tlač, export, import, zálohy, archív, servis, nastavenia.</summary>
+    private static void TestCastiOsnov()
+    {
+        var model = new MainViewModel();
+        var uvod = model.UvodneCasti!;
+        var zaver = model.ZaverecneCasti!;
+        Over(uvod.Typ == TypObjektu.Uvod && zaver.Typ == TypObjektu.Zaver && !uvod.Aktivna && !zaver.Aktivna
+             && uvod.Nazov == CastiOsnov.NazovUvod && zaver.Nazov == CastiOsnov.NazovZaver && uvod.NazovBloku == "ÚVODNÉ ČASTI UČEBNÝCH OSNOV",
+            "úvodné a záverečné časti učebných osnov: skupiny existujú a sú predvolene vypnuté");
+        model.OtvorOblast(uvod);
+        Over(model.Stranka is not OblastViewModel { Oblast.JeUvod: true }, "vypnuté úvodné časti sa nedajú otvoriť");
+
+        model.NastavAktivnuSkupinu(uvod, true);
+        zaver.Aktivna = true;
+        Over(CastiOsnov.JeAktivna(TypObjektu.Uvod) && CastiOsnov.JeAktivna(TypObjektu.Zaver), "zapnutie skupín posuvníkom sa zapamätá");
+        model.OtvorOblast(uvod);
+        Over(model.Stranka is OblastViewModel { JeOblast: false, TextPridat: "Pridať úvodnú časť" }, "do zapnutých úvodných častí sa dá vojsť");
+        var c1 = model.PridajPredmet(uvod, "Úvod do učebných osnov")!;
+        var c2 = model.PridajPredmet(uvod, "Prierezové témy")!;
+        var z1 = model.PridajPredmet(zaver, "Hodnotenie žiakov")!;
+        var sluzba = new ObjektService();
+        Over(sluzba.Nacitaj(c1.Id)!.Typ == TypObjektu.Cast && uvod.Pocet == 2 && uvod.PocetText == "2 úvodné časti" && zaver.PocetText == "1 záverečná časť",
+            "pridanie úvodných a záverečných častí (dokumenty ako pri predmetoch)");
+        var dokumenty = new DokumentService();
+        dokumenty.UlozBloky(c1.Id, new List<Blok> { new Nadpis(1, "Úvod do učebných osnov"), new Odsek(new[] { new Usek("Všeobecné ciele pre všetky predmety.") }) }, "test");
+        dokumenty.UlozBloky(z1.Id, new List<Blok> { new Odsek(new[] { new Usek("Hodnotenie podľa metodického pokynu.") }) }, "test");
+        model.NacitajOblasti();
+        uvod = model.UvodneCasti!;
+        zaver = model.ZaverecneCasti!;
+        Over(model.NajdiPredmet(c1.Id)?.Oblast == uvod && model.PocetPredmetov == model.Oblasti.Sum(o => o.Pocet),
+            "časti sa nájdu ako predmety, do počtu predmetov sa nerátajú");
+
+        // predmet sa nedá presunúť medzi časti a naopak
+        var predmet = model.Oblasti[0].Predmety[0];
+        model.PresunPredmet(predmet, uvod, 0);
+        model.PresunPredmet(model.NajdiPredmet(c2.Id)!, model.Oblasti[0], 0);
+        Over(predmet.Oblast == model.Oblasti[0] && model.NajdiPredmet(c2.Id)!.Oblast == uvod, "predmety a časti sa medzi sebou nepresúvajú");
+
+        // tlač a zostavy: úvodné časti na začiatku, záverečné na konci
+        var celok = ZostavaOsnov.Zostav(new VolbyZostavy());
+        Over(celok.Oblasti[0].Typ == TypObjektu.Uvod && celok.Oblasti[0].Predmety.Count == 2 && celok.Oblasti[^1].Typ == TypObjektu.Zaver
+             && celok.Oblasti[0].Charakteristika.Count == 0 && celok.PocetPredmetov == model.PocetPredmetov,
+            "zostava: úvodné časti pred oblasťami, záverečné za nimi, počet predmetov bez častí");
+        var pdf = PdfVystup.Vytvor(celok);
+        var docx = DocxVystup.Data(celok);
+        Over(pdf is not null && docx.Length > 0, "zostava s časťami do PDF aj Wordu");
+        var tlac = new TlacViewModel(model, null);
+        Over(tlac.Oblasti.First().Oblast == uvod && tlac.Oblasti.Last().Oblast == zaver, "Tlač a zostavy: voľba úvodných a záverečných častí");
+
+        // export každého dokumentu zvlášť do priečinkov 00 … a 99 …
+        var priecinok = Path.Combine(Databaza.Priecinok, "export_casti");
+        var subory = ExportOsnov.UlozJednotlivo(new VolbyZostavy { Oblasti = new[] { uvod.Id, zaver.Id } }, FormatExportu.Word, priecinok);
+        Over(subory.Count == 3 && subory.Count(f => f.Contains("00 " + CastiOsnov.NazovUvod)) == 2 && subory.Any(f => f.Contains("99 " + CastiOsnov.NazovZaver)),
+            "export: úvodné časti do „00 Úvodné časti…“, záverečné do „99 Záverečné časti…“");
+        Over(new ExportOsnovViewModel(model).Oblasti.Any(o => o.Oblast == uvod), "okno exportu ponúka úvodné časti");
+
+        // oblasti a predmety (JSON) – časti sa prenesú a pri importe zaradia do svojich skupín
+        var plan = StrukturaOsnov.Aktualna();
+        Over(plan.Oblasti[0].Nazov == CastiOsnov.NazovUvod && plan.Oblasti[0].Predmety.SequenceEqual(new[] { "Úvod do učebných osnov", "Prierezové témy" })
+             && plan.Oblasti[^1].Nazov == CastiOsnov.NazovZaver, "export oblastí a predmetov obsahuje úvodné a záverečné časti");
+        var json = Path.Combine(Databaza.Priecinok, "casti.json");
+        ImportStruktury.UlozJson(plan, json);
+        var nacitany = ImportStruktury.ZTextovehoSuboru(json)!;
+        nacitany.Oblasti[0].Predmety.Add("Kľúčové kompetencie");
+        var vysledok = UcebnyPlanService.Vytvor(nacitany, nahradit: false);
+        Over(vysledok.NoveOblasti == 0 && vysledok.NovePredmety == 1
+             && CastiOsnov.Dokumenty(sluzba, CastiOsnov.Skupina(sluzba, TypObjektu.Uvod)).Any(p => p.Nazov == "Kľúčové kompetencie"),
+            "import oblastí a predmetov: úvodné časti sa doplnia do svojej skupiny (nevznikne nová oblasť)");
+        var diktat = ImportStruktury.ZDiktovania("Úvodné časti: ciele, kľúčové kompetencie.");
+        Over(CastiOsnov.TypPodlaNazvu(diktat.Oblasti[0].Nazov) == TypObjektu.Uvod, "diktovanie rozpozná úvodné časti");
+        model.NacitajOblasti();
+
+        // import osnov: súbor v priečinku „00 Úvodné časti…“ sa navrhne ako nová úvodná časť
+        Over(ImportOsnov.Predmety().Any(p => p.Id == c1.Id), "import osnov pozná úvodné časti (zapnuté)");
+
+        // zálohy, servis, nastavenia
+        var zip = ZalohaService.ZalohujOsnovy(Path.Combine(Databaza.Priecinok, "zaloha_casti.zip"));
+        using (var archiv = System.IO.Compression.ZipFile.OpenRead(zip))
+        {
+            Over(archiv.Entries.Any(e => e.FullName.StartsWith("00 " + CastiOsnov.NazovUvod, StringComparison.Ordinal) && e.FullName.EndsWith(".docx", StringComparison.Ordinal))
+                 && archiv.Entries.Any(e => e.FullName.StartsWith("99 " + CastiOsnov.NazovZaver, StringComparison.Ordinal)),
+                "záloha učebných osnov obsahuje úvodné a záverečné časti");
+        }
+
+        Over(string.Join("\n", DiagnostikaService.KontrolaDat().Riadky).Contains(CastiOsnov.NazovUvod + ": 3 úvodné časti (zapnuté)."), "servis: kontrola dát uvádza úvodné časti");
+        Over(NastaveniaProgramu.Skupina(CastiOsnov.KlucUvodAktivne) == NastaveniaProgramu.SkupinaCasti, "export nastavení programu: zapnutie častí");
+
+        // vypnuté časti sa nikam nezaradia, ale nestratia sa
+        model.NastavAktivnuSkupinu(model.UvodneCasti!, false);
+        model.NastavAktivnuSkupinu(model.ZaverecneCasti!, false);
+        var bezCasti = ZostavaOsnov.Zostav(new VolbyZostavy());
+        Over(bezCasti.Oblasti.All(o => o.JeOblast) && !ImportOsnov.Predmety().Any(p => p.Id == c1.Id) && model.UvodneCasti!.Pocet == 3,
+            "vypnuté úvodné a záverečné časti sa do tlače a importu nezaradia, ich dokumenty zostanú");
+        Krok("úvodné a záverečné časti učebných osnov v poriadku");
+    }
+
     private static void TestObrazoviek(App aplikacia)
     {
         var okno = new MainWindow { Width = 1440, Height = 900, WindowStartupLocation = WindowStartupLocation.Manual, Left = 0, Top = 0 };
@@ -1617,6 +1714,24 @@ internal static class Samotest
         model.OtvorOsnovy();
         Pumpuj();
         Snimka(okno, "02_osnovy");
+
+        // úvodné a záverečné časti učebných osnov – zapnuté (blok nad a pod oblasťami), vnútri úvodných častí
+        model.NastavAktivnuSkupinu(model.UvodneCasti!, true);
+        model.NastavAktivnuSkupinu(model.ZaverecneCasti!, true);
+        model.OtvorOsnovy();
+        Pumpuj();
+        SnimkyStranky(okno, "02b_osnovy_casti", 3);
+        model.OtvorOblast(model.UvodneCasti);
+        Pumpuj();
+        Snimka(okno, "02c_uvodne_casti");
+        model.OtvorPredmet(model.UvodneCasti!.Predmety[0]);
+        Pumpuj();
+        Snimka(okno, "02d_uvodna_cast");
+        model.NastavAktivnuSkupinu(model.UvodneCasti!, false);
+        model.NastavAktivnuSkupinu(model.ZaverecneCasti!, false);
+        model.OtvorOsnovy();
+        Pumpuj();
+        Snimka(okno, "02e_osnovy_casti_vypnute");
 
         var jazyk = model.Oblasti[0];
         model.OtvorOblast(jazyk);

@@ -165,9 +165,52 @@ public sealed partial class MainViewModel : ObservableObject
 
     // ---- načítanie ----
 
+    /// <summary>Úvodné časti učebných osnov (skupina pred oblasťami).</summary>
+    [ObservableProperty]
+    private OblastVM? _uvodneCasti;
+
+    /// <summary>Záverečné časti učebných osnov (skupina za oblasťami).</summary>
+    [ObservableProperty]
+    private OblastVM? _zaverecneCasti;
+
+    /// <summary>Všetky skupiny v poradí dokumentu: úvodné časti, oblasti, záverečné časti (aj vypnuté).</summary>
+    public IEnumerable<OblastVM> VsetkySkupiny =>
+        new[] { UvodneCasti }.Concat(Oblasti).Append(ZaverecneCasti).OfType<OblastVM>();
+
+    private OblastVM NacitajSkupinu(string typ)
+    {
+        var objekt = CastiOsnov.Skupina(_sluzba, typ);
+        var skupina = new OblastVM(objekt, 0);
+        foreach (var cast in _sluzba.Deti(objekt.Id).Where(p => p.Typ == TypObjektu.Cast))
+        {
+            skupina.Predmety.Add(new PredmetVM(cast, skupina));
+        }
+
+        skupina.Obnov();
+        return skupina;
+    }
+
+    /// <summary>Zapne alebo vypne úvodné/záverečné časti učebných osnov (prepínač v sekcii Osnovy).</summary>
+    public void NastavAktivnuSkupinu(OblastVM skupina, bool aktivna)
+    {
+        if (skupina.JeOblast)
+        {
+            return;
+        }
+
+        skupina.Aktivna = aktivna;
+        Oznam(aktivna
+            ? $"{skupina.Nazov} sú zapnuté – zaradia sa do tlače, exportu, archívu a záloh."
+            : $"{skupina.Nazov} sú vypnuté – dokumenty zostávajú uložené, do tlače a exportu sa nezaradia.");
+    }
+
     public void NacitajOblasti()
     {
-        var vybrana = Oblasti.FirstOrDefault(o => o.JeVybrana)?.Id;
+        var vybrana = VsetkySkupiny.FirstOrDefault(o => o.JeVybrana)?.Id;
+        UvodneCasti = NacitajSkupinu(TypObjektu.Uvod);
+        ZaverecneCasti = NacitajSkupinu(TypObjektu.Zaver);
+        UvodneCasti.JeVybrana = UvodneCasti.Id == vybrana;
+        ZaverecneCasti.JeVybrana = ZaverecneCasti.Id == vybrana;
         Oblasti.Clear();
         var index = 0;
         foreach (var objekt in _sluzba.Oblasti())
@@ -193,9 +236,9 @@ public sealed partial class MainViewModel : ObservableObject
         NazovProgramu = udaje.NazovProgramu;
     }
 
-    public OblastVM? NajdiOblast(long id) => Oblasti.FirstOrDefault(o => o.Id == id);
+    public OblastVM? NajdiOblast(long id) => VsetkySkupiny.FirstOrDefault(o => o.Id == id);
 
-    public PredmetVM? NajdiPredmet(long id) => Oblasti.SelectMany(o => o.Predmety).FirstOrDefault(p => p.Id == id);
+    public PredmetVM? NajdiPredmet(long id) => VsetkySkupiny.SelectMany(o => o.Predmety).FirstOrDefault(p => p.Id == id);
 
     // ---- navigácia ----
 
@@ -203,7 +246,7 @@ public sealed partial class MainViewModel : ObservableObject
     {
         (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
         (Stranka as IDisposable)?.Dispose();
-        foreach (var o in Oblasti)
+        foreach (var o in VsetkySkupiny)
         {
             o.JeVybrana = o == oblast;
         }
@@ -221,6 +264,12 @@ public sealed partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void OtvorOblast(OblastVM? oblast)
     {
+        if (oblast is { Aktivna: false })
+        {
+            Oznam($"{oblast.Nazov} sú vypnuté – zapnite ich prepínačom v sekcii Osnovy.");
+            return;
+        }
+
         if (oblast is not null)
         {
             Prejdi(Sekcie.Osnovy, new OblastViewModel(this, oblast), oblast);
@@ -387,7 +436,7 @@ public sealed partial class MainViewModel : ObservableObject
             return null;
         }
 
-        var objekt = _sluzba.Pridaj(TypObjektu.Predmet, oblast.Id, nazov);
+        var objekt = _sluzba.Pridaj(oblast.JeOblast ? TypObjektu.Predmet : TypObjektu.Cast, oblast.Id, nazov);
         var predmet = new PredmetVM(objekt, oblast);
         oblast.Predmety.Add(predmet);
         oblast.Obnov();
@@ -418,6 +467,15 @@ public sealed partial class MainViewModel : ObservableObject
     public void PresunPredmet(PredmetVM predmet, OblastVM cielova, int pozicia)
     {
         var povodna = predmet.Oblast;
+        if (povodna.JeOblast != cielova.JeOblast || (povodna.JeCastiOsnov && povodna != cielova))
+        {
+            // predmety a úvodné/záverečné časti sa medzi sebou nepresúvajú
+            Oznam(povodna.JeOblast
+                ? "Predmet sa nedá presunúť medzi úvodné alebo záverečné časti učebných osnov."
+                : "Úvodné a záverečné časti učebných osnov sa nedajú presunúť do vzdelávacej oblasti.");
+            return;
+        }
+
         var staryIndex = povodna.Predmety.IndexOf(predmet);
         if (povodna == cielova)
         {

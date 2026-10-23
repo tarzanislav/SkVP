@@ -169,6 +169,32 @@ public sealed class UcebnyPlanService
         var existujuce = sluzba.Oblasti();
         foreach (var oblastPlanu in plan.Oblasti)
         {
+            // „Úvodné časti učebných osnov“ a „Záverečné časti…“ patria do svojich skupín (skupina sa zapne)
+            if (CastiOsnov.TypPodlaNazvu(oblastPlanu.Nazov) is { } typCasti)
+            {
+                var skupina = CastiOsnov.Skupina(sluzba, typCasti);
+                if (oblastPlanu.Predmety.Count > 0)
+                {
+                    CastiOsnov.NastavAktivnu(typCasti, true);
+                }
+
+                var casti = CastiOsnov.Dokumenty(sluzba, skupina).Select(p => p.Nazov).ToHashSet(StringComparer.CurrentCultureIgnoreCase);
+                foreach (var cast in oblastPlanu.Predmety)
+                {
+                    if (casti.Add(cast))
+                    {
+                        sluzba.Pridaj(TypObjektu.Cast, skupina.Id, cast);
+                        novePredmety++;
+                    }
+                    else
+                    {
+                        preskocene++;
+                    }
+                }
+
+                continue;
+            }
+
             var oblast = existujuce.FirstOrDefault(o => string.Equals(o.Nazov, oblastPlanu.Nazov, StringComparison.CurrentCultureIgnoreCase));
             if (oblast is null)
             {

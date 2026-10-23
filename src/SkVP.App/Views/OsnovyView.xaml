@@ -2,6 +2,60 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="clr-namespace:SkVP.ViewModels">
+    <UserControl.Resources>
+        <!-- blok úvodných alebo záverečných častí učebných osnov – cez celú šírku, vypnutý je zosivený -->
+        <DataTemplate x:Key="BlokCasti" DataType="{x:Type vm:OblastVM}">
+            <Grid x:Name="Blok">
+                <Button x:Name="Otvorit" Style="{StaticResource RiadokTlacidlo}" Padding="0" IsEnabled="{Binding Aktivna}"
+                        Command="{Binding DataContext.Hlavny.OtvorOblastCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}" ToolTip="Otvoriť – pridať časti a ich dokumenty">
+                    <Border x:Name="Karta" Style="{StaticResource Karta}" Padding="0">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Left" Width="6" CornerRadius="10,0,0,10"
+                                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                            <StackPanel Margin="22,16,230,18">
+                                <TextBlock Text="{Binding NazovBloku}" FontFamily="{StaticResource PismoNadpisov}" FontSize="19" FontWeight="Bold" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding Charakteristika}" Style="{StaticResource Popis}" FontSize="14" Margin="0,4,0,0" />
+                                <TextBlock Text="{Binding PocetText}" Style="{StaticResource Popis}" FontSize="13" Margin="0,6,0,0" />
+                                <ItemsControl ItemsSource="{Binding Predmety}" Margin="0,8,0,0" Focusable="False"
+                                              Visibility="{Binding Pocet, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type vm:PredmetVM}">
+                                            <Border CornerRadius="9" Padding="8,1,8,2" Margin="0,0,5,5"
+                                                    Background="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=26}">
+                                                <TextBlock Text="{Binding Nazov}" FontSize="12.5" />
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </DockPanel>
+                    </Border>
+                </Button>
+                <!-- posuvník: zapnúť / vypnúť -->
+                <CheckBox Style="{StaticResource Prepinac}" IsChecked="{Binding Aktivna}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                          Margin="0,18,22,0" ToolTip="Zapnuté časti sa zaradia do tlače, exportu, archívu a záloh">
+                    <TextBlock x:Name="StavText" Text="Vypnuté" FontSize="13.5" />
+                </CheckBox>
+            </Grid>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Aktivna}" Value="False">
+                    <Setter TargetName="Karta" Property="Opacity" Value="0.55" />
+                    <Setter TargetName="Karta" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                    <Setter TargetName="Otvorit" Property="ToolTip" Value="Vypnuté – zapnite posuvníkom vpravo" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Aktivna}" Value="True">
+                    <Setter TargetName="StavText" Property="Text" Value="Zapnuté" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </UserControl.Resources>
+
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="44,34,44,40" MaxWidth="1240">
             <TextBlock Text="Osnovy" Style="{StaticResource Nadpis}" />
@@ -16,6 +70,10 @@
                 <TextBlock Style="{StaticResource Popis}" FontSize="14" TextWrapping="Wrap"
                            Text="Vzdelávacie oblasti v poradí, v akom idú v školskom vzdelávacom programe. Otvorte oblasť a uvidíte jej predmety." />
             </DockPanel>
+
+            <!-- úvodné časti učebných osnov – nad oblasťami, oddelené tenkou čiarou -->
+            <ContentControl Content="{Binding UvodneCasti}" ContentTemplate="{StaticResource BlokCasti}" Focusable="False" />
+            <Border Height="1" Margin="0,18,0,18" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
 
             <ItemsControl ItemsSource="{Binding Oblasti}" Focusable="False">
                 <ItemsControl.ItemsPanel>
@@ -96,6 +154,10 @@
                     </DockPanel>
                 </StackPanel>
             </Border>
+
+            <!-- záverečné časti učebných osnov – pod oblasťami, oddelené tenkou čiarou -->
+            <Border Height="1" Margin="0,22,0,18" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
+            <ContentControl Content="{Binding ZaverecneCasti}" ContentTemplate="{StaticResource BlokCasti}" Focusable="False" />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

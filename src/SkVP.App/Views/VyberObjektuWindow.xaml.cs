@@ -20,11 +20,12 @@ public partial class VyberObjektuWindow : Window
     {
         InitializeComponent();
         Druh.ItemsSource = Models.TypVazby.Vsetky.Select(t => new DruhVazby(t.Kod, char.ToUpper(t.Nazov[0], CultureInfo.CurrentCulture) + t.Nazov[1..])).ToList();
-        foreach (var oblast in hlavny.Oblasti)
+        // vzdelávacie oblasti a zapnuté úvodné/záverečné časti učebných osnov
+        foreach (var oblast in hlavny.VsetkySkupiny.Where(o => o.Aktivna))
         {
             if (oblast.Id != vlastneId)
             {
-                _vsetky.Add(new Polozka(oblast.Id, oblast.Nazov, "Vzdelávacia oblasť", oblast.Farba, Normalizuj(oblast.Nazov)));
+                _vsetky.Add(new Polozka(oblast.Id, oblast.Nazov, oblast.NazovDruhu, oblast.Farba, Normalizuj(oblast.Nazov)));
             }
 
             foreach (var predmet in oblast.Predmety.Where(p => p.Id != vlastneId))

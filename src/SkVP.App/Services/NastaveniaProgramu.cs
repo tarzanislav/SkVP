@@ -18,6 +18,8 @@ public static class NastaveniaProgramu
     private static readonly string[] Vynechat =
     {
         "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "Aktualizacie.PoslednaKontrola", "archiv.", "kontrola.",
+        // vyrovnávacie pamäte (stiahnuté údaje) – na inom počítači sa stiahnu znova
+        "novinky.data", "novinky.spravy", "novinky.overenie", "novinky.historia", "pocasie.data",
     };
 
     public sealed class Subor
@@ -90,10 +92,15 @@ public static class NastaveniaProgramu
         _ when kluc.StartsWith("zaloha.", StringComparison.Ordinal) => "zálohovanie (frekvencia, počet, priečinok)",
         _ when kluc.StartsWith("Aktualizacie.", StringComparison.Ordinal) => "aktualizácie",
         _ when kluc.StartsWith("diktovanie.", StringComparison.Ordinal) => "diktovanie (spôsob a model reči)",
+        _ when kluc.StartsWith("osnovy.", StringComparison.Ordinal) => SkupinaCasti,
+        _ when kluc.StartsWith("dashboard.", StringComparison.Ordinal) || kluc.StartsWith("pocasie.", StringComparison.Ordinal)
+               || kluc.StartsWith("citaty.", StringComparison.Ordinal) => "dashboard (bloky, miesto počasia, skryté výroky)",
+        _ when kluc.StartsWith("novinky.", StringComparison.Ordinal) => "Novinky a prázdniny (kraj)",
         _ => "ďalšie nastavenia",
     };
 
     public const string SkupinaLogo = "logo školy";
+    public const string SkupinaCasti = "úvodné a záverečné časti učebných osnov (zapnuté / vypnuté)";
     public const string SkupinaPata = "text dole na úvodnej strane";
 
     /// <summary>Prehľad obsahu súboru nastavení: skupiny v poradí (s logom a textom dole na úvodnej strane).</summary>
@@ -102,7 +109,8 @@ public static class NastaveniaProgramu
         "údaje o organizácii", SkupinaLogo, "školský vzdelávací program (názov, druh školy, platnosť)",
         "úvodná strana, hlavička, päta a údaje o škole v zostavách", SkupinaPata, "voľby tlače a zostáv",
         "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)", "obojstranná tlač", "vzhľad", "jazyk programu",
-        "úprava osnov (Word / editor)", "diktovanie (spôsob a model reči)", "zálohovanie (frekvencia, počet, priečinok)", "aktualizácie",
+        SkupinaCasti, "úprava osnov (Word / editor)", "diktovanie (spôsob a model reči)", "dashboard (bloky, miesto počasia, skryté výroky)",
+        "Novinky a prázdniny (kraj)", "zálohovanie (frekvencia, počet, priečinok)", "aktualizácie",
     };
 
     public static IReadOnlyList<string> Prehlad(Subor subor)

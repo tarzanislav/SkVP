@@ -112,6 +112,7 @@ public sealed partial class NastaveniaViewModel : ObservableObject
             Preklad.Nacitaj();
             App.NastavTemu(Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem));
             Hlavny.NacitajUdaje();
+            Hlavny.NacitajOblasti(); // zapnuté/vypnuté úvodné a záverečné časti učebných osnov
             Hlavny.Oznam($"Nastavenia sú importované ({pocet}).");
             Hlavny.OtvorNastavenia();
         }

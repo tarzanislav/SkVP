@@ -12,11 +12,48 @@ public sealed partial class OblastVM : ObservableObject
     public OblastVM(Objekt objekt, int index)
     {
         Id = objekt.Id;
+        Typ = objekt.Typ;
         _nazov = objekt.Nazov;
-        _farba = objekt.Farba ?? UcebnyPlanService.FarbaOblasti(index);
+        _farba = objekt.Farba ?? (JeOblast ? UcebnyPlanService.FarbaOblasti(index) : CastiOsnov.Farba(Typ));
+        _aktivna = JeOblast || CastiOsnov.JeAktivna(Typ);
     }
 
     public long Id { get; }
+
+    /// <summary>Vzdelávacia oblasť alebo úvodné/záverečné časti učebných osnov.</summary>
+    public string Typ { get; }
+
+    public bool JeOblast => Typ == TypObjektu.Oblast;
+
+    /// <summary>Úvodné alebo záverečné časti učebných osnov.</summary>
+    public bool JeCastiOsnov => !JeOblast;
+
+    public bool JeUvod => Typ == TypObjektu.Uvod;
+
+    /// <summary>Zapnutá skupina (oblasti sú vždy zapnuté; úvodné a záverečné časti sa zapínajú prepínačom).</summary>
+    [ObservableProperty]
+    private bool _aktivna;
+
+    partial void OnAktivnaChanged(bool value)
+    {
+        // zapnutie a vypnutie úvodných/záverečných častí sa pamätá (oblasti sú vždy zapnuté)
+        if (JeCastiOsnov)
+        {
+            CastiOsnov.NastavAktivnu(Typ, value);
+        }
+    }
+
+    /// <summary>Charakteristika úvodných/záverečných častí (pevný text).</summary>
+    public string Charakteristika => JeOblast ? "" : CastiOsnov.Charakteristika(Typ);
+
+    /// <summary>Názov bloku v sekcii Osnovy veľkými písmenami („ÚVODNÉ ČASTI UČEBNÝCH OSNOV“).</summary>
+    public string NazovBloku => Nazov.ToUpper(CultureInfo.GetCultureInfo("sk-SK"));
+
+    /// <summary>„Vzdelávacia oblasť“, „Úvodné časti učebných osnov“.</summary>
+    public string NazovDruhu => TypObjektu.Nazov(Typ);
+
+    /// <summary>Jednotné číslo dokumentu skupiny: „predmet“, „úvodná časť“, „záverečná časť“.</summary>
+    public string NazovDokumentu => JeOblast ? "predmet" : JeUvod ? "úvodná časť" : "záverečná časť";
 
     [ObservableProperty]
     private string _nazov;
@@ -30,13 +67,15 @@ public sealed partial class OblastVM : ObservableObject
     public ObservableCollection<PredmetVM> Predmety { get; } = new();
 
     public int Pocet => Predmety.Count;
-    public string PocetText => PdfVystup.PocetPredmetov(Predmety.Count);
+    public string PocetText => JeOblast ? PdfVystup.PocetPredmetov(Predmety.Count) : CastiOsnov.PocetCasti(Typ, Predmety.Count);
     public int PocetHotovych => Predmety.Count(p => p.Stav == StavOsnovy.Hotova);
     public int PocetNaKontrolu => Predmety.Count(p => p.Stav == StavOsnovy.NaKontrolu);
     public int PocetRozpracovanych => Predmety.Count(p => p.Stav == StavOsnovy.Rozpracovana);
     public int PocetNezacatych => Predmety.Count(p => p.Stav == StavOsnovy.Prazdna);
     public double Podiel => Predmety.Count == 0 ? 0 : (double)PocetHotovych / Predmety.Count;
-    public string HotoveText => Predmety.Count == 0 ? "Bez predmetov" : $"{PocetHotovych} z {Predmety.Count} osnov hotových";
+    public string HotoveText => Predmety.Count == 0
+        ? (JeOblast ? "Bez predmetov" : JeUvod ? "Bez úvodných častí" : "Bez záverečných častí")
+        : JeOblast ? $"{PocetHotovych} z {Predmety.Count} osnov hotových" : $"{PocetHotovych} z {Predmety.Count} hotových";
 
     /// <summary>Prepočíta čísla poradia predmetov a súhrny (po presune, pridaní, zmene stavu).</summary>
     public void Obnov()

@@ -18,6 +18,10 @@ public sealed class ObjektService
         Zoznam($"SELECT {Stlpce} {Z} WHERE o.typ = $t AND o.odstranene IS NULL ORDER BY o.poradie, o.id",
             ("$t", TypObjektu.Oblast));
 
+    /// <summary>Skupiny daného typu (úvodné alebo záverečné časti učebných osnov).</summary>
+    public List<Objekt> Skupiny(string typ) =>
+        Zoznam($"SELECT {Stlpce} {Z} WHERE o.typ = $t AND o.odstranene IS NULL ORDER BY o.poradie, o.id", ("$t", typ));
+
     public List<Objekt> Deti(long rodicId) =>
         Zoznam($"SELECT {Stlpce} {Z} WHERE o.rodic_id = $r AND o.odstranene IS NULL ORDER BY o.poradie, o.id",
             ("$r", rodicId));

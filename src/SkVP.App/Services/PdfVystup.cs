@@ -377,7 +377,7 @@ public static class PdfVystup
                 nazov.Format.Font.Name = PismaDokumentu.Nadpis;
                 nazov.Format.Font.Size = 10;
                 nazov.Format.SpaceAfter = 0;
-                var pocet = nazov.AddFormattedText(PocetPredmetov(oblast.Predmety.Count));
+                var pocet = nazov.AddFormattedText(oblast.PocetText);
                 pocet.Font.Color = Siva;
             }
         }
@@ -581,7 +581,7 @@ public static class PdfVystup
         nadpis.AddBookmark(Zalozka(oblast.Id));
         nadpis.AddText(oblast.Nazov);
 
-        var popis = sekcia.AddParagraph($"Vzdelávacia oblasť  •  {PocetPredmetov(oblast.Predmety.Count)}");
+        var popis = sekcia.AddParagraph($"{TypObjektu.Nazov(oblast.Typ)}  •  {oblast.PocetText}");
         popis.Format.Font.Name = PismaDokumentu.Nadpis;
         popis.Format.Font.Size = 10;
         popis.Format.Font.Color = Siva;

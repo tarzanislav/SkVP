@@ -1,3 +1,4 @@
+using SkVP.Models;
 using System.Globalization;
 using System.IO;
 using DocumentFormat.OpenXml;
@@ -273,7 +274,7 @@ public static class DocxVystup
 
             p.Append(Beh("■   ", farba: Hex(oblast.Farba)));
             p.Append(Beh(oblast.Nazov + "   "));
-            p.Append(Beh(PdfVystup.PocetPredmetov(oblast.Predmety.Count), farba: Siva));
+            p.Append(Beh(oblast.PocetText, farba: Siva));
             telo.Append(p);
         }
 
@@ -318,7 +319,7 @@ public static class DocxVystup
         nadpis.Append(Beh(oblast.Nazov, farba: farba));
         telo.Append(nadpis);
 
-        var popis = Odsek($"Vzdelávacia oblasť  •  {PdfVystup.PocetPredmetov(oblast.Predmety.Count)}", "SkvpPodnadpisOblasti");
+        var popis = Odsek($"{TypObjektu.Nazov(oblast.Typ)}  •  {oblast.PocetText}", "SkvpPodnadpisOblasti");
         popis.ParagraphProperties!.Indentation = new Indentation { Left = "360" };
         telo.Append(popis);
 

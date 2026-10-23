@@ -297,7 +297,8 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
     public ExportOsnovViewModel(MainViewModel hlavny)
     {
         Hlavny = hlavny;
-        foreach (var oblast in hlavny.Oblasti)
+        // zapnuté úvodné časti, oblasti a zapnuté záverečné časti učebných osnov
+        foreach (var oblast in hlavny.VsetkySkupiny.Where(o => o.Aktivna))
         {
             Oblasti.Add(new VolbaOblastiExportu(oblast));
         }

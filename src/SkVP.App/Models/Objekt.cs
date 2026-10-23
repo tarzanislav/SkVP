@@ -6,10 +6,25 @@ public static class TypObjektu
     public const string Oblast = "oblast";
     public const string Predmet = "predmet";
 
+    /// <summary>Úvodné časti učebných osnov – všeobecná skupina pred vzdelávacími oblasťami (jediná).</summary>
+    public const string Uvod = "uvod";
+
+    /// <summary>Záverečné časti učebných osnov – všeobecná skupina za vzdelávacími oblasťami (jediná).</summary>
+    public const string Zaver = "zaver";
+
+    /// <summary>Úvodná alebo záverečná časť učebných osnov (dokument ako osnova predmetu).</summary>
+    public const string Cast = "cast";
+
+    /// <summary>Skupina, ktorá obsahuje dokumenty osnov – oblasť alebo úvodné/záverečné časti.</summary>
+    public static bool JeSkupina(string typ) => typ is Oblast or Uvod or Zaver;
+
     public static string Nazov(string typ) => typ switch
     {
         Oblast => "Vzdelávacia oblasť",
         Predmet => "Predmet",
+        Uvod => "Úvodné časti učebných osnov",
+        Zaver => "Záverečné časti učebných osnov",
+        Cast => "Časť učebných osnov",
         _ => typ,
     };
 }

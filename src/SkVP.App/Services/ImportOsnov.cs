@@ -237,7 +237,8 @@ public static partial class ImportOsnov
     public static List<(long Id, string Nazov)> Predmety()
     {
         var sluzba = new ObjektService();
-        return sluzba.Oblasti().SelectMany(o => sluzba.Deti(o.Id)).Where(p => p.Typ == TypObjektu.Predmet).Select(p => (p.Id, p.Nazov)).ToList();
+        // predmety oblastí a zapnuté úvodné/záverečné časti učebných osnov
+        return CastiOsnov.SkupinyVPoradi(sluzba).SelectMany(o => CastiOsnov.Dokumenty(sluzba, o)).Select(p => (p.Id, p.Nazov)).ToList();
     }
 
     /// <summary>Číslo predmetu v oblasti (01, 02 …).</summary>

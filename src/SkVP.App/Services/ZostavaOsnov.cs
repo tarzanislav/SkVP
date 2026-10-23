@@ -52,7 +52,15 @@ public sealed record KapitolaPredmetu(long Id, int Poradie, string Nazov, List<B
     public string Cislo => Poradie.ToString("00", System.Globalization.CultureInfo.InvariantCulture);
 }
 
-public sealed record KapitolaOblasti(long Id, string Nazov, string Farba, List<Blok> Charakteristika, List<KapitolaPredmetu> Predmety);
+/// <summary>Kapitola dokumentu – vzdelávacia oblasť alebo úvodné/záverečné časti učebných osnov (<see cref="Typ"/>).</summary>
+public sealed record KapitolaOblasti(long Id, string Nazov, string Farba, List<Blok> Charakteristika, List<KapitolaPredmetu> Predmety,
+    string Typ = TypObjektu.Oblast)
+{
+    public bool JeOblast => Typ == TypObjektu.Oblast;
+
+    /// <summary>„9 predmetov“ alebo „3 úvodné časti“.</summary>
+    public string PocetText => JeOblast ? PdfVystup.PocetPredmetov(Predmety.Count) : CastiOsnov.PocetCasti(Typ, Predmety.Count);
+}
 
 /// <summary>Učebné osnovy zostavené do jedného celku – podklad pre náhľad, tlač, PDF a Word.</summary>
 public sealed record CelyDokument(UdajeSkVP Udaje, VolbyZostavy Volby, List<KapitolaOblasti> Oblasti, DateTime Vytvorene)
@@ -62,7 +70,7 @@ public sealed record CelyDokument(UdajeSkVP Udaje, VolbyZostavy Volby, List<Kapi
 
     public const string Podtitul = "Učebné osnovy";
 
-    public int PocetPredmetov => Oblasti.Sum(o => o.Predmety.Count);
+    public int PocetPredmetov => Oblasti.Where(o => o.JeOblast).Sum(o => o.Predmety.Count);
 }
 
 public static class ZostavaOsnov
@@ -74,9 +82,13 @@ public static class ZostavaOsnov
         var dokumenty = new DokumentService();
         var oblasti = new List<KapitolaOblasti>();
         var index = 0;
-        foreach (var oblast in sluzba.Oblasti())
+        // úvodné časti (ak sú zapnuté), vzdelávacie oblasti, záverečné časti (ak sú zapnuté)
+        foreach (var oblast in CastiOsnov.SkupinyVPoradi(sluzba))
         {
-            index++;
+            if (oblast.Typ == TypObjektu.Oblast)
+            {
+                index++;
+            }
             if (volby.Oblasti is not null && !volby.Oblasti.Contains(oblast.Id))
             {
                 continue;
@@ -84,7 +96,7 @@ public static class ZostavaOsnov
 
             var predmety = new List<KapitolaPredmetu>();
             var poradie = 0;
-            foreach (var predmet in sluzba.Deti(oblast.Id).Where(p => p.Typ == TypObjektu.Predmet))
+            foreach (var predmet in CastiOsnov.Dokumenty(sluzba, oblast))
             {
                 poradie++;
                 if (volby.Predmety is not null && !volby.Predmety.Contains(predmet.Id))
@@ -104,6 +116,17 @@ public static class ZostavaOsnov
             if (volby.Predmety is not null && predmety.Count == 0)
             {
                 continue; // z oblasti nie je vybraný žiadny predmet
+            }
+
+            if (oblast.Typ != TypObjektu.Oblast)
+            {
+                // úvodné a záverečné časti nemajú charakteristiku; bez častí sa do dokumentu nezaradia
+                if (predmety.Count > 0)
+                {
+                    oblasti.Add(new KapitolaOblasti(oblast.Id, oblast.Nazov, oblast.Farba ?? CastiOsnov.Farba(oblast.Typ), new List<Blok>(), predmety, oblast.Typ));
+                }
+
+                continue;
             }
 
             var charakteristika = volby.CharakteristikyOblasti ? NacitajBloky(dokumenty, oblast.Id) : new List<Blok>();

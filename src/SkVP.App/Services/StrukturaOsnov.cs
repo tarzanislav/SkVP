@@ -190,10 +190,11 @@ public static class StrukturaOsnov
         {
             Nazov = "Vzdelávacie oblasti a predmety",
             Typ = Databaza.Citaj(UcebnyPlanService.KlucTypSkoly),
-            Oblasti = sluzba.Oblasti().Select(o => new OblastPlanu
+            // zapnuté úvodné časti, oblasti a zapnuté záverečné časti učebných osnov
+            Oblasti = CastiOsnov.SkupinyVPoradi(sluzba).Select(o => new OblastPlanu
             {
                 Nazov = o.Nazov,
-                Predmety = sluzba.Deti(o.Id).Where(p => p.Typ == TypObjektu.Predmet).Select(p => p.Nazov).ToList(),
+                Predmety = CastiOsnov.Dokumenty(sluzba, o).Select(p => p.Nazov).ToList(),
             }).ToList(),
         };
     }
@@ -307,12 +308,16 @@ public static class StrukturaOsnov
         podnadpis.Format.SpaceAfter = Unit.FromPoint(16);
 
         var sluzba = new ObjektService();
-        var farby = sluzba.Oblasti().ToDictionary(o => o.Nazov, o => o.Farba ?? "#3B5BDB");
+        var farby = sluzba.Oblasti().GroupBy(o => o.Nazov).ToDictionary(g => g.Key, g => g.First().Farba ?? "#3B5BDB");
         var index = 0;
         foreach (var oblast in plan.Oblasti)
         {
-            var farba = farby.TryGetValue(oblast.Nazov, out var f) ? f : UcebnyPlanService.FarbaOblasti(index);
-            index++;
+            var typCasti = CastiOsnov.TypPodlaNazvu(oblast.Nazov);
+            var farba = typCasti is not null ? CastiOsnov.Farba(typCasti) : farby.TryGetValue(oblast.Nazov, out var f) ? f : UcebnyPlanService.FarbaOblasti(index);
+            if (typCasti is null)
+            {
+                index++;
+            }
             var p = sekcia.AddParagraph();
             p.Format.SpaceBefore = Unit.FromPoint(10);
             p.Format.SpaceAfter = Unit.FromPoint(3);

@@ -115,7 +115,8 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
         _predmetId = predmetId;
         _predmety = ImportOsnov.Predmety();
         Ciele.Add(NovyPredmet);
-        foreach (var oblast in hlavny.Oblasti)
+        // predmety oblastí a zapnuté úvodné/záverečné časti učebných osnov
+        foreach (var oblast in hlavny.VsetkySkupiny.Where(o => o.Aktivna))
         {
             foreach (var predmet in oblast.Predmety)
             {
@@ -132,7 +133,8 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
 
     public ObservableCollection<CielImportu> Ciele { get; } = new();
 
-    public ObservableCollection<OblastVM> Oblasti => Hlavny.Oblasti;
+    /// <summary>Kam pridať nový dokument: vzdelávacie oblasti a úvodné/záverečné časti učebných osnov.</summary>
+    public IReadOnlyList<OblastVM> Oblasti => Hlavny.VsetkySkupiny.ToList();
 
     public ObservableCollection<PolozkaImportu> Polozky { get; } = new();
 
@@ -219,6 +221,18 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
         // oblasť nového predmetu: podpriečinok s názvom oblasti („03 Človek a príroda“), jazykový predmet do oblasti
         // Jazyk a komunikácia, ostatné podľa učebného plánu, ŠVP a kľúčových slov
         var priecinokOblasti = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(polozka.Cesta) ?? "");
+
+        // podpriečinok „00 Úvodné časti učebných osnov“ alebo „99 Záverečné časti…“ – nová časť do tejto skupiny
+        if (CastiOsnov.TypPodlaNazvu(priecinokOblasti) is { } typCasti && polozka.Ciel == NovyPredmet)
+        {
+            polozka.NovaOblast = typCasti == Models.TypObjektu.Uvod ? Hlavny.UvodneCasti : Hlavny.ZaverecneCasti;
+            polozka.CudziJazyk = false;
+            polozka.Uroven = "";
+            polozka.NovyNazov = subor.NavrhNazvu;
+            polozka.Nastavuje = false;
+            return;
+        }
+
         var oblastZPriecinka = Hlavny.Oblasti.FirstOrDefault(o => ImportOsnov.Kluc(ImportOsnov.CistyNazov(priecinokOblasti)) == ImportOsnov.Kluc(o.Nazov))?.Nazov;
         var oblastPredmetu = oblastZPriecinka
                              ?? (subor.Jazyk is not null ? JazykovePravidla.Oblast : SvpGymnazia.OblastPredmetu(polozka.NovyNazov));
@@ -343,6 +357,12 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                 long id;
                 if (p.JeNovy)
                 {
+                    if (p.NovaOblast is { Aktivna: false } vypnuta)
+                    {
+                        // import do úvodných/záverečných častí ich zapne
+                        Hlavny.NastavAktivnuSkupinu(vypnuta, true);
+                    }
+
                     var novy = Hlavny.PridajPredmet(p.NovaOblast!, p.NovyNazov.Trim())
                                ?? throw new SkvpException("Nový predmet sa nepodarilo pridať.");
                     id = novy.Id;

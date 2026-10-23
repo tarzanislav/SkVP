@@ -88,6 +88,8 @@ public static class DiagnostikaService
         ("verzie v archíve bez predmetu", "SELECT count(*) FROM verzia WHERE objekt_id NOT IN (SELECT id FROM objekt)"),
         ("súvislosti na neexistujúci predmet", "SELECT count(*) FROM vazba WHERE z_id NOT IN (SELECT id FROM objekt) OR do_id NOT IN (SELECT id FROM objekt)"),
         ("osnovy archívu roka bez archívu", "SELECT count(*) FROM archiv_polozka WHERE archiv_id NOT IN (SELECT id FROM archiv_rok)"),
+        ("úvodné a záverečné časti bez svojej skupiny",
+            "SELECT count(*) FROM objekt WHERE typ = 'cast' AND (rodic_id IS NULL OR rodic_id NOT IN (SELECT id FROM objekt WHERE typ IN ('uvod', 'zaver')))"),
     };
 
     /// <summary>Zmaže záznamy bez nadradeného záznamu (chybné väzby). Vráti počet zmazaných.</summary>
@@ -117,6 +119,23 @@ public static class DiagnostikaService
             spolu += Databaza.Vykonaj(db, "UPDATE objekt SET rodic_id = $o WHERE typ = 'predmet' AND (rodic_id IS NULL OR rodic_id NOT IN (SELECT id FROM objekt))", ("$o", oblast));
         }
 
+        // úvodné a záverečné časti bez skupiny sa nemažú – zaradia sa medzi úvodné časti učebných osnov
+        var castiBezSkupiny = Pocet(db, Siroty[^1].Pocet);
+        if (castiBezSkupiny > 0)
+        {
+            var uvod = Databaza.Skalar(db, "SELECT id FROM objekt WHERE typ = 'uvod' AND odstranene IS NULL LIMIT 1") as long?;
+            if (uvod is null)
+            {
+                Databaza.Vykonaj(db, "INSERT INTO objekt(typ, rodic_id, poradie, nazov, farba, vytvorene, upravene) VALUES('uvod', NULL, 0, $n, $f, $t, $t)",
+                    ("$n", CastiOsnov.NazovUvod), ("$f", CastiOsnov.FarbaUvod), ("$t", Databaza.Teraz()));
+                uvod = Convert.ToInt64(Databaza.Skalar(db, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
+            }
+
+            spolu += Databaza.Vykonaj(db,
+                "UPDATE objekt SET rodic_id = $u WHERE typ = 'cast' AND (rodic_id IS NULL OR rodic_id NOT IN (SELECT id FROM objekt WHERE typ IN ('uvod', 'zaver')))",
+                ("$u", uvod));
+        }
+
         transakcia.Commit();
         return new VysledokKontroly("Oprava väzieb", true, new List<string>
         {
@@ -134,6 +153,12 @@ public static class DiagnostikaService
         var oblasti = sluzba.Oblasti();
         var predmety = oblasti.SelectMany(o => sluzba.Deti(o.Id).Where(p => p.Typ == TypObjektu.Predmet).Select(p => (Oblast: o, Predmet: p))).ToList();
         riadky.Add($"Oblastí: {oblasti.Count}, predmetov: {predmety.Count}.");
+        foreach (var typ in new[] { TypObjektu.Uvod, TypObjektu.Zaver })
+        {
+            var skupina = CastiOsnov.Skupina(sluzba, typ);
+            riadky.Add($"{CastiOsnov.Nazov(typ)}: {CastiOsnov.PocetCasti(typ, CastiOsnov.Dokumenty(sluzba, skupina).Count)}" +
+                       (CastiOsnov.JeAktivna(typ) ? " (zapnuté)." : " (vypnuté)."));
+        }
 
         // duplicitné predmety v oblasti
         foreach (var skupina in predmety.GroupBy(x => (x.Oblast.Id, Kluc: ImportOsnov.Kluc(x.Predmet.Nazov))).Where(g => g.Count() > 1))

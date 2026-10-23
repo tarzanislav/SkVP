@@ -96,8 +96,10 @@ public static class ExportOsnov
         var subory = new List<string>();
         foreach (var oblast in celok.Oblasti)
         {
+            // úvodné časti do „00 Úvodné časti učebných osnov“, záverečné do „99 Záverečné časti učebných osnov“
             var poradieOblasti = vsetkyOblasti.FindIndex(o => o.Id == oblast.Id) + 1;
-            var priecinokOblasti = Path.Combine(priecinok, ImportOsnov.BezpecnyNazov($"{poradieOblasti:00} {oblast.Nazov}"));
+            var priecinokOblasti = Path.Combine(priecinok, ImportOsnov.BezpecnyNazov(
+                oblast.JeOblast ? $"{poradieOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ)));
             foreach (var predmet in oblast.Predmety)
             {
                 var jeden = ZostavaOsnov.Zostav(volby with

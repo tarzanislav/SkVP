@@ -87,8 +87,8 @@ public static class PremenovanieVDokumentoch
     {
         var nazvy = new List<string>();
         using var db = Databaza.Otvor();
-        using var prikaz = Databaza.Prikaz(db, "SELECT DISTINCT nazov FROM objekt WHERE typ IN ($o, $p) AND odstranene IS NULL",
-            ("$o", TypObjektu.Oblast), ("$p", TypObjektu.Predmet));
+        using var prikaz = Databaza.Prikaz(db, "SELECT DISTINCT nazov FROM objekt WHERE typ IN ($o, $p, $c) AND odstranene IS NULL",
+            ("$o", TypObjektu.Oblast), ("$p", TypObjektu.Predmet), ("$c", TypObjektu.Cast));
         using var citac = prikaz.ExecuteReader();
         while (citac.Read())
         {

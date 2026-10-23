@@ -27,7 +27,8 @@ public sealed partial class DashboardViewModel : ObservableObject
 
     public MainViewModel Hlavny { get; }
 
-    public ObservableCollection<OblastVM> Oblasti => Hlavny.Oblasti;
+    /// <summary>Stena osnov a pokrok: zapnuté úvodné časti (ak majú časti), oblasti, zapnuté záverečné časti.</summary>
+    public List<OblastVM> Oblasti => Hlavny.VsetkySkupiny.Where(o => o.JeOblast || (o.Aktivna && o.Pocet > 0)).ToList();
 
     public string Datum
     {
@@ -74,6 +75,12 @@ public sealed partial class OsnovyViewModel : ObservableObject
     public MainViewModel Hlavny { get; }
 
     public ObservableCollection<OblastVM> Oblasti => Hlavny.Oblasti;
+
+    /// <summary>Úvodné časti učebných osnov – blok nad oblasťami.</summary>
+    public OblastVM? UvodneCasti => Hlavny.UvodneCasti;
+
+    /// <summary>Záverečné časti učebných osnov – blok pod oblasťami.</summary>
+    public OblastVM? ZaverecneCasti => Hlavny.ZaverecneCasti;
 
     [ObservableProperty]
     private string _novaOblast = "";
@@ -124,7 +131,26 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
     }
 
     /// <summary>Oblasť je v Štátnom vzdelávacom programe pre gymnáziá – charakteristika sa dá prevziať.</summary>
-    public bool MaCharakteristikuSvp => SvpGymnazia.Oblast(Oblast.Nazov) is not null;
+    public bool MaCharakteristikuSvp => Oblast.JeOblast && SvpGymnazia.Oblast(Oblast.Nazov) is not null;
+
+    // texty stránky podľa druhu skupiny (vzdelávacia oblasť alebo úvodné/záverečné časti učebných osnov)
+    public bool JeOblast => Oblast.JeOblast;
+    public string TextPridat => Oblast.JeOblast ? "Pridať predmet" : Oblast.JeUvod ? "Pridať úvodnú časť" : "Pridať záverečnú časť";
+
+    public string PopisNoveho => Oblast.JeOblast
+        ? "Názov nového predmetu (napr. Seminár z matematiky)"
+        : Oblast.JeUvod ? "Názov úvodnej časti (napr. Úvod, Ciele, Prierezové témy)" : "Názov záverečnej časti (napr. Hodnotenie, Záver)";
+
+    public string TextPrazdnej => Oblast.JeOblast
+        ? "Táto oblasť zatiaľ nemá žiadne predmety. Pridajte prvý predmet nižšie."
+        : Oblast.JeUvod ? "Zatiaľ nie je pridaná žiadna úvodná časť. Napíšte jej názov nižšie a pridajte ju."
+        : "Zatiaľ nie je pridaná žiadna záverečná časť. Napíšte jej názov nižšie a pridajte ju.";
+
+    public string TextPomoci => Oblast.JeOblast
+        ? "Poradie zmeníte šípkami pri predmete, klávesmi Alt+↑ a Alt+↓ alebo potiahnutím myšou. Predmet presuniete do inej oblasti potiahnutím na oblasť v ľavom paneli."
+        : "Poradie zmeníte šípkami, klávesmi Alt+↑ a Alt+↓ alebo potiahnutím myšou. Do časti vojdete kliknutím – dokument napíšete, skopírujete z Wordu alebo importujete ako pri predmete.";
+
+    public string TextTlace => Oblast.JeOblast ? "Tlač oblasti" : "Tlač častí";
 
     /// <summary>Charakteristika oblasti je doslovne podľa ŠVP.</summary>
     public bool CharakteristikaJeZoSvp =>
@@ -217,7 +243,7 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
 
     partial void OnNazovChanged(string value)
     {
-        if (!string.IsNullOrWhiteSpace(value))
+        if (!string.IsNullOrWhiteSpace(value) && Oblast.JeOblast)
         {
             Hlavny.PremenujOblast(Oblast, value);
         }
@@ -304,8 +330,9 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         _nazov = predmet.Nazov;
         _vybranyStav = VsetkyStavy.First(s => s.Kod == predmet.StavKod);
         _zobrazitSuvislosti = new ObjektService().Suvislosti(predmet.Id).Count > 0;
+        // úvodné a záverečné časti nemajú šablónu osnovy predmetu (úvodnú tabuľku)
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id,
-            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: true);
+            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast);
         NacitajSuvislosti();
         NacitajInfo();
         predmet.NacitajUdajeOsnovy();
@@ -442,9 +469,9 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         Suvislosti.Clear();
         foreach (var s in _sluzba.Suvislosti(Predmet.Id))
         {
-            var oblast = s.Objekt.Typ == TypObjektu.Oblast ? Hlavny.NajdiOblast(s.Objekt.Id) : Hlavny.NajdiPredmet(s.Objekt.Id)?.Oblast;
+            var oblast = TypObjektu.JeSkupina(s.Objekt.Typ) ? Hlavny.NajdiOblast(s.Objekt.Id) : Hlavny.NajdiPredmet(s.Objekt.Id)?.Oblast;
             Suvislosti.Add(new SuvislostVM(s, oblast?.Farba ?? "#6B7280",
-                s.Objekt.Typ == TypObjektu.Predmet ? oblast?.Nazov ?? "" : "Vzdelávacia oblasť"));
+                s.Objekt.Typ is TypObjektu.Predmet or TypObjektu.Cast ? oblast?.Nazov ?? "" : TypObjektu.Nazov(s.Objekt.Typ)));
         }
     }
 
@@ -485,7 +512,7 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
             return;
         }
 
-        if (suvislost.Suvislost.Objekt.Typ == TypObjektu.Oblast)
+        if (TypObjektu.JeSkupina(suvislost.Suvislost.Objekt.Typ))
         {
             Hlavny.OtvorOblast(Hlavny.NajdiOblast(suvislost.Suvislost.Objekt.Id));
         }

@@ -47,7 +47,8 @@ public sealed partial class TlacViewModel : ObservableObject
     public TlacViewModel(MainViewModel hlavny, OblastVM? oblast)
     {
         Hlavny = hlavny;
-        foreach (var o in hlavny.Oblasti)
+        // zapnuté úvodné časti, oblasti a zapnuté záverečné časti učebných osnov
+        foreach (var o in hlavny.VsetkySkupiny.Where(s => s.Aktivna))
         {
             var volba = new VolbaOblasti(o, oblast is null || o == oblast);
             volba.PropertyChanged += (_, _) => Zmena();
@@ -203,7 +204,7 @@ public sealed partial class TlacViewModel : ObservableObject
         }
 
         OnPropertyChanged(nameof(PocetStran));
-        var oblasti = _dokument!.Oblasti.Count;
+        var oblasti = _dokument!.Oblasti.Count(o => o.JeOblast);
         Popis = $"{PocetStranText(pocet)}  •  {OblastiText(oblasti)}  •  {PdfVystup.PocetPredmetov(_dokument.PocetPredmetov)}";
     }
 
