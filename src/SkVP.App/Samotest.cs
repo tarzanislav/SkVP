@@ -1608,6 +1608,17 @@ internal static class Samotest
         Over(archiv.Archivy.Count == 2 && archiv.Vybrany?.Id == druhy.Id && archiv.Dlazdice.Count == 6 && archiv.MaPorovnanie
              && archiv.Oblasti.Count == model.Oblasti.Count, "sekcia Archív – vybraný rok so štatistikami");
         Snimka(okno, "22f_archiv");
+        if (Najdi<ArchivView>(okno) is { } archivView && Najdi<System.Windows.Controls.ScrollViewer>(archivView) is { } posuv)
+        {
+            posuv.ScrollToVerticalOffset(560);
+            Pumpuj();
+            Snimka(okno, "22f2_archiv_statistiky");
+            posuv.ScrollToVerticalOffset(1100);
+            Pumpuj();
+            Snimka(okno, "22f3_archiv_predmety");
+            posuv.ScrollToVerticalOffset(0);
+        }
+
         archiv.Hladat = "fyzika";
         Pumpuj();
         var najdene = archiv.Oblasti.SelectMany(o => o.Predmety).ToList();

@@ -30,31 +30,32 @@
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="44,34,44,40" MaxWidth="1180" HorizontalAlignment="Left">
+        <StackPanel Margin="44,34,44,40" MaxWidth="1180">
             <TextBlock Text="Archív" Style="{StaticResource Nadpis}" />
             <TextBlock Style="{StaticResource Popis}" FontSize="14" Margin="0,4,0,20" TextWrapping="Wrap"
                        Text="Učebné osnovy archivované za školský rok – tak, ako v danom roku platili, so štatistikami roka. Archív sa nemení, upravujú sa vždy aktuálne osnovy v sekcii Osnovy." />
 
             <!-- archivácia nového roka -->
             <Border Style="{StaticResource Karta}">
-                <DockPanel>
-                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="Školský rok" VerticalAlignment="Center" Margin="0,0,10,0" />
-                        <ComboBox ItemsSource="{Binding SkolskeRoky}" SelectedItem="{Binding SkolskyRok}" Width="130" />
-                        <Button Padding="14,6" Margin="12,0,0,0" Style="{DynamicResource AccentButtonStyle}" Command="{Binding ArchivovatRokCommand}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" FontSize="20" Margin="0,0,10,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Archivovať školský rok" Style="{StaticResource Podnadpis}" Margin="0" />
+                    </StackPanel>
+                    <TextBlock TextWrapping="Wrap" Margin="0,6,0,10"
+                               Text="Na konci školského roka archivujte celé osnovy – uložia sa sem, do archívu verzií predmetov aj do priečinka Dokumenty\SkVP\Archív školských rokov (Word a PDF/A)." />
+                    <WrapPanel>
+                        <TextBlock Text="Školský rok" VerticalAlignment="Center" Margin="0,0,10,6" />
+                        <ComboBox ItemsSource="{Binding SkolskeRoky}" SelectedItem="{Binding SkolskyRok}" Width="130" Margin="0,0,12,6" />
+                        <Button Padding="14,6" Margin="0,0,0,6" Style="{DynamicResource AccentButtonStyle}" Command="{Binding ArchivovatRokCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" FontSize="13" Margin="0,0,8,0" />
                                 <TextBlock Text="Archivovať osnovy roka…" />
                             </StackPanel>
                         </Button>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,16,0">
-                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE7B8;" FontSize="22" Margin="0,0,12,0" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
-                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="560"
-                                   Text="Na konci školského roka archivujte celé osnovy – uložia sa sem, do archívu verzií predmetov aj do priečinka Dokumenty\SkVP\Archív školských rokov (Word a PDF/A)." />
-                    </StackPanel>
-                </DockPanel>
+                    </WrapPanel>
+                </StackPanel>
             </Border>
 
             <!-- zatiaľ bez archívu -->
@@ -68,35 +69,56 @@
                 </StackPanel>
             </Border>
 
-            <Grid Margin="0,16,0,0" Visibility="{Binding MaArchivy, Converter={StaticResource BoolNaViditelnost}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="230" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
+            <StackPanel Margin="0,16,0,0" Visibility="{Binding MaArchivy, Converter={StaticResource BoolNaViditelnost}}">
                 <!-- archivované školské roky -->
-                <Border Style="{StaticResource Karta}" Padding="10,14" VerticalAlignment="Top">
-                    <StackPanel>
-                        <TextBlock Text="Školské roky" Style="{StaticResource Stitok}" Margin="10,0,0,6" />
-                        <ListBox ItemsSource="{Binding Archivy}" SelectedItem="{Binding Vybrany}" BorderThickness="0" Background="Transparent"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="2,4">
-                                        <TextBlock Text="{Binding SkolskyRok}" FontWeight="SemiBold" FontSize="16" />
-                                        <TextBlock Style="{StaticResource Popis}" FontSize="11.5">
-                                            <Run Text="{Binding Predmetov, Mode=OneWay}" /><Run Text=" predmetov  •  " /><Run Text="{Binding Vytvorene, Mode=OneWay, StringFormat={}{0:d. M. yyyy}}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </StackPanel>
-                </Border>
+                <TextBlock Text="Archivované školské roky" Style="{StaticResource Stitok}" Margin="2,0,0,6" />
+                <ListBox ItemsSource="{Binding Archivy}" SelectedItem="{Binding Vybrany}" BorderThickness="0" Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="-4,0,0,0">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Margin" Value="4,0,8,8" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Ram" CornerRadius="10" Padding="16,10" BorderThickness="1.5" MinWidth="150"
+                                                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                                            <ContentPresenter />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Ram" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorSecondaryBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Ram" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                                <Setter TargetName="Ram" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding SkolskyRok}" FontWeight="SemiBold" FontSize="17" />
+                                <TextBlock Style="{StaticResource Popis}" FontSize="11.5">
+                                    <Run Text="{Binding Predmetov, Mode=OneWay}" /><Run Text=" predmetov  •  " /><Run Text="{Binding Vytvorene, Mode=OneWay, StringFormat={}{0:d. M. yyyy}}" />
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
 
                 <!-- detail roka -->
-                <StackPanel Grid.Column="2" Visibility="{Binding JeVybrany, Converter={StaticResource BoolNaViditelnost}}">
+                <StackPanel Margin="0,8,0,0" Visibility="{Binding JeVybrany, Converter={StaticResource BoolNaViditelnost}}">
                     <Border Style="{StaticResource Karta}">
                         <StackPanel>
                             <TextBlock Text="{Binding Nadpis}" Style="{StaticResource Podnadpis}" FontSize="22" Margin="0" />
@@ -279,7 +301,7 @@
                         </Border>
                     </StackPanel>
                 </StackPanel>
-            </Grid>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>
