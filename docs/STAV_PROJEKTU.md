@@ -69,6 +69,29 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - „Konverzácia z nemeckého jazyka“ → „Konverzácia v nemeckom jazyku“ (učebný plán, testovacia sada) + jednorazová úprava
   existujúcich databáz pri spustení (`Migracie`, značka `migracia.konverzacia_nj`).
 
+## Tlač, Import a export, Servis, Nastavenia (23. 10. 2026, na vetve vyvoj/etapa1)
+- Tlač ako v EviTA: vlastné okno tlače (`Views/TlacWindow`, `Pomocne/RozvrhTlace`, `ObojstrannaTlac`, `ObojstrannaWindow`)
+  – náhľad listu, tlačiareň, kópie, obojstranná tlač so sprievodcom, 1/2/4/8 strán na list, opakovanie, brožúra,
+  zväčšenie, rámik, sivá, zosvetlenie, bez pozadia, dierovač. Tlač ide priamo na tlačiareň (XPS), nie cez okno Windows
+  (to v náhľade neukazovalo dokument). Režim PDF: PDF, PDF/A-2b, PDF/A-3b (príloha Word), PDF/X-4, PNG, JPEG, TIFF,
+  šifrovanie, heslo, zákazy (`Services/SuboryZostavy`, `PdfNorma`, `ObrazkyDokumentu`, `PozadieDokumentu`). Bez e-mailu (rozhodnutie používateľa).
+- Import a export (`ImportExportView`): export osnov (`ExportOsnovWindow`, `Services/ExportOsnov`) – všetky/oblasti/predmety,
+  jeden dokument alebo každý predmet zvlášť „05 Fyzika 2026“ v priečinku oblasti; Word a všetky formáty PDF/obrázkov.
+  Import osnov (`ImportOsnovWindow`, `Services/ImportOsnov`) z DOCX a PDF (PDF: čítanie PDF a OCR Windows v pomocnom
+  procese `--ocr`, `Pomocne/CitaniePdf` z EviTA; text → bloky `Services/TextNaOsnovu`) do existujúceho alebo nového predmetu;
+  rozpoznanie predmetu z názvu súboru/textu, rok zo súboru. Pred importom záloha; stará osnova do archívu verzií s dôvodom
+  „Archivované … (rok R) – pred importom …“ a súbor `Dokumenty\SkVP\Osnovy\Archív\05 Fyzika – archív R.docx`; nová kópia
+  `Osnovy\<rok>\05 Fyzika <rok>.docx`. Rok zmeny osnov a import v `objekt.vlastnosti` (`Services/InfoOsnovy`), poznámka
+  a tlačidlá „Importovať novú osnovu…“ a „Archív (N)“ pri predmete (`ArchivOsnovyWindow` – otvoriť, uložiť, obnoviť).
+  Oblasti a predmety z dokumentu (Excel, Word – tabuľka alebo nadpisy/zoznamy, PDF) a export do Excelu, Wordu, PDF (`Services/StrukturaOsnov`).
+- Servis (`ServisView`): záloha všetkých dát, záloha osnov vo Worde (ZIP s priečinkami oblastí a archívom), pravidelná
+  záloha (denne/týždenne/vypnutá, ponechať N), vlastný priečinok záloh (`zaloha.priecinok`), obnova zo zálohy (overenie,
+  záloha pred obnovou, reštart), kontrola a zmenšenie databázy, testovacia sada a vymazanie údajov (presunuté z Nastavení).
+- Nastavenia: jazyk (`Services/Preklad` ako v EviTA, zatiaľ len slovenčina – rozhodnutie používateľa), export a import
+  nastavení do JSON (`Services/NastaveniaProgramu` – aj logo a text dole na úvodnej strane).
+- Cieľová platforma `net10.0-windows10.0.19041.0` (súčasti Windows na PDF a OCR, schválené používateľom).
+- OCR na GitHube má len angličtinu (diakritika sa stráca) – kvalitu importu PDF treba overiť na počítači používateľa.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
