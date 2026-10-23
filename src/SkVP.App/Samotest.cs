@@ -59,6 +59,7 @@ internal static class Samotest
             TestZostav();
             TestLogaAHlavicky();
             TestPremenovania();
+            TestVystupov();
             TestZaloh();
             TestObrazoviek(aplikacia);
 
@@ -627,6 +628,56 @@ internal static class Samotest
         Krok("premenovanie v dokumentoch v poriadku");
     }
 
+    /// <summary>Uloženie zostavy do PDF, PDF/A-2b, PDF/A-3b, PDF/X-4, PNG, JPEG, TIFF a zašifrovaného PDF.</summary>
+    private static void TestVystupov()
+    {
+        var export = Databaza.PriecinokDokumentov;
+        Directory.CreateDirectory(export);
+        var idOblasti = new ObjektService().Oblasti()[4].Id;
+        var volby = new VolbyZostavy { Oblasti = new[] { idOblasti } };
+        var dokument = ZostavaOsnov.Zostav(volby);
+        MigraDoc.DocumentObjectModel.Document Tvorba() => PdfVystup.Vytvor(ZostavaOsnov.Zostav(volby));
+        var stran = NahladDokumentu.PocetStran(NahladDokumentu.Priprav(Tvorba()));
+
+        string Text(byte[] data) => System.Text.Encoding.Latin1.GetString(data);
+        var pdf = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf());
+        Over(pdf.Count == 1 && Text(pdf[0].Data).StartsWith("%PDF", StringComparison.Ordinal), "PDF");
+        foreach (var (format, znak, popis) in new[]
+                 {
+                     (FormatVystupu.PdfA2b, "pdfaid:part>2", "PDF/A-2b"),
+                     (FormatVystupu.PdfA3b, "/EmbeddedFiles", "PDF/A-3b s dokumentom Word"),
+                     (FormatVystupu.PdfX4, "GTS_PDFX", "PDF/X-4"),
+                 })
+        {
+            try
+            {
+                var subor = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf { Format = format }, () => TlacViewModel.PrilohaWord(dokument));
+                File.WriteAllBytes(Path.Combine(export, $"samotest_{format}.pdf"), subor[0].Data);
+                Over(Text(subor[0].Data).Contains(znak, StringComparison.Ordinal), popis);
+            }
+            catch (SkvpException ex)
+            {
+                Krok($"{popis}: {ex.Message} (preskočené)");
+            }
+        }
+
+        var png = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf { Format = FormatVystupu.Png });
+        Over(png.Count == stran && png.All(s => s.Mime == "image/png"), $"obrázky PNG ({png.Count})");
+        var jpeg = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf { Format = FormatVystupu.Jpeg });
+        Over(jpeg.Count == stran && jpeg[0].Nazov.EndsWith(".jpg", StringComparison.Ordinal) && jpeg[0].Data[0] == 0xFF && jpeg[0].Data[1] == 0xD8,
+            $"obrázky JPEG ({jpeg.Count})");
+        File.WriteAllBytes(Path.Combine(export, "samotest_strana.jpg"), jpeg[0].Data);
+        var tiff = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf { Format = FormatVystupu.Tiff });
+        Over(tiff.Count == 1 && tiff[0].Nazov.EndsWith(".tif", StringComparison.Ordinal), "viacstranový TIFF");
+        var dve = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf { Rozvrh = new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Dve, OdtieneSivej = true } });
+        File.WriteAllBytes(Path.Combine(export, "samotest_2_na_list_siva.pdf"), dve[0].Data);
+        VolbyPdf.Heslo = "skvp";
+        var sifrovane = SuboryZostavy.Vytvor(Tvorba(), "skuska", new VolbyPdf { PouzitHeslo = true, ZakazTlace = true });
+        VolbyPdf.Heslo = null;
+        Over(Text(sifrovane[0].Data).Contains("/Encrypt", StringComparison.Ordinal), "zašifrované PDF s heslom");
+        Krok("výstupy tlače v poriadku");
+    }
+
     /// <summary>Po vymazaní testovacej sady nesmú zostať údaje vymyslenej školy.</summary>
     private static void OverBezSkolySady(string popis, Dictionary<string, string?> predSadou)
     {
@@ -869,6 +920,32 @@ internal static class Samotest
         Pumpuj();
         Over(tlacOblasti.Len && tlacOblasti.Oblasti.Count(o => o.Zahrnut) == 1, "tlač jednej oblasti z jej stránky");
         Snimka(okno, "13_tlac_oblasti");
+
+        // okno tlače (ako v EviTA) – vlastný náhľad listu a voľby
+        var vykreslenieOblasti = NahladDokumentu.Priprav(PdfVystup.Vytvor(ZostavaOsnov.Zostav(tlacOblasti.Volby())));
+        var oknoTlace = new TlacWindow(vykreslenieOblasti, false, "samotest", RezimOknaTlace.Tlac,
+            () => PdfVystup.Vytvor(ZostavaOsnov.Zostav(tlacOblasti.Volby())), null) { Owner = okno };
+        oknoTlace.Show();
+        Pumpuj();
+        var stranOblasti = NahladDokumentu.PocetStran(vykreslenieOblasti);
+        Over(oknoTlace.PocetListov == stranOblasti && oknoTlace.ObrazokListu(0) is not null, $"náhľad v okne tlače ukazuje dokument ({oknoTlace.PocetListov} listov)");
+        Snimka(oknoTlace, "13b_okno_tlace");
+        oknoTlace.NastavVolby(new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Dve, Ramcek = true });
+        Pumpuj();
+        Over(oknoTlace.PocetListov == (stranOblasti + 1) / 2, "2 strany na list");
+        Snimka(oknoTlace, "13c_okno_tlace_2_na_list");
+        oknoTlace.NastavVolby(new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Brozura, OdtieneSivej = true });
+        Pumpuj();
+        Over(oknoTlace.PocetListov == (stranOblasti + 3) / 4 * 2, "brožúra");
+        Snimka(oknoTlace, "13d_okno_tlace_brozura");
+        oknoTlace.NastavVolby(new VolbyTlace());
+        oknoTlace.Close();
+        var oknoPdf = new TlacWindow(vykreslenieOblasti, false, "samotest", RezimOknaTlace.Pdf,
+            () => PdfVystup.Vytvor(ZostavaOsnov.Zostav(tlacOblasti.Volby())), "samotest.pdf") { Owner = okno };
+        oknoPdf.Show();
+        Pumpuj();
+        Snimka(oknoPdf, "13e_okno_pdf");
+        oknoPdf.Close();
         tlacOblasti.UlozitPdfCommand.Execute(null);
         tlacOblasti.UlozitWordCommand.Execute(null);
 

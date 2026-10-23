@@ -203,6 +203,16 @@ public sealed partial class TlacViewModel : ObservableObject
 
     public int PocetStran => Strany.Count;
 
+    private string NazovUlohy => $"{_dokument?.Titul.Podnadpis ?? Services.TitulnaStrana.PredvolenyPodnadpis} – SkVP";
+
+    /// <summary>Tvorba dokumentu na tlač a do PDF (vždy nová – voľba Bez pozadia mení dokument).</summary>
+    private Func<MigraDoc.DocumentObjectModel.Document> Tvorba()
+    {
+        var volby = Volby();
+        return () => PdfVystup.Vytvor(ZostavaOsnov.Zostav(volby));
+    }
+
+    /// <summary>Tlač cez okno tlače SkVP (ako v EviTA) s náhľadom listu a všetkými voľbami.</summary>
     [RelayCommand]
     private void Tlacit()
     {
@@ -213,22 +223,48 @@ public sealed partial class TlacViewModel : ObservableObject
 
         if (_vykreslenie is not null)
         {
-            NahladDokumentu.Vytlac(_vykreslenie, $"{_dokument?.Titul.Podnadpis ?? Services.TitulnaStrana.PredvolenyPodnadpis} – SkVP");
+            NahladDokumentu.Vytlac(_vykreslenie, NazovUlohy, Tvorba());
         }
     }
 
+    /// <summary>Uloženie do PDF, PDF/A-2b, PDF/A-3b (s Wordom), PDF/X-4 alebo obrázkov PNG, JPEG, TIFF – s voľbami a náhľadom.</summary>
     [RelayCommand]
     private void UlozitPdf()
     {
-        var dokument = ZostavaOsnov.Zostav(Volby());
-        var cesta = Dialogy.UlozitAko("Uložiť učebné osnovy do PDF", "Dokument PDF (*.pdf)|*.pdf", ZostavaOsnov.NazovSuboru(dokument, ".pdf"));
-        if (cesta is null)
+        if (_vykreslenie is null)
+        {
+            Obnovit();
+        }
+
+        if (_vykreslenie is null || _dokument is null)
         {
             return;
         }
 
-        Uloz(cesta, () => PdfVystup.UlozPdf(dokument, cesta));
+        var volby = Volby();
+        var nazov = ZostavaOsnov.NazovSuboru(_dokument, ".pdf");
+        if (Dialogy.TichyRezim)
+        {
+            var cesta = Dialogy.UlozitAko("PDF", "PDF|*.pdf", nazov);
+            if (cesta is not null)
+            {
+                Uloz(cesta, () => PdfVystup.UlozPdf(ZostavaOsnov.Zostav(volby), cesta));
+            }
+
+            return;
+        }
+
+        new Views.TlacWindow(_vykreslenie, false, NazovUlohy, Views.RezimOknaTlace.Pdf, Tvorba(), nazov)
+        {
+            Owner = Dialogy.Vlastnik,
+            Priloha = () => PrilohaWord(ZostavaOsnov.Zostav(volby)),
+        }.ShowDialog();
     }
+
+    /// <summary>Príloha PDF/A-3b: tie isté osnovy ako dokument Word.</summary>
+    public static SuboryZostavy.Priloha PrilohaWord(CelyDokument dokument) => new(
+        ZostavaOsnov.NazovSuboru(dokument, ".docx"), DocxVystup.Data(dokument),
+        "/application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Učebné osnovy vo Worde");
 
     [RelayCommand]
     private void UlozitWord()

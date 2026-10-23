@@ -20,10 +20,11 @@
                         </StackPanel>
                     </Button>
                     <UniformGrid Columns="2" Margin="0,8,0,0">
-                        <Button Padding="10,8" Margin="0,0,4,0" Command="{Binding UlozitPdfCommand}">
+                        <Button Padding="10,8" Margin="0,0,4,0" Command="{Binding UlozitPdfCommand}"
+                                ToolTip="PDF, PDF/A-2b, PDF/A-3b, PDF/X-4, PNG, JPEG, TIFF – so šifrovaním, 2 – 8 strán na list, brožúrou …">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xEA90;" FontSize="15" Margin="0,0,8,0" />
-                                <TextBlock Text="Uložiť PDF" />
+                                <TextBlock Text="PDF, obrázky…" />
                             </StackPanel>
                         </Button>
                         <Button Padding="10,8" Margin="4,0,0,0" Command="{Binding UlozitWordCommand}">

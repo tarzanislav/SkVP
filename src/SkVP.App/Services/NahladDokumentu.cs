@@ -1,5 +1,5 @@
+using System.Printing;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
 using MigraDoc.DocumentObjectModel;
@@ -10,7 +10,8 @@ using SkVP.Pomocne;
 namespace SkVP.Services;
 
 /// <summary>
-/// Vykreslenie dokumentu (MigraDoc) na obrazovku a na tlačiareň. Náhľad aj tlač používajú rovnaké vykreslenie ako PDF.
+/// Vykreslenie dokumentu (MigraDoc) na obrazovku a na tlačiareň. Náhľad aj tlač používajú rovnaké vykreslenie ako PDF,
+/// takže vytlačené osnovy vyzerajú rovnako ako uložené PDF. Tlač ide cez vlastné okno tlače (ako v EviTA) s náhľadom listu.
 /// </summary>
 public static class NahladDokumentu
 {
@@ -34,12 +35,24 @@ public static class NahladDokumentu
         return obrazok;
     }
 
-    /// <summary>Vykreslí stranu (číslovanú od 1) vo veľkosti A4 v jednotkách WPF.</summary>
+    /// <summary>Vykreslí stranu (číslovanú od 1) vo veľkosti A4 v jednotkách WPF (orientácia podľa strany).</summary>
     public static DrawingVisual Strana(DocumentRenderer vykreslenie, int strana, out Size velkost)
+    {
+        var info = vykreslenie.FormattedDocument!.GetPageInfo(strana);
+        return Strana(vykreslenie, strana, info.Width > info.Height, out velkost);
+    }
+
+    /// <summary>Vykreslí stranu (číslovanú od 1) do vizuálu vo veľkosti strany A4 v jednotkách WPF.</summary>
+    public static DrawingVisual Strana(DocumentRenderer vykreslenie, int strana, bool naSirku, out Size velkost)
     {
         var info = vykreslenie.FormattedDocument!.GetPageInfo(strana);
         double sirka = info.Width;
         double vyska = info.Height;
+        if (naSirku != (sirka > vyska))
+        {
+            (sirka, vyska) = (vyska, sirka);
+        }
+
         velkost = new Size(sirka * BodovNaDip, vyska * BodovNaDip);
         var kresba = new DrawingVisual();
         using (var kontext = kresba.RenderOpen())
@@ -52,60 +65,141 @@ public static class NahladDokumentu
         return kresba;
     }
 
-    /// <summary>Vytlačí dokument cez okno tlače Windows (výber tlačiarne, rozsah strán, kópie).</summary>
-    public static bool Vytlac(DocumentRenderer vykreslenie, string nazovUlohy)
+    /// <summary>
+    /// Vytlačí dokument cez okno tlače SkVP (ako v EviTA): výber tlačiarne, kópie, obojstranná tlač, 1/2/4/8 strán na list,
+    /// opakovanie strán, brožúra, zväčšenie, rámik, odtiene sivej, zosvetlenie, bez pozadia a dierovač – s náhľadom listu.
+    /// Vráti false, ak používateľ tlač zrušil.
+    /// </summary>
+    public static bool Vytlac(DocumentRenderer vykreslenie, string nazovUlohy, Func<Document>? tvorba = null)
     {
-        var pocet = PocetStran(vykreslenie);
         if (Dialogy.TichyRezim)
         {
-            Dialogy.TicheHlasenia.Add($"[Tlač] {nazovUlohy} ({pocet} strán)");
+            Dialogy.TicheHlasenia.Add($"[Tlač] {nazovUlohy} ({PocetStran(vykreslenie)} strán)");
             return true;
         }
 
-        var dialog = new PrintDialog
-        {
-            UserPageRangeEnabled = true,
-            MinPage = 1,
-            MaxPage = (uint)Math.Max(1, pocet),
-            PageRange = new PageRange(1, Math.Max(1, pocet)),
-        };
-        if (dialog.ShowDialog() != true)
-        {
-            return false;
-        }
-
-        var od = 1;
-        var po = pocet;
-        if (dialog.PageRangeSelection == PageRangeSelection.UserPages)
-        {
-            od = Math.Clamp(dialog.PageRange.PageFrom, 1, pocet);
-            po = Math.Clamp(dialog.PageRange.PageTo, od, pocet);
-        }
-
-        dialog.PrintDocument(new Strankovanie(vykreslenie, od, po), nazovUlohy);
-        return true;
+        var okno = new Views.TlacWindow(vykreslenie, false, nazovUlohy, Views.RezimOknaTlace.Tlac, tvorba, null) { Owner = Dialogy.Vlastnik };
+        return okno.ShowDialog() == true;
     }
 
-    /// <summary>Strany dokumentu MigraDoc pre tlač WPF.</summary>
-    private sealed class Strankovanie(DocumentRenderer vykreslenie, int od, int po) : DocumentPaginator
+    /// <summary>Strana dokumentu ako kresba na umiestnenie na list.</summary>
+    public static LogickaStrana Logicka(DocumentRenderer vykreslenie, int strana, bool naSirku)
     {
-        private Size _velkost = new(793.7, 1122.5);
+        var vizual = Strana(vykreslenie, strana, naSirku, out var velkost);
+        var kresba = vizual.Drawing;
+
+        // obsah strany = všetko okrem bieleho podkladu (prvá kresba), s rezervou 2 mm
+        var obsah = Rect.Empty;
+        foreach (var cast in kresba.Children.Skip(1))
+        {
+            obsah.Union(cast.Bounds);
+        }
+
+        if (!obsah.IsEmpty)
+        {
+            obsah.Inflate(2 * 96 / 25.4, 2 * 96 / 25.4);
+            obsah.Intersect(new Rect(velkost));
+        }
+
+        if (kresba.CanFreeze)
+        {
+            kresba.Freeze();
+        }
+
+        return new LogickaStrana(kresba, velkost, obsah);
+    }
+
+    /// <summary>Listy na tlač podľa volieb (rozmiestnenie strán, sivá …) pre tlačiareň Windows.</summary>
+    public sealed class StrankovacRozvrhu : DocumentPaginator
+    {
+        private readonly DocumentRenderer _vykreslenie;
+        private readonly bool _naSirku;
+        private readonly VolbyTlace _volby;
+        private readonly List<int?[]> _listy;
+        private readonly Dictionary<int, LogickaStrana> _strany = new();
+
+        public StrankovacRozvrhu(DocumentRenderer vykreslenie, bool naSirku, VolbyTlace volby)
+        {
+            _vykreslenie = vykreslenie;
+            _naSirku = naSirku;
+            _volby = volby;
+            _listy = RozvrhTlace.Rozdel(PocetStran(vykreslenie), volby);
+            ListNaSirku = RozvrhTlace.Mriezka(volby.Rozmiestnenie, naSirku).ListNaSirku;
+            PageSize = RozvrhTlace.VelkostListu(ListNaSirku);
+        }
+
+        public bool ListNaSirku { get; }
+
+        /// <summary>Strany listov (pri obojstrannej tlači každá druhá je zadná strana).</summary>
+        public int PocetListov => _listy.Count;
 
         public override bool IsPageCountValid => true;
-        public override int PageCount => po - od + 1;
 
-        public override Size PageSize
-        {
-            get => _velkost;
-            set => _velkost = value;
-        }
+        public override int PageCount => _listy.Count;
+
+        public override Size PageSize { get; set; }
 
         public override IDocumentPaginatorSource? Source => null;
 
+        /// <summary>Strana listu ako vizuál (aj pre náhľad v okne tlače).</summary>
+        public DrawingVisual List(int index) =>
+            RozvrhTlace.List(_listy[index], Strana, _volby, _naSirku, index % 2 == 1);
+
+        private LogickaStrana Strana(int cislo)
+        {
+            if (!_strany.TryGetValue(cislo, out var strana))
+            {
+                strana = Logicka(_vykreslenie, cislo, _naSirku);
+                if (_volby.OdtieneSivej)
+                {
+                    strana = RozvrhTlace.NaSivu(strana, NahladDpi ?? 250);
+                }
+
+                _strany[cislo] = strana;
+            }
+
+            return strana;
+        }
+
+        /// <summary>Rozlíšenie sivých strán v náhľade (nižšie = rýchlejšie); pri tlači null = 250 dpi.</summary>
+        public double? NahladDpi { get; init; }
+
         public override DocumentPage GetPage(int pageNumber)
         {
-            var kresba = Strana(vykreslenie, od + pageNumber, out var velkost);
-            return new DocumentPage(kresba, velkost, new Rect(velkost), new Rect(velkost));
+            var vizual = List(pageNumber);
+            return new DocumentPage(vizual, PageSize, new Rect(PageSize), new Rect(PageSize));
+        }
+    }
+
+    /// <summary>
+    /// Tlačový lístok pre vybranú tlačiareň: A4, orientácia listu, obojstranná tlač, kópie a sivá – nastaví sa pri každej
+    /// tlačiarni znova (každá má svoje predvolené) a zosúladí sa s jej možnosťami.
+    /// </summary>
+    public static PrintTicket Tiket(PrintQueue fronta, VolbyTlace volby, bool listNaSirku, bool? obojstranne = null)
+    {
+        var duplex = obojstranne ?? volby.TlacitObojstranne;
+        var tiket = (fronta.UserPrintTicket ?? fronta.DefaultPrintTicket).Clone();
+        tiket.PageMediaSize = new PageMediaSize(PageMediaSizeName.ISOA4);
+        tiket.PageOrientation = listNaSirku ? PageOrientation.Landscape : PageOrientation.Portrait;
+        tiket.CopyCount = volby.Kopie;
+        tiket.Collation = Collation.Collated;
+        tiket.Duplexing = !duplex
+            ? Duplexing.OneSided
+            : listNaSirku ? Duplexing.TwoSidedShortEdge : Duplexing.TwoSidedLongEdge;
+        if (volby.OdtieneSivej)
+        {
+            tiket.OutputColor = OutputColor.Grayscale;
+        }
+
+        try
+        {
+            var overeny = fronta.MergeAndValidatePrintTicket(fronta.UserPrintTicket ?? fronta.DefaultPrintTicket, tiket).ValidatedPrintTicket;
+            overeny.PageOrientation = tiket.PageOrientation;
+            return overeny;
+        }
+        catch (Exception)
+        {
+            return tiket;
         }
     }
 }

@@ -1,0 +1,140 @@
+<Window x:Class="SkVP.Views.TlacWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Vytlačiť"
+        Width="1100" Height="780" MinWidth="820" MinHeight="560"
+        WindowStartupLocation="CenterOwner">
+    <DockPanel>
+        <!-- tlačidlá -->
+        <Border DockPanel.Dock="Bottom" Padding="16,10" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <DockPanel>
+                <StackPanel x:Name="Tlacidla" DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="Vytlacit" Style="{DynamicResource AccentButtonStyle}" Padding="18,6" IsDefault="True" Click="Vytlacit_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock x:Name="IkonaHlavneho" Style="{StaticResource Ikona}" Text="&#xE749;" FontSize="14" Margin="0,0,8,0" />
+                            <TextBlock x:Name="TextHlavneho" Text="Vytlačiť" />
+                        </StackPanel>
+                    </Button>
+                    <Button Content="Zrušiť" Padding="16,6" Margin="8,0,0,0" IsCancel="True" />
+                </StackPanel>
+                <TextBlock x:Name="Suhrn" VerticalAlignment="Center" Style="{StaticResource Popis}" FontSize="13" TextWrapping="Wrap" />
+            </DockPanel>
+        </Border>
+
+        <!-- voľby -->
+        <ScrollViewer x:Name="PanelVolieb" DockPanel.Dock="Left" Width="290" VerticalScrollBarVisibility="Auto"
+                      Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <StackPanel Margin="16,12,16,16">
+                <StackPanel x:Name="SekciaTlaciarne">
+                <TextBlock Text="Tlačiareň" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                <ComboBox x:Name="Tlaciarne" HorizontalAlignment="Stretch" SelectionChanged="Volba_Changed" />
+                <DockPanel Margin="0,8,0,0">
+                    <TextBlock Text="Kópie" VerticalAlignment="Center" Margin="0,0,10,0" />
+                    <TextBox x:Name="Kopie" Width="64" Text="1" TextChanged="Volba_Changed" HorizontalAlignment="Left" />
+                </DockPanel>
+                <DockPanel Margin="0,8,0,0">
+                    <Button DockPanel.Dock="Right" Content="Nastaviť…" Padding="10,3" Click="NastavitObojstranne_Click"
+                            ToolTip="Sprievodca vytlačí skúšobné listy a podľa odpovedí nastaví, ako táto tlačiareň otáča listy (aby zadná strana nebola hore nohami)." />
+                    <CheckBox x:Name="Obojstranne" Content="Obojstranne" Click="Volba_Changed" />
+                </DockPanel>
+                <TextBlock x:Name="ProfilText" Style="{StaticResource Popis}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+
+                <!-- PDF: šifrovanie, heslo, zákazy (len pri ukladaní do PDF) -->
+                <StackPanel x:Name="SekciaPdf" Visibility="Collapsed">
+                    <TextBlock Text="Formát súboru" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                    <ComboBox x:Name="FormatSuboru" SelectionChanged="Volba_Changed">
+                        <ComboBoxItem Tag="Pdf" Content="PDF" />
+                        <ComboBoxItem Tag="PdfA2b" Content="PDF/A-2b – archívne" />
+                        <ComboBoxItem Tag="PdfA3b" Content="PDF/A-3b – archívne s dátami" />
+                        <ComboBoxItem Tag="PdfX4" Content="PDF/X-4 – pre tlačiareň" />
+                        <ComboBoxItem Tag="Png" Content="Obrázky PNG (300 dpi)" />
+                        <ComboBoxItem Tag="Jpeg" Content="Obrázky JPEG (300 dpi)" />
+                        <ComboBoxItem Tag="Tiff" Content="Obrázok TIFF (300 dpi, všetky strany)" />
+                    </ComboBox>
+                    <TextBlock x:Name="PopisFormatu" Style="{StaticResource Popis}" FontSize="12" TextWrapping="Wrap" Margin="0,4,0,0" />
+
+                    <StackPanel x:Name="Zabezpecenie">
+                    <TextBlock Text="Zabezpečenie PDF" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                    <CheckBox x:Name="Sifrovat" Content="Šifrovať PDF (AES)" Click="Volba_Changed" />
+                    <CheckBox x:Name="PouzitHeslo" Content="Heslo na otvorenie" Margin="0,6,0,0" Click="Volba_Changed" />
+                    <PasswordBox x:Name="HesloPole" Margin="26,4,0,0" ToolTip="Heslo sa neukladá – platí do zatvorenia programu." />
+                    <TextBlock Text="Zakázať v PDF" Style="{StaticResource Stitok}" />
+                    <CheckBox x:Name="ZakazTlace" Content="tlač" Click="Volba_Changed" />
+                    <CheckBox x:Name="ZakazKopirovania" Margin="0,4,0,0" Click="Volba_Changed">
+                        <TextBlock Text="kopírovanie textu a obrázkov" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <CheckBox x:Name="ZakazUprav" Margin="0,4,0,0" Click="Volba_Changed">
+                        <TextBlock Text="úpravy (zmena, vkladanie a mazanie strán)" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <CheckBox x:Name="ZakazPoznamok" Margin="0,4,0,0" Click="Volba_Changed">
+                        <TextBlock Text="poznámky a vypĺňanie formulárov" TextWrapping="Wrap" />
+                    </CheckBox>
+                    <TextBlock Text="Heslo na zrušenie zákazov (nepovinné)" Style="{StaticResource Popis}" FontSize="12" Margin="0,8,0,2" TextWrapping="Wrap" />
+                    <PasswordBox x:Name="HesloVlastnikaPole" ToolTip="Bez neho sa zákazy nedajú zrušiť. Heslo sa neukladá." />
+                    </StackPanel>
+                    <StackPanel x:Name="InfoPisma">
+                    <CheckBox Content="Vložiť všetky písma" IsChecked="True" IsEnabled="False" Margin="0,10,0,0"
+                              ToolTip="Písma sa do PDF vkladajú vždy – dokument vyzerá rovnako na každom počítači." />
+                    <TextBlock Style="{StaticResource Popis}" FontSize="12" TextWrapping="Wrap" Margin="0,8,0,0"
+                               Text="Text v PDF zo SkVP je skutočný text – dá sa označiť myšou, kopírovať a vyhľadávať (OCR netreba), ak nie je zakázané kopírovanie. Aj v odtieňoch sivej a pri viacerých stranách na list." />
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock Text="Strany na list" Style="{StaticResource Stitok}" />
+                <RadioButton x:Name="Jedna" GroupName="rozmiestnenie" Content="1 strana" Click="Volba_Changed" />
+                <RadioButton x:Name="Dve" GroupName="rozmiestnenie" Content="2 strany" Click="Volba_Changed" />
+                <RadioButton x:Name="Styri" GroupName="rozmiestnenie" Content="4 strany" Click="Volba_Changed" />
+                <RadioButton x:Name="Osem" GroupName="rozmiestnenie" Content="8 strán" Click="Volba_Changed" />
+                <RadioButton x:Name="Brozura" GroupName="rozmiestnenie" Content="Brožúra (preložiť v strede)" Click="Volba_Changed"
+                             ToolTip="Strany sa usporiadajú tak, aby po obojstrannej tlači a preložení listov v strede vznikol zošit A5." />
+                <CheckBox x:Name="Opakovat" Content="Opakovať stránky" Margin="0,6,0,0" Click="Volba_Changed"
+                          ToolTip="Každá strana sa na liste zopakuje (2, 4 alebo 8 rovnakých strán vedľa seba) – napr. na rozstrihanie." />
+
+                <TextBlock Text="Zväčšenie zmenšených strán" Style="{StaticResource Stitok}" />
+                <DockPanel>
+                    <TextBlock x:Name="ZvacsenieText" DockPanel.Dock="Right" Width="48" TextAlignment="Right" VerticalAlignment="Center" Text="100 %" />
+                    <Slider x:Name="Zvacsenie" Minimum="100" Maximum="160" TickFrequency="5" IsSnapToTickEnabled="True" Value="100"
+                            ValueChanged="Zvacsenie_ValueChanged"
+                            ToolTip="Zmenšené strany majú prázdne okraje – zväčšením sa orežú a text bude väčší (napr. 2 strany na A4 skoro ako A5)." />
+                </DockPanel>
+
+                <TextBlock Text="Úprava" Style="{StaticResource Stitok}" />
+                <CheckBox x:Name="Ramcek" Content="Orámovanie strán (tenký rám)" Click="Volba_Changed" />
+                <CheckBox x:Name="Siva" Content="Odtiene sivej" Margin="0,6,0,0" Click="Volba_Changed"
+                          ToolTip="Farby sa zmenia na odtiene sivej podľa svetlosti – čierny text zostane čierny, farebné časti a obrázky budú sivé, biele pozadie zostane biele." />
+                <CheckBox x:Name="Zosvetlit" Content="Zosvetliť (šetrí toner)" Margin="0,6,0,0" Click="Volba_Changed" />
+                <CheckBox x:Name="BezPozadia" Content="Bez pozadia (len biely papier)" Margin="0,6,0,0" Click="Volba_Changed"
+                          ToolTip="Farebné podklady (hlavička tabuľky, striedanie riadkov, zvýraznené dni) sa netlačia. Text, čiary, obrázky a logo zostanú." />
+                <CheckBox x:Name="Dierovac" Content="Dierovač – okraj zľava" Margin="0,6,0,0" Click="Volba_Changed"
+                          ToolTip="Vľavo sa vynechá miesto na dierovanie, aby sa list dal založiť do zakladača (pri obojstrannej tlači na zadnej strane sprava)." />
+                <DockPanel Margin="26,4,0,0">
+                    <TextBlock Text="mm" DockPanel.Dock="Right" VerticalAlignment="Center" Margin="6,0,0,0" />
+                    <TextBox x:Name="DierovacMm" Width="64" Text="10" HorizontalAlignment="Left" TextChanged="Volba_Changed" />
+                </DockPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- náhľad listu -->
+        <DockPanel x:Name="SekciaNahladu" Background="{DynamicResource SolidBackgroundFillColorTertiaryBrush}">
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <Button x:Name="Predosly" Padding="10,4" Click="Predosly_Click" ToolTip="Predošlá strana listu">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE76B;" FontSize="12" />
+                </Button>
+                <TextBlock x:Name="CisloListu" VerticalAlignment="Center" Margin="14,0" MinWidth="150" TextAlignment="Center" />
+                <Button x:Name="Dalsi" Padding="10,4" Click="Dalsi_Click" ToolTip="Ďalšia strana listu">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE76C;" FontSize="12" />
+                </Button>
+            </StackPanel>
+            <Viewbox Margin="24,12,24,24" Stretch="Uniform">
+                <Border Background="White" BorderBrush="#55000000" BorderThickness="1">
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="14" ShadowDepth="2" Opacity="0.3" />
+                    </Border.Effect>
+                    <Image x:Name="Nahlad" Stretch="Fill" />
+                </Border>
+            </Viewbox>
+        </DockPanel>
+    </DockPanel>
+</Window>

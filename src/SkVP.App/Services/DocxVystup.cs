@@ -27,6 +27,27 @@ public static class DocxVystup
         public int PosunNadpisov = 2;
     }
 
+    /// <summary>Celý dokument ako obsah súboru Word (napr. príloha PDF/A-3b).</summary>
+    public static byte[] Data(CelyDokument dokument)
+    {
+        var docasny = Path.Combine(Path.GetTempPath(), $"SkVP_{Guid.NewGuid():N}.docx");
+        try
+        {
+            Uloz(dokument, docasny);
+            return File.ReadAllBytes(docasny);
+        }
+        finally
+        {
+            try
+            {
+                File.Delete(docasny);
+            }
+            catch (IOException)
+            {
+            }
+        }
+    }
+
     public static void Uloz(CelyDokument dokument, string cesta)
     {
         var priecinok = Path.GetDirectoryName(cesta);
