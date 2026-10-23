@@ -813,6 +813,14 @@ internal static class Samotest
              && nazvy.Contains("Reálie anglicky hovoriacich krajín – úroveň B2") && nazvy.Contains("Ruský jazyk – úroveň B1")
              && nazvy.Contains("Slovenský jazyk a literatúra") && !nazvy.Contains("Konverzácia v anglickom jazyku")
              && !nazvy.Contains("Reálie v anglickom jazyku") && !nazvy.Contains("Jazykom k maturite"), "názvy predmetov po importe");
+        int Index(string zaciatok) => nazvy.FindIndex(n => n.StartsWith(zaciatok, StringComparison.Ordinal));
+        Over(Index("Konverzácia v anglickom jazyku - profilácia šport") == Index("Konverzácia v anglickom jazyku - profilácia anglický") + 1,
+            "obe konverzácie v anglickom jazyku sú pod sebou");
+        Over(Index("Konverzácia v ruskom jazyku") == Index("Konverzácia v nemeckom jazyku") + 1
+             && Index("Konverzácia v nemeckom jazyku") == Index("Konverzácia v anglickom jazyku - profilácia šport") + 1,
+            "konverzácia v ruskom jazyku je pod ostatnými konverzáciami");
+        var maturita = nazvy.Select((n, i) => (n, i)).Where(x => x.n.StartsWith("Jazykom k maturite", StringComparison.Ordinal)).Select(x => x.i).ToList();
+        Over(maturita.Count == 3 && maturita[2] - maturita[0] == 2, "Jazykom k maturite – všetky tri pod sebou");
         var rusky = new ObjektService().Oblasti().SelectMany(o => new ObjektService().Deti(o.Id)).First(p => p.Nazov == "Ruský jazyk – úroveň B1");
         Over(InfoOsnovyService.Nacitaj(rusky.Id).Uroven == "B1", "úroveň je zaznamenaná pri osnove");
 

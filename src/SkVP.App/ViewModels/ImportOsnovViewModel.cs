@@ -336,6 +336,14 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                     var novy = Hlavny.PridajPredmet(p.NovaOblast!, p.NovyNazov.Trim())
                                ?? throw new SkvpException("Nový predmet sa nepodarilo pridať.");
                     id = novy.Id;
+
+                    // príbuzné predmety pod seba (napr. konverzácie v jednom bloku)
+                    var oblast = p.NovaOblast!;
+                    var ostatne = oblast.Predmety.Where(x => x != novy).Select(x => x.Nazov).ToList();
+                    if (JazykovePravidla.Pozicia(ostatne, p.Subor!.Jazyk?.ZaraditZa) is int pozicia && pozicia < ostatne.Count)
+                    {
+                        Hlavny.PresunPredmet(novy, oblast, pozicia);
+                    }
                 }
                 else
                 {

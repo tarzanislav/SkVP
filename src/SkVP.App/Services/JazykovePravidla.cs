@@ -7,7 +7,9 @@ namespace SkVP.Services;
 /// <param name="Uroven">predvolená úroveň (B1, B2) alebo null (bez úrovne – SJL, SSJ)</param>
 /// <param name="Aliasy">doterajšie názvy v programe, ktoré sa premenujú (napr. „Reálie v anglickom jazyku“)</param>
 /// <param name="CudziJazyk">pri cudzom jazyku sa sprievodca pýta na úroveň</param>
-public sealed record JazykovyPredmet(string Zaklad, string? Uroven, IReadOnlyList<string> Aliasy, bool CudziJazyk);
+/// <param name="ZaraditZa">nový predmet sa zaradí za posledný predmet oblasti, ktorého názov začína týmto textom
+/// (napr. konverzácie pod seba)</param>
+public sealed record JazykovyPredmet(string Zaklad, string? Uroven, IReadOnlyList<string> Aliasy, bool CudziJazyk, string? ZaraditZa = null);
 
 /// <summary>
 /// Pravidlá pre osnovy vzdelávacej oblasti Jazyk a komunikácia: skratky v názvoch súborov (SJL, SSJ, ANJ, NEJ, RUJ, KAJ,
@@ -39,6 +41,29 @@ public static class JazykovePravidla
     {
         var i = nazov.LastIndexOf(" – úroveň ", StringComparison.Ordinal);
         return i > 0 ? nazov[(i + " – úroveň ".Length)..].Trim() : null;
+    }
+
+    /// <summary>
+    /// Kam zaradiť nový predmet: za posledný predmet oblasti, ktorého názov začína textom <paramref name="zaradZa"/>
+    /// (index v zozname predmetov oblasti), alebo null = na koniec.
+    /// </summary>
+    public static int? Pozicia(IReadOnlyList<string> nazvyPredmetov, string? zaradZa)
+    {
+        if (zaradZa is null)
+        {
+            return null;
+        }
+
+        var kluc = ImportOsnov.Kluc(zaradZa);
+        for (var i = nazvyPredmetov.Count - 1; i >= 0; i--)
+        {
+            if (ImportOsnov.Kluc(nazvyPredmetov[i]).StartsWith(kluc, StringComparison.Ordinal))
+            {
+                return i + 1;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>Je predmet cudzím jazykom (pýta sa úroveň)? Slovenčina nie.</summary>
@@ -75,7 +100,7 @@ public static class JazykovePravidla
             {
                 if (Ma(skratka) || k.Contains(ImportOsnov.Kluc(jazyk), StringComparison.Ordinal))
                 {
-                    return new JazykovyPredmet($"Jazykom k maturite - {jazyk}", "B2", new[] { "Jazykom k maturite" }, true);
+                    return new JazykovyPredmet($"Jazykom k maturite - {jazyk}", "B2", new[] { "Jazykom k maturite" }, true, "Jazykom k maturite");
                 }
             }
 
@@ -90,17 +115,18 @@ public static class JazykovePravidla
         if (Ma("kaj") || k.Contains("konverzacia v anglickom", StringComparison.Ordinal))
         {
             var profilacia = Profilacia(text, bloky);
-            return new JazykovyPredmet($"Konverzácia v anglickom jazyku - {profilacia}", "B2", new[] { "Konverzácia v anglickom jazyku" }, true);
+            return new JazykovyPredmet($"Konverzácia v anglickom jazyku - {profilacia}", "B2", new[] { "Konverzácia v anglickom jazyku" }, true,
+                "Konverzácia v anglickom jazyku");
         }
 
         if (Ma("knj") || k.Contains("konverzacia v nemeckom", StringComparison.Ordinal))
         {
-            return new JazykovyPredmet("Konverzácia v nemeckom jazyku", "B1", new[] { "Konverzácia z nemeckého jazyka" }, true);
+            return new JazykovyPredmet("Konverzácia v nemeckom jazyku", "B1", new[] { "Konverzácia z nemeckého jazyka" }, true, "Konverzácia");
         }
 
         if (Ma("krj") || k.Contains("konverzacia v ruskom", StringComparison.Ordinal))
         {
-            return new JazykovyPredmet("Konverzácia v ruskom jazyku", "B1", Array.Empty<string>(), true);
+            return new JazykovyPredmet("Konverzácia v ruskom jazyku", "B1", Array.Empty<string>(), true, "Konverzácia");
         }
 
         if (Ma("ruj") || Ma("rusky jazyk"))
