@@ -185,6 +185,40 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Databáza: rýchla kontrola pri spustení (upozornenie pri chybe), optimalizácia pri zatvorení programu.
 - Web/HTML/XML: kódovanie z BOM, `<meta charset>` alebo deklarácie XML (windows-1250, iso-8859-2).
 
+## Sekcia Novinky a dashboard (23. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+- **Novinky** (`Services/NovinkyService`, `ViewModels/NovinkyViewModel`, `Views/NovinkyView`, menu pod Dashboardom):
+  overené informácie v 6 farebných témach – Učebné osnovy a ŠVP, Tematické plány, Cieľové požiadavky, Maturitná skúška,
+  Prijímacie skúšky, Prázdniny a školský rok; druhy Termín / Novinka / Odporúčanie (farebné štítky), odpočet, poznámky
+  k nesúladu zdrojov, kraj pre jarné prázdniny (`novinky.kraj`), hľadanie, záložky Prehľad podľa tém / Termínovník /
+  Aktuálne správy zo zdrojov / Odporúčané stránky, „Do kalendára…“ (.ics).
+- Údaje: `Zdroje/novinky.json` (65 položiek, stav k 23. 10. 2026; vygenerované nástrojom zo stiahnutých oficiálnych
+  dokumentov – POP 2026/2027, termíny prázdnin .docx, termíny prijímacích skúšok 2027/2028, Základné informácie MS 2027,
+  stránky NÚCEM/NIVaM, ePrihlášky, školský zákon zo Slov-Lex). Každý zdroj musí byť na oficiálnej doméne
+  (`NovinkyService.OficialneDomeny` – minedu, nivam, nucem, statpedu, iedu, slov-lex, slovensko.sk, cvtisr, svsbb…);
+  médiá a noviny sa odmietnu aj v stiahnutých údajoch. Pole `overit` = texty, ktoré musí zdrojová stránka obsahovať.
+- Aktualizácia bez novej verzie: „Aktualizovať“ stiahne `src/SkVP.App/Zdroje/novinky.json` z vetvy main (raw GitHub),
+  použije ho, ak je novší a platný (`novinky.data`). Nový stav údajov = upraviť JSON a vydať (main).
+- RSS kanály ministerstva (`minedu.sk/rss/`) a NIVaM (`nivam.sk/feed/`): výber správ k vzdelávaciemu obsahu podľa
+  nadpisu (súťaže, šport, veda, výstavba sa vynechajú), krížové potvrdenie, ak o téme píše aj druhý zdroj (≥3 výrazné
+  slová, ±10 dní); obnova najviac raz za 3 h (`novinky.spravy`).
+- „Overiť na zdrojoch“ načíta zdrojové stránky (HTML aj Word priamo, PDF len dostupnosť) a skontroluje údaje
+  (`novinky.overenie`). Samotest v CI 23. 10. 2026: 29 údajov potvrdených na stránkach, 67 dokumentov dostupných,
+  0 nenájdených; report `novinky_overenie.txt` vo výstupoch samotestu.
+- Zistené nesúlady (uvedené pri položke): zber údajov o maturantoch NIVaM 1. – 31. 10. vs. POP 1. – 30. 10. 2026;
+  .docx prázdnin na webe ministerstva vynecháva pri jarných prázdninách Trenčiansky kraj (POP ho uvádza); preklep
+  v POP pri vianočných prázdninách 2028/2029.
+- **Dashboard** (`ViewModels/DashboardDen.cs`): panel Dnes (dátum, týždeň, meniny dnes/zajtra, sviatky, najbližší deň
+  pracovného pokoja – Kalendárium z EviTA `src/Kalendarium.Core`, spoločná DB C:\ProgramData\Kalendarium, údaje mien
+  MIT `LICENSE-meniny.txt`; stav školského roka/prázdniny a najbližší termín z Noviniek), Počasie (`Services/PocasieService`
+  z EviTA, Open-Meteo bez kľúča; predvolene mesto z Údajov o organizácii, zmena miesta priamo v paneli), Výrok dňa
+  (`Services/CitatyService`, `Zdroje/citaty.json`). Prepínače „Zobraziť na dashboarde“ (`dashboard.dnes/pocasie/citat`).
+- Výroky: výlučne z citaty-slavnych.sk (stiahnuté 23. 10. 2026), 1974 výrokov s autorom, rokmi života a popisom;
+  vynechané výroky žijúcich politikov a osôb s politickou funkciou (Danko, Kiska, Schwarzenegger, Slota, Čaputová,
+  Harabin, Dalajláma); predvolene skryté výroky diktátorov (Stalin, Lenin, Husák). Na dashboarde len výroky do 280 znakov,
+  výrok dňa podľa dátumu, „Ďalší“ a „Skryť“ (`citaty.skryte`, s vrátením späť).
+- Nástroj zdrojov: `.github/workflows/zdroje.yml` + `nastroje/zdroje/stiahni.py` (`zoznam.txt`, `overenie.txt`, premenná
+  ZOZNAM) – stiahne oficiálne dokumenty na runneri do vetvy `zdroje` (shell session nemá prístup na tieto stránky).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
