@@ -1,0 +1,789 @@
+Štátny vzdelávací
+
+
+
+
+       ŠTÁTNY VZDELÁVACÍ PROGRAM PRE GYMNÁZIÁ
+
+                    (úplné stredné všeobecné vzdelávanie)
+Obsah
+
+Úvod ................................................................................................................................................. 3
+1 Všeobecné ciele úplného stredného všeobecného vzdelávania ..................................................... 4
+2 Stupeň vzdelania ........................................................................................................................... 4
+3 Profil absolventa gymnázia ........................................................................................................... 5
+4 Vzdelávacie oblasti ....................................................................................................................... 5
+  4.1 Jazyk a komunikácia .............................................................................................................. 7
+  4.2 Matematika a práca s informáciami ....................................................................................... 7
+  4.3 Človek a príroda ..................................................................................................................... 7
+  4.4 Človek a spoločnosť ............................................................................................................... 8
+  4.5 Človek a hodnoty ................................................................................................................... 8
+  4.6 Umenie a kultúra .................................................................................................................... 8
+  4.7 Zdravie a pohyb ...................................................................................................................... 9
+5 Prierezové témy ............................................................................................................................. 9
+  5.1 Osobnostný a sociálny rozvoj .............................................................................................. 10
+  5.2 Environmentálna výchova .................................................................................................... 10
+  5.3 Mediálna výchova ................................................................................................................ 11
+  5.4 Multikultúrna výchova ......................................................................................................... 11
+  5.5 Ochrana života a zdravia ...................................................................................................... 11
+6 Vzdelávacie štandardy................................................................................................................. 12
+7 Výchova a vzdelávanie žiakov so zdravotným znevýhodnením ................................................. 12
+8 Rámcové učebné plány................................................................................................................ 13
+9 Organizačné podmienky na výchovu a vzdelávanie ................................................................... 13
+10 Povinné personálne zabezpečenie ............................................................................................. 13
+11 Povinné materiálno-technické a priestorové zabezpečenie ....................................................... 14
+  11.1 Priestorové vybavenie ........................................................................................................ 14
+  11.2 Povinné učebné priestory škôl a ich vybavenie.................................................................. 15
+12 Podmienky na zaistenie bezpečnosti a ochrany zdravia............................................................ 17
+13 Školský vzdelávací program ..................................................................................................... 17
+
+
+
+
+                                                                                                                                                      2
+Úvod
+
+
+      Štátny vzdelávací program (ďalej len ŠVP) predstavuje záväzný národný rámec pre úplné
+stredné všeobecné vzdelávanie. Reprezentuje prvú úroveň dvojúrovňového modelu vzdelávania.
+Je východiskovým dokumentom pre prípravu školských vzdelávacích programov (ďalej len
+ŠkVP), ktoré reprezentujú druhú úroveň dvojúrovňového modelu vzdelávania.
+      Dvojúrovňovým modelom vzdelávania sa dáva možnosť každej škole, aby
+prostredníctvom využitia disponibilných hodín reflektovala vo svojom ŠkVP špecifické
+regionálne/lokálne podmienky a/alebo požiadavky žiakov/rodičov.
+      ŠVP vychádza z demokratických a humanistických hodnôt spoločnosti. Na ich základe
+vymedzuje vzdelávacie štandardy poskytovaného vzdelávania v cieľovej, výkonovej a obsahovej
+rovine. Tieto štandardy tvoria východisko k osvojovaniu si a rozvíjaniu kompetencií žiakov.
+Prostredníctvom vzdelávacích oblastí a prierezových tém preferuje vo výučbe medzipredmetový
+prístup, a tým aj kooperáciu v rámci jednotlivých vyučovacích predmetov nielen v rámci danej
+vzdelávacej oblasti, ale aj medzi rôznymi oblasťami. Súčasne s týmto prístupom podmieňuje
+svoju realizáciu uplatňovaním motivačných učebných postupov a vytváraním podporujúcej
+sociálnej klímy v škole. Kladie dôraz na kvalitu školy, ktorá uplatňuje vnútorné a vonkajšie
+vyhodnocovanie svojich programov, procesov a výsledkov.
+      Pri riešení týchto problémov je tiež potrebné chápať znalosť ako akciu v zmysle jej
+použiteľnosti. Nepoužiteľné a nepoužité znalosti zostávajú informáciami, kým nie sú
+transformované na činnosť. V nej si musíme osvojovať skúmajúce pozorovanie a pátranie po
+veciach. Myslieť znamená na niečo sa spytovať, hľadať čosi, čo ešte nemáme k dispozícii.
+      To znamená, že účinne si osvojíme len taký poznatok, ktorý si sami vytvoríme v konkrétnej
+činnosti. Teda ide nám aj o výučbu aktívnej výstavby poznatkov v jednotlivých predmetoch.
+Naším spoločným cieľom je potom vytvárať také kognitívne činnosti, ktoré sú vyjadrené
+pojmami, ako je vlastné aktívne objavovanie, hľadanie, skúmanie, pátranie, zisťovanie niečoho
+nového, napríklad výsledkov pokusu alebo experimentu, interpretácie, či vytvárania rôznorodých
+verbálnych, obrazových a grafických textov, ktoré tvoria sociálny a kultúrny svet.
+     Vytváranie uvedených kognitívnych činností možno všeobecne zhrnúť do štyroch
+základných programových cieľov výchovy a vzdelávania.
+V tomto zmysle naším spoločným cieľovým úsilím vo výučbe každého predmetu je:
+         rozvíjať schopnosti žiakov vedieť a chcieť sa učiť;
+         posilňovať sebadôveru žiakov v riešení problémov, ktoré sú spojené s učením;
+         viesť žiakov k aktívnemu občianstvu;
+         podieľať sa na vymedzovaní hodnôt slušného a morálneho človeka.
+      ŠVP tiež akcentuje potrebu zabezpečenia primeraných personálnych, materiálno-
+technických a priestorových podmienok procesu vzdelávania. Uvádza    požiadavky na
+vzdelávanie žiakov so zdravotným znevýhodnením. Umožňuje využívanie schválených
+výsledkov experimentálneho overovania.
+
+
+
+
+                                                                                             3
+1 Všeobecné ciele úplného stredného všeobecného vzdelávania
+      Všeobecné ciele vzdelávania predstavujú rámec pre konkretizované predmetové ciele a
+ciele prierezových tém, ktoré sa majú vzdelávaním naplniť.
+V rámci úplného stredného všeobecného vzdelávania je potrebné najmä:
+          poskytnúť žiakom všeobecný vzdelanostný základ vychádzajúci zo systematického
+           a vyváženého výberu informácií a poznatkov z vedeckého a kultúrneho dedičstva;
+            prehĺbiť u žiakov abstraktné a logické myslenie s dôrazom na pochopenie
+             kauzálnych, funkčných a vývinových vzťahov medzi javmi a procesmi;
+            naučiť žiakov samostatne riešiť problémy, úlohy, realizovať skúmanie a vyvodzovať
+             logické závery;
+            viesť žiakov ku kritickému mysleniu s uplatnením mnohostranného pohľadu pri
+             riešení úloh;
+            naučiť žiakov zaraďovať získané informácie/poznatky do zmysluplného kontextu
+             životnej praxe;
+            poskytnúť žiakom možnosti pre optimálny výber ďalšieho vzdelávania/pracovného
+             zaradenia podľa ich schopností a záujmov a tiež potrieb spoločnosti;
+            prehĺbiť u žiakov sociálne kompetencie, osobitne schopnosť    kultivovane
+             komunikovať, racionálne argumentovať a efektívne spolupracovať v rôznych
+             skupinách;
+            posilniť u žiakov prístup rešpektujúci                 ľudské     práva     a zodpovednú       účasť
+             v demokratickej spoločnosti;
+            nasmerovať žiakov na uprednostňovanie životného štýlu, ktorý rešpektuje zdravie,
+             duševnú rovnováhu a pohodu;
+            motivovať žiakov k tomu, aby sa zaujímali o svet a ľudí okolo seba, aby boli aktívni
+             pri ochrane ľudských a kultúrnych hodnôt, životného prostredia a života na Zemi.
+            viesť žiakov k tomu, aby si uvedomili globálnu previazanosť udalostí, vývoja
+             i problémov na miestnej, regionálnej, národnej i svetovej úrovni.
+
+2 Stupeň vzdelania
+     Úplné stredné všeobecné vzdelanie získa žiak1 úspešným absolvovaním posledného ročníka
+najmenej štvorročného a najviac osemročného vzdelávacieho programu odboru vzdelávania v
+gymnáziu, ktorý sa ukončuje maturitnou skúškou; dokladom o získanom stupni vzdelania je
+vysvedčenie o maturitnej skúške.
+
+
+
+
+1
+   Pojmy žiak, absolvent, učiteľ, riaditeľ, pracovník... sú v dokumente používané ako pedagogické kategórie alebo
+označenie profesijnej skupiny, t. j. vo význame žiak i žiačka, absolvent i absolventka, učiteľ i učiteľka, riaditeľ
+i riaditeľka a pod.
+
+                                                                                                                 4
+3 Profil absolventa gymnázia
+      Profil absolventa úplného stredného všeobecného vzdelávania sa odvíja od kompetencií
+vychádzajúcich zo vzdelávacích štandardov vyučovacích predmetov a špecifických cieľov
+prierezových tém, ktoré žiak získal v procese vzdelávania a sebavzdelávania na tomto stupni.
+Absolvent:
+          má osvojené funkčné znalosti a kompetencie z oblasti prírodných a spoločenských
+           vied, ktoré sú vymedzené vzdelávacími štandardami;
+          efektívne komunikuje v materinskom, resp. vo vyučovacom jazyku a vo dvoch
+           cudzích jazykoch;
+          má osvojené matematické princípy a postupy tak, že ich dokáže využiť v praktickom
+           živote a pri ďalšom štúdiu/pracovnom zaradení;
+          ovláda a využíva pri svojom vzdelávaní a tvorbe súčasné informačno-komunikačné
+           technológie;
+          vie vyhodnotiť a zaujať kritický postoj k informáciám, vrátane masmediálnych
+           informácií;
+          uvedomuje si svoje schopnosti, silné a slabé stránky a v súlade s nimi sa rozhoduje
+           pre ďalšie/celoživotné vzdelávanie a svoju budúcu profesiu;
+          akceptuje a uplatňuje ľudské práva vo vzťahu k sebe a iným, rešpektuje inakosť v
+           spoločnosti;
+          je si vedomý svojich občianskych práv a povinností, uvedomuje si význam a potrebu
+           občianskej angažovanosti v národnom a globálnom kontexte;
+          uznáva a je pripravený v praxi aplikovať demokratické princípy spoločnosti;
+          zaujíma sa o svet a ľudí okolo seba, je pripravený aktívne chrániť ľudské a kultúrne
+           hodnoty a životné prostredie na Zemi.
+
+4 Vzdelávacie oblasti
+     Vzdelávacie oblasti sú okruhy, do ktorých patrí problematika príbuzných vyučovacích
+predmetov. Zabezpečujú nadväznosť a previazanosť obsahu jednotlivých/príbuzných
+vyučovacích predmetov, ktoré patria do konkrétnej oblasti. Umožňujú rozvíjanie
+medzipredmetových vzťahov, a tým aj kooperáciu v rámci jednotlivých predmetov.
+
+
+
+
+                                                                                             5
+Tab. 1 Vzdelávacie oblasti a príslušné predmety ŠVP pre gymnázium so štvorročným
+a päťročným vzdelávacím programom
+    VZDELÁVACIA OBLASŤ                                 VYUČOVACIE PREDMETY
+                                                       SLOVENSKÝ JAZYK A LITERATÚRA
+                                                       JAZYK NÁRODNOSTNEJ MENŠINY A LITERATÚRA
+    JAZYK A KOMUNIKÁCIA                                SLOVENSKÝ JAZYK A SLOVENSKÁ LITERATÚRA
+                                                                              2
+                                                       DRUHÝ VYUČOVACÍ JAZYK
+                                                       CUDZÍ JAZYK
+                                                       MATEMATIKA
+    MATEMATIKA A PRÁCA S INFORMÁCIAMI
+                                                       INFORMATIKA
+                                                       FYZIKA
+    ČLOVEK A PRÍRODA                                   CHÉMIA
+                                                       BIOLÓGIA
+                                                       DEJEPIS
+    ČLOVEK A SPOLOČNOSŤ                                GEOGRAFIA
+                                                       OBČIANSKA NÁUKA
+                                                       ETICKÁ VÝCHOVA /
+    ČLOVEK A HODNOTY
+                                                       NÁBOŽENSKÁ VÝCHOVA/NÁBOŽENSTVO
+    UMENIE A KULTÚRA                                   UMENIE A KULTÚRA
+    ZDRAVIE A POHYB                                    TELESNÁ A ŠPORTOVÁ VÝCHOVA
+
+Tab. 2 Vzdelávacie oblasti a príslušné predmety ŠVP pre gymnázium s osemročným vzdelávacím
+programom
+    VZDELÁVACIA OBLASŤ                                 VYUČOVACIE PREDMETY
+                                                       SLOVENSKÝ JAZYK A LITERATÚRA
+                                                       JAZYK NÁRODNOSTNEJ MENŠINY A LITERATÚRA
+    JAZYK A KOMUNIKÁCIA
+                                                       SLOVENSKÝ JAZYK A SLOVENSKÁ LITERATÚRA
+                                                       CUDZÍ JAZYK
+                                                       MATEMATIKA
+    MATEMATIKA A PRÁCA S INFORMÁCIAMI
+                                                       INFORMATIKA
+                                                       FYZIKA
+    ČLOVEK A PRÍRODA                                   CHÉMIA
+                                                       BIOLÓGIA
+                                                       DEJEPIS
+    ČLOVEK A SPOLOČNOSŤ                                GEOGRAFIA
+                                                       OBČIANSKA NÁUKA
+                                                       ETICKÁ VÝCHOVA /
+    ČLOVEK A HODNOTY
+                                                       NÁBOŽENSKÁ VÝCHOVA/NÁBOŽENSTVO
+                                                       HUDOBNÁ VÝCHOVA
+    UMENIE A KULTÚRA                                   VÝTVARNÁ VÝCHOVA
+                                                       UMENIE A KULTÚRA
+    ZDRAVIE A POHYB                                    TELESNÁ A ŠPORTOVÁ VÝCHOVA
+
+
+
+2
+    Platí pre gymnáziá s dvoma vyučovacími jazykmi (bilingválne gymnáziá s päťročným štúdiom).
+
+                                                                                                 6
+4.1 Jazyk a komunikácia
+
+      Vzdelávaciu oblasť Jazyk a komunikácia tvoria vyučovacie predmety zahrnuté do troch
+skupín: vyučovacie jazyky3, druhý jazyk4, cudzie jazyky a druhý vyučovací jazyk v bilingválnom
+štúdiu. Spoločným menovateľom oblasti je jazyk, ktorý sa chápe ako potenciálny zdroj osobného
+a kultúrneho obohatenia človeka, nástroj myslenia a komunikácie a prostriedok na vyjadrovanie
+citov a pocitov. Vzdelávanie preto vedie k vnímaniu a postupnému osvojovaniu si jazyka ako
+bohatého mnohotvárneho prostriedku na získavanie a odovzdávanie informácií, k zvyšovaniu
+jazykovej kultúry ústnych i písomných jazykových prejavov žiakov a k rozvíjaniu čitateľských
+kompetencií zameraných na prácu s textom (čítanie s porozumením, deklamácia, počúvanie s
+porozumením), na jeho analýzu a hodnotenie.
+      Špecifickou zložkou oblasti je literatúra, ktorá spája vyučovacie predmety zahrnuté
+v skupinách vyučovacie jazyky a druhý jazyk. Jej základom sa stáva postupné rozvíjanie
+analytického čítania a rozvoj schopnosti pracovať s významom literárneho textu na vyššej
+individuálnej úrovni.
+
+4.2 Matematika a práca s informáciami
+
+      Cieľom vzdelávacej oblasti Matematika a práca s informáciami je rozvíjať matematické
+myslenie (pochopenie kvantitatívnych a priestorových vzťahov), ktoré je potrebné pri riešení
+rôznych problémov v každodenných situáciách, a spôsobilosť formulovať problém s využitím
+stratégie algoritmického prístupu pri jeho riešení. Prehlbuje abstraktné, analytické, systémové
+myslenie a logické usudzovanie žiaka. Učí zrozumiteľne a vecne argumentovať. Podporuje
+schopnosť efektívnym a tvorivým spôsobom využívať informačno-komunikačné technológie,
+informačné zdroje a možnosti aplikačného programového vybavenia. Buduje informatickú
+kultúru, založenú na rešpektovaní právnych a etických zásad používania informačných
+technológií a produktov.
+      V priebehu štúdia žiaci nadobudnú vedomosti, zručnosti a kompetencie, ktoré nájdu
+uplatnenie v širokej škále odborov ľudskej činnosti. Zvládnutím vedomostí a zručností, ktoré
+primárne rozvíja táto vzdelávacia oblasť, sa zvyšuje pravdepodobnosť uplatnenia absolventov
+gymnázia v ďalšom vzdelávaní, vrátane celoživotného, a konečne i na samotnom trhu práce.
+Vzdelávaciu oblasť tvoria vyučovacie predmety matematika a informatika.
+
+4.3 Človek a príroda
+      Základnou charakteristikou vzdelávacej oblasti je hľadanie zákonitých súvislostí medzi
+pozorovanými vlastnosťami prírodných objektov a javov, ktoré nás obklopujú v každodennom
+živote, a porozumenie ich podstate, čo si vyžaduje interdisciplinárny prístup, a preto aj úzku
+spoluprácu v rámci prírodovedných predmetov. Cieľom je nielen viesť žiakov k pochopeniu
+dejov prebiehajúcich v reálnom svete, ale aj naučiť ich kriticky myslieť, získavať a hodnotiť
+informácie. Všetky vzdelávacie postupy budujú nové poznatky na predchádzajúcich
+
+3
+  Vyučovacie jazyky: slovenský jazyk a literatúra v školách s vyučovacím jazykom slovenským,
+jazyk národnostnej menšiny a literatúra v školách s vyučovacím jazykom národnostnej menšiny.
+4
+   Druhý jazyk: slovenský jazyk a literatúra v školách s vyučovacím jazykom národnostnej menšiny okrem
+maďarskej národnostnej menšiny, slovenský jazyk a slovenská literatúra v školách s vyučovacím jazykom
+maďarským, jazyk národnostnej menšiny a literatúra v školách s vyučovacím jazykom národnostnej menšiny.
+
+
+
+                                                                                                     7
+skúsenostiach žiaka, čím sa jeho aktívna činnosť stáva hlavnou formou vzdelávania. Dôraz sa
+kladie na rozvíjanie poznávacích schopností, komunikačných zručností (formulácia a vyjadrenie
+vlastných názorov, počúvanie názorov druhých), vytváranie spôsobilostí pre vedeckú prácu, a to
+najmä spôsobilosti pozorovania, vnímania časových a priestorových vzťahov medzi objektmi a
+javmi, klasifikácie, merania a predvídania.
+      Prírodovedné vzdelávanie poskytne žiakovi možnosť získania informácií o tom, ako súvisí
+rozvoj prírodných vied s rozvojom techniky, technológií a so spôsobom života spoločnosti.
+Vzdelávaciu oblasť tvoria vyučovacie predmety fyzika, chémia a biológia.
+
+4.4 Človek a spoločnosť
+
+       Hlavným cieľom vzdelávacej oblasti je aktívny prístup k reflektovaniu minulosti
+a prítomnosti v kontexte miesta, regiónu a štátu. Prostredníctvom vzdelávacej oblasti sa žiaci
+zoznamujú s najvýznamnejšími historickými, geografickými a spoločenskými procesmi a javmi,
+ktoré sa premietajú do ich každodenného života. Učia sa z potrieb prítomnosti o minulosti svojho
+národa a iných národov, poznávajú prírodné aj spoločenské charakteristiky svojej krajiny a iných
+krajín v Európe i vo svete. Žiaci sa učia kriticky reflektovať spoločenskú skutočnosť, posudzovať
+rôzne prístupy k riešeniu problémov v prítomnosti, ktorej korene možno hľadať v minulosti.
+Vzdelávacia oblasť prispieva k utváraniu historického vedomia. Ďalej vedie žiakov
+k rešpektovaniu základných princípov demokracie a pripravuje žiakov na zodpovedný občiansky
+život v demokratickej spoločnosti. Vzdelávaciu oblasť Človek a spoločnosť tvoria vyučovacie
+predmety dejepis, občianska náuka a geografia.
+
+4.5 Človek a hodnoty
+
+      Hlavnou úlohou tejto vzdelávacej oblasti je aktívne sa podieľať na formovaní osobnosti
+žiaka, podporovať pochopenie a interiorizáciu (zvnútornenie) mravných noriem a napomáhať k
+osvojeniu si správania, ktoré je s nimi v súlade. Vedie žiakov k tomu, aby si vedeli vytvoriť
+harmonické vzťahy v rôznych sociálnych skupinách – v rodine, na pracovisku, v spoločnosti.
+      Obsah vzdelávacej oblasti sa realizuje prostredníctvom povinne voliteľných vyučovacích
+predmetov etická výchova alebo náboženská výchova/náboženstvo. Predmet etická výchova sa v
+ prvom rade zameriava na výchovu k prosociálnosti, ktorá sa odráža v morálnych postojoch
+a v regulácii správania žiakov. Cieľom predmetu náboženská výchova/náboženstvo je motivovať
+žiaka k viere, osobnému náboženskému životu a k zodpovednému konaniu v cirkvi
+a v spoločnosti.
+
+4.6 Umenie a kultúra
+
+      Vzdelávacia oblasť Umenie a kultúra rozvíja u žiaka komplexné vnímanie kultúry a
+umenia v intenciách aktuálnych spoločenských procesov. Podieľa sa na rozvíjaní kultúrneho
+povedomia a kultúrnej identity žiaka, jeho kritického myslenia vo vzťahu k mediálnej produkcii
+a k aktuálnym kultúrnym procesom, prehlbuje jeho záujem o kultúru, kultúrne dedičstvo svojho
+regiónu, národa, štátu a iných kultúr. Prispieva k tomu, aby sa žiak naučil rozlišovať medzi
+hlavnými kultúrnymi, umeleckými smermi, prúdmi a druhmi, pochopil význam a hodnotu
+kultúry a umenia v živote človeka a spoločnosti a zaujal vlastný postoj k hodnotám národnej
+kultúry a kultúry iných národov. Žiaci sa učia verbalizovať, diskutovať a interpretovať, ale tiež
+umeleckými prostriedkami a médiami vyjadrovať rôznorodé zážitky z vnímania umeleckých diel
+
+                                                                                               8
+a kultúry. Hlavným cieľom vzdelávacej oblasti je rozvoj umeleckej, estetickej, vizuálnej,
+akustickej, jazykovej a pohybovej kultúry žiaka v učebných situáciách, v ktorých žiaci aktívne
+reflektujú súčasné umenie a kultúru. Využíva pritom skúsenostné metódy postavené na osobnom
+zážitku, reflexii, aktívnej tvorbe v rámci projektov v oblasti rôznych druhov umení a médií.
+      Obsah vzdelávacej oblasti sa realizuje prostredníctvom predmetu umenie a kultúra, v
+nižších ročníkoch gymnázia s osemročným vzdelávacím programom (prima – kvarta) aj
+prostredníctvom predmetov výtvarná výchova a hudobná výchova. Svojím obsahom a zameraním
+prispievajú k získaniu relevantných kompetencií u žiakov i prierezové témy mediálna výchova
+a multikultúrna výchova, ako aj vyučovacie predmety vzdelávacích oblastí Človek a spoločnosť a
+Zdravie a pohyb.
+
+4.7 Zdravie a pohyb
+
+      Vzdelávacia oblasť Zdravie a pohyb je zameraná na uvedomenie si potreby celoživotnej
+starostlivosti o svoje zdravie, osvojenie si teoretických vedomostí a praktických zručností
+súvisiacich so zdravým životným štýlom a pohybovou aktivitou. Oblasť sa realizuje vyučovacím
+predmetom telesná a športová výchova, ktorej najdôležitejším poslaním je vytváranie vzťahu k
+pravidelnej pohybovej aktivite ako k nevyhnutnému základu zdravého životného štýlu. Žiaci si
+vytvoria predstavu o význame pohybovej a športovej aktivity, spoznajú účinok vykonávaných
+cvičení na organizmus a možnosti upevňovania svojho zdravia. V rámci športových aktivít si
+osvoja a zdokonalia športové zručnosti a získajú vedomosti o rôznych športových odvetviach ako
+i organizácii športových súťaží.
+      Pri realizovaní obsahu telesnej a športovej výchovy je dôležité rešpektovať individuálne
+dispozície žiakov, ktoré by mali byť zohľadnené pri plánovaní cvičení, ako i pri hodnotení
+žiakov. Významnou súčasťou je motivácia žiakov k dosiahnutiu individuálnych zlepšení vo
+svojej pohybovej výkonnosti pri akceptovaní ich vlastných predpokladov.
+
+5 Prierezové témy5
+      Rýchlo sa meniaca realita súčasnej globalizovanej spoločnosti s novými technológiami
+a sociálnymi zmenami ovplyvňuje postoje, hodnotový systém žiakov a ich konanie. Táto
+skutočnosť sa musí odraziť aj vo vzdelávaní. Vhodným prostriedkom na to sú prierezové
+tematiky, ktoré sa svojím obsahom a výchovným zameraním premietajú do vymedzených
+vzdelávacích oblastí, dopĺňajú ich, prepájajú ich obsah s aktuálnym dianím v spoločnosti, s
+každodennou skúsenosťou žiaka a konkrétnej triedy. V tomto zmysle prierezové témy priaznivo
+ovplyvňujú proces utvárania a rozvíjania funkčných kompetencií žiakov. Prierezové témy sa
+môžu realizovať ako súčasť učebného obsahu vyučovacích predmetov alebo prostredníctvom
+samostatných projektov, seminárov, vyučovacích blokov, kurzov a pod. Súčasne prierezové témy
+môžu tvoriť samostatný vyučovací predmet z rámca disponibilných hodín. Jednotlivé formy sa
+môžu aj ľubovoľne kombinovať. Účinnosť pôsobenia prierezových tém sa zvyšuje relevantnými
+mimovyučovacími a mimoškolskými aktivitami.
+      V rámci úplného stredného všeobecného vzdelávania majú prierezový charakter tieto témy:
+osobnostný a sociálny rozvoj, environmentálna výchova, mediálna výchova, multikultúrna
+výchova, ochrana života a zdravia.
+
+
+5
+    Metodické usmernenia k realizácii prierezových tém sa nachádzajú na webovom sídle ŠPÚ.
+
+                                                                                             9
+5.1 Osobnostný a sociálny rozvoj
+
+      Prostredníctvom tejto nadpredmetovej témy sa cielene rozvíjajú osobnostné a sociálne
+kompetencie u žiakov, ktoré významne podmieňujú ich akademický rozvoj, napomáhajú úspechu
+vo svete práce a podporujú žiakovu osobnú emocionálnu pohodu a integritu. Pri správnom
+uplatňovaní tejto prierezovej oblasti sa prispieva k pozitívnej sociálnej klíme školy a dobrým
+vzťahom medzi pedagógmi a žiakmi a tiež medzi samotnými žiakmi.
+      Dôležitou súčasťou osobnostného rozvoja žiakov je príprava na zodpovedné partnerské
+vzťahy, manželstvo a rodičovstvo. Výchova k manželstvu a rodičovstvu je zameraná na
+osvojovanie relevantných vedomostí a rozvíjanie zodpovedných postojov v oblasti partnerských
+vzťahov a rodičovstva v súlade s vedeckými poznatkami a etickými normami. Podmienkou je
+taktný a citlivý prístup pedagóga. Škola môže využiť aj pomoc alebo služby relevantných
+odborníkov.
+Cieľom uplatňovania tejto prierezovej témy je prispieť k tomu, aby (si) žiak:
+         porozumel sebe a iným;
+         stanovil priority a ciele s ohľadom na svoje osobné schopnosti, záujmy a možnosti;
+         ovládal zručnosť kultivovanej komunikácie a vzájomnej spolupráce;
+         akceptoval rôzne typy ľudí, ich názory a prístupy k riešeniu problémov a rešpektoval
+          práva každého človeka;
+         osvojil poznatky o biologických, psychických a sociálnych zmenách, ktoré
+          ovplyvňujú vývin jeho osobnosti v súčasnosti i v budúcnosti;
+         získal predpoklady pre zodpovedné rozhodnutia v oblasti partnerských vzťahov,
+          manželstva a rodičovstva;
+         spoznal a uplatňoval podmienky pre životný štýl, ktorý podporuje a neohrozuje
+          zdravie.
+
+5.2 Environmentálna výchova
+
+      Environmentálna výchova umožňuje žiakom získať vedomosti, zručnosti, postoje a návyky
+k ochrane a zlepšovaniu životného prostredia dôležitého pre trvalo udržateľný život na Zemi.
+Vedie žiakov ku komplexnému pochopeniu vzájomných vzťahov človeka, organizmov a
+životného prostredia, kde sú prepojené aspekty ekologické, ekonomické a sociálne. Podporuje
+myslenie a zodpovedné konanie v súlade s princípmi trvalo udržateľného rozvoja a s úctou k
+životu vo všetkých jeho formách.
+Cieľom uplatňovania tejto prierezovej témy je prispieť k tomu, aby žiak:
+         dokázal vnímať negatívne zásahy človeka vo svojom širšom životnom prostredí;
+         navrhol možnosti, riešenia smerujúce k ochrane a zlepšeniu životného prostredia na
+          lokálnej/regionálnej úrovni a aktívne sa na nich podieľal;
+         skúmal vplyv faktorov prostredia na organizmy v širších súvislostiach;
+         spoznal globálne ekologické problémy, kriticky hodnotil ich vplyv a navrhol
+          možnosti riešenia;
+         porozumel princípom trvalo udržateľného rozvoja;
+         porovnal technológie a materiály, ktoré sú šetrné a ktoré poškodzujú životné
+          prostredie, akceptoval potrebu uprednostnenia tzv. zelených technológií a materiálov;
+         poznal spoločenské nástroje starostlivosti o životné prostredie;
+
+                                                                                            10
+          správal sa šetrne k prírodným zdrojom, vedel prispôsobiť svoje návyky v prospech
+           zachovania životných podmienok.
+5.3 Mediálna výchova
+      Hlavným cieľom mediálnej výchovy je zvýšiť úroveň mediálnej gramotnosti žiakov.
+Prostredníctvom zamerania sa na široký kontext – teda na sociálne, etické, kultúrne a tiež
+hospodárske aspekty súčasného mediálneho sveta – sa rozvíjajú informačné a digitálne
+kompetencie žiakov. Dôležité v tomto kontexte je nadväzovať na každodennú skúsenosť žiakov,
+ich rôznorodé skúsenosti s médiami. K vhodným vyučovacím stratégiám patrí textuálna analýza,
+kontextuálna analýza, prípadové štúdie, simulácie a tvorba mediálnych produktov.
+Cieľom uplatňovania tejto prierezovej témy je prispieť k tomu, aby (si) žiak:
+         uvedomil význam a vplyv médií vo svojom živote a v spoločnosti;
+         využíval médiá zmysluplne;
+         získal kritický odstup od mediálnych produktov/obsahov, rozpoznal mediálne
+          spracovanú realitu;
+         reflektoval pozitíva a negatíva využívania, vplyvu médií a ich produktov;
+         osvojil zodpovedný prístup pri využívaní médií na komunikáciu a pri vytváraní
+          vlastných mediálnych produktov;
+         prehĺbil technické zručnosti potrebné pre používanie médií.
+
+5.4 Multikultúrna výchova
+
+      S aktuálnou realitou celosvetovej globálnej spoločnosti a s multikultúrnym charakterom
+slovenskej spoločnosti sa spájajú riziká predsudkov a stereotypov, ktoré sa prejavujú v rôznych
+podobách neznášanlivosti, rasizmu, či xenofóbie. Žiaci sú každodenne vystavení rôznym
+kultúrnym vplyvom a dostávajú sa do kontaktu s príslušníkmi rôznych kultúr. Prostredníctvom
+spoznávania svojej kultúry a iných kultúr, histórie, zvykov a tradícií sa žiaci naučia rešpektovať
+tieto kultúry ako rovnocenné a dokážu s ich príslušníkmi konštruktívne komunikovať
+a spolupracovať. Pri realizácii tejto témy sa odporúča využívať také didaktické postupy a metódy,
+ktoré neučia stierať medzikultúrne rozdiely, ale pochopiť ich a akceptovať, ako aj rešpektovať
+ľudské práva.
+Cieľom uplatňovania tejto prierezovej témy je prispieť k tomu, aby žiak:
+         rozvíjal svoju kultúrnu identitu a interkultúrne kompetencie;
+         spoznal rozličné tradičné aj nové kultúry a subkultúry;
+         akceptoval prirodzenú rozmanitosť spoločnosti, rešpektoval kultúrne, náboženské a
+          iné odlišnosti ľudí a spoločenstiev;
+         uplatňoval svoje práva a rešpektoval práva iných ľudí.
+
+5.5 Ochrana života a zdravia
+
+      Prierezová téma ochrana života a zdravia sa realizuje v rámci predmetov ŠVP a obsahom
+samostatných organizačných foriem vyučovania – účelových cvičení a kurzu na ochranu života a
+zdravia. Integruje spôsobilosti žiakov zamerané na ochranu života a zdravia v mimoriadnych
+situáciách, tiež pri pobyte a pohybe v prírode, ktoré môžu vzniknúť vplyvom nepredvídaných
+skutočností ohrozujúcich človeka a jeho okolie. Počas kurzu na ochranu života a zdravia sa
+odporúča podľa možnosti školy realizovať i netradičné pohybové aktivity zamerané na osvojenie
+
+                                                                                               11
+si nových pohybových zručností, ktoré podporujú rozvoj telesnej zdatnosti (jazda na koni,
+lukostreľba, horolezectvo a pod.).
+Cieľom uplatňovania tejto prierezovej témy je prispieť k tomu, aby (si) žiak:
+         identifikoval a charakterizoval nebezpečné situácie ohrozujúce život a zdravie;
+         rozvinul si praktické zručnosti v sebaochrane;
+         aktívne poskytol pomoc iným v prípade ohrozenia zdravia a života;
+         vedel poskytnúť predlekársku prvú pomoc;
+         cieľavedome zvyšoval svoju telesnú zdatnosť a odolnosť organizmu voči fyzickej a
+          psychickej záťaži v náročných životných situáciách.
+
+6 Vzdelávacie štandardy
+      Vzdelávacie štandardy vymedzujú požiadavky, ktoré majú žiaci splniť v rámci konkrétneho
+časového intervalu. Tieto požiadavky sú formulované ako kompetencie, v ktorých sú obsiahnuté
+vedomosti, zručnosti, postoje a hodnoty v kontexte vymedzeného obsahu vzdelávania. Obsahujú
+štruktúru učebných cieľov, výkonové požiadavky a vymedzený rámcový učebný obsah.
+      Vzdelávacie štandardy je nevyhnutné chápať ako základné východisko k mnohostranne
+chápanej výučbe. Predstavujú dôležitý podklad pre učiteľa na realizáciu osobného plánovania,
+tvorby špecifickej stratégie a taktiky na výučbu jednotlivých predmetov, pričom je nevyhnutná
+kognitívna pestrosť a vytváranie panorámy myšlienkových možností žiakov.
+      Z hľadiska vymedzeného učebného obsahu je kľúčovým prvkom uvedomovanie si pojmov
+a vzťahov medzi nimi. Následne je žiaduce tieto pojmy a vzťahy medzi nimi spolu s funkčnými
+faktami názorne zobrazovať do pamäťových myšlienkových máp, ktoré sa potom stávajú
+základným prostriedkom efektívnejšieho upevňovania a systematizácie nadobudnutých
+kompetencií žiakov.
+
+7 Výchova a vzdelávanie žiakov so zdravotným znevýhodnením
+      Pre žiakov so zdravotným znevýhodnením platia rovnaké ciele vzdelávania ako pre
+ostatných žiakov. Pri realizácii vzdelávacích štandardov vyučovacích predmetov sa berie ohľad
+na individuálne osobitosti žiakov so zdravotným znevýhodnením, ale iba v takom rozsahu, aby
+výsledky žiaka so zdravotným znevýhodnením reflektovali profil absolventa gymnázia.
+      Vo všetkých organizačných formách vzdelávania je potrebné akceptovať nasledujúce
+špecifické podmienky, ktoré zabezpečujú žiakom so zdravotným znevýhodnením saturáciu ich
+špeciálnych výchovno-vzdelávacích potrieb:
+           zaradiť do školských vzdelávacích programov gymnázií pre žiakov so zdravotným
+            znevýhodnením a gymnázií, v ktorých sa vzdelávajú žiaci so zdravotným
+            znevýhodnením špecifické predmety (vyučovací predmet komunikačné zručnosti;
+            prípadne iné predmety) a podľa druhu zdravotného znevýhodnenia a individuálnej
+            potreby uplatňovať alternatívne formy komunikácie (posunkový jazyk, Braillovo
+            písmo);
+           dať možnosť učiteľom flexibilne prispôsobiť rozsah a štruktúru vyučovacej hodiny
+            zohľadňujúc momentálny psychický stav, správanie a potreby žiakov, ktoré sú
+            dôsledkom ich zdravotného znevýhodnenia;
+
+
+
+                                                                                          12
+          vypracovať individuálny výchovno-vzdelávací program v prípade, že žiak nemôže
+           vzhľadom na svoje zdravotné znevýhodnenie plniť požiadavky príslušného
+           vzdelávacieho programu aj v gymnáziu pre žiakov so zdravotným znevýhodnením.
+Základné podmienky vzdelávania žiakov so zdravotným znevýhodnením v bežných triedach
+gymnázií (integrované vzdelávanie):
+          zabezpečiť odborné personálne, materiálne, priestorové a organizačné podmienky
+           zodpovedajúce individuálnym potrebám žiaka so zdravotným znevýhodnením a tiež
+           systematickú spoluprácu školy so školským zariadením výchovného poradenstva
+           a prevencie alebo špeciálnou školou;
+          zabezpečiť vypracovanie individuálneho výchovno-vzdelávacieho programu pre
+           integrovaného žiaka, za ktorý zodpovedá triedny učiteľ v spolupráci s vyučujúcim
+           daného predmetu, školským špeciálnym pedagógom a školským zariadením
+           výchovného poradenstva a prevencie;
+          využívať disponibilné hodiny na zavedenie špecifických predmetov, príp. na
+           individuálne alebo skupinové vyučovanie v predmetoch, v ktorých sa žiak/žiaci
+           vzdelávajú podľa individuálneho výchovno-vzdelávacieho programu;
+          vyučovať žiaka/žiakov so zdravotným znevýhodnením školským špeciálnym
+           pedagógom individuálne/v skupinkách na vyučovaní alebo mimo triedy, pričom
+           obsah, formy a postup vyučovania sa konzultuje s príslušným učiteľom;
+          umožniť školskému špeciálnemu pedagógovi, liečebnému pedagógovi, logopédovi,
+           školskému psychológovi v rámci vyučovania individuálne pracovať so žiakmi
+           s cieľom systematickej, intenzívnej korekcie, terapie alebo reedukácie postihnutia,
+           narušenia.
+
+8 Rámcové učebné plány
+      Rámcový učebný plán (ďalej len RUP) stanovuje časové dotácie vyučovacích predmetov
+v ŠVP. Vymedzuje počet disponibilných hodín, ktoré škola konkretizuje v svojom ŠkVP. Je
+potrebné použiť v ŠkVP všetky disponibilné hodiny uvedené v príslušnom RUP.
+      Poznámky k RUP sú pre školu záväzné, avšak v rámci svojho učebného plánu si škola
+môže vytvoriť ďalšie poznámky podľa svojich potrieb a možností.
+
+9 Organizačné podmienky na výchovu a vzdelávanie
+     Formy organizácie výchovy a vzdelávania v rámci úplného stredného všeobecného
+vzdelávania upravuje platná legislatíva.
+
+10 Povinné personálne zabezpečenie
+        Efektívna realizácia ŠVP je podmienená aj potrebným personálnym zabezpečením podľa
+nasledujúceho rámca, pričom sa musí vychádzať z požiadaviek formulovaných v platnej
+legislatíve, napr. zákon o pedagogických zamestnancoch a odborných zamestnancoch.
+
+
+
+
+                                                                                           13
+Vedúci pedagogickí zamestnanci
+       spĺňajú kvalifikačné predpoklady na výkon pedagogickej činnosti, vykonali prvú
+          atestáciu, spĺňajú podmienku dĺžky výkonu pedagogickej činnosti, ukončili funkčné
+          vzdelávanie (najneskôr do troch rokov od ustanovenia do kariérnej pozície);
+       sú odborne pripravení na riadenie pracovnej skupiny a osvojené manažérske zručnosti
+          uplatňujú pri riadení pracovného kolektívu;
+       podporujú a vytvárajú podmienky pre odborný rast a ďalšie vzdelávanie svojich
+          zamestnancov;
+       zabezpečujú podmienky pre dobrú klímu v oblasti personálnych vzťahov – vo vzťahu
+          k žiakom, v rámci pedagogického zboru a vo vzťahu k rodičom a širšej komunite.
+Pedagogickí zamestnanci
+       spĺňajú kvalifikačné predpoklady na výkon pedagogickej činnosti a kvalifikačné
+          požiadavky stanovené platnou legislatívou;
+       pre realizáciu športovej prípravy v príslušnom športovom odvetví je potrebná
+          trénerská kvalifikácia;
+       uplatňujú zásady tímovej práce, kooperatívneho a konštruktívneho riešenia
+          problémov;
+       preukazujú odborné a pedagogicko-psychologické spôsobilosti pri práci so žiakmi a
+          spolupráci s rodičmi.
+Zamestnanci poskytujúci odborné služby a pomoc pedagógom
+       spĺňajú kvalifikačné predpoklady na výkon odbornej činnosti a kvalifikačné
+          požiadavky stanovené platnou legislatívou pri poskytovaní psychologickej,
+          logopedickej, špeciálnopedagogickej starostlivosti alebo výchovného a sociálneho
+          poradenstva a prevencie.
+
+11 Povinné materiálno-technické a priestorové zabezpečenie
+        Dôležitou podmienkou pri realizácii ŠVP je primerané priestorové vybavenie školy a
+materiálno-technické vybavenie učebných priestorov. V škole sa výchova a vzdelávanie
+uskutočňuje v učebniach, odborných učebniach a ďalších priestoroch školy zriadených podľa
+platnej legislatívy.
+
+11.1 Priestorové vybavenie
+   a) pre vedenie školy
+        kancelária riaditeľa
+        kancelária/kancelárie zástupcu/zástupcov riaditeľa školy;
+   b) pre pedagogických zamestnancov školy
+        zborovňa;
+        kabinety pre učiteľov (priestor pre prípravnú prácu učiteľov a odkladanie pomôcok);
+    c) pre zamestnancov poskytujúcich odborné služby a pomoc pedagógom
+        kancelárie pre prácu personálu poskytujúceho odborné služby a pomoc
+           pedagógom/žiakom;
+        kancelária pre ekonomický úsek;
+   d) pre nepedagogických zamestnancov školy
+        kancelárie pre sekretariát a nepedagogických zamestnancov;
+
+                                                                                         14
+    e) hygienické priestory
+        sociálne zariadenia pre žiakov a zamestnancov;
+        šatne alebo iné priestory na odkladanie odevov a prezúvanie obuvi;
+    f) odkladacie a úložné priestory
+        pre učebné pomôcky a didaktickú techniku;
+        skladové priestory;
+        archív;
+    g) informačno-komunikačné priestory
+        knižnica/priestor pre knižnicu vybavený knižničným fondom, IKT zariadením
+           a pripojením na internet;
+    h) učebné priestory (interné/externé)
+        učebne;
+        odborné učebne;
+        telocvičňa;
+        školské ihrisko;
+    i) spoločné priestory
+        školská budova;
+        školská jedáleň alebo výdajná školská jedáleň;
+        priestor pre riešenie zdravotných problémov.
+
+11.2 Povinné učebné priestory škôl a ich vybavenie6
+
+        Tab. 2 Učebné priestory
+          P. č.                          Názov učebného priestoru
+         1.       učebňa
+         2.       telocvičňa
+         3.       multimediálna učebňa
+
+
+
+
+6
+ Uvedené učebné priestory a ich vybavenie je povinné pre novovzniknuté školy. Ostatné školy doplnia povinné
+učebné priestory a ich vybavenie v priebehu päťročného prechodného obdobia.
+
+
+                                                                                                              15
+Tab. 3 Vybavenie učební (okrem multimediálnej učebne)
+                                                     Počet na
+                    Názov vybavenia                               triedu/
+                                             učiteľa
+                                                                 skupinu
+         učiteľský stôl a stolička              1                    -
+                                                                podľa počtu
+         školská lavica a stolička               -
+                                                                  žiakov
+         školská tabuľa                          -                  1
+                                           najmenej 36
+         PC/notebook                                                 -
+                                              v škole
+                                             najmenej
+         pripojenie na internet           v jednej učebni            -
+                                              v škole
+                                            najmenej 1
+         interaktívna tabuľa                                         -
+                                              v škole
+                                            najmenej 1
+         dataprojektor                                               -
+                                              v škole
+                                            najmenej 1
+                                                                     -
+         audioprehrávač/DVD prehrávač         v škole
+
+
+Tab. 4 Vybavenie telocvične
+
+                                                     Počet na
+                    Názov vybavenia                           triedu/
+                                             učiteľa
+                                                            skupinu
+         rebrina                                 -               8
+         tyč na šplhanie                         -                  2
+         lano na šplhanie                        -                  2
+         kruhy                                   -                  1
+         hrazda                                  -                  1
+         lavička                                 -                  6
+         karimatka/podložka na cvičenie         1                  15
+         švihadlo                               1                  15
+         švédska debna                           -                  2
+         žinenka                                 -                  8
+         koza                                    -                  1
+         mostík                                  -                  1
+         nízka kladina                           -                  1
+                                                                  podľa
+         lopty                                   -
+                                                                 potreby
+                                                                  podľa
+         kriketová loptička, granát              -
+                                                                 potreby
+         futbalová/hádzanárska brána             -                  2
+
+
+                                                                              16
+                volejbalová konštrukcia a sieť          -                1
+                basketbalový kôš                        -                2
+                stopky                                  -                1
+                meracie pásmo                           -                1
+                audioprehrávač/DVD prehrávač            -                1
+                skrinka pre audiovizuálnu techniku      -                1
+
+
+
+
+       Tab. 5 Vybavenie multimediálnej učebne
+
+                                                            Počet na
+                          Názov vybavenia                               triedu/
+                                                     učiteľa
+                                                                       skupinu
+                učiteľský stôl a stolička              1                   -
+                školská lavica a stolička               -                17
+                skriňa                                  -                 1
+                interaktívna tabuľa                     -                 1
+                dataprojektor                           -                 1
+                PC/notebook                            1                 17
+                reproduktory, slúchadlá                1                 17
+                ozvučenie, Hi-Fi technika               -                 1
+                multifunkčné zariadenie                 -                 1
+                digitálny fotoaparát/kamera             -                 1
+                prístup na internet                    1                 17
+
+
+
+12 Podmienky na zaistenie bezpečnosti a ochrany zdravia
+      Nevyhnutnosťou pre realizáciu ŠVP je zabezpečenie vhodnej štruktúry pracovného režimu
+a odpočinku žiakov a učiteľov, vhodného režimu vyučovania s rešpektovaním hygieny učenia,
+zdravého prostredia učební a ostatných priestorov školy podľa platných noriem (svetlo, teplo,
+hlučnosť, čistota, vetranie, hygienické vybavenie priestorov, primeraná veľkosť sedacieho
+a pracovného nábytku). Pri organizovaní lyžiarskeho/snoubordingového výcviku, výletu sa
+z hľadiska bezpečnosti škola riadi platnou legislatívou.
+
+13 Školský vzdelávací program
+       ŠkVP je základným dokumentom školy, podľa ktorého sa uskutočňuje výchova
+a vzdelávanie na danej škole. Musí byť vypracovaný v súlade s platnou legislatívou
+a s príslušným ŠVP. Uvádza víziu, ciele, poslanie a zameranie konkrétnej školy. Zohľadňuje
+potreby žiakov súvisiace s ich ďalším vzdelávaním, resp. vstupom na trh práce, pričom reflektuje
+aj možnosti regiónu. Konkretizuje obsah vzdelávania ako profiláciu školy v učebnom pláne s
+využitím všetkých disponibilných hodín (škola môže mať aj viacero školských učebných plánov
+v prípade, že má triedy s rôznym zameraním). ŠkVP môže byť aj medzinárodný program, ktorý
+
+                                                                                             17
+sa uskutočňuje po písomnom súhlase Ministerstva školstva, vedy, výskumu a športu Slovenskej
+republiky (ďalej len ministerstvo) alebo schválený experimentálne overený inovačný program.
+      Na vypracovaní ŠkVP by sa mali podieľať všetci pedagogickí zamestnanci školy. ŠkVP
+vydáva riaditeľ školy po prerokovaní v pedagogickej rade školy a rade školy a zverejní ho na
+verejne prístupnom mieste.
+
+Školský vzdelávací program obsahuje:
+
+     I.   Všeobecné údaje
+          1.    Názov vzdelávacieho programu
+          2.    Zriaďovateľ školy
+          3.    Vyučovací jazyk školy
+
+    II.   Charakteristiku školského vzdelávacieho programu
+          1.    Zameranie, profilácia školy, ciele výchovy a vzdelávania
+          2.    Dĺžka štúdia a formy výchovy a vzdelávania
+          3.    Stupeň vzdelania, ktorý dosiahne žiak po ukončení
+          4.    Učebný plán
+          5.    Učebné osnovy sa musia vypracovať k rozširujúcemu učivu z povinných vyučovacích
+                predmetov a k novovytvoreným predmetom v učebnom pláne7
+          6.    Personálne zabezpečenie chodu školy
+          7.    Materiálno-technické a priestorové podmienky školy
+          8.    Podmienky na zaistenie bezpečnosti a ochrany zdravia pri výchove a vzdelávaní
+          9.    Vnútorný systém kontroly a hodnotenia žiakov
+          10.   Vnútorný systém kontroly a hodnotenia zamestnancov školy
+          11.   Požiadavky na kontinuálne vzdelávanie pedagogických a ostatných zamestnancov
+          12.   Podmienky pre vzdelávanie žiakov so špeciálnymi výchovno-vzdelávacími potrebami
+
+
+
+
+Štátny vzdelávací program vypracoval Štátny pedagogický ústav.
+Schválilo Ministerstvo školstva, vedy, výskumu a športu Slovenskej republiky dňa 20. marca
+2015 pod číslom 2015-7846/10840:1-10B0 ako súčasť Štátneho vzdelávacieho programu pre
+gymnáziá s platnosťou od 1. septembra 2015.
+
+
+
+
+7
+  Učebné osnovy k povinnému vyučovaciemu predmetu, ktorého časová dotácia sa v učebnom pláne nezvyšuje,
+nesmú byť nad rámec obsahového štandardu stanoveného ŠVP. Škola môže nahradiť učebné osnovy povinného
+vyučovacieho predmetu, ktorého časovú dotáciu v učebnom pláne nezvyšuje, platným vzdelávacím štandardom pre
+príslušný vyučovací predmet.
+
+                                                                                                        18
+
