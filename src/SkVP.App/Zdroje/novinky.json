@@ -1,0 +1,1376 @@
+{
+  "verzia": 1,
+  "aktualizovane": "2026-10-23",
+  "skolskyRok": "2026/2027",
+  "popis": "Overené informácie z oficiálnych stránok ministerstva školstva a jeho organizácií. Médiá ani noviny sa nepoužívajú.",
+  "kategorie": [
+    {
+      "id": "osnovy",
+      "nazov": "Učebné osnovy a ŠVP",
+      "popis": "Štátny vzdelávací program, dodatky a revízia učebných osnov",
+      "farba": "#4F46E5",
+      "ikona": ""
+    },
+    {
+      "id": "tematicke",
+      "nazov": "Tematické plány",
+      "popis": "Čo zohľadniť pri tvorbe a úprave tematických výchovno-vzdelávacích plánov",
+      "farba": "#0D9488",
+      "ikona": ""
+    },
+    {
+      "id": "ciele",
+      "nazov": "Cieľové požiadavky",
+      "popis": "Cieľové požiadavky na vedomosti a zručnosti maturantov, špecifikácie testov",
+      "farba": "#7C3AED",
+      "ikona": ""
+    },
+    {
+      "id": "maturita",
+      "nazov": "Maturitná skúška",
+      "popis": "Termíny, novinky a odporúčania k maturite 2027",
+      "farba": "#DC2626",
+      "ikona": ""
+    },
+    {
+      "id": "prijimacky",
+      "nazov": "Prijímacie skúšky",
+      "popis": "Prihlášky, prijímacie skúšky a Testovanie 9",
+      "farba": "#EA580C",
+      "ikona": ""
+    },
+    {
+      "id": "skolskyrok",
+      "nazov": "Prázdniny a školský rok",
+      "popis": "Organizácia školského roka, prázdniny a termínovník",
+      "farba": "#16A34A",
+      "ikona": ""
+    }
+  ],
+  "polozky": [
+    {
+      "id": "svp-dodatok-6",
+      "kategoria": "osnovy",
+      "druh": "novinka",
+      "nazov": "Dodatok č. 6 k ŠVP pre gymnáziá: AI gramotnosť",
+      "text": "MŠVVaM SR schválilo dodatok č. 6 k Štátnemu vzdelávaciemu programu pre gymnáziá s účinnosťou od 1. 9. 2026. AI gramotnosť, kritické overovanie výstupov umelej inteligencie a zodpovedné používanie digitálnych nástrojov sa stávajú súčasťou cieľov vzdelávania a profilu absolventa. Gymnáziá so zameraním na matematiku majú ciele rozšírené o systematický rozvoj AI gramotnosti.",
+      "od": "2026-09-01",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – AI gramotnosť prichádza na gymnáziá (18. 6. 2026)",
+          "url": "https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/",
+          "overit": [
+            "dodatok č. 6 k štátnemu vzdelávaciemu programu pre gymnáziá",
+            "účinnosť od 1. septembra 2026"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "svp-revizia-osnov-ai",
+      "kategoria": "osnovy",
+      "druh": "odporucanie",
+      "nazov": "Revízia učebných osnov podľa dodatku č. 6",
+      "text": "Skontrolujte, či ciele vzdelávania, profil absolventa v ŠkVP a učebné osnovy predmetov (najmä informatiky, matematiky a predmetov rozvíjajúcich digitálnu gramotnosť) zohľadňujú AI gramotnosť: pochopenie princípov AI, jej zodpovedné používanie ako nástroja na učenie, kritické overovanie výstupov a transparentné priznanie miery jej využitia.",
+      "od": "2026-09-01",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – AI gramotnosť prichádza na gymnáziá (18. 6. 2026)",
+          "url": "https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/",
+          "overit": [
+            "transparentné priznávanie miery využitia AI"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "svp-platny",
+      "kategoria": "osnovy",
+      "druh": "novinka",
+      "nazov": "Platný ŠVP pre gymnáziá v školskom roku 2026/2027",
+      "text": "Gymnáziá postupujú podľa Štátneho vzdelávacieho programu pre gymnáziá schváleného pod č. 2015-7846/10840:1-10B0 v znení jeho dodatkov – pre gymnáziá so štvorročným a päťročným vzdelávacím programom a pre gymnáziá s osemročným vzdelávacím programom (vrátane vzdelávacieho štandardu z dejepisu pre gymnáziá s vyučovacím jazykom maďarským).",
+      "od": "2026-09-01",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "NIVaM (statpedu.sk) – iŠVP pre gymnáziá so 4- a 5-ročným programom",
+          "url": "https://www.statpedu.sk/sk/svp/inovovany-statny-vzdelavaci-program/inovovany-svp-gymnazia-so-stvorrocnym-patrocnym-vzdelavacim-programom/",
+          "overit": [
+            "Dodatok č. 5"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "svp-ai-ss-2027",
+      "kategoria": "osnovy",
+      "druh": "novinka",
+      "nazov": "Stredné školy majú učiť o AI systematicky od 2027/2028",
+      "text": "Ministerstvo pripravuje ďalšie úpravy vzdelávacích programov (napr. v informatike), aby stredné školy začali systematicky učiť o umelej inteligencii a jej zodpovednom používaní od školského roka 2027/2028. Do konca roka 2026 má tému AI postupne doplniť aj do stredného odborného vzdelávania.",
+      "od": "2027-09-01",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – AI gramotnosť prichádza na gymnáziá (18. 6. 2026)",
+          "url": "https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/",
+          "overit": [
+            "od školského roka 2027/2028"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "svp-kurikularna-zs",
+      "kategoria": "osnovy",
+      "druh": "novinka",
+      "nazov": "Kurikulárna reforma: ŠVP 2023 povinne v 1. ročníku ZŠ",
+      "text": "V školskom roku 2026/2027 všetky základné školy implementujú nový Štátny vzdelávací program pre základné vzdelávanie (ŠVP 2023) – uplatňuje sa povinne od 1. ročníka. Reforma dáva školám väčšiu autonómiu pri tvorbe učebných osnov: obsah je definovaný rámcovo a školy ho konkretizujú vo svojich ŠkVP. Pre gymnáziá s osemročným programom je dôležitá nadväznosť na nové kurikulum.",
+      "od": "2026-09-01",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Kurikulárna reforma",
+          "url": "https://www.minedu.sk/kurikularna-reforma/"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "svp-zverejnenie-skvp",
+      "kategoria": "osnovy",
+      "druh": "odporucanie",
+      "nazov": "Nový ŠkVP zverejniť do 60 dní od schválenia",
+      "text": "POP 2026/2027 pri kurikulárnej reforme uvádza, že nový školský vzdelávací program škola zverejní na webovom sídle určenom ministerstvom školstva do 60 dní od jeho schválenia. Po revízii učebných osnov si overte aktuálne povinnosti zverejnenia ŠkVP pre vašu školu.",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "tvvp-ai",
+      "kategoria": "tematicke",
+      "druh": "odporucanie",
+      "nazov": "Doplňte AI gramotnosť do tematických plánov",
+      "text": "Tematické výchovno-vzdelávacie plány vychádzajú z učebných osnov ŠkVP. Po úprave osnov podľa dodatku č. 6 k ŠVP pre gymnáziá (účinnosť od 1. 9. 2026) doplňte do plánov dotknutých predmetov témy a aktivity rozvíjajúce AI gramotnosť a kritické overovanie digitálnych výstupov.",
+      "od": "2026-09-01",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – AI gramotnosť prichádza na gymnáziá (18. 6. 2026)",
+          "url": "https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/",
+          "overit": [
+            "dodatok č. 6"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "tvvp-prazdniny",
+      "kategoria": "tematicke",
+      "druh": "odporucanie",
+      "nazov": "Rozvrhnite celky podľa prázdnin 2026/2027",
+      "text": "Pri rozvrhnutí tematických celkov rátajte s prázdninami podľa POP 2026/2027: jesenné 29. – 30. 10. 2026, vianočné 23. 12. 2026 – 7. 1. 2027, polročné 1. 2. 2027, jarné podľa kraja (15. 2. – 5. 3. 2027), veľkonočné 25. – 30. 3. 2027. Vyučovanie sa končí 30. 6. 2027.",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "tvvp-maturitne-rocniky",
+      "kategoria": "tematicke",
+      "druh": "odporucanie",
+      "nazov": "Maturitné ročníky: plány zosúlaďte s cieľovými požiadavkami",
+      "text": "EČ a PFIČ maturitnej skúšky sa uskutočňujú podľa vzdelávacích štandardov ŠVP a cieľových požiadaviek na maturitné skúšky. V posledných ročníkoch zosúlaďte tematické plány s katalógom cieľových požiadaviek a naplánujte opakovanie pred písomnou maturitou 9. – 12. 3. 2027 (pri eMaturite aj generálna skúška 9. – 10. 2. 2027).",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "NIVaM – Maturitné skúšky a cieľové požiadavky",
+          "url": "https://nivam.sk/pre-skoly/maturitne-skusky/",
+          "overit": [
+            "Cieľové požiadavky na maturitné skúšky"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "tvvp-specifikacie",
+      "kategoria": "tematicke",
+      "druh": "odporucanie",
+      "nazov": "Využite špecifikácie testov EČ a PFIČ MS 2027",
+      "text": "NIVaM zverejňuje špecifikácie testov EČ MS a tém a zadaní PFIČ MS pre školský rok 2026/2027 (NÚCEM → Maturita → Dokumenty na stiahnutie → Dokumenty Maturita 2027). Sú vhodným podkladom pre tematické plány predmetov s externou časťou maturity.",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "Špecifikácie testov EČ a PFIČ MS v školskom roku 2026/2027"
+          ]
+        },
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ciele-katalog",
+      "kategoria": "ciele",
+      "druh": "novinka",
+      "nazov": "Platný katalóg cieľových požiadaviek na maturitnú skúšku",
+      "text": "Katalóg cieľových požiadaviek definuje požiadavky na vedomosti a zručnosti maturantov z jednotlivých predmetov maturitnej skúšky. Platný katalóg nadobudol platnosť od 1. 9. 2018 (nahradil katalóg z 1. 9. 2013); Dodatok č. 1 s platnosťou od 1. 9. 2019 obsahuje podrobnosti o ústnej forme internej časti MS. Katalógy pre jednotlivé predmety zverejňuje NIVaM.",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Maturitné skúšky a cieľové požiadavky",
+          "url": "https://nivam.sk/pre-skoly/maturitne-skusky/",
+          "overit": [
+            "nadobudol platnosť od 1. 9. 2018",
+            "Dodatok č. 1"
+          ]
+        },
+        {
+          "nazov": "NÚCEM / NIVaM – O maturite",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita/o-maturite",
+          "overit": [
+            "Cieľových požiadaviek na maturanta"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ciele-ms-obsah",
+      "kategoria": "ciele",
+      "druh": "novinka",
+      "nazov": "Maturita vychádza z cieľových požiadaviek",
+      "text": "Maturitná skúška po obsahovej stránke vychádza z cieľových požiadaviek na maturanta; EČ a PFIČ MS sa uskutočňujú podľa vzdelávacích štandardov ŠVP pre jednotlivé skupiny stredných škôl a cieľových požiadaviek na maturitné skúšky.",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Maturitné skúšky a cieľové požiadavky",
+          "url": "https://nivam.sk/pre-skoly/maturitne-skusky/",
+          "overit": [
+            "Maturitná skúška po obsahovej stránke vychádza z Cieľových požiadaviek na maturanta"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ciele-cudzie-jazyky",
+      "kategoria": "ciele",
+      "druh": "odporucanie",
+      "nazov": "Cudzie jazyky: cieľové požiadavky podľa úrovne",
+      "text": "Pre cudzie jazyky NIVaM zverejňuje cieľové požiadavky podľa referenčných úrovní (B1, B2, C1). Pri revízii učebných osnov a tematických plánov cudzích jazykov skontrolujte, ktorá úroveň sa na vašej škole maturuje.",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Maturitné skúšky a cieľové požiadavky",
+          "url": "https://nivam.sk/pre-skoly/maturitne-skusky/",
+          "overit": [
+            "referenčná úroveň C1"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ciele-specifikacie-2027",
+      "kategoria": "ciele",
+      "druh": "novinka",
+      "nazov": "Špecifikácie testov EČ a PFIČ MS 2026/2027",
+      "text": "Podrobné špecifikácie testov EČ MS, tém a zadaní PFIČ MS sú zverejnené na stránke NÚCEM v časti Dokumenty na stiahnutie – Dokumenty Maturita 2027.",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "Špecifikácie testov"
+          ]
+        },
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-zber-udajov",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Zber údajov o maturantoch (IS EČ a PFIČ MS)",
+      "text": "Riaditeľ školy nahlási v Informačnom systéme CVTI SR-ŠVS Banská Bystrica údaje o všetkých žiakoch maturujúcich z predmetov s EČ a/alebo PFIČ MS vrátane žiakov prihlásených na eMaturitu.",
+      "od": "2026-10-01",
+      "do": "2026-10-31",
+      "dolezite": true,
+      "poznamka": "Zdroje sa líšia v poslednom dni: NIVaM (Základné informácie, stránka NÚCEM) uvádza 1. – 31. 10. 2026, POP 2026/2027 uvádza 1. – 30. 10. 2026. Odporúčame dokončiť zber do 30. 10. 2026.",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita, školský rok 2026/2027",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027",
+          "overit": [
+            "od 1. do 31. októbra 2026"
+          ]
+        },
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-zmena-eformy",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Zmena výberu elektronickej formy EČ MS",
+      "text": "Školy môžu v prípade potreby zmeniť výber elektronickej formy testovania žiakov zo SJL, MJL a MAT.",
+      "do": "2026-11-13",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-zmeny-databazy",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Nahlasovanie zmien v databáze maturantov",
+      "text": "Zmeny v databáze škôl a žiakov prihlásených na EČ a PFIČ MS 2027 je možné nahlasovať iba v odôvodnených prípadoch a v súlade s platnou legislatívou.",
+      "od": "2026-11-20",
+      "do": "2027-01-31",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita, školský rok 2026/2027",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027",
+          "overit": [
+            "od 20. 11. 2026 do 31. 1. 2027"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-gs-sjl",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Generálna skúška eMaturity – SJL, MJL",
+      "text": "Generálna skúška eMaturity 2027 zo slovenského jazyka a literatúry, resp. maďarského jazyka a literatúry. Povinne ju absolvujú všetci maturanti prihlásení na elektronickú formu EČ MS z daného predmetu.",
+      "od": "2027-02-09",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-gs-mat",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Generálna skúška eMaturity – matematika",
+      "text": "Generálna skúška eMaturity 2027 z matematiky (povinná pre žiakov prihlásených na elektronickú formu EČ MS z MAT). Výsledky GS zašle NIVaM školám najneskôr do 3. 3. 2027.",
+      "od": "2027-02-10",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-ec-sjl",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "EČ a PFIČ MS – slovenský jazyk a literatúra, maďarský jazyk a literatúra",
+      "text": "Riadny termín externej časti a písomnej formy internej časti maturitnej skúšky (aj eMaturita zo SJL a MJL).",
+      "od": "2027-03-09",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "9. marec 2027 (utorok) – slovenský jazyk a literatúra"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-ec-cj",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "EČ a PFIČ MS – cudzie jazyky",
+      "text": "Riadny termín EČ a PFIČ MS z anglického, francúzskeho, nemeckého, ruského, španielskeho a talianskeho jazyka.",
+      "od": "2027-03-10",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "10. marec 2027 (streda) – anglický"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-ec-mat",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "EČ MS – matematika",
+      "text": "Riadny termín externej časti maturitnej skúšky z matematiky (aj eMaturita z MAT).",
+      "od": "2027-03-11",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "11. marec 2027 (štvrtok) – matematika"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-ec-sjsl",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "EČ a PFIČ MS – slovenský jazyk a slovenská literatúra, ukrajinský jazyk a literatúra",
+      "text": "Riadny termín EČ a PFIČ MS pre školy s vyučovacím jazykom národnostných menšín.",
+      "od": "2027-03-12",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "12. marec 2027 (piatok) – slovenský jazyk a slovenská literatúra"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-nahradny-april",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Náhradný termín EČ a PFIČ MS (apríl)",
+      "text": "Aprílový náhradný termín externej časti a písomnej formy internej časti maturitnej skúšky.",
+      "od": "2027-04-06",
+      "do": "2027-04-09",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "9. apríla 2027"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-opravny-prihlaska",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Prihlásenie na septembrový opravný termín",
+      "text": "Na opravnú skúšku EČ a PFIČ MS v septembri sa žiak prihlási riaditeľovi školy do 30. júna (školský zákon, § 77 ods. 7); ak chce opravnú skúšku konať v marci, do 30. septembra nasledujúceho školského roka.",
+      "do": "2027-06-30",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-opravny-dni",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Zverejnenie dní opravného termínu",
+      "text": "Dni konania opravného termínu pre jednotlivé predmety určí NIVaM podľa počtu prihlásených žiakov a zverejní ich najneskôr 1. augusta 2027.",
+      "do": "2027-08-01",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-september",
+      "kategoria": "maturita",
+      "druh": "termin",
+      "nazov": "Opravný a náhradný termín EČ a PFIČ MS (september)",
+      "text": "Septembrový opravný a náhradný termín EČ a PFIČ MS pre školský rok 2026/2027.",
+      "od": "2027-09-02",
+      "do": "2027-09-07",
+      "zdroje": [
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita",
+          "overit": [
+            "7. septembra 2027"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-ematurita",
+      "kategoria": "maturita",
+      "druh": "novinka",
+      "nazov": "eMaturita 2027 zo SJL, MJL a matematiky",
+      "text": "Elektronickú formu EČ MS si žiaci volia dobrovoľne, z jedného alebo z oboch predmetov. Školy sú povinné umožniť ju, ak to dovoľujú ich technické, priestorové a personálne kapacity. Testy sú obsahovo totožné s papierovými, EČ MS zo SJL/MJL elektronicky trvá 110 minút a z MAT 160 minút. Ostatné predmety sa v 2026/2027 píšu iba papierovo.",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        },
+        {
+          "nazov": "NÚCEM / NIVaM – Maturita, školský rok 2026/2027",
+          "url": "https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027",
+          "overit": [
+            "eMaturitu"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-rozsah-predmetov",
+      "kategoria": "maturita",
+      "druh": "novinka",
+      "nazov": "Nový rozsah maturitných predmetov až pre žiakov od 1. 9. 2027",
+      "text": "Rozsah predmetov maturitnej skúšky podľa predpisov účinných od 1. januára 2026 (napr. povinná maturita z matematiky v študijných odboroch zo zoznamu ministerstva) sa nevzťahuje na žiakov, ktorí začnú štúdium pred 1. septembrom 2027. Úroveň maturity z matematiky určí pripravovaná novela vyhlášky o strednej škole č. 224/2022 Z. z.",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Stredné školy: otázky a odpovede k novele",
+          "url": "https://www.minedu.sk/44151-sk/stredne-skoly/",
+          "overit": [
+            "nevzťahuje na žiakov, ktorí začnú štúdium pred 1. septembrom 2027"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ms-dodatocna",
+      "kategoria": "maturita",
+      "druh": "odporucanie",
+      "nazov": "Dodatočná maturitná skúška",
+      "text": "Do troch rokov od úspešnej maturity možno vykonať dodatočnú MS najviac z dvoch ďalších predmetov; žiadosť sa podáva orgánu miestnej štátnej správy v školstve podľa trvalého pobytu do 30. septembra školského roka, v ktorom ju chce uchádzač vykonať.",
+      "zdroje": [
+        {
+          "nazov": "NIVaM – Základné informácie k Maturite 2027 (PDF)",
+          "url": "https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-zverejnenie-ss",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "SŠ zverejní počty prijímaných žiakov a termíny skúšok",
+      "text": "Riaditeľ strednej školy zverejní na webovom sídle školy počet žiakov, ktorých možno prijať do prvého ročníka, a termíny prijímacích skúšok do 7. februára (školský zákon, § 65 ods. 1).",
+      "do": "2027-02-07",
+      "zdroje": [
+        {
+          "nazov": "Zákon č. 245/2008 Z. z. (školský zákon), znenie od 1. 9. 2026 – Slov-Lex (PDF)",
+          "url": "https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-prihlasky",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Podávanie prihlášok na stredné školy (1. kolo)",
+      "text": "Zákonný zástupca podáva prihlášku na vzdelávanie (elektronicky cez ePrihlášky alebo listinne) riaditeľovi základnej školy do 20. februára. V 1. kole možno uviesť najviac dva talentové a dva netalentové odbory v poradí podľa záujmu; prijímanie na osemročné gymnáziá je iba v 1. kole.",
+      "od": "2027-02-08",
+      "do": "2027-02-20",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "ePrihlášky (iedu.sk)",
+          "url": "https://eprihlasky.iedu.sk/",
+          "overit": [
+            "8. február - 20. február 2027"
+          ]
+        },
+        {
+          "nazov": "Zákon č. 245/2008 Z. z. (školský zákon), znenie od 1. 9. 2026 – Slov-Lex (PDF)",
+          "url": "https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-talentove-1",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Prijímacie skúšky – talentové odbory, 1. termín",
+      "text": "Prvý termín prijímacích skúšok pre odbory, v ktorých sa vyžaduje overenie špeciálnych schopností, zručností alebo nadania; podľa počtu uchádzačov aj 23. a 24. 3. 2027.",
+      "od": "2027-03-22",
+      "do": "2027-03-24",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Pre školský rok 2027/2028",
+          "url": "https://www.minedu.sk/pre-skolsky-rok-20272028/",
+          "overit": [
+            "2027/2028"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-sportove",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Overenie športového nadania (stredné športové školy)",
+      "text": "Overenie športového nadania pre všetky druhy športov od 15. do 31. marca 2027, okrem 17. a 18. marca a veľkonočných prázdnin.",
+      "od": "2027-03-15",
+      "do": "2027-03-31",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-talentove-2",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Prijímacie skúšky – talentové odbory, 2. termín",
+      "text": "Druhý termín prijímacích skúšok pre talentové odbory; podľa počtu uchádzačov aj 1. a 2. 4. 2027.",
+      "od": "2027-03-31",
+      "do": "2027-04-02",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-netalentove-1",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Prijímacie skúšky na gymnáziá a SOŠ – 1. termín",
+      "text": "Prvý termín prijímacích skúšok pre odbory bez overenia špeciálnych schopností (gymnáziá, SOŠ, SPŠ); podľa počtu uchádzačov aj 4. 5. 2027.",
+      "od": "2027-05-03",
+      "do": "2027-05-04",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-netalentove-2",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Prijímacie skúšky na gymnáziá a SOŠ – 2. termín",
+      "text": "Druhý termín prijímacích skúšok pre netalentové odbory; podľa počtu uchádzačov aj 11. 5. 2027.",
+      "od": "2027-05-10",
+      "do": "2027-05-11",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-dalsi-termin",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Ďalší termín prijímacej skúšky (nenaplnené miesta)",
+      "text": "Ďalší termín prijímacej skúšky pre nenaplnený počet miest (okrem osemročných gymnázií) je 22. 6. 2027; z organizačných dôvodov sa môže skončiť 23. 6. 2027.",
+      "od": "2027-06-22",
+      "do": "2027-06-23",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-zverejnenie-vysledkov",
+      "kategoria": "prijimacky",
+      "druh": "odporucanie",
+      "nazov": "Zoznam uchádzačov = rozhodnutie o prijatí",
+      "text": "Stredná škola zverejní zoznam uchádzačov podľa výsledkov prijímacieho konania cez ePrihlášky, na svojom webovom sídle a na verejne prístupnom mieste školy. Informácia o prijatí v zozname sa považuje za rozhodnutie o prijatí a deň zverejnenia za deň jeho doručenia.",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Termíny prijímacích skúšok na SŠ pre šk. rok 2027/2028 (PDF)",
+          "url": "https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-jednotna-skuska",
+      "kategoria": "prijimacky",
+      "druh": "novinka",
+      "nazov": "Jednotná prijímacia skúška najskôr pre 2028/2029",
+      "text": "Jednotnú prijímaciu skúšku na stredné školy podľa predpisov účinných od 1. januára 2026 vykonajú žiaci najskôr v prijímacom konaní na školský rok 2028/2029. Prijímacie skúšky na školské roky 2026/2027 a 2027/2028 sa vykonajú podľa predpisov účinných do 31. decembra 2025 (vrátane prijatia bez prijímacej skúšky podľa § 65 ods. 5).",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Stredné školy: otázky a odpovede k novele",
+          "url": "https://www.minedu.sk/44151-sk/stredne-skoly/",
+          "overit": [
+            "najskôr v rámci prijímacieho konania na školský rok 2028/2029"
+          ]
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "ps-poradie-odborov",
+      "kategoria": "prijimacky",
+      "druh": "novinka",
+      "nazov": "Poradie preferencie odborov na prihláške",
+      "text": "Elektronická aj listinná prihláška na strednú školu obsahuje poradie preferencie odborov vzdelávania; uchádzač môže byť prijatý len na jeden odbor podľa poradia uvedeného na prihláške.",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Stredné školy: otázky a odpovede k novele",
+          "url": "https://www.minedu.sk/44151-sk/stredne-skoly/",
+          "overit": [
+            "Poradie preferencie odborov vzdelávania"
+          ]
+        },
+        {
+          "nazov": "Zákon č. 245/2008 Z. z. (školský zákon), znenie od 1. 9. 2026 – Slov-Lex (PDF)",
+          "url": "https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "t9-prihlasovanie",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Prihlasovanie žiakov na Testovanie 9",
+      "text": "Prihlasovanie žiakov 9. ročníka ZŠ na Testovanie 9 2027.",
+      "od": "2026-11-16",
+      "do": "2026-11-30",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Testovanie 9 v školskom roku 2026-2027",
+          "url": "https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/",
+          "overit": [
+            "16. – 30. november 2026"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "t9-riadny",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Testovanie 9 – riadny termín",
+      "text": "Externé testovanie žiakov 9. ročníka ZŠ z matematiky a vyučovacieho jazyka (17. 3.) a zo slovenského jazyka a slovenskej literatúry na školách s VJM (18. 3.). V rovnakom termíne je externé testovanie na účel získania nižšieho stredného vzdelania.",
+      "od": "2027-03-17",
+      "do": "2027-03-18",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Testovanie 9 v školskom roku 2026-2027",
+          "url": "https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/",
+          "overit": [
+            "17. a 18. marca 2027"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "t9-nahradny",
+      "kategoria": "prijimacky",
+      "druh": "termin",
+      "nazov": "Testovanie 9 – náhradný termín",
+      "text": "Náhradný termín Testovania 9 2027.",
+      "od": "2027-03-31",
+      "do": "2027-04-01",
+      "zdroje": [
+        {
+          "nazov": "MŠVVaM SR – Testovanie 9 v školskom roku 2026-2027",
+          "url": "https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/",
+          "overit": [
+            "31. marca a 1. apríla 2027"
+          ]
+        },
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "sr-zaciatok",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Začiatok školského vyučovania 2026/2027",
+      "text": "Obdobie školského vyučovania sa začína 1. 9. 2026 (utorok) a končí sa 30. 6. 2027 (streda).",
+      "od": "2026-09-01",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-jesenne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jesenné prázdniny",
+      "text": "Posledný deň vyučovania 28. 10. 2026 (streda), vyučovanie sa začína 2. 11. 2026 (pondelok).",
+      "od": "2026-10-29",
+      "do": "2026-10-30",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-vianocne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Vianočné prázdniny",
+      "text": "Posledný deň vyučovania 22. 12. 2026 (utorok), vyučovanie sa začína 8. 1. 2027 (piatok).",
+      "od": "2026-12-23",
+      "do": "2027-01-07",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "sr-polrok",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Koniec prvého polroka",
+      "text": "Vyučovanie v prvom polroku sa končí 29. 1. 2027 (piatok); druhý polrok sa začína 2. 2. 2027 (utorok).",
+      "od": "2027-01-29",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-polrocne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Polročné prázdniny",
+      "text": "Posledný deň vyučovania 29. 1. 2027 (piatok), vyučovanie sa začína 2. 2. 2027 (utorok).",
+      "od": "2027-02-01",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-jarne-bb",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jarné prázdniny – Banskobystrický, Žilinský, Trenčiansky kraj",
+      "text": "Posledný deň vyučovania 12. 2. 2027 (piatok), vyučovanie sa začína 22. 2. 2027 (pondelok).",
+      "od": "2027-02-15",
+      "do": "2027-02-19",
+      "skupina": "BB, ZA, TN",
+      "poznamka": "Tabuľka v .docx na stránke ministerstva uvádza pri tomto termíne len BB a ZA kraj; Trenčiansky kraj je uvedený v POP 2026/2027 (Tabuľka 1).",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-jarne-ke",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jarné prázdniny – Košický, Prešovský kraj",
+      "text": "Posledný deň vyučovania 19. 2. 2027 (piatok), vyučovanie sa začína 1. 3. 2027 (pondelok).",
+      "od": "2027-02-22",
+      "do": "2027-02-26",
+      "skupina": "KE, PO",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-jarne-ba",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jarné prázdniny – Bratislavský, Nitriansky, Trnavský kraj",
+      "text": "Posledný deň vyučovania 26. 2. 2027 (piatok), vyučovanie sa začína 8. 3. 2027 (pondelok).",
+      "od": "2027-03-01",
+      "do": "2027-03-05",
+      "skupina": "BA, NR, TT",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-velkonocne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Veľkonočné prázdniny",
+      "text": "Posledný deň vyučovania 24. 3. 2027 (streda), vyučovanie sa začína 31. 3. 2027 (streda).",
+      "od": "2027-03-25",
+      "do": "2027-03-30",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "sr-zaverecna",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Záverečné a absolventské skúšky",
+      "text": "Riadny termín skúšobného obdobia: absolventská skúška 1. – 25. 6. 2027, záverečná skúška 7. – 25. 6. 2027 (stredné odborné školy a konzervatóriá).",
+      "od": "2027-06-01",
+      "do": "2027-06-25",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "sr-koniec",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Koniec školského vyučovania 2026/2027",
+      "text": "Vyučovanie v druhom polroku sa končí 30. 6. 2027 (streda).",
+      "od": "2027-06-30",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr-letne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Letné prázdniny",
+      "text": "Posledný deň vyučovania 30. 6. 2027 (streda), vyučovanie v školskom roku 2027/2028 sa začína 1. 9. 2027 (streda).",
+      "od": "2027-07-01",
+      "do": "2027-08-31",
+      "dolezite": true,
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        },
+        {
+          "nazov": "MŠVVaM SR – Školské prázdniny v šk. roku 2026/2027 (.docx)",
+          "url": "https://www.minedu.sk/data/att/2da/36701.feb2b6.docx"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-jesenne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jesenné prázdniny 2027/2028",
+      "text": "Posledný deň vyučovania 27. 10. 2027 (streda), vyučovanie sa začína 2. 11. 2027 (utorok).",
+      "od": "2027-10-28",
+      "do": "2027-10-29",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-vianocne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Vianočné prázdniny 2027/2028",
+      "text": "Posledný deň vyučovania 22. 12. 2027 (streda), vyučovanie sa začína 10. 1. 2028 (pondelok).",
+      "od": "2027-12-23",
+      "do": "2028-01-07",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-polrocne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Polročné prázdniny 2027/2028",
+      "text": "Posledný deň vyučovania 3. 2. 2028 (štvrtok), vyučovanie sa začína 7. 2. 2028 (pondelok).",
+      "od": "2028-02-04",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-jarne-ke",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jarné prázdniny 2027/2028 – Košický, Prešovský kraj",
+      "text": "Posledný deň vyučovania 18. 2. 2028, vyučovanie sa začína 28. 2. 2028.",
+      "od": "2028-02-21",
+      "do": "2028-02-25",
+      "skupina": "KE, PO",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-jarne-ba",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jarné prázdniny 2027/2028 – Bratislavský, Nitriansky, Trnavský kraj",
+      "text": "Posledný deň vyučovania 25. 2. 2028, vyučovanie sa začína 6. 3. 2028.",
+      "od": "2028-02-28",
+      "do": "2028-03-03",
+      "skupina": "BA, NR, TT",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-jarne-bb",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Jarné prázdniny 2027/2028 – Banskobystrický, Žilinský, Trenčiansky kraj",
+      "text": "Posledný deň vyučovania 3. 3. 2028, vyučovanie sa začína 13. 3. 2028.",
+      "od": "2028-03-06",
+      "do": "2028-03-10",
+      "skupina": "BB, ZA, TN",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-velkonocne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Veľkonočné prázdniny 2027/2028",
+      "text": "Posledný deň vyučovania 12. 4. 2028 (streda), vyučovanie sa začína 19. 4. 2028 (streda).",
+      "od": "2028-04-13",
+      "do": "2028-04-18",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr27-letne",
+      "kategoria": "skolskyrok",
+      "druh": "termin",
+      "nazov": "Letné prázdniny 2028",
+      "text": "Posledný deň vyučovania 30. 6. 2028 (piatok), vyučovanie sa začína 4. 9. 2028 (pondelok).",
+      "od": "2028-07-03",
+      "do": "2028-09-01",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    },
+    {
+      "id": "pr28-prehlad",
+      "kategoria": "skolskyrok",
+      "druh": "novinka",
+      "nazov": "Prázdniny v školskom roku 2028/2029",
+      "text": "Jesenné 30. – 31. 10. 2028; vianočné do 5. 1. 2029 (vyučovanie od 8. 1. 2029); polročné 2. 2. 2029; jarné BA, NR, TT 19. – 23. 2. 2029, BB, ZA, TN 26. 2. – 2. 3. 2029, KE, PO 5. – 9. 3. 2029; veľkonočné 29. 3. – 3. 4. 2029; letné 2. 7. – 31. 8. 2029.",
+      "od": "2028-10-30",
+      "poznamka": "V POP 2026/2027 (Príloha 1) je pri vianočných prázdninách 2028/2029 zjavný preklep v dátume začiatku („27. január 2027“, posledný deň vyučovania 22. 12. 2028). Overte si termín, keď ministerstvo zverejní pokyny na školský rok 2028/2029.",
+      "zdroje": [
+        {
+          "nazov": "Pedagogicko-organizačné pokyny na školský rok 2026/2027 (MŠVVaM SR)",
+          "url": "https://www.minedu.sk/data/att/a96/36583.42ace6.pdf"
+        }
+      ],
+      "overene": "2026-10-23"
+    }
+  ],
+  "stranky": [
+    {
+      "nazov": "Ministerstvo školstva, výskumu, vývoja a mládeže SR",
+      "url": "https://www.minedu.sk/",
+      "popis": "Pedagogicko-organizačné pokyny, termíny prázdnin, prijímacie konanie, štátne vzdelávacie programy a tlačové správy.",
+      "rss": "https://www.minedu.sk/rss/",
+      "kategorie": [
+        "osnovy",
+        "prijimacky",
+        "skolskyrok"
+      ]
+    },
+    {
+      "nazov": "Národný inštitút vzdelávania a mládeže (NIVaM)",
+      "url": "https://nivam.sk/",
+      "popis": "Metodická podpora, cieľové požiadavky, maturitné skúšky, olympiády a súťaže.",
+      "rss": "https://nivam.sk/feed/",
+      "kategorie": [
+        "ciele",
+        "maturita",
+        "tematicke"
+      ]
+    },
+    {
+      "nazov": "NÚCEM – národné merania (NIVaM)",
+      "url": "https://www2.nucem.sk/",
+      "popis": "Maturita, Testovanie 9, špecifikácie testov, výsledky a dokumenty na stiahnutie.",
+      "kategorie": [
+        "maturita",
+        "prijimacky",
+        "ciele"
+      ]
+    },
+    {
+      "nazov": "Štátne vzdelávacie programy (statpedu.sk)",
+      "url": "https://www.statpedu.sk/",
+      "popis": "Inovovaný ŠVP pre gymnáziá, dodatky a vzdelávacie štandardy.",
+      "kategorie": [
+        "osnovy",
+        "tematicke"
+      ]
+    },
+    {
+      "nazov": "Kurikulárna reforma",
+      "url": "https://reforma.iedu.sk/",
+      "popis": "Nový ŠVP, sprievodné materiály a podpora škôl pri revízii ŠkVP.",
+      "kategorie": [
+        "osnovy",
+        "tematicke"
+      ]
+    },
+    {
+      "nazov": "ePrihlášky",
+      "url": "https://eprihlasky.iedu.sk/",
+      "popis": "Elektronické prihlášky do materských, základných a stredných škôl, výsledky prijímacieho konania.",
+      "kategorie": [
+        "prijimacky"
+      ]
+    },
+    {
+      "nazov": "Maturita – zber údajov (CVTI SR-ŠVS Banská Bystrica)",
+      "url": "https://maturita.svsbb.sk/",
+      "popis": "Informačný systém pre prihlasovanie maturantov na EČ a PFIČ MS.",
+      "kategorie": [
+        "maturita"
+      ]
+    },
+    {
+      "nazov": "Slov-Lex – právne predpisy",
+      "url": "https://www.slov-lex.sk/",
+      "popis": "Platné znenie školského zákona č. 245/2008 Z. z., vyhlášky o strednej škole č. 224/2022 Z. z. a vyhlášky č. 231/2009 Z. z.",
+      "kategorie": [
+        "osnovy",
+        "maturita",
+        "prijimacky",
+        "skolskyrok"
+      ]
+    },
+    {
+      "nazov": "Centrum vedecko-technických informácií SR",
+      "url": "https://www.cvtisr.sk/",
+      "popis": "Rezortné informačné systémy a štatistiky školstva.",
+      "kategorie": [
+        "skolskyrok"
+      ]
+    },
+    {
+      "nazov": "Ústredný portál verejnej správy",
+      "url": "https://www.slovensko.sk/",
+      "popis": "Životné situácie – prihláška na strednú školu, elektronické schránky.",
+      "kategorie": [
+        "prijimacky"
+      ]
+    }
+  ]
+}
