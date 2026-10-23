@@ -1041,6 +1041,19 @@ internal static class Samotest
         UlozObrazokStrany(vykreslenie, 2, Path.Combine(Databaza.PriecinokDokumentov, "organizacia_hlavicka_pata.png"));
 
         // okno úvodnej strany: uloženie zachová údaje o škole v zostave (IČO, kontakt, päta) a adresa sa uloží aj po častiach
+        var titulPred = new Dictionary<string, string?>();
+        using (var db = Databaza.Otvor())
+        using (var prikaz = Databaza.Prikaz(db, "SELECT kluc, hodnota FROM nastavenie WHERE kluc LIKE 'titul.%'"))
+        using (var citac = prikaz.ExecuteReader())
+        {
+            while (citac.Read())
+            {
+                titulPred[citac.GetString(0)] = citac.IsDBNull(1) ? null : citac.GetString(1);
+            }
+        }
+
+        var patuPred = TitulnaStrana.DataPaty();
+        var adresaPred = Databaza.Citaj(UdajeSkVP.KlucAdresa);
         var oknoTitulu = new UvodnaStranaWindow();
         oknoTitulu.Show();
         Pumpuj();
@@ -1051,6 +1064,22 @@ internal static class Samotest
         Over(poOkne.IcoDicZobrazit && poOkne.KontaktZobrazit && poOkne.SkolaVPateZobrazit && poOkne.ZlozkaNaStrane == "Gymnázium"
              && UdajeOrganizacie.Nacitaj() is { Ulica: "Nová 7", Psc: "821 08", Mesto: "Bratislava", Ico: "12345678" },
             "okno úvodnej strany zachová údaje o škole v zostave a uloží adresu po častiach");
+        // texty úvodnej strany späť (okno ich uložilo – napr. nadpis by inak prekryl názov programu testovacej sady)
+        using (var db = Databaza.Otvor())
+        {
+            Databaza.Vykonaj(db, "DELETE FROM nastavenie WHERE kluc LIKE 'titul.%'");
+            foreach (var (kluc, hodnota) in titulPred)
+            {
+                Databaza.Vykonaj(db, "INSERT INTO nastavenie(kluc, hodnota) VALUES($k, $h)", ("$k", kluc), ("$h", hodnota));
+            }
+
+            if (patuPred is null)
+            {
+                Databaza.Vykonaj(db, "DELETE FROM objekt WHERE typ = $t", ("$t", TitulnaStrana.TypPaty));
+            }
+        }
+
+        Databaza.Zapis(UdajeSkVP.KlucAdresa, adresaPred);
         var bloky = StrukturaOsnov.Bloky(StrukturaOsnov.Aktualna());
         Over(DokumentOsnovy.Text(bloky).Contains("IČO: 12345678", StringComparison.Ordinal), "údaje o škole aj v exporte oblastí a predmetov");
 
