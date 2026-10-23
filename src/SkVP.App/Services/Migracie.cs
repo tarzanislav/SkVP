@@ -16,6 +16,18 @@ public static class Migracie
     {
         try
         {
+            // skupiny úvodných a záverečných častí učebných osnov – vytvoria sa pred otvorením okna a zálohou na pozadí
+            var sluzba = new ObjektService();
+            CastiOsnov.Skupina(sluzba, TypObjektu.Uvod);
+            CastiOsnov.Skupina(sluzba, TypObjektu.Zaver);
+        }
+        catch (Exception)
+        {
+            // vytvoria sa pri načítaní oblastí
+        }
+
+        try
+        {
             ArchivSkolskehoRoka.PrenesStareZaznamy();
         }
         catch (Exception)

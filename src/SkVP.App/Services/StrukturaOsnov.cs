@@ -177,6 +177,9 @@ public static class StrukturaOsnov
             zname.Add(ImportOsnov.Kluc(oblast.Nazov));
         }
 
+        // úvodné a záverečné časti učebných osnov (aby sa záverečné nezaradili ako predmety poslednej oblasti)
+        zname.Add(ImportOsnov.Kluc(CastiOsnov.NazovUvod));
+        zname.Add(ImportOsnov.Kluc(CastiOsnov.NazovZaver));
         return zname;
     }
 

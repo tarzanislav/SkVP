@@ -155,8 +155,9 @@ public static class DiagnostikaService
         riadky.Add($"Oblastí: {oblasti.Count}, predmetov: {predmety.Count}.");
         foreach (var typ in new[] { TypObjektu.Uvod, TypObjektu.Zaver })
         {
-            var skupina = CastiOsnov.Skupina(sluzba, typ);
-            riadky.Add($"{CastiOsnov.Nazov(typ)}: {CastiOsnov.PocetCasti(typ, CastiOsnov.Dokumenty(sluzba, skupina).Count)}" +
+            // kontrola nič nevytvára – chýbajúca skupina sa vytvorí pri spustení programu
+            var pocet = sluzba.Skupiny(typ).FirstOrDefault() is { } skupina ? CastiOsnov.Dokumenty(sluzba, skupina).Count : 0;
+            riadky.Add($"{CastiOsnov.Nazov(typ)}: {CastiOsnov.PocetCasti(typ, pocet)}" +
                        (CastiOsnov.JeAktivna(typ) ? " (zapnuté)." : " (vypnuté)."));
         }
 

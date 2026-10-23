@@ -182,6 +182,7 @@ public static partial class NovinkyService
     public const string KlucSpravy = "novinky.spravy";
     public const string KlucOverenie = "novinky.overenie";
     public const string KlucKraj = "novinky.kraj";
+    public const string VsetkyKraje = "Všetky kraje";
     public const string KlucHistoria = "novinky.historia";
 
     /// <summary>Počet informácií na jednej strane bloku; staršie sú v histórii bloku (ďalšie strany).</summary>

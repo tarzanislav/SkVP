@@ -146,7 +146,7 @@
                                     <Border Grid.RowSpan="2" Height="1" VerticalAlignment="Bottom" Margin="78,0,0,0" Background="{DynamicResource DividerStrokeColorDefaultBrush}" />
                                     <Button x:Name="Otvorit" Style="{StaticResource RiadokTlacidlo}" Padding="10,13,190,13"
                                             Command="{Binding DataContext.Hlavny.OtvorPredmetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                            CommandParameter="{Binding}" ToolTip="Otvoriť osnovu predmetu">
+                                            CommandParameter="{Binding}" ToolTip="Otvoriť dokument">
                                         <DockPanel>
                                             <TextBlock x:Name="Uchytka" DockPanel.Dock="Left" Text="&#xE76F;" Style="{StaticResource Ikona}" FontSize="12"
                                                        Margin="0,0,10,0" Opacity="0" Cursor="SizeAll" ToolTip="Potiahnite a presuňte predmet" />
@@ -160,7 +160,7 @@
                                                     <!-- oprava názvu priamo v riadku -->
                                                     <Button x:Name="Pero" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70F;" FontSize="12"
                                                             Margin="6,-4,0,-4" Opacity="0.35" Cursor="Hand"
-                                                            ToolTip="Opraviť názov predmetu (F2) – zmení sa aj v textoch osnov"
+                                                            ToolTip="Opraviť názov (F2) – zmení sa aj v textoch osnov"
                                                             Command="{Binding DataContext.ZacniPremenovanieCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}" />
                                                 </StackPanel>
@@ -202,10 +202,10 @@
                                         <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70D;" ToolTip="Posunúť nižšie (Alt+↓)"
                                                 Command="{Binding DataContext.Hlavny.PosunPredmetDoleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}" IsEnabled="{Binding JePosledny, Converter={StaticResource InverzBool}}" />
-                                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70F;" ToolTip="Opraviť názov predmetu (F2)"
+                                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE70F;" ToolTip="Opraviť názov (F2)"
                                                 Command="{Binding DataContext.ZacniPremenovanieCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}" />
-                                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE74D;" ToolTip="Odstrániť predmet"
+                                        <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE74D;" ToolTip="Odstrániť"
                                                 Command="{Binding DataContext.Hlavny.OdstranPredmetCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}" />
                                         <TextBlock Text="&#xE76C;" Style="{StaticResource Ikona}" FontSize="12" Margin="10,0,4,0" Opacity="0.6" />

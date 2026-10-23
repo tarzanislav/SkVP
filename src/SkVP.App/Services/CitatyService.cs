@@ -56,7 +56,6 @@ public static class CitatyService
 {
     public const int MaxDlzkaNaDashboard = 280;
     public const string KlucSkryte = "citaty.skryte";
-    public const string KlucZobrazene = "citaty.zobrazene";
 
     private static readonly Lazy<DatabazaCitatov> Zabudovana = new(Nacitaj);
 

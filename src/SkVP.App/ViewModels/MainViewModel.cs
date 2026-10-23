@@ -538,7 +538,7 @@ public sealed partial class MainViewModel : ObservableObject
             OtvorOblast(oblast);
         }
 
-        Oznam($"Predmet „{predmet.Nazov}“ je odstránený.", () =>
+        Oznam(oblast.JeOblast ? $"Predmet „{predmet.Nazov}“ je odstránený." : $"Časť „{predmet.Nazov}“ je odstránená.", () =>
         {
             _sluzba.Obnov(predmet.Id);
             oblast.Predmety.Insert(Math.Min(index, oblast.Predmety.Count), predmet);

@@ -346,14 +346,14 @@ public sealed class SpravaVM
 /// </summary>
 public sealed partial class NovinkyViewModel : ObservableObject
 {
-    public const string VsetkyKraje = "Všetky kraje";
+    /// <summary>Výber kraja pri jarných prázdninách (tabuľka prázdnin na dashboarde).</summary>
+    public const string VsetkyKraje = NovinkyService.VsetkyKraje;
 
     private DataNoviniek _data;
     private List<PolozkaNoviniek> _polozky;
     private OverenieNoviniek? _overenie;
     private SpravyZoZdrojov? _spravy;
     private List<PolozkaNovinkyVM> _vsetky = new();
-    private bool _nacitane;
 
     public NovinkyViewModel(MainViewModel hlavny)
     {
@@ -362,11 +362,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
         _polozky = NovinkyService.SHistoriou(_data);
         _overenie = NovinkyService.UlozeneOverenie();
         _spravy = NovinkyService.UlozeneSpravy();
-        Kraje = new[] { VsetkyKraje }.Concat(_data.Polozky.Select(p => p.Skupina).OfType<string>().Distinct().Order()).ToList();
-        var kraj = Databaza.Citaj(NovinkyService.KlucKraj, VsetkyKraje);
-        _vybranyKraj = Kraje.Contains(kraj) ? kraj : VsetkyKraje;
         Obnov();
-        _nacitane = true;
 
         if (!Dialogy.TichyRezim && NovinkyService.TrebaObnovitSpravy(_spravy))
         {
@@ -387,7 +383,6 @@ public sealed partial class NovinkyViewModel : ObservableObject
     public List<MesiacTerminovnikaVM> Terminovnik { get; private set; } = new();
     public List<SpravaVM> Spravy { get; private set; } = new();
     public List<OdporucanaStranka> Stranky => _data.Stranky;
-    public List<string> Kraje { get; }
 
     public bool NicSaNenaslo => Bloky.Count == 0;
     public bool ZiadneSpravy => Spravy.Count == 0;
@@ -422,12 +417,6 @@ public sealed partial class NovinkyViewModel : ObservableObject
     private string _hladat = "";
 
     [ObservableProperty]
-    private bool _ajUplynule;
-
-    [ObservableProperty]
-    private string _vybranyKraj;
-
-    [ObservableProperty]
     private string? _vybranaTema;
 
     [ObservableProperty]
@@ -437,18 +426,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
     private string _stavPrace = "";
 
     partial void OnHladatChanged(string value) => Obnov();
-    partial void OnAjUplynuleChanged(bool value) => Obnov();
     partial void OnVybranaTemaChanged(string? value) => Obnov();
-
-    partial void OnVybranyKrajChanged(string value)
-    {
-        if (_nacitane)
-        {
-            Databaza.Zapis(NovinkyService.KlucKraj, value);
-        }
-
-        Obnov();
-    }
 
     /// <summary>Skopíruje celú informáciu (nadpis, termín, text, zdroje) do schránky.</summary>
     [RelayCommand]
@@ -633,14 +611,13 @@ public sealed partial class NovinkyViewModel : ObservableObject
                 _overenie?.Polozky.TryGetValue(p.Id, out var o) == true ? o : null, Dnes))
             .ToList();
 
-        bool PodlaKraja(PolozkaNovinkyVM p) => VybranyKraj == VsetkyKraje || !p.MaSkupinu || p.Skupina == VybranyKraj;
         bool PodlaHladania(PolozkaNovinkyVM p) => hladane.Length == 0 || p.Hladany.Contains(hladane, StringComparison.Ordinal);
 
         // prázdniny a organizácia školského roka sú na dashboarde (tabuľka prázdnin)
         bool VNovinkach(PolozkaNovinkyVM p) => p.Polozka.Kategoria != NovinkyService.TemaSkolskyRok;
         var kategorie = _data.Kategorie.Where(k => k.Id != NovinkyService.TemaSkolskyRok).ToList();
         // história sa nemaže – staršie a uplynulé informácie sú na ďalších stranách bloku
-        var viditelne = _vsetky.Where(p => VNovinkach(p) && PodlaKraja(p) && PodlaHladania(p)).ToList();
+        var viditelne = _vsetky.Where(p => VNovinkach(p) && PodlaHladania(p)).ToList();
 
         Temy = new[] { new FilterTemyVM(null, "Všetky témy", "#9AA5B1", "\uE80F", viditelne.Count(p => !p.JeVHistorii)) { Vybrany = VybranaTema is null } }
             .Concat(kategorie.Select(k => new FilterTemyVM(k.Id, k.Nazov, k.Farba, k.Ikona, viditelne.Count(p => p.Polozka.Kategoria == k.Id && !p.JeVHistorii))
@@ -660,7 +637,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
 
         var sk = CultureInfo.GetCultureInfo("sk-SK");
         Terminovnik = podlaTemy.Where(p => p.Polozka.Druh == NovinkyService.DruhTermin && p.Polozka.Zaciatok is not null && !p.Archivna
-                                           && (AjUplynule || !p.JeMinule))
+                                           && !p.JeMinule)
             .OrderBy(p => p.Polozka.Zaciatok).ThenBy(p => p.Polozka.Koniec)
             .GroupBy(p => (p.Polozka.Zaciatok!.Value.Year, p.Polozka.Zaciatok!.Value.Month))
             .Select(g => new MesiacTerminovnikaVM(

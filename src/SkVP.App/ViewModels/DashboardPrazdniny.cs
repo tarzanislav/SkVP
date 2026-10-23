@@ -75,7 +75,7 @@ public sealed partial class DashboardViewModel
     [ObservableProperty] private List<RiadokPrazdninVM> _riadkyPrazdnin = new();
     [ObservableProperty] private string _obdobieVyucovania = "";
 
-    public string ZdrojPrazdnin => "Zdroj: Pedagogicko-organizačné pokyny MŠVVaM SR na školský rok 2026/2027 a termíny prázdnin na minedu.sk";
+    public string ZdrojPrazdnin => "Zdroj: Pedagogicko-organizačné pokyny MŠVVaM SR a termíny školských prázdnin na minedu.sk (údaje sekcie Novinky)";
 
     partial void OnVybranyRokChanged(string value) => ZostavPrazdniny();
 
