@@ -15,6 +15,10 @@ Prvý modul: **Učebné osnovy**.
   medzipredmetové vzťahy).
 - **Tlač a zostavy** – spojenie osnov všetkých, jednej alebo vybraných oblastí do jedného dokumentu s úvodnou stranou
   (škola, logo), obsahom a oddeľujúcimi stranami. Tlač, PDF a Word – bez potreby Wordu.
+- **Testovacia sada učebných osnov** – ukážkové osnovy všetkých 43 predmetov učebného plánu gymnázia (predmety ŠVP podľa
+  vzdelávacích štandardov inovovaného ŠVP pre gymnáziá, školské predmety ako návrh). Ponúkne sa v inštalátore a pri prvom
+  spustení; dá sa kedykoľvek vymazať (len osnovy alebo všetko) – pred vymazaním sa vytvorí záloha. Zdrojové texty sady sú
+  v `nastroje/testovacia_sada` (`python3 nastroje/testovacia_sada/zostav.py` vytvorí `Zdroje/testovacia_sada.json`).
 - **Zálohy** – automaticky raz za deň, číslované za sebou (Dokumenty\SkVP\Zálohy).
 - **Aktualizácie** – program sám ponúkne novú verziu z GitHubu.
 
