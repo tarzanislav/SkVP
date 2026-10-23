@@ -886,7 +886,7 @@ internal static class Samotest
         Databaza.Zapis(UdajeSkVP.KlucSkola, "Moja škola");
         model.Vymaz(vsetko: false);
         Over(Databaza.Citaj(UdajeSkVP.KlucSkola) == "Moja škola" && NastaveniaSkoly.CestaLoga() is null
-             && Databaza.Citaj(UdajeSkVP.KlucAdresa) is null, "vymazanie sady ponechá vlastný názov školy, ostatné údaje sady zmaže");
+             && string.IsNullOrEmpty(Databaza.Citaj(UdajeSkVP.KlucAdresa)) && Databaza.Citaj(TestovaciaSada.KlucUdajeSkoly) is null, "vymazanie sady ponechá vlastný názov školy, ostatné údaje sady zmaže");
         Databaza.Zapis(UdajeSkVP.KlucSkola, "");
         model.Vymaz(vsetko: true);
         model.NahrajTestovaciuSadu();
