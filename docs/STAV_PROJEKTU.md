@@ -1,6 +1,6 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.16** (vetva `main` = `vyvoj/etapa1`)
+Aktualizované: 23. 10. 2026 · posledné vydanie **v0.1.16** (`main`); na vetve `vyvoj/etapa1` je navyše logo a hlavička strán
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
@@ -42,10 +42,17 @@ charakteristika oblasti, Tlač a zostavy (všetky/jedna/vybrané oblasti, úvodn
 oblasti a predmetu, tlač, PDF, Word), Nastavenia (škola, logo, program, Word/editor, vzhľad, import z Excelu, zálohy,
 testovacia sada, aktualizácie), automatické denné zálohy číslované za sebou, aktualizácia z GitHub releases.
 
-## Rozpracované – čaká na upresnenie používateľa
-Požiadavka (23. 10. 2026 12:00): logo školy na úvodnej strane (zap./vyp.); v hlavičke ďalších strán vľavo
-„Školský vzdelávací program – Učebné osnovy“, vpravo názov školy a logo; všetky časti hlavičky vypínateľné jednotlivo aj naraz.
-Používateľ napísal „počkaj, upresním“ – **pred implementáciou si vypýtať upresnenie.**
+## Logo a hlavička strán (23. 10. 2026, na vetve vyvoj/etapa1, čaká na vydanie)
+- Úvodná strana: logo školy sa dá vybrať/odstrániť priamo v okne „Úvodná strana a hlavička“ (rovnaké logo ako v Nastaveniach)
+  a vypnúť zaškrtávacím políčkom (`titul.logo.zobrazit`).
+- Hlavička ďalších strán: vľavo text (predvolene nadpis – podnadpis „Školský vzdelávací program – Učebné osnovy“, dá sa prepísať;
+  rovnaký text ako nadpis sa neukladá, aby sledoval nadpis), vpravo názov školy a logo (výška 0,8 cm, najviac 3,5 cm široké).
+  Každá časť sa vypína zvlášť (`titul.hlavicka.text|skola|logo.zobrazit`) a celá hlavička naraz (`titul.hlavicka.zobrazit`,
+  jednotlivé voľby sa pritom pamätajú). Okno ukazuje živú ukážku hlavičky.
+- PDF/tlač: hlavička je tabuľka (MigraDoc) s čiarou dole; Word: tabuľka v hlavičke + prázdny odsek, obrázok v časti hlavičky;
+  pri vypnutej hlavičke sa časť hlavičky do Wordu nepridá.
+- Samotest `TestLogaAHlavicky`: hľadá body skúšobného loga na vykreslených stranách, kontroluje hlavičky a obrázky vo Worde,
+  snímky `uvodna_strana_logo.png`, `hlavicka_*.png` na vetve `vystupy`.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,

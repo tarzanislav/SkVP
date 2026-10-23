@@ -74,10 +74,10 @@
                         <Button HorizontalAlignment="Left" Margin="28,4,0,4" Padding="10,3" Command="{Binding UpravitUvodnuStranuCommand}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE70F;" FontSize="12" Margin="0,0,6,0" />
-                                <TextBlock Text="Upraviť texty úvodnej strany…" />
+                                <TextBlock Text="Upraviť úvodnú stranu, logo a hlavičku…" />
                             </StackPanel>
                         </Button>
-                        <TextBlock Style="{StaticResource Popis}" Margin="28,0,0,4" Text="Logo školy nastavíte v Nastaveniach."
+                        <TextBlock Style="{StaticResource Popis}" Margin="28,0,0,4" Text="Logo školy vyberiete v úprave úvodnej strany alebo v Nastaveniach."
                                    Visibility="{Binding MaLogo, Converter={StaticResource InverzBoolNaViditelnost}}" />
                         <CheckBox Content="Obsah s číslami strán" IsChecked="{Binding Obsah}" Margin="0,4,0,0" />
                         <CheckBox IsChecked="{Binding OddelovacOblasti}" Margin="0,4,0,0">

@@ -57,6 +57,7 @@ internal static class Samotest
             TestDokumentov();
             TestVlozeniaZWordu();
             TestZostav();
+            TestLogaAHlavicky();
             TestZaloh();
             TestObrazoviek(aplikacia);
 
@@ -455,6 +456,159 @@ internal static class Samotest
         }
 
         Krok("zostavy v poriadku");
+    }
+
+    /// <summary>Logo školy na úvodnej strane a hlavička ďalších strán (text vľavo, škola a logo vpravo, vypínanie).</summary>
+    private static void TestLogaAHlavicky()
+    {
+        var export = Databaza.PriecinokDokumentov;
+        Directory.CreateDirectory(export);
+        var zdrojLoga = Path.Combine(Databaza.Priecinok, "samotest_logo.png");
+        VytvorSkusobneLogo(zdrojLoga, 360, 240);
+        NastaveniaSkoly.NastavLogo(zdrojLoga);
+        var logo = NastaveniaSkoly.CestaLoga();
+        Over(logo is not null && NastaveniaSkoly.Rozmer(logo) == (360, 240), "logo školy je nastavené");
+
+        var t = TitulnaStrana.Nacitaj();
+        Over(t.LogoZobrazit && t.HlavickaZobrazit && t.TextHlavickyZobrazit && t.SkolaVHlavickeZobrazit && t.LogoVHlavickeZobrazit,
+            "logo na úvodnej strane aj všetky časti hlavičky sú predvolene zapnuté");
+        Over(t.TextHlavickyVysledny == "Školský vzdelávací program – Učebné osnovy", $"predvolený text hlavičky ({t.TextHlavickyVysledny})");
+        t.Skola = "Gymnázium Ukážková 1, Vzorovo";
+        t.Uloz();
+
+        var idOblasti = new ObjektService().Oblasti()[4].Id;
+        CelyDokument Zostava() => ZostavaOsnov.Zostav(new VolbyZostavy { Oblasti = new[] { idOblasti } });
+        var hornyOkraj = new Int32Rect(400, 0, 394, 96);   // hlavička vpravo hore (nad textom strany)
+        var oblastLoga = new Int32Rect(60, 112, 360, 160); // logo na úvodnej strane pod pásom farieb
+
+        // všetko zapnuté
+        var plna = Zostava();
+        var vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(plna));
+        Over(PixelyLoga(vykreslenie, 1, oblastLoga) > 500, "logo na úvodnej strane (PDF a tlač)");
+        Over(PixelyLoga(vykreslenie, 2, hornyOkraj) > 100, "logo v hlavičke ďalších strán (PDF a tlač)");
+        Over(PixelyLoga(vykreslenie, 1, hornyOkraj) == 0, "úvodná strana nemá hlavičku");
+        PdfVystup.UlozPdf(plna, Path.Combine(export, "samotest_hlavicka_s_logom.pdf"));
+        UlozObrazokStrany(vykreslenie, 1, Path.Combine(export, "uvodna_strana_logo.png"));
+        UlozObrazokStrany(vykreslenie, 2, Path.Combine(export, "hlavicka_s_logom.png"));
+        var docx = Path.Combine(export, "samotest_hlavicka_s_logom.docx");
+        DocxVystup.Uloz(plna, docx);
+        OverDocx(File.ReadAllBytes(docx), "hlavička s logom");
+        var (text, obrazkyHlavicky, obrazkyTela, hlaviciek) = HlavickaWordu(docx);
+        Over(hlaviciek == 1 && text.Contains("Školský vzdelávací program – Učebné osnovy", StringComparison.Ordinal)
+             && text.Contains("Gymnázium Ukážková 1", StringComparison.Ordinal) && obrazkyHlavicky == 1,
+            $"hlavička vo Worde: text, škola a logo ({text}; obrázkov {obrazkyHlavicky})");
+        Over(obrazkyTela == 1, "logo na úvodnej strane vo Worde");
+
+        // jednotlivé časti vypnuté: logo na úvodnej strane, logo a text v hlavičke; vlastný text hlavičky
+        t = TitulnaStrana.Nacitaj();
+        t.LogoZobrazit = false;
+        t.LogoVHlavickeZobrazit = false;
+        t.TextHlavicky = "ŠkVP – Učebné osnovy gymnázia";
+        t.Uloz();
+        Over(TitulnaStrana.Nacitaj().TextHlavickyVysledny == "ŠkVP – Učebné osnovy gymnázia", "vlastný text hlavičky sa uložil");
+        var bezLoga = Zostava();
+        vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(bezLoga));
+        Over(PixelyLoga(vykreslenie, 1, oblastLoga) == 0, "vypnuté logo na úvodnej strane");
+        Over(PixelyLoga(vykreslenie, 2, hornyOkraj) == 0, "vypnuté logo v hlavičke");
+        UlozObrazokStrany(vykreslenie, 2, Path.Combine(export, "hlavicka_bez_loga.png"));
+        DocxVystup.Uloz(bezLoga, docx);
+        OverDocx(File.ReadAllBytes(docx), "hlavička bez loga");
+        (text, obrazkyHlavicky, obrazkyTela, hlaviciek) = HlavickaWordu(docx);
+        Over(hlaviciek == 1 && obrazkyHlavicky == 0 && obrazkyTela == 0 && text.Contains("ŠkVP – Učebné osnovy gymnázia", StringComparison.Ordinal),
+            "Word: bez loga, s vlastným textom hlavičky");
+
+        t = TitulnaStrana.Nacitaj();
+        t.TextHlavickyZobrazit = false;
+        t.LogoVHlavickeZobrazit = true;
+        t.Uloz();
+        var lenSkola = Zostava();
+        DocxVystup.Uloz(lenSkola, docx);
+        OverDocx(File.ReadAllBytes(docx), "hlavička bez textu");
+        (text, obrazkyHlavicky, _, _) = HlavickaWordu(docx);
+        Over(!text.Contains("Učebné osnovy", StringComparison.Ordinal) && text.Contains("Gymnázium Ukážková 1", StringComparison.Ordinal) && obrazkyHlavicky == 1,
+            "vypnutý text hlavičky – zostane škola a logo");
+        UlozObrazokStrany(NahladDokumentu.Priprav(PdfVystup.Vytvor(lenSkola)), 2, Path.Combine(export, "hlavicka_skola_a_logo.png"));
+
+        // celá hlavička vypnutá naraz – nastavenie jednotlivých častí sa zachová
+        t = TitulnaStrana.Nacitaj();
+        t.HlavickaZobrazit = false;
+        t.Uloz();
+        var bezHlavicky = Zostava();
+        vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(bezHlavicky));
+        Over(PixelyLoga(vykreslenie, 2, hornyOkraj) == 0 && !bezHlavicky.Titul.MaHlavicku(logo), "celá hlavička vypnutá naraz");
+        UlozObrazokStrany(vykreslenie, 2, Path.Combine(export, "hlavicka_vypnuta.png"));
+        DocxVystup.Uloz(bezHlavicky, docx);
+        OverDocx(File.ReadAllBytes(docx), "dokument bez hlavičky");
+        Over(HlavickaWordu(docx).Hlaviciek == 0, "Word: dokument bez hlavičky");
+        var znova = TitulnaStrana.Nacitaj();
+        Over(!znova.HlavickaZobrazit && !znova.TextHlavickyZobrazit && znova.SkolaVHlavickeZobrazit && znova.LogoVHlavickeZobrazit,
+            "po vypnutí celej hlavičky sa jednotlivé časti pamätajú");
+
+        // predvolené: logo zostane, hlavička aj logo sú znova zapnuté a text sleduje nadpis
+        TitulnaStrana.Predvolene();
+        t = TitulnaStrana.Nacitaj();
+        Over(NastaveniaSkoly.CestaLoga() is not null && t.LogoZobrazit && t.HlavickaZobrazit && t.TextHlavickyZobrazit
+             && t.TextHlavickyVysledny == "Školský vzdelávací program – Učebné osnovy", "predvolená hlavička (logo zostalo)");
+        t.Podnadpis = "Učebné osnovy 2026";
+        t.TextHlavicky = t.Hlavicka;
+        t.Uloz();
+        Over(Databaza.Citaj("titul.hlavicka.text") is null, "text hlavičky rovnaký ako nadpis sa neukladá zvlášť");
+        TitulnaStrana.Predvolene();
+        UlozObrazokStrany(NahladDokumentu.Priprav(PdfVystup.Vytvor(Zostava())), 2, Path.Combine(export, "hlavicka_predvolena.png"));
+
+        Krok("logo a hlavička v poriadku");
+    }
+
+    /// <summary>Skúšobné logo – purpurový kruh s modrým štvorcom (farba sa dá nájsť na vykreslenej strane).</summary>
+    private static void VytvorSkusobneLogo(string cesta, int sirka, int vyska)
+    {
+        var kresba = new DrawingVisual();
+        using (var kontext = kresba.RenderOpen())
+        {
+            var purpurova = new SolidColorBrush(Color.FromRgb(200, 20, 120));
+            kontext.DrawEllipse(purpurova, null, new Point(vyska / 2.0, vyska / 2.0), vyska / 2.0 - 4, vyska / 2.0 - 4);
+            kontext.DrawRectangle(new SolidColorBrush(Color.FromRgb(30, 60, 200)), null, new Rect(vyska, vyska * 0.2, sirka - vyska - 4, vyska * 0.6));
+        }
+
+        var obrazok = new System.Windows.Media.Imaging.RenderTargetBitmap(sirka, vyska, 96, 96, PixelFormats.Pbgra32);
+        obrazok.Render(kresba);
+        var kodovac = new System.Windows.Media.Imaging.PngBitmapEncoder();
+        kodovac.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(obrazok));
+        using var subor = File.Create(cesta);
+        kodovac.Save(subor);
+    }
+
+    /// <summary>Počet purpurových bodov skúšobného loga vo vybranej časti vykreslenej strany.</summary>
+    private static int PixelyLoga(MigraDoc.Rendering.DocumentRenderer vykreslenie, int strana, Int32Rect oblast)
+    {
+        var kresba = NahladDokumentu.Strana(vykreslenie, strana, out var velkost);
+        var obrazok = new System.Windows.Media.Imaging.RenderTargetBitmap((int)velkost.Width, (int)velkost.Height, 96, 96, PixelFormats.Pbgra32);
+        obrazok.Render(kresba);
+        var sirka = Math.Min(oblast.Width, obrazok.PixelWidth - oblast.X);
+        var vyska = Math.Min(oblast.Height, obrazok.PixelHeight - oblast.Y);
+        var body = new byte[sirka * vyska * 4];
+        obrazok.CopyPixels(new Int32Rect(oblast.X, oblast.Y, sirka, vyska), body, sirka * 4, 0);
+        var pocet = 0;
+        for (var i = 0; i < body.Length; i += 4)
+        {
+            int b = body[i], g = body[i + 1], r = body[i + 2];
+            if (r > 160 && g < 90 && b > 70 && b < 180)
+            {
+                pocet++;
+            }
+        }
+
+        return pocet;
+    }
+
+    /// <summary>Text a obrázky hlavičky dokumentu Word, počet obrázkov v tele (logo úvodnej strany) a počet hlavičiek.</summary>
+    private static (string Text, int ObrazkyHlavicky, int ObrazkyTela, int Hlaviciek) HlavickaWordu(string cesta)
+    {
+        using var docx = WordprocessingDocument.Open(cesta, false);
+        var hlavna = docx.MainDocumentPart!;
+        var hlavicky = hlavna.HeaderParts.ToList();
+        var text = string.Join(" | ", hlavicky.SelectMany(h => h.Header!.Descendants<W.Paragraph>()).Select(p => p.InnerText).Where(x => x.Length > 0));
+        return (text, hlavicky.Sum(h => h.ImageParts.Count()), hlavna.ImageParts.Count(), hlavicky.Count);
     }
 
     private static void TestZaloh()

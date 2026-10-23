@@ -229,17 +229,18 @@ public static class PdfVystup
             }
         }
 
-        if (u.Logo is not null && File.Exists(u.Logo))
+        var t = dokument.Titul;
+        if (t.LogoNaUvodnejStrane(u.Logo) is { } cestaLoga)
         {
             var odsekLoga = sekcia.AddParagraph();
             odsekLoga.Format.SpaceBefore = Unit.FromPoint(22);
             odsekLoga.Format.SpaceAfter = 0;
-            var logo = odsekLoga.AddImage(u.Logo);
+            odsekLoga.Format.LineSpacingRule = LineSpacingRule.Single;
+            var logo = odsekLoga.AddImage(cestaLoga);
             logo.LockAspectRatio = true;
             logo.Height = Unit.FromCentimeter(2.6);
         }
 
-        var t = dokument.Titul;
         var skola = sekcia.AddParagraph(t.SkolaZobrazit && t.Skola.Length > 0 ? t.Skola : " ");
         skola.Format.Font.Name = PismaDokumentu.Nadpis;
         skola.Format.Font.Size = 13;
@@ -347,25 +348,106 @@ public static class PdfVystup
         Bloky(sekcia, bloky, Farba("#3B5BDB"), 0);
     }
 
-    private static void HlavickaAPata(Section sekcia, CelyDokument dokument)
+    /// <summary>Výška loga v hlavičke strán a jeho najväčšia šírka (pri širokom logu).</summary>
+    public const double VyskaLogaHlavickyCm = 0.8;
+    public const double MaxSirkaLogaHlavickyCm = 3.5;
+
+    /// <summary>Rozmer loga v hlavičke v centimetroch (pomer strán zachovaný).</summary>
+    public static (double Sirka, double Vyska) RozmerLogaHlavicky(string logo)
     {
-        var hlavicka = sekcia.Headers.Primary.AddParagraph();
-        hlavicka.AddText(dokument.Titul.Hlavicka);
-        if (dokument.Udaje.Skola.Length > 0)
+        var (px, py) = NastaveniaSkoly.Rozmer(logo) ?? (1, 1);
+        var vyska = VyskaLogaHlavickyCm;
+        var sirka = vyska * px / py;
+        if (sirka > MaxSirkaLogaHlavickyCm)
         {
-            hlavicka.AddTab();
-            hlavicka.AddText(dokument.Udaje.Skola);
+            sirka = MaxSirkaLogaHlavickyCm;
+            vyska = sirka * py / px;
         }
 
-        hlavicka.Format.Borders.Bottom.Width = Unit.FromPoint(0.5);
-        hlavicka.Format.Borders.Bottom.Color = Linka;
-        hlavicka.Format.Borders.DistanceFromBottom = Unit.FromPoint(3);
+        return (sirka, vyska);
+    }
+
+    private static void HlavickaAPata(Section sekcia, CelyDokument dokument)
+    {
+        var t = dokument.Titul;
+        var text = t.TextVHlavicke;
+        var skola = t.SkolaVHlavicke;
+        var logo = t.LogoVHlavicke(dokument.Udaje.Logo);
+        if (text is not null || skola is not null || logo is not null)
+        {
+            Hlavicka(sekcia.Headers.Primary, text, skola, logo);
+        }
 
         var pata = sekcia.Footers.Primary.AddParagraph();
         pata.AddText("Strana ");
         pata.AddPageField();
         pata.AddText(" z ");
         pata.AddNumPagesField();
+    }
+
+    /// <summary>Hlavička strany: vľavo text, vpravo názov školy a logo, pod tým tenká čiara. Vypnuté časti sa vynechajú.</summary>
+    private static void Hlavicka(HeaderFooter hlavicka, string? text, string? skola, string? logo)
+    {
+        var (sirkaLoga, vyskaLoga) = logo is null ? (0.0, 0.0) : RozmerLogaHlavicky(logo);
+        var stlpecLoga = logo is null ? 0 : Unit.FromCentimeter(sirkaLoga + (skola is null ? 0 : 0.3)).Point;
+        var zvysok = SirkaTextu.Point - stlpecLoga;
+
+        var tabulka = hlavicka.AddTable();
+        tabulka.LeftPadding = 0;
+        tabulka.RightPadding = 0;
+        tabulka.TopPadding = 0;
+        tabulka.BottomPadding = Unit.FromPoint(3);
+        var bunky = new List<Action<Cell>>();
+        if (text is not null)
+        {
+            tabulka.AddColumn(Unit.FromPoint(skola is null ? zvysok : zvysok * 0.55));
+            bunky.Add(c => OdsekHlavicky(c, ParagraphAlignment.Left).AddText(text));
+        }
+
+        if (skola is not null)
+        {
+            tabulka.AddColumn(Unit.FromPoint(text is null ? zvysok : zvysok * 0.45));
+            bunky.Add(c => OdsekHlavicky(c, ParagraphAlignment.Right).AddText(skola));
+        }
+
+        if (text is null && skola is null)
+        {
+            // samotné logo je vpravo
+            tabulka.AddColumn(Unit.FromPoint(zvysok));
+            bunky.Add(_ => { });
+        }
+
+        if (logo is not null)
+        {
+            tabulka.AddColumn(Unit.FromPoint(stlpecLoga));
+            bunky.Add(c =>
+            {
+                var obrazok = OdsekHlavicky(c, ParagraphAlignment.Right).AddImage(logo);
+                obrazok.LockAspectRatio = true;
+                obrazok.Width = Unit.FromCentimeter(sirkaLoga);
+                obrazok.Height = Unit.FromCentimeter(vyskaLoga);
+            });
+        }
+
+        var riadok = tabulka.AddRow();
+        riadok.VerticalAlignment = VerticalAlignment.Center;
+        riadok.Borders.Bottom.Width = Unit.FromPoint(0.5);
+        riadok.Borders.Bottom.Color = Linka;
+        for (var i = 0; i < bunky.Count; i++)
+        {
+            bunky[i](riadok.Cells[i]);
+        }
+    }
+
+    private static Paragraph OdsekHlavicky(Cell bunka, ParagraphAlignment zarovnanie)
+    {
+        var odsek = bunka.AddParagraph();
+        odsek.Style = StyleNames.Header;
+        odsek.Format.Alignment = zarovnanie;
+        odsek.Format.SpaceBefore = 0;
+        odsek.Format.SpaceAfter = 0;
+        odsek.Format.LineSpacingRule = LineSpacingRule.Single;
+        return odsek;
     }
 
     private static void ObsahDokumentu(Section sekcia, CelyDokument dokument)

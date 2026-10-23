@@ -27,6 +27,26 @@ public static class NastaveniaSkoly
         return File.Exists(cesta) ? cesta : null;
     }
 
+    /// <summary>Rozmer obrázka v pixeloch, alebo null, ak sa nedá načítať.</summary>
+    public static (int Sirka, int Vyska)? Rozmer(string? cesta)
+    {
+        if (string.IsNullOrEmpty(cesta) || !File.Exists(cesta))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var prud = File.OpenRead(cesta);
+            var snimka = BitmapFrame.Create(prud, BitmapCreateOptions.DelayCreation, BitmapCacheOption.None);
+            return snimka.PixelWidth > 0 && snimka.PixelHeight > 0 ? (snimka.PixelWidth, snimka.PixelHeight) : null;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     /// <summary>Skopíruje obrázok loga do priečinka dát (PNG, JPEG, BMP, GIF).</summary>
     public static void NastavLogo(string zdroj)
     {

@@ -139,7 +139,7 @@ public sealed partial class TlacViewModel : ObservableObject
         NespracovanePredmety = Nespracovane,
     };
 
-    /// <summary>Úprava textov úvodnej strany (každý riadok sa dá prepísať aj vypnúť).</summary>
+    /// <summary>Úprava úvodnej strany (texty, logo) a hlavičky ďalších strán – každú časť sa dá prepísať aj vypnúť.</summary>
     [RelayCommand]
     private void UpravitUvodnuStranu()
     {
@@ -147,6 +147,7 @@ public sealed partial class TlacViewModel : ObservableObject
         if (okno.ShowDialog() == true)
         {
             Hlavny.NacitajUdaje();
+            OnPropertyChanged(nameof(MaLogo));
             TitulnaStrana = true;
             Obnovit();
         }

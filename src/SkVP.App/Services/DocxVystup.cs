@@ -98,20 +98,13 @@ public static class DocxVystup
             }
         }
 
-        // hlavička a päta (nie na titulnej strane)
-        var hlavicka = hlavna.AddNewPart<HeaderPart>();
-        var textHlavicky = dokument.Titul.Hlavicka;
-        var odsekHlavicky = new Paragraph(
-            new ParagraphProperties(new ParagraphStyleId { Val = "Header" },
-                new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka, Space = 3 }),
-                new Tabs(new TabStop { Val = TabStopValues.Right, Position = 9354 })),
-            Beh(textHlavicky));
-        if (dokument.Udaje.Skola.Length > 0)
+        // hlavička (ak má zapnutú aspoň jednu časť) a päta – nie na titulnej strane
+        HeaderPart? hlavicka = null;
+        if (dokument.Titul.MaHlavicku(dokument.Udaje.Logo))
         {
-            odsekHlavicky.Append(new Run(new TabChar()), Beh(dokument.Udaje.Skola));
+            hlavicka = hlavna.AddNewPart<HeaderPart>();
+            hlavicka.Header = Hlavicka(hlavicka, dokument.Titul, dokument.Udaje.Logo);
         }
-
-        hlavicka.Header = new Header(odsekHlavicky);
 
         var pata = hlavna.AddNewPart<FooterPart>();
         var odsekPaty = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" }, new Justification { Val = JustificationValues.Center }));
@@ -121,8 +114,13 @@ public static class DocxVystup
         odsekPaty.Append(Pole("NUMPAGES", "1"));
         pata.Footer = new Footer(odsekPaty);
 
-        var sekcia = new SectionProperties(
-            new HeaderReference { Type = HeaderFooterValues.Default, Id = hlavna.GetIdOfPart(hlavicka) },
+        var sekcia = new SectionProperties();
+        if (hlavicka is not null)
+        {
+            sekcia.Append(new HeaderReference { Type = HeaderFooterValues.Default, Id = hlavna.GetIdOfPart(hlavicka) });
+        }
+
+        sekcia.Append(
             new FooterReference { Type = HeaderFooterValues.Default, Id = hlavna.GetIdOfPart(pata) },
             new PageSize { Width = 11906, Height = 16838 },
             new PageMargin { Top = 1474, Bottom = 1361, Left = 1361, Right = 1247, Header = 680, Footer = 624, Gutter = 0 });
@@ -169,12 +167,17 @@ public static class DocxVystup
             telo.Append(pas);
         }
 
-        if (u.Logo is not null && File.Exists(u.Logo) && Logo(hlavna, u.Logo) is { } logo)
+        var t = dokument.Titul;
+        if (t.LogoNaUvodnejStrane(u.Logo) is { } cestaLoga && NastaveniaSkoly.Rozmer(cestaLoga) is { } rozmer)
         {
-            telo.Append(logo);
+            const double vyska = 2.6;
+            var beh = Obrazok(hlavna, cestaLoga, vyska * rozmer.Sirka / rozmer.Vyska, vyska, 1U, "Logo školy");
+            if (beh is not null)
+            {
+                telo.Append(new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = "400", After = "0" }), beh));
+            }
         }
 
-        var t = dokument.Titul;
         telo.Append(Odsek(t.SkolaZobrazit && t.Skola.Length > 0 ? t.Skola : " ", "SkvpSkola"));
         if (t.AdresaZobrazit && t.Adresa.Length > 0)
         {
@@ -326,41 +329,115 @@ public static class DocxVystup
         }
     }
 
-    /// <summary>Logo školy na titulnú stranu (výška 2,6 cm, pomer strán zachovaný).</summary>
-    private static Paragraph? Logo(MainDocumentPart hlavna, string cesta)
+    /// <summary>
+    /// Hlavička strán: tabuľka bez okrajov s čiarou dole – vľavo text, vpravo názov školy a logo. Vypnuté časti sa vynechajú.
+    /// </summary>
+    private static Header Hlavicka(HeaderPart cast, SkVP.Services.TitulnaStrana t, string? cestaLoga)
+    {
+        const int sirkaTextu = 9298; // šírka textu strany v twipoch (A4 bez okrajov)
+        const double twipovNaCm = 566.93;
+        var text = t.TextVHlavicke;
+        var skola = t.SkolaVHlavicke;
+        var logo = t.LogoVHlavicke(cestaLoga);
+        var (sirkaLoga, vyskaLoga) = logo is null ? (0.0, 0.0) : PdfVystup.RozmerLogaHlavicky(logo);
+        var stlpecLoga = logo is null ? 0 : (int)Math.Round((sirkaLoga + (skola is null ? 0 : 0.3)) * twipovNaCm);
+        var zvysok = sirkaTextu - stlpecLoga;
+
+        var bunky = new List<(int Sirka, Paragraph Obsah)>();
+        if (text is not null)
+        {
+            bunky.Add((skola is null ? zvysok : (int)(zvysok * 0.55), OdsekHlavicky(JustificationValues.Left, Beh(text))));
+        }
+
+        if (skola is not null)
+        {
+            bunky.Add((text is null ? zvysok : zvysok - (int)(zvysok * 0.55), OdsekHlavicky(JustificationValues.Right, Beh(skola))));
+        }
+
+        if (text is null && skola is null)
+        {
+            bunky.Add((zvysok, OdsekHlavicky(JustificationValues.Left)));
+        }
+
+        if (logo is not null)
+        {
+            var beh = Obrazok(cast, logo, sirkaLoga, vyskaLoga, 2U, "Logo školy v hlavičke");
+            bunky.Add((stlpecLoga, beh is null ? OdsekHlavicky(JustificationValues.Right) : OdsekHlavicky(JustificationValues.Right, beh)));
+        }
+
+        var siet = new TableGrid();
+        var riadok = new TableRow();
+        foreach (var (sirka, obsah) in bunky)
+        {
+            siet.Append(new GridColumn { Width = sirka.ToString(CultureInfo.InvariantCulture) });
+            riadok.Append(new TableCell(
+                new TableCellProperties(
+                    new TableCellWidth { Width = sirka.ToString(CultureInfo.InvariantCulture), Type = TableWidthUnitValues.Dxa },
+                    new TableCellVerticalAlignment { Val = TableVerticalAlignmentValues.Center }),
+                obsah));
+        }
+
+        var tabulka = new Table(
+            new TableProperties(
+                new TableWidth { Width = sirkaTextu.ToString(CultureInfo.InvariantCulture), Type = TableWidthUnitValues.Dxa },
+                new TableBorders(
+                    new TopBorder { Val = BorderValues.None },
+                    new LeftBorder { Val = BorderValues.None },
+                    new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka, Space = 0 },
+                    new RightBorder { Val = BorderValues.None },
+                    new InsideHorizontalBorder { Val = BorderValues.None },
+                    new InsideVerticalBorder { Val = BorderValues.None }),
+                new TableLayout { Type = TableLayoutValues.Fixed },
+                new TableCellMarginDefault(
+                    new TopMargin { Width = "0", Type = TableWidthUnitValues.Dxa },
+                    new TableCellLeftMargin { Width = 0, Type = TableWidthValues.Dxa },
+                    new BottomMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
+                    new TableCellRightMargin { Width = 0, Type = TableWidthValues.Dxa })),
+            siet,
+            riadok);
+
+        // hlavička vo Worde musí končiť odsekom – drobný prázdny odsek pod tabuľkou
+        var koniec = new Paragraph(new ParagraphProperties(
+            new ParagraphStyleId { Val = "Header" },
+            new SpacingBetweenLines { Before = "0", After = "0", Line = "20", LineRule = LineSpacingRuleValues.Exact }));
+        return new Header(tabulka, koniec);
+    }
+
+    private static Paragraph OdsekHlavicky(JustificationValues zarovnanie, params OpenXmlElement[] obsah)
+    {
+        var odsek = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Header" }, new Justification { Val = zarovnanie }));
+        odsek.Append(obsah);
+        return odsek;
+    }
+
+    private static PartTypeInfo TypObrazka(string cesta) => Path.GetExtension(cesta).ToLowerInvariant() switch
+    {
+        ".jpg" or ".jpeg" => ImagePartType.Jpeg,
+        ".bmp" => ImagePartType.Bmp,
+        ".gif" => ImagePartType.Gif,
+        _ => ImagePartType.Png,
+    };
+
+    /// <summary>Obrázok (logo) vložený do časti dokumentu ako beh textu s daným rozmerom v cm.</summary>
+    private static Run? Obrazok(OpenXmlPart vlastnik, string cesta, double sirkaCm, double vyskaCm, uint cislo, string nazov)
     {
         try
         {
-            int sirkaPx, vyskaPx;
-            using (var prud = File.OpenRead(cesta))
+            var cast = vlastnik switch
             {
-                var snimka = System.Windows.Media.Imaging.BitmapFrame.Create(prud,
-                    System.Windows.Media.Imaging.BitmapCreateOptions.DelayCreation, System.Windows.Media.Imaging.BitmapCacheOption.None);
-                sirkaPx = snimka.PixelWidth;
-                vyskaPx = snimka.PixelHeight;
-            }
-
-            if (sirkaPx <= 0 || vyskaPx <= 0)
-            {
-                return null;
-            }
-
-            var typ = Path.GetExtension(cesta).ToLowerInvariant() switch
-            {
-                ".jpg" or ".jpeg" => ImagePartType.Jpeg,
-                ".bmp" => ImagePartType.Bmp,
-                ".gif" => ImagePartType.Gif,
-                _ => ImagePartType.Png,
+                MainDocumentPart m => m.AddImagePart(TypObrazka(cesta)),
+                HeaderPart h => h.AddImagePart(TypObrazka(cesta)),
+                _ => throw new ArgumentException("Nepodporovaná časť dokumentu.", nameof(vlastnik)),
             };
-            var cast = hlavna.AddImagePart(typ);
             using (var prud = File.OpenRead(cesta))
             {
                 cast.FeedData(prud);
             }
 
-            const long vyska = 936000; // 2,6 cm v EMU
-            var sirka = vyska * sirkaPx / vyskaPx;
-            var id = hlavna.GetIdOfPart(cast);
+            const long emuNaCm = 360000;
+            var sirka = (long)Math.Round(sirkaCm * emuNaCm);
+            var vyska = (long)Math.Round(vyskaCm * emuNaCm);
+            var id = vlastnik.GetIdOfPart(cast);
             var obrazok = new DocumentFormat.OpenXml.Drawing.Pictures.Picture(
                 new DocumentFormat.OpenXml.Drawing.Pictures.NonVisualPictureProperties(
                     new DocumentFormat.OpenXml.Drawing.Pictures.NonVisualDrawingProperties { Id = 0U, Name = "logo" },
@@ -377,13 +454,13 @@ public static class DocxVystup
             var kresba = new Drawing(new DocumentFormat.OpenXml.Drawing.Wordprocessing.Inline(
                 new DocumentFormat.OpenXml.Drawing.Wordprocessing.Extent { Cx = sirka, Cy = vyska },
                 new DocumentFormat.OpenXml.Drawing.Wordprocessing.EffectExtent { LeftEdge = 0L, TopEdge = 0L, RightEdge = 0L, BottomEdge = 0L },
-                new DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties { Id = 1U, Name = "Logo školy" },
+                new DocumentFormat.OpenXml.Drawing.Wordprocessing.DocProperties { Id = cislo, Name = nazov },
                 new DocumentFormat.OpenXml.Drawing.Wordprocessing.NonVisualGraphicFrameDrawingProperties(
                     new DocumentFormat.OpenXml.Drawing.GraphicFrameLocks { NoChangeAspect = true }),
                 new DocumentFormat.OpenXml.Drawing.Graphic(new DocumentFormat.OpenXml.Drawing.GraphicData(obrazok)
                 { Uri = "http://schemas.openxmlformats.org/drawingml/2006/picture" }))
             { DistanceFromTop = 0U, DistanceFromBottom = 0U, DistanceFromLeft = 0U, DistanceFromRight = 0U });
-            return new Paragraph(new ParagraphProperties(new SpacingBetweenLines { Before = "400", After = "0" }), new Run(kresba));
+            return new Run(kresba);
         }
         catch (Exception)
         {
