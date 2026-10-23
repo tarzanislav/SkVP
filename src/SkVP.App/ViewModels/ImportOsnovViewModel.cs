@@ -18,6 +18,55 @@ public sealed partial class PolozkaImportu : ObservableObject
 {
     public PolozkaImportu(string cesta) => Cesta = cesta;
 
+    /// <summary>Voľby úrovne cudzieho jazyka (prázdna hodnota = bez úrovne).</summary>
+    public static IReadOnlyList<KeyValuePair<string, string>> Urovne { get; } = new[]
+    {
+        new KeyValuePair<string, string>("B1", "B1"),
+        new KeyValuePair<string, string>("B2", "B2"),
+        new KeyValuePair<string, string>("", "bez úrovne"),
+    };
+
+    /// <summary>Názov existujúceho predmetu podľa id (nastaví sprievodca) – pri ručnej zmene predmetu sa podľa neho doplní názov.</summary>
+    public Func<long, string?>? NazovPredmetu { get; set; }
+
+    /// <summary>Sprievodca práve nastavuje návrh (zmena predmetu nemení názov).</summary>
+    public bool Nastavuje { get; set; }
+
+    partial void OnCielChanged(CielImportu? value)
+    {
+        if (Nastavuje || value?.PredmetId is not long id || NazovPredmetu?.Invoke(id) is not { } nazov)
+        {
+            return;
+        }
+
+        // používateľ vybral iný predmet – názov a úroveň podľa neho
+        Zaklad = JazykovePravidla.BezUrovne(nazov);
+        CudziJazyk = JazykovePravidla.JeCudziJazyk(Zaklad);
+        NovyNazov = nazov;
+        Uroven = CudziJazyk ? JazykovePravidla.UrovenZNazvu(nazov) : "";
+        NovyNazov = nazov;
+    }
+
+    /// <summary>Názov predmetu bez úrovne (z pravidiel, rozpoznaného predmetu alebo súboru).</summary>
+    public string Zaklad { get; set; } = "";
+
+    /// <summary>Cudzí jazyk – sprievodca sa pýta na úroveň.</summary>
+    [ObservableProperty]
+    private bool _cudziJazyk;
+
+    /// <summary>Úroveň cudzieho jazyka: B1, B2, "" = bez úrovne, null = ešte nezvolená.</summary>
+    [ObservableProperty]
+    private string? _uroven;
+
+    /// <summary>Po zmene úrovne sa názov predmetu doplní („Ruský jazyk – úroveň B1“).</summary>
+    partial void OnUrovenChanged(string? value)
+    {
+        if (Zaklad.Length > 0)
+        {
+            NovyNazov = JazykovePravidla.NazovSUrovnou(Zaklad, value);
+        }
+    }
+
     public string Cesta { get; }
 
     public string NazovSuboru => System.IO.Path.GetFileName(Cesta);
@@ -35,6 +84,7 @@ public sealed partial class PolozkaImportu : ObservableObject
     [ObservableProperty]
     private OblastVM? _novaOblast;
 
+    /// <summary>Názov predmetu po importe – nový predmet sa tak nazve, existujúci sa naň premenuje.</summary>
     [ObservableProperty]
     private string _novyNazov = "";
 
@@ -105,16 +155,14 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                 SuborImportu? subor = null;
                 Dialogy.Cakaj(() => subor = ImportOsnov.Nacitaj(cesta, _predmety));
                 polozka.Subor = subor;
-                var id = _predmetId ?? subor!.PredmetId;
-                polozka.Ciel = Ciele.FirstOrDefault(c => c.PredmetId == id && id is not null) ?? NovyPredmet;
-                polozka.NovyNazov = subor!.NavrhNazvu;
-                polozka.NovaOblast = Hlavny.Oblasti.FirstOrDefault();
-                if (subor.Rok is int rok)
+                NastavCiel(polozka, subor!);
+                if (subor!.Rok is int rok)
                 {
                     polozka.Rok = rok.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 }
 
-                polozka.Stav = polozka.JeNovy ? "Predmet sa nenašiel – vytvorí sa nový" : "Predmet rozpoznaný";
+                polozka.Stav = (polozka.JeNovy ? "Predmet sa nenašiel – vytvorí sa nový" : "Predmet rozpoznaný")
+                               + (polozka.CudziJazyk && polozka.Uroven is null ? " • zvoľte úroveň jazyka" : "");
             }
             catch (SkvpException ex)
             {
@@ -131,6 +179,75 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
         }
 
         ObnovSuhrn();
+    }
+
+    /// <summary>
+    /// Predmet, názov a úroveň pre súbor. Jazykové osnovy podľa pravidiel (skratky, profilácia, úroveň); predmet, ktorý už
+    /// patrí inému súboru v zozname, sa znova nepoužije – napr. druhá profilácia konverzácie sa stane novým predmetom.
+    /// </summary>
+    private void NastavCiel(PolozkaImportu polozka, SuborImportu subor)
+    {
+        polozka.Nastavuje = true;
+        polozka.NazovPredmetu = id => _predmety.FirstOrDefault(p => p.Id == id).Nazov;
+        var obsadene = Polozky.Select(p => p.Ciel?.PredmetId).OfType<long>().ToHashSet();
+        long? id;
+        if (_predmetId is long pevny)
+        {
+            id = pevny;
+        }
+        else if (subor.Jazyk is { } jazyk)
+        {
+            id = ImportOsnov.Kandidati(jazyk, _predmety).Select(p => (long?)p.Id).FirstOrDefault(i => i is long x && !obsadene.Contains(x));
+        }
+        else
+        {
+            id = subor.PredmetId is long i && !obsadene.Contains(i) ? i : null;
+        }
+
+        polozka.Ciel = Ciele.FirstOrDefault(c => c.PredmetId == id && id is not null) ?? NovyPredmet;
+        var existujuci = polozka.Ciel.PredmetId is long e ? _predmety.First(p => p.Id == e).Nazov : null;
+        polozka.Zaklad = subor.Jazyk?.Zaklad ?? JazykovePravidla.BezUrovne(existujuci ?? subor.NavrhNazvu);
+        polozka.CudziJazyk = subor.Jazyk?.CudziJazyk ?? JazykovePravidla.JeCudziJazyk(polozka.Zaklad);
+        polozka.NovyNazov = subor.Jazyk is { } j ? JazykovePravidla.NazovSUrovnou(j.Zaklad, j.Uroven) : existujuci ?? subor.NavrhNazvu;
+        polozka.Uroven = subor.Jazyk is { } r ? r.Uroven ?? (r.CudziJazyk ? null : "")
+            : !polozka.CudziJazyk ? "" : existujuci is not null ? JazykovePravidla.UrovenZNazvu(existujuci) : null;
+        if (polozka.Uroven is null && !polozka.CudziJazyk)
+        {
+            polozka.Uroven = "";
+        }
+
+        // nový jazykový predmet patrí do oblasti Jazyk a komunikácia
+        polozka.NovaOblast = (subor.Jazyk is not null
+                                 ? Hlavny.Oblasti.FirstOrDefault(o => string.Equals(o.Nazov, JazykovePravidla.Oblast, StringComparison.CurrentCultureIgnoreCase))
+                                 : null)
+                             ?? Hlavny.Oblasti.FirstOrDefault();
+        polozka.Nastavuje = false;
+    }
+
+    /// <summary>Všetky osnovy z priečinka (Word a PDF) – súbory sa len čítajú.</summary>
+    public void PridajPriecinok(string priecinok)
+    {
+        var subory = System.IO.Directory.EnumerateFiles(priecinok)
+            .Where(f => ImportOsnov.Pripony.Contains(System.IO.Path.GetExtension(f).ToLowerInvariant())
+                        && !System.IO.Path.GetFileName(f).StartsWith("~$", StringComparison.Ordinal))
+            .OrderBy(f => f, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        if (subory.Count == 0)
+        {
+            Dialogy.Upozornenie("V priečinku nie sú žiadne osnovy vo Worde (.docx) ani PDF.");
+            return;
+        }
+
+        PridajSubory(subory);
+    }
+
+    [RelayCommand]
+    private void PridatPriecinok()
+    {
+        if (Dialogy.VybratPriecinok("Priečinok s osnovami na import") is { } priecinok)
+        {
+            PridajPriecinok(priecinok);
+        }
     }
 
     private void ObnovSuhrn()
@@ -181,6 +298,18 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                 Dialogy.Upozornenie($"{p.NazovSuboru}: zadajte názov nového predmetu a oblasť.");
                 return 0;
             }
+
+            if (p.CudziJazyk && p.Uroven is null)
+            {
+                Dialogy.Upozornenie($"{p.NazovSuboru}: zvoľte úroveň cudzieho jazyka (B1, B2 alebo bez úrovne).");
+                return 0;
+            }
+
+            if (p.NovyNazov.Trim().Length == 0)
+            {
+                Dialogy.Upozornenie($"{p.NazovSuboru}: zadajte názov predmetu.");
+                return 0;
+            }
         }
 
         try
@@ -211,9 +340,14 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                 else
                 {
                     id = p.Ciel!.PredmetId!.Value;
+                    if (Hlavny.NajdiPredmet(id) is { } predmet && predmet.Nazov != p.NovyNazov.Trim())
+                    {
+                        // napr. „Ruský jazyk“ → „Ruský jazyk – úroveň B1“ (aj v textoch dokumentov)
+                        Hlavny.PremenujPredmet(predmet, p.NovyNazov.Trim());
+                    }
                 }
 
-                var vysledok = ImportOsnov.Importuj(p.Subor!, id, int.Parse(p.Rok.Trim(), System.Globalization.CultureInfo.InvariantCulture));
+                var vysledok = ImportOsnov.Importuj(p.Subor!, id, int.Parse(p.Rok.Trim(), System.Globalization.CultureInfo.InvariantCulture), p.Uroven);
                 Vysledky.Add(vysledok);
                 Hlavny.PoZmeneDokumentu(id, oznamit: true);
                 p.Stav = !vysledok.Zmenene ? "Bez zmeny – osnova je rovnaká ako doteraz"

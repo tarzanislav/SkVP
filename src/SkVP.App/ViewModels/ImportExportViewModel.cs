@@ -46,6 +46,25 @@ public sealed partial class ImportExportViewModel : ObservableObject
         OnPropertyChanged(nameof(Suhrn));
     }
 
+    /// <summary>Všetky osnovy z vybraného priečinka (Word a PDF) – súbory v priečinku sa len čítajú.</summary>
+    [RelayCommand]
+    private void ImportovatZPriecinka()
+    {
+        if (Dialogy.VybratPriecinok("Priečinok s osnovami na import") is not { } priecinok)
+        {
+            return;
+        }
+
+        var model = new ImportOsnovViewModel(Hlavny);
+        model.PridajPriecinok(priecinok);
+        if (model.Polozky.Count > 0)
+        {
+            new Views.ImportOsnovWindow(model) { Owner = Dialogy.Vlastnik }.ShowDialog();
+        }
+
+        OnPropertyChanged(nameof(Suhrn));
+    }
+
     [RelayCommand]
     private void OtvoritPriecinokOsnov()
     {

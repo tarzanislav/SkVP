@@ -41,11 +41,13 @@
                         <WrapPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
                             <Button Padding="16,7" Margin="0,0,8,6" Style="{DynamicResource AccentButtonStyle}"
                                     Command="{Binding ImportovatOsnovyCommand}" Content="Importovať osnovy z Wordu alebo PDF…" />
+                            <Button Padding="12,7" Margin="0,0,8,6" Command="{Binding ImportovatZPriecinkaCommand}" Content="Z priečinka…"
+                                    ToolTip="Všetky osnovy (Word a PDF) z vybraného priečinka naraz – súbory sa len čítajú" />
                             <Button Padding="12,7" Margin="0,0,0,6" Command="{Binding OtvoritPriecinokOsnovCommand}" Content="Priečinok Osnovy"
                                     ToolTip="{Binding PriecinokOsnov}" />
                         </WrapPanel>
                         <TextBlock TextWrapping="Wrap"
-                                   Text="Nové osnovy pre zmenené alebo novo pridané predmety. Program rozpozná predmet podľa názvu súboru alebo textu, PDF prevedie na Word bez Wordu. Doterajšia osnova sa najprv zarchivuje so záznamom a rokom archivácie („05 Fyzika – archív 2026“), nová dostane rok zmeny („05 Fyzika 2026“). Zdrojové súbory sa nemenia." />
+                                   Text="Nové osnovy pre zmenené alebo novo pridané predmety – jednotlivo alebo celý priečinok. Program rozpozná predmet podľa názvu súboru (aj skratky SJL, ANJ, KAJ …) alebo textu, pri cudzích jazykoch sa opýta na úroveň (B1, B2), PDF prevedie na Word bez Wordu. Doterajšia osnova sa najprv zarchivuje so záznamom a rokom archivácie („05 Fyzika – archív 2026“), nová dostane rok zmeny („05 Fyzika 2026“). Zdrojové súbory sa nemenia." />
                     </DockPanel>
                 </Border>
             </Grid>

@@ -62,6 +62,7 @@ internal static class Samotest
             TestVystupov();
             TestImportuAExportu();
             TestServisu();
+            TestJazykovychOsnov(aplikacia);
             TestZaloh();
             TestObrazoviek(aplikacia);
 
@@ -746,6 +747,82 @@ internal static class Samotest
         sluzba.Odstran(astronomia.Id);
         InfoOsnovyService.Uloz(fyzika.Id, InfoOsnovy.Prazdne);
         Krok("import a export v poriadku");
+    }
+
+    /// <summary>
+    /// Import osnov oblasti Jazyk a komunikácia z priečinka: skratky v názvoch súborov, profilácia konverzácie v anglickom
+    /// jazyku z úvodnej tabuľky, úroveň B1/B2 v názve predmetu. Na konci sa dáta obnovia zo zálohy.
+    /// </summary>
+    private static void TestJazykovychOsnov(App aplikacia)
+    {
+        var zaloha = new ZalohaService().Zalohuj();
+        var priecinok = Path.Combine(Databaza.PriecinokDokumentov, "Moje osnovy");
+        Directory.CreateDirectory(priecinok);
+        byte[] Osnova(string profilacia) => DocxVystup.Osnova(new List<Blok>
+        {
+            new Tabulka(new IReadOnlyList<Bunka>[]
+            {
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Názov predmetu") }) }), new Bunka(new Blok[] { new Odsek(new[] { new Usek("Konverzácia v anglickom jazyku") }) }) },
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Profilácia") }) }), new Bunka(new Blok[] { new Odsek(new[] { new Usek(profilacia) }) }) },
+            }, 2),
+            new Nadpis(1, "Charakteristika predmetu"),
+            new Odsek(new[] { new Usek("Text osnovy.") }),
+        });
+        var subory = new Dictionary<string, string>
+        {
+            ["KAJ profilácia ANJ.docx"] = "anglický jazyk",
+            ["KAJ šport.docx"] = "šport, informatika, STEAM",
+            ["RUJ.docx"] = "", ["NEJ.docx"] = "", ["KRJ.docx"] = "", ["KNJ.docx"] = "",
+            ["Jazykom k maturite RUJ.docx"] = "", ["Jazykom k maturite_NEJ.docx"] = "", ["Jazykom k maturite ANJ.docx"] = "",
+            ["Reálie anglicky hovoriacich krajín.docx"] = "", ["ANJ.docx"] = "", ["SJL.docx"] = "", ["SSJ.docx"] = "",
+        };
+        foreach (var (nazov, profilacia) in subory)
+        {
+            File.WriteAllBytes(Path.Combine(priecinok, nazov), Osnova(profilacia));
+        }
+
+        var model = new MainViewModel();
+        var sprievodca = new ImportOsnovViewModel(model);
+        sprievodca.PridajPriecinok(priecinok);
+        Over(sprievodca.Polozky.Count == subory.Count && sprievodca.Polozky.All(p => p.Subor is not null), $"import z priečinka: {sprievodca.Polozky.Count} súborov");
+        string Navrh(string subor) => sprievodca.Polozky.Single(p => p.NazovSuboru == subor).NovyNazov;
+        Over(Navrh("KAJ profilácia ANJ.docx") == "Konverzácia v anglickom jazyku - profilácia anglický jazyk – úroveň B2", $"KAJ – profilácia anglický jazyk ({Navrh("KAJ profilácia ANJ.docx")})");
+        Over(Navrh("KAJ šport.docx") == "Konverzácia v anglickom jazyku - profilácia šport, informatika, steam – úroveň B2", $"KAJ – ostatné profilácie ({Navrh("KAJ šport.docx")})");
+        Over(Navrh("RUJ.docx") == "Ruský jazyk – úroveň B1" && Navrh("KNJ.docx") == "Konverzácia v nemeckom jazyku – úroveň B1"
+             && Navrh("KRJ.docx") == "Konverzácia v ruskom jazyku – úroveň B1" && Navrh("NEJ.docx") == "Nemecký jazyk – úroveň B1", "úroveň B1: RUJ, NEJ, KRJ, KNJ");
+        Over(Navrh("Jazykom k maturite_NEJ.docx") == "Jazykom k maturite - nemecký jazyk – úroveň B2" && Navrh("ANJ.docx") == "Anglický jazyk – úroveň B2"
+             && Navrh("Reálie anglicky hovoriacich krajín.docx") == "Reálie anglicky hovoriacich krajín – úroveň B2", "úroveň B2: Jazykom k maturite, ANJ, Reálie");
+        Over(Navrh("SJL.docx") == "Slovenský jazyk a literatúra" && Navrh("SSJ.docx") == "Seminár zo slovenského jazyka a literatúry"
+             && !sprievodca.Polozky.Single(p => p.NazovSuboru == "SJL.docx").CudziJazyk, "SJL a SSJ bez úrovne");
+        var kaj = sprievodca.Polozky.Where(p => p.NazovSuboru.StartsWith("KAJ", StringComparison.Ordinal)).ToList();
+        Over(kaj.Count(p => !p.JeNovy) == 1 && kaj.Count(p => p.JeNovy) == 1, "KAJ: jedna profilácia do existujúceho predmetu, druhá ako nový predmet");
+        Over(sprievodca.Polozky.Count(p => p.NazovSuboru.StartsWith("Jazykom", StringComparison.Ordinal) && !p.JeNovy) == 1, "Jazykom k maturite: existujúci predmet sa použije raz");
+
+        var okno = new ImportOsnovWindow(sprievodca);
+        okno.Show();
+        Pumpuj();
+        Snimka(okno, "25_import_jazykovych_osnov");
+        okno.Close();
+
+        Over(sprievodca.Importuj() == subory.Count, "import všetkých jazykových osnov");
+        var nazvy = new ObjektService().Deti(new ObjektService().Oblasti().First(o => o.Nazov == JazykovePravidla.Oblast).Id).Select(p => p.Nazov).ToList();
+        Krok("predmety oblasti Jazyk a komunikácia: " + string.Join(" | ", nazvy));
+        Over(nazvy.Contains("Konverzácia v anglickom jazyku - profilácia anglický jazyk – úroveň B2")
+             && nazvy.Contains("Konverzácia v anglickom jazyku - profilácia šport, informatika, steam – úroveň B2")
+             && nazvy.Contains("Jazykom k maturite - ruský jazyk – úroveň B2") && nazvy.Contains("Jazykom k maturite - anglický jazyk – úroveň B2")
+             && nazvy.Contains("Reálie anglicky hovoriacich krajín – úroveň B2") && nazvy.Contains("Ruský jazyk – úroveň B1")
+             && nazvy.Contains("Slovenský jazyk a literatúra") && !nazvy.Contains("Konverzácia v anglickom jazyku")
+             && !nazvy.Contains("Reálie v anglickom jazyku") && !nazvy.Contains("Jazykom k maturite"), "názvy predmetov po importe");
+        var rusky = new ObjektService().Oblasti().SelectMany(o => new ObjektService().Deti(o.Id)).First(p => p.Nazov == "Ruský jazyk – úroveň B1");
+        Over(InfoOsnovyService.Nacitaj(rusky.Id).Uroven == "B1", "úroveň je zaznamenaná pri osnove");
+
+        // budúci import už premenovaného predmetu: rovnaký predmet, úroveň sa ponúkne z názvu
+        var znova = new ImportOsnovViewModel(new MainViewModel());
+        znova.PridajSubory(new[] { Path.Combine(priecinok, "RUJ.docx") });
+        Over(!znova.Polozky[0].JeNovy && znova.Polozky[0].Uroven == "B1", "opakovaný import nájde predmet s úrovňou");
+
+        new ZalohaService().Obnov(zaloha);
+        Krok("jazykové osnovy v poriadku");
     }
 
     /// <summary>Servis: záloha osnov vo Worde, obnova zo zálohy, kontrola databázy, export a import nastavení.</summary>

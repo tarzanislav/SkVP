@@ -92,6 +92,18 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
 - Cieľová platforma `net10.0-windows10.0.19041.0` (súčasti Windows na PDF a OCR, schválené používateľom).
 - OCR na GitHube má len angličtinu (diakritika sa stráca) – kvalitu importu PDF treba overiť na počítači používateľa.
 
+## Jazykové osnovy a úroveň (23. 10. 2026, na vetve vyvoj/etapa1)
+- Pri importe osnovy cudzieho jazyka sa sprievodca pýta na úroveň (B1, B2, bez úrovne); úroveň ide do názvu predmetu
+  „Ruský jazyk – úroveň B1“ (aj B2) a do `objekt.vlastnosti` (uroven). Existujúci predmet sa pri importe premenuje na
+  názov zo sprievodcu (aj v textoch dokumentov).
+- Pravidlá oblasti Jazyk a komunikácia (`Services/JazykovePravidla`), podľa skratiek v názve súboru: KAJ → profilácia
+  z 2. riadku úvodnej tabuľky („Konverzácia v anglickom jazyku - profilácia anglický jazyk“ / „… - profilácia šport,
+  informatika, steam“), B2; RUJ, NEJ, KRJ (Konverzácia v ruskom jazyku – nový predmet), KNJ → B1; ANJ, Reálie anglicky
+  hovoriacich krajín (premenuje „Reálie v anglickom jazyku“), Jazykom k maturite RUJ/NEJ/ANJ („Jazykom k maturite -
+  ruský jazyk“, pôvodný predmet sa použije pre prvý, ďalšie nové) → B2; SJL, SSJ bez úrovne. Predmet už použitý iným
+  súborom v zozname sa znova nepoužije (druhá profilácia KAJ = nový predmet).
+- Import celého priečinka (Import a export → Z priečinka…, v sprievodcovi Pridať priečinok…), súbory sa len čítajú.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.

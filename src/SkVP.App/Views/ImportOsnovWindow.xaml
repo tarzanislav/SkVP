@@ -30,10 +30,17 @@
                         <TextBlock Text="Pridať súbory…" />
                     </StackPanel>
                 </Button>
+                <Button DockPanel.Dock="Right" Padding="12,5" Margin="0,0,8,0" Command="{Binding PridatPriecinokCommand}"
+                        ToolTip="Všetky osnovy (Word a PDF) z priečinka – súbory sa len čítajú">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE8B7;" FontSize="12" Margin="0,0,8,0" />
+                        <TextBlock Text="Pridať priečinok…" />
+                    </StackPanel>
+                </Button>
                 <TextBlock Text="Import učebných osnov" Style="{StaticResource Podnadpis}" FontSize="20" Margin="0" />
             </DockPanel>
             <TextBlock Style="{StaticResource Popis}" Margin="0,6,0,0" TextWrapping="Wrap"
-                       Text="Skontrolujte, do ktorého predmetu sa každá osnova uloží a rok zmeny osnov. Neznámy predmet sa vytvorí ako nový v zvolenej oblasti. Doterajšie osnovy sa pred importom zarchivujú (v programe aj ako súbor „05 Fyzika – archív 2026“)." />
+                       Text="Skontrolujte, do ktorého predmetu sa každá osnova uloží, jeho názov, pri cudzích jazykoch úroveň (B1, B2) a rok zmeny osnov. Neznámy predmet sa vytvorí ako nový v zvolenej oblasti. Doterajšie osnovy sa pred importom zarchivujú (v programe aj ako súbor „05 Fyzika – archív 2026“)." />
         </StackPanel>
 
         <ScrollViewer Margin="24,0,24,10" VerticalScrollBarVisibility="Auto">
@@ -46,6 +53,7 @@
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="260" />
                                     <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="90" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
@@ -58,22 +66,30 @@
                                 <StackPanel Grid.Column="2">
                                     <TextBlock Text="Predmet" Style="{StaticResource Popis}" FontSize="12" Margin="0,0,0,2" />
                                     <ComboBox ItemsSource="{Binding DataContext.Ciele, ElementName=Okno}" SelectedItem="{Binding Ciel}" />
-                                    <Grid Margin="0,6,0,0" Visibility="{Binding JeNovy, Converter={StaticResource BoolNaViditelnost}}">
+                                    <TextBlock Text="Názov predmetu po importe" Style="{StaticResource Popis}" FontSize="12" Margin="0,6,0,2" />
+                                    <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="8" />
-                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBox Text="{Binding NovyNazov, UpdateSourceTrigger=PropertyChanged}" ToolTip="Názov nového predmetu" />
-                                        <ComboBox Grid.Column="2" ItemsSource="{Binding DataContext.Oblasti, ElementName=Okno}" SelectedItem="{Binding NovaOblast}"
-                                                  DisplayMemberPath="Nazov" ToolTip="Oblasť nového predmetu" />
+                                        <TextBox Text="{Binding NovyNazov, UpdateSourceTrigger=PropertyChanged}"
+                                                 ToolTip="Nový predmet sa tak nazve, existujúci sa naň premenuje (aj v textoch dokumentov)" />
+                                        <ComboBox Grid.Column="1" Width="200" Margin="8,0,0,0" ItemsSource="{Binding DataContext.Oblasti, ElementName=Okno}"
+                                                  SelectedItem="{Binding NovaOblast}" DisplayMemberPath="Nazov" ToolTip="Oblasť nového predmetu"
+                                                  Visibility="{Binding JeNovy, Converter={StaticResource BoolNaViditelnost}}" />
                                     </Grid>
                                 </StackPanel>
-                                <StackPanel Grid.Column="3" Margin="12,0,0,0">
+                                <StackPanel Grid.Column="3" Margin="12,0,0,0" Width="110"
+                                            Visibility="{Binding CudziJazyk, Converter={StaticResource BoolNaViditelnost}}">
+                                    <TextBlock Text="Úroveň jazyka" Style="{StaticResource Popis}" FontSize="12" Margin="0,0,0,2" />
+                                    <ComboBox ItemsSource="{x:Static vm:PolozkaImportu.Urovne}" SelectedValuePath="Key" DisplayMemberPath="Value"
+                                              SelectedValue="{Binding Uroven}" ToolTip="B1, B2 alebo bez úrovne – doplní sa do názvu predmetu" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="4" Margin="12,0,0,0">
                                     <TextBlock Text="Rok zmeny" Style="{StaticResource Popis}" FontSize="12" Margin="0,0,0,2" />
                                     <TextBox Text="{Binding Rok, UpdateSourceTrigger=PropertyChanged}" />
                                 </StackPanel>
-                                <Button Grid.Column="4" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE711;" VerticalAlignment="Top" Margin="8,0,0,0"
+                                <Button Grid.Column="5" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE711;" VerticalAlignment="Top" Margin="8,0,0,0"
                                         ToolTip="Odobrať zo zoznamu"
                                         Command="{Binding DataContext.OdobratCommand, ElementName=Okno}" CommandParameter="{Binding}" />
                             </Grid>

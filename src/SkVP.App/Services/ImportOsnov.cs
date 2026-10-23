@@ -26,6 +26,9 @@ public sealed class SuborImportu
 
     /// <summary>Rok zmeny osnov z názvu súboru (napr. „05 Fyzika 2026.docx“).</summary>
     public int? Rok { get; init; }
+
+    /// <summary>Jazykový predmet podľa pravidiel oblasti Jazyk a komunikácia (skratky, profilácia, úroveň) alebo null.</summary>
+    public JazykovyPredmet? Jazyk { get; init; }
 }
 
 /// <summary>Výsledok importu jednej osnovy.</summary>
@@ -58,6 +61,7 @@ public static partial class ImportOsnov
         var pripona = Path.GetExtension(cesta).ToLowerInvariant();
         byte[] docx;
         string text;
+        IReadOnlyList<Blok> bloky;
         if (pripona == ".docx")
         {
             try
@@ -73,7 +77,8 @@ public static partial class ImportOsnov
             }
 
             using var citanie = new MemoryStream(docx, false);
-            text = DokumentOsnovy.Text(DocxCitac.Nacitaj(citanie).Bloky);
+            bloky = DocxCitac.Nacitaj(citanie).Bloky;
+            text = DokumentOsnovy.Text(bloky);
         }
         else if (pripona == ".pdf")
         {
@@ -83,7 +88,8 @@ public static partial class ImportOsnov
                 throw new SkvpException($"V súbore {Path.GetFileName(cesta)} sa nenašiel žiadny text.");
             }
 
-            docx = DocxVystup.Osnova(TextNaOsnovu.Rozober(text));
+            bloky = TextNaOsnovu.Rozober(text);
+            docx = DocxVystup.Osnova(bloky);
         }
         else if (pripona == ".doc")
         {
@@ -94,7 +100,10 @@ public static partial class ImportOsnov
             throw new SkvpException($"{Path.GetFileName(cesta)}: podporované sú dokumenty Word (.docx) a PDF.");
         }
 
-        var (id, navrh) = Rozpoznaj(Path.GetFileNameWithoutExtension(cesta), text, predmety);
+        var jazyk = JazykovePravidla.Rozpoznaj(Path.GetFileName(cesta), text, bloky);
+        var (id, navrh) = jazyk is null
+            ? Rozpoznaj(Path.GetFileNameWithoutExtension(cesta), text, predmety)
+            : (Kandidati(jazyk, predmety).Select(p => (long?)p.Id).FirstOrDefault(), JazykovePravidla.NazovSUrovnou(jazyk.Zaklad, jazyk.Uroven));
         return new SuborImportu
         {
             Cesta = cesta,
@@ -103,8 +112,39 @@ public static partial class ImportOsnov
             Text = text,
             PredmetId = id,
             NavrhNazvu = navrh,
+            Jazyk = jazyk,
             Rok = RokVTexte().Match(Path.GetFileNameWithoutExtension(cesta)) is { Success: true } m ? int.Parse(m.Value, CultureInfo.InvariantCulture) : null,
         };
+    }
+
+    /// <summary>
+    /// Predmety programu, do ktorých patrí jazyková osnova – v poradí: rovnaký názov s úrovňou, rovnaký názov bez úrovne,
+    /// doterajší názov (napr. „Konverzácia v anglickom jazyku“ pred rozdelením podľa profilácie).
+    /// </summary>
+    public static List<(long Id, string Nazov)> Kandidati(JazykovyPredmet jazyk, IReadOnlyList<(long Id, string Nazov)> predmety)
+    {
+        var vysledok = new List<(long Id, string Nazov)>();
+        void Pridaj(IEnumerable<(long Id, string Nazov)> zhody)
+        {
+            foreach (var z in zhody)
+            {
+                if (vysledok.All(v => v.Id != z.Id))
+                {
+                    vysledok.Add(z);
+                }
+            }
+        }
+
+        var cely = Kluc(JazykovePravidla.NazovSUrovnou(jazyk.Zaklad, jazyk.Uroven));
+        var zaklad = Kluc(jazyk.Zaklad);
+        Pridaj(predmety.Where(p => Kluc(p.Nazov) == cely));
+        Pridaj(predmety.Where(p => Kluc(JazykovePravidla.BezUrovne(p.Nazov)) == zaklad));
+        foreach (var alias in jazyk.Aliasy)
+        {
+            Pridaj(predmety.Where(p => Kluc(JazykovePravidla.BezUrovne(p.Nazov)) == Kluc(alias)));
+        }
+
+        return vysledok;
     }
 
     /// <summary>
@@ -115,7 +155,7 @@ public static partial class ImportOsnov
     {
         var zoSuboru = CistyNazov(nazovSuboru);
         var kluc = Kluc(zoSuboru);
-        if (predmety.FirstOrDefault(p => Kluc(p.Nazov) == kluc) is { Id: > 0 } presny)
+        if (predmety.FirstOrDefault(p => Kluc(p.Nazov) == kluc || Kluc(JazykovePravidla.BezUrovne(p.Nazov)) == kluc) is { Id: > 0 } presny)
         {
             return (presny.Id, presny.Nazov);
         }
@@ -190,7 +230,7 @@ public static partial class ImportOsnov
     /// Uloží osnovu do predmetu: doterajšia sa zarchivuje (v databáze aj ako súbor „… – archív rok.docx“), nová dostane rok
     /// zmeny osnov a jej kópia sa uloží ako „číslo názov rok.docx“.
     /// </summary>
-    public static VysledokImportuOsnovy Importuj(SuborImportu subor, long predmetId, int rok)
+    public static VysledokImportuOsnovy Importuj(SuborImportu subor, long predmetId, int rok, string? uroven = null)
     {
         var sluzba = new ObjektService();
         var predmet = sluzba.Nacitaj(predmetId) ?? throw new SkvpException("Predmet sa nenašiel.");
@@ -208,7 +248,7 @@ public static partial class ImportOsnov
 
         var dovod = $"Archivované {teraz.ToString("d. M. yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))} (rok {teraz.Year}) – pred importom novej osnovy zo súboru {subor.NazovSuboru}";
         var zmenene = dokumenty.Uloz(predmetId, subor.Docx, dovod);
-        InfoOsnovyService.Uloz(predmetId, new InfoOsnovy(rok, teraz, subor.NazovSuboru));
+        InfoOsnovyService.Uloz(predmetId, new InfoOsnovy(rok, teraz, subor.NazovSuboru, uroven is { Length: > 0 } ? uroven : null));
 
         string? kopia = null;
         try

@@ -6,7 +6,7 @@ using SkVP.Data;
 namespace SkVP.Services;
 
 /// <summary>Rok, od ktorého osnova platí (rok zmeny osnov), a odkiaľ bola naimportovaná.</summary>
-public sealed record InfoOsnovy(int? Rok, DateTime? Importovane, string? Zdroj)
+public sealed record InfoOsnovy(int? Rok, DateTime? Importovane, string? Zdroj, string? Uroven = null)
 {
     public static readonly InfoOsnovy Prazdne = new(null, null, null);
 
@@ -19,6 +19,11 @@ public sealed record InfoOsnovy(int? Rok, DateTime? Importovane, string? Zdroj)
             if (Rok is int rok)
             {
                 casti.Add($"Osnovy zmenené v roku {rok}");
+            }
+
+            if (Uroven is { Length: > 0 } uroven)
+            {
+                casti.Add($"úroveň {uroven}");
             }
 
             if (Importovane is DateTime kedy)
@@ -40,6 +45,7 @@ public static class InfoOsnovyService
     private const string KlucRok = "rokOsnovy";
     private const string KlucImport = "importovane";
     private const string KlucZdroj = "zdrojImportu";
+    private const string KlucUroven = "uroven";
 
     public static InfoOsnovy Nacitaj(long objektId)
     {
@@ -47,7 +53,8 @@ public static class InfoOsnovyService
         return new InfoOsnovy(
             json[KlucRok]?.GetValue<int>(),
             json[KlucImport]?.GetValue<string>() is { } d && DateTime.TryParse(d, CultureInfo.InvariantCulture, DateTimeStyles.None, out var kedy) ? kedy : null,
-            json[KlucZdroj]?.GetValue<string>());
+            json[KlucZdroj]?.GetValue<string>(),
+            json[KlucUroven]?.GetValue<string>());
     }
 
     public static void Uloz(long objektId, InfoOsnovy info)
@@ -56,6 +63,7 @@ public static class InfoOsnovyService
         json[KlucRok] = info.Rok is int r ? JsonValue.Create(r) : null;
         json[KlucImport] = info.Importovane?.ToString("s", CultureInfo.InvariantCulture);
         json[KlucZdroj] = info.Zdroj;
+        json[KlucUroven] = info.Uroven;
         foreach (var kluc in json.Where(p => p.Value is null).Select(p => p.Key).ToList())
         {
             json.Remove(kluc);
