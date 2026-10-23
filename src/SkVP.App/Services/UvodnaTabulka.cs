@@ -62,6 +62,36 @@ public static partial class UvodnaTabulka
         }
     }
 
+    /// <summary>
+    /// Názov predmetu z úvodnej tabuľky („Názov predmetu | Fyzika“, „Predmet: Fyzika“), alebo null. Podľa neho sa pri
+    /// importe z priečinka rozpozná alebo vytvorí predmet.
+    /// </summary>
+    public static string? NazovPredmetu(byte[]? docx)
+    {
+        if (docx is not { Length: > 0 })
+        {
+            return null;
+        }
+
+        try
+        {
+            using var prud = new MemoryStream(docx, false);
+            using var dokument = WordprocessingDocument.Open(prud, false);
+            if (Tabulka(dokument) is not { } tabulka)
+            {
+                return null;
+            }
+
+            var miesto = Najdi(tabulka, "nazov predmetu") ?? Najdi(tabulka, "nazov vyucovacieho predmetu") ?? Najdi(tabulka, "vyucovaci predmet")
+                         ?? Najdi(tabulka, "ucebny predmet") ?? Najdi(tabulka, "predmet");
+            return Upravit(miesto?.Hodnota);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     /// <summary>Údaje osnovy predmetu z databázy.</summary>
     public static UdajeOsnovy Precitaj(long objektId) => Precitaj(new DokumentService().NacitajData(objektId));
 

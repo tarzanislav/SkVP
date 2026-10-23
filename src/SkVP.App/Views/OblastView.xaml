@@ -276,6 +276,34 @@
 
             <!-- charakteristika vzdelávacej oblasti -->
             <DockPanel x:Name="PanelCharakteristika" Visibility="Collapsed">
+                <Border DockPanel.Dock="Top" Margin="44,8,24,0" Padding="14,8" CornerRadius="8"
+                        Background="{Binding Oblast.Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=18}"
+                        Visibility="{Binding MaCharakteristikuSvp, Converter={StaticResource BoolNaViditelnost}}">
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Padding="12,4" Command="{Binding CharakteristikaZoSvpCommand}"
+                                ToolTip="Nahradí text oficiálnym znením zo Štátneho vzdelávacieho programu pre gymnáziá (doterajší sa zarchivuje)">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource Ikona}" Text="&#xE8A5;" FontSize="12" Margin="0,0,6,0" />
+                                <TextBlock Text="Prevziať zo ŠVP…" />
+                            </StackPanel>
+                        </Button>
+                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" FontSize="12.5">
+                            <Run Text="Štátny vzdelávací program pre gymnáziá obsahuje charakteristiku tejto oblasti." />
+                            <Run FontWeight="SemiBold">
+                                <Run.Style>
+                                    <Style TargetType="Run">
+                                        <Setter Property="Text" Value="" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding CharakteristikaJeZoSvp}" Value="True">
+                                                <Setter Property="Text" Value="Text je zhodný so ŠVP." />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Run.Style>
+                            </Run>
+                        </TextBlock>
+                    </DockPanel>
+                </Border>
                 <v:ListaDokumentu DockPanel.Dock="Top" DataContext="{Binding Dokument}"
                                   Popis="Úvodný text oblasti – v zostave sa vytlačí pred predmetmi oblasti." />
                 <v:EditorDokumentu x:Name="Editor" JeUprava="{Binding Dokument.JeUprava, Mode=OneWay}" Farba="{Binding Oblast.Farba}"

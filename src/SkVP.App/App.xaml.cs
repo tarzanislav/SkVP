@@ -3,6 +3,7 @@ using System.Windows.Threading;
 using SkVP.Data;
 using SkVP.Pomocne;
 using SkVP.Services;
+using SkVP.ViewModels;
 using SkVP.Views;
 
 namespace SkVP;
@@ -53,9 +54,12 @@ public partial class App : Application
 
         NastavTemu(Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem));
 
+        string? priecinokOsnov = null;
         if (prveSpustenie)
         {
-            new PrveSpustenieWindow().ShowDialog();
+            var uvod = new PrveSpustenieWindow();
+            uvod.ShowDialog();
+            priecinokOsnov = uvod.PriecinokOsnov;
         }
 
         try
@@ -74,6 +78,17 @@ public partial class App : Application
         okno.Show();
 
         okno.Dispatcher.InvokeAsync(okno.Model.ObnovNeprevzateZWordu, DispatcherPriority.ApplicationIdle);
+        if (priecinokOsnov is not null)
+        {
+            // prvé spustenie podľa ŠVP: predmety z učebných osnov v priečinku (podľa názvu v úvodnej tabuľke)
+            okno.Dispatcher.InvokeAsync(() =>
+            {
+                var sprievodca = new ImportOsnovViewModel(okno.Model);
+                sprievodca.PridajPriecinok(priecinokOsnov);
+                new ImportOsnovWindow(sprievodca) { Owner = okno }.ShowDialog();
+                okno.Model.NacitajOblasti();
+            }, DispatcherPriority.ApplicationIdle);
+        }
 
         // automatická záloha raz za deň a kontrola novej verzie
         Task.Run(() =>

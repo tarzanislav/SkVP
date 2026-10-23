@@ -1523,11 +1523,78 @@ internal static class Samotest
         Pumpuj();
         Snimka(okno, "23_sada_po_obnoveni");
 
+        // prvé spustenie: údaje o škole, oblasti podľa ŠVP, predmety z priečinka osnov podľa úvodnej tabuľky
+        model.Vymaz(vsetko: true);
         var uvod = new PrveSpustenieWindow();
         uvod.Show();
+        uvod.Udaje.Nazov = "Gymnázium Skúšobné";
+        uvod.Udaje.Ulica = "Školská 1";
+        uvod.Udaje.Psc = "999 99";
+        uvod.Udaje.Mesto = "Skúšobné";
+        uvod.Udaje.Ico = "12345678";
         Pumpuj();
         Snimka(uvod, "18_prve_spustenie");
-        uvod.Close();
+        uvod.ZobrazKrok2();
+        Pumpuj();
+        Snimka(uvod, "18b_prve_spustenie_volba");
+        uvod.Zvol("svp");
+        uvod.Zacat();
+        Pumpuj();
+        model.NacitajOblasti();
+        var oblastiSvp = new ObjektService().Oblasti();
+        Over(oblastiSvp.Count == 7 && oblastiSvp.Select(o => o.Nazov).SequenceEqual(SvpGymnazia.Oblasti.Select(o => o.Nazov)) && model.PocetPredmetov == 0
+             && Databaza.Citaj(UdajeSkVP.KlucSkola) == "Gymnázium Skúšobné" && UdajeOrganizacie.Nacitaj().AdresaRiadok == "Školská 1, 999 99 Skúšobné",
+            "prvé spustenie podľa ŠVP – 7 oblastí bez predmetov a údaje o škole");
+        var dokumentySvp = new DokumentService();
+        var priroda = oblastiSvp.First(o => o.Nazov == "Človek a príroda");
+        var textPrirody = DokumentOsnovy.Text(dokumentySvp.Nacitaj(priroda.Id).Bloky);
+        Over(textPrirody.Contains("Základnou charakteristikou vzdelávacej oblasti je hľadanie zákonitých súvislostí", StringComparison.Ordinal)
+             && textPrirody.Contains("Štátny vzdelávací program pre gymnáziá", StringComparison.Ordinal), "charakteristika oblasti podľa ŠVP");
+
+        var priecinokSvp = Path.Combine(Databaza.PriecinokDokumentov, "Osnovy školy");
+        Directory.CreateDirectory(priecinokSvp);
+        byte[] OsnovaSTabulkou(string predmet) => DocxVystup.Osnova(new List<Blok>
+        {
+            new Tabulka(new IReadOnlyList<Bunka>[]
+            {
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Názov predmetu") }) }), new Bunka(new Blok[] { new Odsek(new[] { new Usek(predmet) }) }) },
+                new[] { new Bunka(new Blok[] { new Odsek(new[] { new Usek("Platnosť") }) }), new Bunka(new Blok[] { new Odsek(new[] { new Usek("od 1.9.2026") }) }) },
+            }, 2),
+            new Nadpis(1, "Charakteristika predmetu"),
+            new Odsek(new[] { new Usek($"Osnova predmetu {predmet}.") }),
+        });
+        var subory = new[] { ("osnova_1.docx", "Fyzika"), ("osnova_2.docx", "Seminár z dejepisu"), ("osnova_3.docx", "Anglický jazyk"), ("osnova_4.docx", "Telesná a športová výchova") };
+        foreach (var (subor, predmet) in subory)
+        {
+            File.WriteAllBytes(Path.Combine(priecinokSvp, subor), OsnovaSTabulkou(predmet));
+        }
+
+        var sprievodcaSvp = new ImportOsnovViewModel(model);
+        sprievodcaSvp.PridajPriecinok(priecinokSvp);
+        Over(sprievodcaSvp.Polozky.Count == 4 && sprievodcaSvp.Polozky.All(p => p.JeNovy)
+             && sprievodcaSvp.Polozky[0].NovyNazov == "Fyzika" && sprievodcaSvp.Polozky[0].NovaOblast?.Nazov == "Človek a príroda"
+             && sprievodcaSvp.Polozky[1].NovaOblast?.Nazov == "Človek a spoločnosť"
+             && sprievodcaSvp.Polozky[2].NovyNazov.StartsWith("Anglický jazyk", StringComparison.Ordinal) && sprievodcaSvp.Polozky[2].NovaOblast?.Nazov == "Jazyk a komunikácia"
+             && sprievodcaSvp.Polozky[3].NovaOblast?.Nazov == "Zdravie a pohyb",
+            "predmety z priečinka podľa úvodnej tabuľky a ich oblasti (" + string.Join(" | ", sprievodcaSvp.Polozky.Select(p => $"{p.NovyNazov} → {p.NovaOblast?.Nazov}")) + ")");
+        var oknoSvp = new ImportOsnovWindow(sprievodcaSvp) { Owner = okno };
+        oknoSvp.Show();
+        Pumpuj();
+        Snimka(oknoSvp, "18c_import_predmetov_svp");
+        oknoSvp.Close();
+        foreach (var p in sprievodcaSvp.Polozky.Where(p => p.CudziJazyk && p.Uroven is null))
+        {
+            p.Uroven = "B2";
+        }
+
+        Over(sprievodcaSvp.Importuj() == 4, "import osnov vytvorí predmety v oblastiach podľa ŠVP");
+        model.NacitajOblasti();
+        Over(model.PocetPredmetov == 4 && model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.Single().Nazov == "Fyzika", "predmety sú v správnych oblastiach");
+        model.OtvorOblast(model.Oblasti.First(o => o.Nazov == "Človek a príroda"));
+        Pumpuj();
+        var oblastSvp = (OblastViewModel)model.Stranka!;
+        Over(oblastSvp.MaCharakteristikuSvp && oblastSvp.CharakteristikaJeZoSvp, "charakteristika oblasti je zhodná so ŠVP");
+        Snimka(okno, "18d_oblast_svp");
 
         okno.Close();
         Pumpuj();

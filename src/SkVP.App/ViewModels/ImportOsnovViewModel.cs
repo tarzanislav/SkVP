@@ -216,9 +216,10 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
             polozka.Uroven = "";
         }
 
-        // nový jazykový predmet patrí do oblasti Jazyk a komunikácia
-        polozka.NovaOblast = (subor.Jazyk is not null
-                                 ? Hlavny.Oblasti.FirstOrDefault(o => string.Equals(o.Nazov, JazykovePravidla.Oblast, StringComparison.CurrentCultureIgnoreCase))
+        // nový jazykový predmet patrí do oblasti Jazyk a komunikácia, ostatné podľa učebného plánu, ŠVP a kľúčových slov
+        var oblastPredmetu = subor.Jazyk is not null ? JazykovePravidla.Oblast : SvpGymnazia.OblastPredmetu(polozka.NovyNazov);
+        polozka.NovaOblast = (oblastPredmetu is not null
+                                 ? Hlavny.Oblasti.FirstOrDefault(o => ImportOsnov.Kluc(o.Nazov) == ImportOsnov.Kluc(oblastPredmetu))
                                  : null)
                              ?? Hlavny.Oblasti.FirstOrDefault();
         polozka.Nastavuje = false;

@@ -102,6 +102,32 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
         }
     }
 
+    /// <summary>Oblasť je v Štátnom vzdelávacom programe pre gymnáziá – charakteristika sa dá prevziať.</summary>
+    public bool MaCharakteristikuSvp => SvpGymnazia.Oblast(Oblast.Nazov) is not null;
+
+    /// <summary>Charakteristika oblasti je doslovne podľa ŠVP.</summary>
+    public bool CharakteristikaJeZoSvp =>
+        SvpGymnazia.Oblast(Oblast.Nazov) is { } svp && new DokumentService() is var d && d.Existuje(Oblast.Id) && SvpGymnazia.JePrevzata(d.Nacitaj(Oblast.Id).Bloky, svp);
+
+    /// <summary>Nahradí charakteristiku oblasti oficiálnym znením ŠVP (doterajšia sa zarchivuje).</summary>
+    [RelayCommand]
+    private void CharakteristikaZoSvp()
+    {
+        if (!Dialogy.Potvrd($"Nahradiť charakteristiku oblasti {Oblast.Nazov} znením zo Štátneho vzdelávacieho programu pre gymnáziá?\n\n" +
+                            "Doterajší text sa zarchivuje (dá sa obnoviť v archíve)."))
+        {
+            return;
+        }
+
+        Dokument.UlozTeraz();
+        if (SvpGymnazia.PrevezmiCharakteristiku(Oblast.Id, Oblast.Nazov))
+        {
+            Hlavny.OznamPrepisanie(Oblast.Id);
+            OnPropertyChanged(nameof(CharakteristikaJeZoSvp));
+            Hlavny.Oznam($"Charakteristika oblasti {Oblast.Nazov} je podľa Štátneho vzdelávacieho programu.");
+        }
+    }
+
     /// <summary>Zapíše opravené profilácie a platnosť do úvodnej tabuľky osnovy (doterajšia verzia sa zarchivuje).</summary>
     [RelayCommand]
     private void UlozitUdaje(PredmetVM? predmet)

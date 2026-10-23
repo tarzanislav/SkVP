@@ -55,6 +55,9 @@ public static partial class ImportOsnov
     [GeneratedRegex(@"^\s*\d{1,3}[\s_.\-]+")]
     private static partial Regex CisloNaZaciatku();
 
+    [GeneratedRegex(@"(?im)^\s*(?:názov\s+(?:vyučovacieho\s+)?predmetu|vyučovací\s+predmet|predmet)\s*[:\t]\s*(.{2,80})$")]
+    private static partial Regex NazovVTexte();
+
     /// <summary>Prečíta súbor (Word alebo PDF) a rozpozná predmet.</summary>
     public static SuborImportu Nacitaj(string cesta, IReadOnlyList<(long Id, string Nazov)> predmety)
     {
@@ -100,10 +103,25 @@ public static partial class ImportOsnov
             throw new SkvpException($"{Path.GetFileName(cesta)}: podporované sú dokumenty Word (.docx) a PDF.");
         }
 
-        var jazyk = JazykovePravidla.Rozpoznaj(Path.GetFileName(cesta), text, bloky);
+        // názov predmetu z úvodnej tabuľky dokumentu („Názov predmetu | Fyzika“) alebo z prvých riadkov PDF
+        var zTabulky = UvodnaTabulka.NazovPredmetu(docx);
+        if (zTabulky is null && NazovVTexte().Match(string.Join("\n", text.Replace("\r", "").Split('\n').Take(25))) is { Success: true } nt)
+        {
+            zTabulky = nt.Groups[1].Value.Trim().TrimEnd('.', ',', ';');
+        }
+
+        var jazyk = JazykovePravidla.Rozpoznaj(Path.GetFileName(cesta), text, bloky)
+                    ?? (zTabulky is { Length: > 0 } ? JazykovePravidla.Rozpoznaj(zTabulky + ".docx", text, bloky) : null);
         var (id, navrh) = jazyk is null
-            ? Rozpoznaj(Path.GetFileNameWithoutExtension(cesta), text, predmety)
+            ? zTabulky is { Length: > 0 } && predmety.FirstOrDefault(p => Kluc(p.Nazov) == Kluc(zTabulky) || Kluc(JazykovePravidla.BezUrovne(p.Nazov)) == Kluc(zTabulky)) is { Id: > 0 } podlaTabulky
+                ? (podlaTabulky.Id, podlaTabulky.Nazov)
+                : Rozpoznaj(Path.GetFileNameWithoutExtension(cesta), text, predmety)
             : (Kandidati(jazyk, predmety).Select(p => (long?)p.Id).FirstOrDefault(), JazykovePravidla.NazovSUrovnou(jazyk.Zaklad, jazyk.Uroven));
+        if (id is null && jazyk is null && zTabulky is { Length: > 1 })
+        {
+            navrh = zTabulky; // nový predmet sa nazve podľa úvodnej tabuľky
+        }
+
         return new SuborImportu
         {
             Cesta = cesta,

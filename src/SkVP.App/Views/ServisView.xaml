@@ -33,7 +33,7 @@
                                     ToolTip="Všetky osnovy a ich archív v priečinkoch oblastí (ZIP) – každý dokument vo Worde a vedľa neho v PDF; otvoria sa aj bez programu">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Style="{StaticResource Ikona}" Text="&#xE8A5;" FontSize="13" Margin="0,0,8,0" />
-                                    <TextBlock Text="Zálohovať učebné osnovy (Word, PDF)" />
+                                    <TextBlock Text="Zálohovať učebné osnovy (Word, PDF)" TextWrapping="Wrap" />
                                 </StackPanel>
                             </Button>
                             <Button Padding="12,6" Margin="0,0,8,6" Content="Otvoriť priečinok záloh" Command="{Binding OtvoritZalohyCommand}" />

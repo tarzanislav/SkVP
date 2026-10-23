@@ -503,6 +503,13 @@ public sealed partial class MainViewModel : ObservableObject
     /// <summary>Text dokumentu sa zmenil v programe (napr. nový názov predmetu) – zobrazenie aj editor ho majú načítať znova.</summary>
     public event Action<long>? DokumentPrepisany;
 
+    /// <summary>Dokument sa prepísal v programe (napr. charakteristika zo ŠVP) – stránky ho načítajú znova.</summary>
+    public void OznamPrepisanie(long objektId)
+    {
+        PoZmeneDokumentu(objektId, oznamit: false);
+        DokumentPrepisany?.Invoke(objektId);
+    }
+
     /// <summary>Úprava dokumentu vo Worde sa skončila (Word dokument zatvoril).</summary>
     public event Action<long>? WordSkoncil;
 

@@ -439,8 +439,14 @@ public static class TestovaciaSada
 
     // ---- tvorba textu osnovy ----
 
+    /// <summary>Charakteristika oblasti: doslovné znenie Štátneho vzdelávacieho programu pre gymnáziá (inak text sady).</summary>
     public static List<Blok> CharakteristikaOblasti(OblastSady oblast)
     {
+        if (SvpGymnazia.Oblast(oblast.Nazov) is { } svp)
+        {
+            return SvpGymnazia.Charakteristika(svp);
+        }
+
         var bloky = oblast.Charakteristika.Select(t => (Blok)Odsek(t)).ToList();
         bloky.Add(Poznamka());
         return bloky;

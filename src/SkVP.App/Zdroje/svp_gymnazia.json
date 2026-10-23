@@ -1,0 +1,96 @@
+{
+  "nazov": "Štátny vzdelávací program pre gymnáziá (úplné stredné všeobecné vzdelávanie)",
+  "vydavatel": "Štátny pedagogický ústav, schválilo MŠVVaŠ SR 20. 3. 2015 pod č. 2015-7846/10840:1-10B0, v znení dodatkov č. 1 – 5",
+  "url": "https://www.statpedu.sk/files/articles/dokumenty/inovovany-statny-vzdelavaci-program/statny_vzdel_program_pre_gymnazia.pdf",
+  "oblasti": [
+    {
+      "kapitola": "4.1",
+      "nazov": "Jazyk a komunikácia",
+      "predmety": [
+        "Slovenský jazyk a literatúra",
+        "Jazyk národnostnej menšiny a literatúra",
+        "Slovenský jazyk a slovenská literatúra",
+        "Druhý vyučovací jazyk",
+        "Cudzí jazyk"
+      ],
+      "charakteristika": [
+        "Vzdelávaciu oblasť Jazyk a komunikácia tvoria vyučovacie predmety zahrnuté do troch skupín: vyučovacie jazyky¹, druhý jazyk², cudzie jazyky a druhý vyučovací jazyk v bilingválnom štúdiu. Spoločným menovateľom oblasti je jazyk, ktorý sa chápe ako potenciálny zdroj osobného a kultúrneho obohatenia človeka, nástroj myslenia a komunikácie a prostriedok na vyjadrovanie citov a pocitov. Vzdelávanie preto vedie k vnímaniu a postupnému osvojovaniu si jazyka ako bohatého mnohotvárneho prostriedku na získavanie a odovzdávanie informácií, k zvyšovaniu jazykovej kultúry ústnych i písomných jazykových prejavov žiakov a k rozvíjaniu čitateľských kompetencií zameraných na prácu s textom (čítanie s porozumením, deklamácia, počúvanie s porozumením), na jeho analýzu a hodnotenie.",
+        "Špecifickou zložkou oblasti je literatúra, ktorá spája vyučovacie predmety zahrnuté v skupinách vyučovacie jazyky a druhý jazyk. Jej základom sa stáva postupné rozvíjanie analytického čítania a rozvoj schopnosti pracovať s významom literárneho textu na vyššej individuálnej úrovni."
+      ],
+      "poznamky": [
+        "¹ Vyučovacie jazyky: slovenský jazyk a literatúra v školách s vyučovacím jazykom slovenským, jazyk národnostnej menšiny a literatúra v školách s vyučovacím jazykom národnostnej menšiny.",
+        "² Druhý jazyk: slovenský jazyk a literatúra v školách s vyučovacím jazykom národnostnej menšiny okrem maďarskej národnostnej menšiny, slovenský jazyk a slovenská literatúra v školách s vyučovacím jazykom maďarským, jazyk národnostnej menšiny a literatúra v školách s vyučovacím jazykom národnostnej menšiny."
+      ]
+    },
+    {
+      "kapitola": "4.2",
+      "nazov": "Matematika a práca s informáciami",
+      "predmety": [
+        "Matematika",
+        "Informatika"
+      ],
+      "charakteristika": [
+        "Cieľom vzdelávacej oblasti Matematika a práca s informáciami je rozvíjať matematické myslenie (pochopenie kvantitatívnych a priestorových vzťahov), ktoré je potrebné pri riešení rôznych problémov v každodenných situáciách, a spôsobilosť formulovať problém s využitím stratégie algoritmického prístupu pri jeho riešení. Prehlbuje abstraktné, analytické, systémové myslenie a logické usudzovanie žiaka. Učí zrozumiteľne a vecne argumentovať. Podporuje schopnosť efektívnym a tvorivým spôsobom využívať informačno-komunikačné technológie, informačné zdroje a možnosti aplikačného programového vybavenia. Buduje informatickú kultúru, založenú na rešpektovaní právnych a etických zásad používania informačných technológií a produktov.",
+        "V priebehu štúdia žiaci nadobudnú vedomosti, zručnosti a kompetencie, ktoré nájdu uplatnenie v širokej škále odborov ľudskej činnosti. Zvládnutím vedomostí a zručností, ktoré primárne rozvíja táto vzdelávacia oblasť, sa zvyšuje pravdepodobnosť uplatnenia absolventov gymnázia v ďalšom vzdelávaní, vrátane celoživotného, a konečne i na samotnom trhu práce. Vzdelávaciu oblasť tvoria vyučovacie predmety matematika a informatika."
+      ]
+    },
+    {
+      "kapitola": "4.3",
+      "nazov": "Človek a príroda",
+      "predmety": [
+        "Fyzika",
+        "Chémia",
+        "Biológia"
+      ],
+      "charakteristika": [
+        "Základnou charakteristikou vzdelávacej oblasti je hľadanie zákonitých súvislostí medzi pozorovanými vlastnosťami prírodných objektov a javov, ktoré nás obklopujú v každodennom živote, a porozumenie ich podstate, čo si vyžaduje interdisciplinárny prístup, a preto aj úzku spoluprácu v rámci prírodovedných predmetov. Cieľom je nielen viesť žiakov k pochopeniu dejov prebiehajúcich v reálnom svete, ale aj naučiť ich kriticky myslieť, získavať a hodnotiť informácie. Všetky vzdelávacie postupy budujú nové poznatky na predchádzajúcich skúsenostiach žiaka, čím sa jeho aktívna činnosť stáva hlavnou formou vzdelávania. Dôraz sa kladie na rozvíjanie poznávacích schopností, komunikačných zručností (formulácia a vyjadrenie vlastných názorov, počúvanie názorov druhých), vytváranie spôsobilostí pre vedeckú prácu, a to najmä spôsobilosti pozorovania, vnímania časových a priestorových vzťahov medzi objektmi a javmi, klasifikácie, merania a predvídania.",
+        "Prírodovedné vzdelávanie poskytne žiakovi možnosť získania informácií o tom, ako súvisí rozvoj prírodných vied s rozvojom techniky, technológií a so spôsobom života spoločnosti. Vzdelávaciu oblasť tvoria vyučovacie predmety fyzika, chémia a biológia."
+      ]
+    },
+    {
+      "kapitola": "4.4",
+      "nazov": "Človek a spoločnosť",
+      "predmety": [
+        "Dejepis",
+        "Geografia",
+        "Občianska náuka"
+      ],
+      "charakteristika": [
+        "Hlavným cieľom vzdelávacej oblasti je aktívny prístup k reflektovaniu minulosti a prítomnosti v kontexte miesta, regiónu a štátu. Prostredníctvom vzdelávacej oblasti sa žiaci zoznamujú s najvýznamnejšími historickými, geografickými a spoločenskými procesmi a javmi, ktoré sa premietajú do ich každodenného života. Učia sa z potrieb prítomnosti o minulosti svojho národa a iných národov, poznávajú prírodné aj spoločenské charakteristiky svojej krajiny a iných krajín v Európe i vo svete. Žiaci sa učia kriticky reflektovať spoločenskú skutočnosť, posudzovať rôzne prístupy k riešeniu problémov v prítomnosti, ktorej korene možno hľadať v minulosti. Vzdelávacia oblasť prispieva k utváraniu historického vedomia. Ďalej vedie žiakov k rešpektovaniu základných princípov demokracie a pripravuje žiakov na zodpovedný občiansky život v demokratickej spoločnosti. Vzdelávaciu oblasť Človek a spoločnosť tvoria vyučovacie predmety dejepis, občianska náuka a geografia."
+      ]
+    },
+    {
+      "kapitola": "4.5",
+      "nazov": "Človek a hodnoty",
+      "predmety": [
+        "Etická výchova / Náboženská výchova / Náboženstvo"
+      ],
+      "charakteristika": [
+        "Hlavnou úlohou tejto vzdelávacej oblasti je aktívne sa podieľať na formovaní osobnosti žiaka, podporovať pochopenie a interiorizáciu (zvnútornenie) mravných noriem a napomáhať k osvojeniu si správania, ktoré je s nimi v súlade. Vedie žiakov k tomu, aby si vedeli vytvoriť harmonické vzťahy v rôznych sociálnych skupinách – v rodine, na pracovisku, v spoločnosti.",
+        "Obsah vzdelávacej oblasti sa realizuje prostredníctvom povinne voliteľných vyučovacích predmetov etická výchova alebo náboženská výchova/náboženstvo. Predmet etická výchova sa v prvom rade zameriava na výchovu k prosociálnosti, ktorá sa odráža v morálnych postojoch a v regulácii správania žiakov. Cieľom predmetu náboženská výchova/náboženstvo je motivovať žiaka k viere, osobnému náboženskému životu a k zodpovednému konaniu v cirkvi a v spoločnosti."
+      ]
+    },
+    {
+      "kapitola": "4.6",
+      "nazov": "Umenie a kultúra",
+      "predmety": [
+        "Umenie a kultúra"
+      ],
+      "charakteristika": [
+        "Vzdelávacia oblasť Umenie a kultúra rozvíja u žiaka komplexné vnímanie kultúry a umenia v intenciách aktuálnych spoločenských procesov. Podieľa sa na rozvíjaní kultúrneho povedomia a kultúrnej identity žiaka, jeho kritického myslenia vo vzťahu k mediálnej produkcii a k aktuálnym kultúrnym procesom, prehlbuje jeho záujem o kultúru, kultúrne dedičstvo svojho regiónu, národa, štátu a iných kultúr. Prispieva k tomu, aby sa žiak naučil rozlišovať medzi hlavnými kultúrnymi, umeleckými smermi, prúdmi a druhmi, pochopil význam a hodnotu kultúry a umenia v živote človeka a spoločnosti a zaujal vlastný postoj k hodnotám národnej kultúry a kultúry iných národov. Žiaci sa učia verbalizovať, diskutovať a interpretovať, ale tiež umeleckými prostriedkami a médiami vyjadrovať rôznorodé zážitky z vnímania umeleckých diel a kultúry. Hlavným cieľom vzdelávacej oblasti je rozvoj umeleckej, estetickej, vizuálnej, akustickej, jazykovej a pohybovej kultúry žiaka v učebných situáciách, v ktorých žiaci aktívne reflektujú súčasné umenie a kultúru. Využíva pritom skúsenostné metódy postavené na osobnom zážitku, reflexii, aktívnej tvorbe v rámci projektov v oblasti rôznych druhov umení a médií.",
+        "Obsah vzdelávacej oblasti sa realizuje prostredníctvom predmetu umenie a kultúra, v nižších ročníkoch gymnázia s osemročným vzdelávacím programom (prima – kvarta) aj prostredníctvom predmetov výtvarná výchova a hudobná výchova. Svojím obsahom a zameraním prispievajú k získaniu relevantných kompetencií u žiakov i prierezové témy mediálna výchova a multikultúrna výchova, ako aj vyučovacie predmety vzdelávacích oblastí Človek a spoločnosť a Zdravie a pohyb."
+      ]
+    },
+    {
+      "kapitola": "4.7",
+      "nazov": "Zdravie a pohyb",
+      "predmety": [
+        "Telesná a športová výchova"
+      ],
+      "charakteristika": [
+        "Vzdelávacia oblasť Zdravie a pohyb je zameraná na uvedomenie si potreby celoživotnej starostlivosti o svoje zdravie, osvojenie si teoretických vedomostí a praktických zručností súvisiacich so zdravým životným štýlom a pohybovou aktivitou. Oblasť sa realizuje vyučovacím predmetom telesná a športová výchova, ktorej najdôležitejším poslaním je vytváranie vzťahu k pravidelnej pohybovej aktivite ako k nevyhnutnému základu zdravého životného štýlu. Žiaci si vytvoria predstavu o význame pohybovej a športovej aktivity, spoznajú účinok vykonávaných cvičení na organizmus a možnosti upevňovania svojho zdravia. V rámci športových aktivít si osvoja a zdokonalia športové zručnosti a získajú vedomosti o rôznych športových odvetviach ako i organizácii športových súťaží.",
+        "Pri realizovaní obsahu telesnej a športovej výchovy je dôležité rešpektovať individuálne dispozície žiakov, ktoré by mali byť zohľadnené pri plánovaní cvičení, ako i pri hodnotení žiakov. Významnou súčasťou je motivácia žiakov k dosiahnutiu individuálnych zlepšení vo svojej pohybovej výkonnosti pri akceptovaní ich vlastných predpokladov."
+      ]
+    }
+  ]
+}
