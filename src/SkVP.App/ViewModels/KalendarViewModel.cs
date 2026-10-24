@@ -675,7 +675,7 @@ public sealed partial class KalendarViewModel : ObservableObject
 
         try
         {
-            File.WriteAllText(cesta, _sluzba.Ics(od, od.AddYears(1).AddDays(-1), automaticke: true), new UTF8Encoding(false));
+            File.WriteAllText(cesta, _sluzba.Kalendar(od, od.AddYears(1).AddDays(-1), automaticke: true), new UTF8Encoding(false));
             Hlavny.Oznam($"Kalendár na rok od {Planovanie.DatumText(od)} je uložený: {Path.GetFileName(cesta)} – otvorí ho Outlook aj Google Kalendár (Import).");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)

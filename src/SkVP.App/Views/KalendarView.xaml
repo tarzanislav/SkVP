@@ -15,7 +15,7 @@
         </Style>
 
         <!-- ponuka dňa (pravé tlačidlo) -->
-        <ContextMenu x:Key="PonukaDna">
+        <ContextMenu x:Key="PonukaDna" x:Shared="False">
             <MenuItem Header="Nová udalosť…" Command="{Binding PlacementTarget.Tag.NovaUdalostCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
                       CommandParameter="{Binding}" />
             <MenuItem Header="Nová úloha s týmto termínom" Command="{Binding PlacementTarget.Tag.NovaUlohaCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"

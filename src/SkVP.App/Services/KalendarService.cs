@@ -749,7 +749,7 @@ public sealed partial class KalendarService
     /// Kalendár vo formáte iCalendar: vlastné udalosti (opakované jedným pravidlom), úlohy s termínom a voliteľne
     /// automatické termíny školského roka – v období od – po.
     /// </summary>
-    public string Ics(DateTime od, DateTime po, bool automaticke)
+    public string Kalendar(DateTime od, DateTime po, bool automaticke)
     {
         var ics = new Ics("SkVP – kalendár");
         var typy = Typy().ToDictionary(t => t.Id);

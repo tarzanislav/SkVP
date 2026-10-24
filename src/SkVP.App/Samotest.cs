@@ -1788,7 +1788,7 @@ internal static class Samotest
              && KalendarService.KratkyNazovPrazdnin("Jarné prázdniny 2027/2028 – Košický, Prešovský kraj") == "Jarné prázdniny", "platnosť osnovy a názov prázdnin");
 
         // ---- export .ics ----
-        var ics = new KalendarService().Ics(dnes.AddDays(-7), dnes.AddDays(120), automaticke: true);
+        var ics = new KalendarService().Kalendar(dnes.AddDays(-7), dnes.AddDays(120), automaticke: true);
         Over(ics.StartsWith("BEGIN:VCALENDAR\r\n", StringComparison.Ordinal) && ics.Contains("RRULE:FREQ=WEEKLY;UNTIL=", StringComparison.Ordinal)
              && ics.Contains("TRIGGER:-PT1440M", StringComparison.Ordinal) && ics.Contains("SUMMARY:Úloha: Skontrolovať laboratórne práce", StringComparison.Ordinal)
              && ics.Split("\r\n").All(r => Encoding.UTF8.GetByteCount(r) <= 75) && ics.EndsWith("END:VCALENDAR\r\n", StringComparison.Ordinal),

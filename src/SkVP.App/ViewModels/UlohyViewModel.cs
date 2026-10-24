@@ -122,6 +122,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
 
     public void Obnov()
     {
+        UlozTeraz(); // rozpísané zmeny vybranej úlohy sa pred novým načítaním uložia
         var vybrana = Vybrana?.Id;
         try
         {
@@ -152,10 +153,11 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
             Suhrn = $"Úlohy sa nepodarilo načítať: {ex.GetBaseException().Message}";
         }
 
+        // nový zoznam zruší výber v zozname – rozpísané polia sa pritom nemajú vyprázdniť (kurzor zostane, kde bol)
+        _nacitavam = true;
         var pohlad = CollectionViewSource.GetDefaultView(Zoznam);
         pohlad.GroupDescriptions.Add(new PropertyGroupDescription(nameof(UlohaRiadok.Skupina)));
         Zobrazenie = pohlad;
-        _nacitavam = true;
         Vybrana = vybrana is { } id ? Zoznam.FirstOrDefault(u => u.Id == id) : null;
         _nacitavam = false;
         NacitajNavrhy();
@@ -236,6 +238,11 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
 
     partial void OnVybranaChanged(UlohaRiadok? value)
     {
+        if (value is null && _nacitavam)
+        {
+            return;
+        }
+
         var predtym = _nacitavam;
         _nacitavam = true;
         Text = value?.Text ?? "";

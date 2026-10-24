@@ -277,16 +277,12 @@ public static class TestovaciaSada
         id.Add(poznamky.Uloz(new Poznamka
         {
             Nazov = "Nápady na seminár z dejepisu", Pripnuta = true, Farba = PoznamkyService.Farby[0],
-            Text = "Exkurzia do múzea SNP
-Projekt: dejiny našej obce
-Viac práce s prameňmi", TykaSa = Predmety("Seminár z dejepisu").ToList(),
+            Text = "Exkurzia do múzea SNP\nProjekt: dejiny našej obce\nViac práce s prameňmi", TykaSa = Predmety("Seminár z dejepisu").ToList(),
         }));
         id.Add(poznamky.Uloz(new Poznamka
         {
             Nazov = "Zápis z predmetovej komisie", Farba = PoznamkyService.Farby[4], Datum = streda,
-            Text = "Fyzika – doplniť laboratórne práce
-Chémia – bez zmeny
-Biológia – presunúť genetiku do 3. ročníka",
+            Text = "Fyzika – doplniť laboratórne práce\nChémia – bez zmeny\nBiológia – presunúť genetiku do 3. ročníka",
             TykaSa = Predmety("Fyzika", "Chémia", "Biológia").Append(komisia).ToList(),
         }));
         // opakované nahratie sady doplní zoznam (pri vymazaní sa odstránia všetky ukážkové záznamy)
