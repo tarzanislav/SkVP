@@ -263,6 +263,37 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   zálohou na pozadí – bez duplicít), kontrola dát v Servise nič nevytvára, `StrukturaOsnov.ZnameOblasti` pozná názvy
   skupín (import z PDF), odstránený nepoužívaný kód (filter krajov a uplynulých v Novinkách, kľúč citátov).
 
+## Kalendár, Úlohy, Poznámky (24. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+Analýza a rozhodnutia: `docs/ANALYZA_KALENDAR_ULOHY_POZNAMKY.md` (používateľ schválil: úloha a kalendár jeden zdroj,
+navrhované úlohy z osnov, zobrazenie Školský rok, pole Zodpovedá, úlohy a poznámky v archíve roka; všetky 4 etapy naraz).
+Kód je napísaný nanovo pre SkVP (z EviTA prevzatý len princíp funkcií).
+- **Dáta (schéma 3)**: záznam = objekt (`TypObjektu.Udalost/Uloha/Poznamka`, mäkké mazanie s Vrátiť späť) + tabuľka
+  podrobností `udalost`, `uloha`, `poznamka`; `typ_udalosti` (predvolené typy `Databaza.PredvoleneTypyUdalosti`);
+  „Týka sa“ = väzba `TypVazby.Patri` (viac predmetov, oblastí, častí, udalosť); `archiv_zaznam` (úlohy a poznámky roka).
+  `ObjektService.Suvislosti` väzby `patri` vynecháva. Služby: `Services/Planovanie.cs` (spoločné), `UlohyService`,
+  `PoznamkyService`, `KalendarService` (opakovanie, výskyty, automatické termíny, prehľad dňa, .ics), `NavrhyUloh`,
+  `Ics` (zápis iCalendar, aj pre Novinky), `ZostavaPlanovania` (MigraDoc: mesiac, školský rok, zoznam, úlohy, poznámky).
+- **Menu**: Kalendár (počet dnes), Úlohy (otvorené + po termíne červeno), Poznámky (počet) pod Osnovami, nad Tlačou.
+- **Úlohy** (`UlohyViewModel`, `UlohyView`): skupiny podľa termínu, filter Týka sa + hľadanie, rýchle pridanie (s filtrom
+  sa naviaže na predmet), detail s priebežným ukladaním (termín, priorita, zodpovedá, Týka sa, popis), odstránenie a
+  „Odstrániť hotové“ s Vrátiť späť, navrhované úlohy (kontrola, nezačaté, bez platnosti, dôležité novinky) Prevziať/Skryť,
+  tlač a PDF. Úloha s termínom sa zobrazuje v kalendári.
+- **Poznámky** (`PoznamkyViewModel`, `PoznamkaEditorVM`, `PoznamkaEditor`, `PoznamkaWindow`): nástenka lístkov,
+  pripnutie, 8 pastelových farieb, diktovanie (`DiktovanieDoPola.PopisSposobu/PripravModel`), deň, udalosť, Týka sa,
+  Kopírovať text (do osnovy Ctrl+V), automatické ukladanie, tlač a PDF.
+- **Kalendár** (`KalendarViewModel`, `KalendarView`, `UdalostEditorVM`, `UdalostWindow`, `TypyUdalostiWindow`):
+  mesiac, týždeň, zoznam 60 dní, školský rok (12 mesiacov); vpravo vybraný deň (meniny, sviatok, prázdniny, záznamy
+  s akciami Otvoriť/Hotovo/Zdroj/Prevziať do kalendára, poznámky); prepínače zdrojov (prázdniny a školský rok,
+  maturita a prijímačky, platnosť osnov, archivácia, týždenná záloha, hotové); kraj spoločný s dashboardom; export .ics,
+  tlač a PDF (mesiac A4 na šírku, školský rok na jednej strane, zoznam).
+- **Prepojenia**: panel „Úlohy a poznámky“ pri predmete a oblasti (`PanelPlanovaniaVM`, `PanelPlanovania`), odznak
+  otvorených úloh pri predmete, pri stave „Na kontrolu“ ponuka úlohy v oznámení (`Oznam` s textom akcie), dashboard
+  (kalendár na týždeň, úlohy, pripnuté poznámky), Novinky (Pridať do kalendára, Vytvoriť úlohu), prehľad dňa pri
+  spustení (`PrehladDnaWindow`, predvolene vypnutý) a pripomienky udalostí počas práce, Nastavenia (karta Kalendár a
+  úlohy), export/import nastavení (kľúče `kalendar.*`, `ulohy.*`, typy udalostí), Servis (počty, kontrola dát a väzieb,
+  záchrana), Archív (voľba „aj úlohy a poznámky“, zoznam v detaile, PDF v priečinku), testovacia sada (ukážkové
+  záznamy, pri vymazaní sady sa odstránia len tie – `TestovaciaSada.KlucPlanovanie`).
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.

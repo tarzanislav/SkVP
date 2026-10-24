@@ -213,7 +213,7 @@ odškrtnutie na ktoromkoľvek mieste platí všade. Udalosť (napr. porada) zost
 4. **Výstupy a dokončenie** – tlač a PDF (kalendár, úlohy, poznámky), .ics a Excel, prehľad dňa a upozornenia,
    nastavenia a ich export/import, archív, servis, testovacia sada, dokumentácia.
 
-## 12. Rozhodnutia (s odporúčaním)
+## 12. Rozhodnutia (s odporúčaním) – 24. 10. 2026 schválené všetky body 1–4 a 6; postup: všetky etapy naraz
 1. **Úlohy a kalendár ako jeden zdroj** (úloha s termínom je v kalendári) – *odporúčam*; alternatíva: oddelené ako
    v EviTA.
 2. **Navrhované úlohy z osnov** (vypočítané, s „Prevziať“ / „Skryť“) – *odporúčam*.
