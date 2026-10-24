@@ -22,8 +22,6 @@ public sealed class Ics
         Riadok("X-WR-CALNAME:" + Text(nazov));
     }
 
-    public int Pocet { get; private set; }
-
     /// <summary>Jedna udalosť. Celodenná udalosť končí posledným dňom (vrátane), ostatné časom konca (inak o hodinu).</summary>
     public void Udalost(string uid, string nazov, DateTime zaciatok, DateTime? koniec, bool celyDen, string? popis = null,
         string? kategoria = null, string? miesto = null, string? url = null, string? pravidlo = null, int? pripomienkaMinut = null,
@@ -87,7 +85,6 @@ public sealed class Ics
         }
 
         Riadok("END:VEVENT");
-        Pocet++;
     }
 
     public override string ToString() => _sb + "END:VCALENDAR\r\n";

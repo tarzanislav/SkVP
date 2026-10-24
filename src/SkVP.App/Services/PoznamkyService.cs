@@ -50,7 +50,7 @@ public sealed class PoznamkyService
         farba is { Length: 7 } && farba[0] == '#' && farba.Skip(1).All(Uri.IsHexDigit);
 
     /// <summary>Názov z prvého riadku textu.</summary>
-    public static string NazovZTextu(string? text)
+    private static string NazovZTextu(string? text)
     {
         var prvy = (text ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).FirstOrDefault() ?? "";
         return prvy.Length == 0 ? "Poznámka" : prvy.Length > 80 ? prvy[..80].TrimEnd() + "…" : prvy;

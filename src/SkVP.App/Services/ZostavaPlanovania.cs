@@ -23,10 +23,12 @@ public static class ZostavaPlanovania
     private static readonly MdColor Ciara = new(0xD5, 0xD9, 0xE0);
     private static readonly MdColor Vikend = new(0xF3, 0xF4, 0xF6);
     private static readonly MdColor Zelena = Svetla(Planovanie.FarbaPrazdnin, 0.72);
-    private static readonly MdColor Cervena = Tmava("#E07A7A");
+    private const string FarbaSviatku = "#E07A7A";
+    private const string FarbaPoznamky = "#B8A44C";
+    private static readonly MdColor Cervena = Tmava(FarbaSviatku);
 
     /// <summary>Farba zmiešaná s bielou (podiel bielej 0 – 1).</summary>
-    public static MdColor Svetla(string hex, double biela)
+    private static MdColor Svetla(string hex, double biela)
     {
         var f = PdfVystup.Farba(hex);
         byte Mix(uint c) => (byte)Math.Round(c + (255 - c) * biela);
@@ -34,7 +36,7 @@ public static class ZostavaPlanovania
     }
 
     /// <summary>Tmavší odtieň farby – čitateľný text.</summary>
-    public static MdColor Tmava(string hex)
+    private static MdColor Tmava(string hex)
     {
         var f = PdfVystup.Farba(hex);
         byte Tmav(uint c) => (byte)Math.Round(c * 0.55);
@@ -292,11 +294,11 @@ public static class ZostavaPlanovania
             nic = false;
             var prvy = true;
             var zaznamy = d.Vyskyty.Select(v => (v.CasText, v.Nazov, Doplnok: string.Join("  ·  ", new[] { v.Typ, v.TykaSaText }.Where(t => t.Length > 0)), v.Farba, Vlastny: v.JeVlastny))
-                .Concat(d.Poznamky.Select(p => ("poznámka", p.Nazov, p.Nahlad, "#B8A44C", true)))
+                .Concat(d.Poznamky.Select(p => ("poznámka", p.Nazov, p.Nahlad, FarbaPoznamky, true)))
                 .ToList();
             if (zaznamy.Count == 0)
             {
-                zaznamy.Add(("", d.Sviatok!, "", "#E07A7A", false));
+                zaznamy.Add(("", d.Sviatok!, "", FarbaSviatku, false));
             }
 
             foreach (var (cas, nazov, doplnok, farba, vlastny) in zaznamy)
@@ -308,7 +310,7 @@ public static class ZostavaPlanovania
                 {
                     var den = riadok.Cells[0].AddParagraph(PocasieService.VelkePrve(d.Datum.ToString("ddd d. M.", Planovanie.Sk)));
                     den.Format.Font.Bold = true;
-                    if (d.Sviatok is not null && zaznamy.Count > 0 && nazov != d.Sviatok)
+                    if (d.Sviatok is not null && nazov != d.Sviatok)
                     {
                         var s = riadok.Cells[0].AddParagraph(d.Sviatok);
                         s.Format.Font.Size = 7.5;

@@ -45,7 +45,6 @@ public sealed partial class DenKalendara : ObservableObject
 
     public int Cislo => Datum.Day;
     public string NazovDna => PocasieService.VelkePrve(Datum.ToString("dddd", Planovanie.Sk));
-    public string KratkyNazovDna => Datum.ToString("ddd", Planovanie.Sk).TrimEnd('.');
     public string DatumText => $"{Datum.Day}. {Datum.Month}.";
     public string DlhyDatum => PocasieService.VelkePrve(Datum.ToString("dddd d. MMMM yyyy", Planovanie.Sk));
     public bool MaSviatok => !string.IsNullOrEmpty(Sviatok);

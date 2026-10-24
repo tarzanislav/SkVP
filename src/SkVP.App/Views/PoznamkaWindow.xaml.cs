@@ -32,13 +32,13 @@ public partial class PoznamkaWindow : Window
     /// <summary>Otvorí poznámku v okne; vráti true, ak sa zmenila.</summary>
     public static bool Otvor(PoznamkaEditorVM model)
     {
-        var okno = new PoznamkaWindow(model) { Owner = Dialogy.Vlastnik };
         if (Dialogy.TichyRezim)
         {
             model.Dispose();
             return false;
         }
 
+        var okno = new PoznamkaWindow(model) { Owner = Dialogy.Vlastnik };
         okno.ShowDialog();
         return okno.Zmenene;
     }

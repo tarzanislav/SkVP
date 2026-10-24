@@ -1770,8 +1770,6 @@ internal static class Samotest
 
         Over(chyba, "koniec udalosti pred začiatkom sa neuloží");
         Over(kalendar.Najblizsie(new[] { oblastFyziky.Id }, dni: 40).Count == 4, "najbližšie termíny pri oblasti (panel Úlohy a poznámky)");
-        kalendar.PresunNaDen(tyzdenna, pondelok.AddDays(1));
-        Over(kalendar.Nacitaj(tyzdenna)!.Zaciatok == pondelok.AddDays(1).AddHours(8), "presun udalosti na iný deň (čas zostane)");
 
         // ---- automatické termíny školského roka ----
         kalendar.Kraj = "KE, PO";
@@ -1864,7 +1862,7 @@ internal static class Samotest
         Over(panel.Ulohy.Count >= 2 && panel.Poznamky.Count >= 1 && panel.Terminy.Count >= 1, "panel Úlohy a poznámky pri oblasti (aj úlohy jej predmetov)");
         var dashboard = new DashboardViewModel(model);
         Over(dashboard.UlohyNaPaneli.Count > 0 && dashboard.PripnutePoznamky.Count == 1, "dashboard: úlohy a pripnuté poznámky");
-        Over(model.NovePripomienky(pondelok.AddDays(1).AddHours(-11)).Count == 1, "pripomienka udalosti deň vopred");
+        Over(model.NovePripomienky(pondelok.AddHours(-11)).Count == 1, "pripomienka udalosti deň vopred");
         Over(!new KalendarService().Prehlad(dnes).JePrazdny, "prehľad dňa");
 
         // ---- nastavenia, servis, archív ----

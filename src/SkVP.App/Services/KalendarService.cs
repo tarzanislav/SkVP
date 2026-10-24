@@ -158,7 +158,7 @@ public sealed partial class KalendarService
         return vysledok;
     }
 
-    public int PocetPouziti(long typId)
+    private static int PocetPouziti(long typId)
     {
         using var db = Databaza.Otvor();
         return Convert.ToInt32(Databaza.Skalar(db, "SELECT count(*) FROM udalost u JOIN objekt o ON o.id = u.objekt_id WHERE u.typ_id = $t AND o.odstranene IS NULL",
@@ -340,25 +340,6 @@ public sealed partial class KalendarService
         using var db = Databaza.Otvor();
         Databaza.Vykonaj(db, "UPDATE udalost SET stav = $s WHERE objekt_id = $id", ("$s", (int)stav), ("$id", id));
         Planovanie.Upravene(db, id);
-    }
-
-    /// <summary>Presunie udalosť na iný deň (čas sa zachová) – ťahanie v kalendári.</summary>
-    public void PresunNaDen(long id, DateTime den)
-    {
-        if (Nacitaj(id) is not { } u)
-        {
-            return;
-        }
-
-        var posun = den.Date - u.Zaciatok.Date;
-        u.Zaciatok += posun;
-        u.Koniec += posun;
-        if (u.OpakovanieDo is { } dokedy && dokedy < u.Zaciatok.Date)
-        {
-            u.OpakovanieDo = null;
-        }
-
-        Uloz(u);
     }
 
     // ------------------------------------------------------------------ opakovanie
