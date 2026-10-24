@@ -286,15 +286,9 @@ public sealed partial class PoznamkyViewModel : ObservableObject, IUkladaPredOdc
     {
         try
         {
-            var vsetky = _sluzba.Zoznam(Hladat);
-            if (FilterOsnov.Objekty(Hlavny, FilterObjektu) is { } objekty)
-            {
-                vsetky = vsetky.Where(p => p.TykaSa.Any(t => objekty.Contains(t.Id))).ToList();
-            }
-
-            Zoznam = vsetky;
+            Zoznam = _sluzba.Zoznam(Hladat, FilterOsnov.Objekty(Hlavny, FilterObjektu));
             var spolu = _sluzba.Pocet();
-            Suhrn = Zoznam.Count == spolu ? Pocet(spolu) : $"Zobrazené: {Zoznam.Count} z {spolu}";
+            Suhrn = Zoznam.Count == spolu ? Preklad.Pocet(spolu, "{0} poznámka", "{0} poznámky", "{0} poznámok") : $"Zobrazené: {Zoznam.Count} z {spolu}";
         }
         catch (Exception ex)
         {
@@ -311,13 +305,6 @@ public sealed partial class PoznamkyViewModel : ObservableObject, IUkladaPredOdc
             OtvorVEditore(v);
         }
     }
-
-    private static string Pocet(int n) => n switch
-    {
-        1 => "1 poznámka",
-        >= 2 and <= 4 => $"{n} poznámky",
-        _ => $"{n} poznámok",
-    };
 
     partial void OnVybranaChanged(PoznamkaRiadok? value)
     {

@@ -64,7 +64,7 @@ public sealed partial class DashboardViewModel
                 : dnesne == 0 ? "Dnes nič – najbližšie dni:" : $"Dnes: {dnesne}, najbližšie dni:";
 
             var otvorene = new UlohyService().Zoznam(ajHotove: false);
-            UlohyNaPaneli = otvorene.OrderBy(u => Array.IndexOf(UlohyService.PoradieSkupin, u.Skupina)).Take(UlohNaPaneli).ToList();
+            UlohyNaPaneli = otvorene.Take(UlohNaPaneli).ToList();
             var poTermine = otvorene.Count(u => u.PoTermine);
             UlohySuhrn = otvorene.Count == 0
                 ? "Žiadne otvorené úlohy."
@@ -76,6 +76,12 @@ public sealed partial class DashboardViewModel
         {
             KalendarSuhrn = $"Kalendár sa nepodarilo načítať: {ex.GetBaseException().Message}";
         }
+    }
+
+    private void PoZmeneUloh()
+    {
+        AktualizujPlanovanie();
+        Hlavny.ObnovPlanovanie();
     }
 
     [RelayCommand]
@@ -90,8 +96,7 @@ public sealed partial class DashboardViewModel
         {
             new UlohyService().Pridaj(NovaUloha);
             NovaUloha = "";
-            AktualizujPlanovanie();
-            Hlavny.ObnovPlanovanie();
+            PoZmeneUloh();
         }
         catch (SkvpException ex)
         {
@@ -105,8 +110,7 @@ public sealed partial class DashboardViewModel
         if (uloha is not null)
         {
             new UlohyService().NastavHotovo(uloha.Id, !uloha.Hotovo);
-            AktualizujPlanovanie();
-            Hlavny.ObnovPlanovanie();
+            PoZmeneUloh();
         }
     }
 

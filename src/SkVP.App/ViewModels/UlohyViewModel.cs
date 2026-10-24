@@ -41,11 +41,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
         TykaSa = new TykaSaVM(hlavny, () => Zmena(hned: true));
         Filtre = FilterOsnov.Volby(hlavny);
         _filterObjektu = Filtre[0];
-        _ukladanie.Tick += (_, _) =>
-        {
-            UlozTeraz();
-            Obnov();
-        };
+        _ukladanie.Tick += (_, _) => Obnov(); // Obnov najprv uloží rozpísané zmeny
         try
         {
             _vsetkyNavrhy = NavrhyUloh.VsetkyNavrhy();
@@ -137,7 +133,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
                 FilterUloh.Otvorene => vsetky.Where(u => !u.Hotovo),
                 FilterUloh.Hotove => vsetky.Where(u => u.Hotovo),
                 _ => vsetky,
-            }).OrderBy(u => Array.IndexOf(UlohyService.PoradieSkupin, u.Skupina)).ToList();
+            }).ToList();
             var otvorene = vsetky.Count(u => !u.Hotovo);
             var poTermine = vsetky.Count(u => u.PoTermine);
             var hotove = vsetky.Count(u => u.Hotovo);
@@ -280,7 +276,6 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
         _ukladanie.Stop();
         if (hned)
         {
-            UlozTeraz();
             Obnov();
         }
         else
@@ -437,10 +432,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
     [ObservableProperty]
     private int _pocetSkrytych;
 
-    /// <summary>Navrhované úlohy zapnuté (Nastavenia → Kalendár a úlohy).</summary>
-    public const string KlucNavrhy = "ulohy.navrhy";
-
-    public const string KlucRozbaleneNavrhy = "ulohy.navrhy.rozbalene";
+    private const string KlucRozbaleneNavrhy = "ulohy.navrhy.rozbalene";
 
     partial void OnUkazNavrhyChanged(bool value) => Databaza.Zapis(KlucRozbaleneNavrhy, value ? "1" : "0");
 
@@ -448,7 +440,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
     {
         try
         {
-            Navrhy = Databaza.Citaj(KlucNavrhy, "1") == "0" ? new List<NavrhUlohy>() : NavrhyUloh.BezVybavenych(_vsetkyNavrhy);
+            Navrhy = NavrhyUloh.Zapnute ? NavrhyUloh.BezVybavenych(_vsetkyNavrhy) : new List<NavrhUlohy>();
             PocetSkrytych = NavrhyUloh.Skryte().Count;
         }
         catch (Exception)

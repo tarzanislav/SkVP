@@ -74,12 +74,8 @@ public sealed partial class UdalostEditorVM : ObservableObject
 
     public IReadOnlyList<Volba<StavUdalosti>> Stavy => ZoznamStavy;
 
-    private static readonly IReadOnlyList<Volba<StavUdalosti>> ZoznamStavy = new[]
-    {
-        new Volba<StavUdalosti>(StavUdalosti.Naplanovane, "naplánovaná"),
-        new Volba<StavUdalosti>(StavUdalosti.Hotovo, "prebehla"),
-        new Volba<StavUdalosti>(StavUdalosti.Zrusene, "zrušená"),
-    };
+    private static readonly IReadOnlyList<Volba<StavUdalosti>> ZoznamStavy =
+        Enum.GetValues<StavUdalosti>().Select(s => new Volba<StavUdalosti>(s, KalendarService.NazovStavu(s))).ToList();
 
     public TykaSaVM TykaSa { get; }
 
@@ -113,7 +109,7 @@ public sealed partial class UdalostEditorVM : ObservableObject
     [ObservableProperty] private string _popis = "";
     [ObservableProperty] private List<PoznamkaRiadok> _poznamky = new();
 
-    private void NacitajPoznamky() => Poznamky = Id == 0 ? new List<PoznamkaRiadok>() : new PoznamkyService().PatriaK(new[] { Id });
+    private void NacitajPoznamky() => Poznamky = Id == 0 ? new List<PoznamkaRiadok>() : new PoznamkyService().Zoznam(patriK: new[] { Id });
 
     private static TimeSpan? Cas(string text) =>
         TimeSpan.TryParseExact((text ?? "").Trim().Replace('.', ':'), new[] { @"h\:mm", @"hh\:mm", "%h" }, CultureInfo.InvariantCulture, out var t)

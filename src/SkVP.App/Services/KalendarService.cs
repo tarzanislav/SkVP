@@ -85,7 +85,7 @@ public sealed record VyskytVKalendari
 
     public string StavText => JeUloha
         ? JeVybavena ? "hotová" : "otvorená"
-        : Stav switch { StavUdalosti.Hotovo => "prebehla", StavUdalosti.Zrusene => "zrušená", _ => "naplánovaná" };
+        : KalendarService.NazovStavu(Stav);
 }
 
 /// <summary>Čo kalendár ukazuje okrem vlastných udalostí a úloh, a čo robí pri spustení programu.</summary>
@@ -226,7 +226,7 @@ public sealed partial class KalendarService
         Id = c.GetInt64(0),
         Guid = Guid.TryParse(c.GetString(1), out var g) ? g : Guid.NewGuid(),
         Nazov = c.GetString(2),
-        Popis = c.IsDBNull(3) ? null : c.GetString(3),
+        Popis = Planovanie.Text(c, 3),
         TypId = c.IsDBNull(4) ? null : c.GetInt64(4),
         Zaciatok = Planovanie.Datum(c, 5) ?? DateTime.Today,
         Koniec = Planovanie.Datum(c, 6),
@@ -235,7 +235,7 @@ public sealed partial class KalendarService
         OpakovanieDo = Planovanie.Datum(c, 9),
         Pripomienka = (PripomienkaUdalosti)c.GetInt32(10),
         Stav = (StavUdalosti)c.GetInt32(11),
-        Miesto = c.IsDBNull(12) ? null : c.GetString(12),
+        Miesto = Planovanie.Text(c, 12),
     };
 
     public Udalost? Nacitaj(long id)
@@ -265,10 +265,11 @@ public sealed partial class KalendarService
             .ToList();
     }
 
-    private static List<Udalost> Udalosti(SqliteConnection db, DateTime po1)
+    /// <summary>Udalosti, ktoré sa začínajú pred zadaným časom (opakované aj s budúcimi opakovaniami).</summary>
+    private static List<Udalost> Udalosti(SqliteConnection db, DateTime pred)
     {
         var vysledok = new List<Udalost>();
-        using var prikaz = Databaza.Prikaz(db, SqlUdalosti + " AND u.zaciatok < $po", ("$po", Planovanie.Iso(po1, sCasom: true)));
+        using var prikaz = Databaza.Prikaz(db, SqlUdalosti + " AND u.zaciatok < $pred", ("$pred", Planovanie.Iso(pred, sCasom: true)));
         using var citac = prikaz.ExecuteReader();
         while (citac.Read())
         {
@@ -426,6 +427,13 @@ public sealed partial class KalendarService
         _ => "neopakuje sa",
     };
 
+    public static string NazovStavu(StavUdalosti s) => s switch
+    {
+        StavUdalosti.Hotovo => "prebehla",
+        StavUdalosti.Zrusene => "zrušená",
+        _ => "naplánovaná",
+    };
+
     public static string NazovPripomienky(PripomienkaUdalosti p) => p switch
     {
         PripomienkaUdalosti.VDen => "v deň udalosti",
@@ -513,7 +521,7 @@ public sealed partial class KalendarService
             .ToList();
     }
 
-    /// <summary>Najbližšie udalosti a termíny úloh, ktoré patria k objektom (panel pri predmete či oblasti).</summary>
+    /// <summary>Najbližšie naplánované udalosti, ktoré patria k objektom (panel pri predmete či oblasti).</summary>
     public List<VyskytVKalendari> Najblizsie(IReadOnlyCollection<long> objekty, int dni = 120, int pocet = 8)
     {
         var dnes = DateTime.Today;
@@ -615,7 +623,7 @@ public sealed partial class KalendarService
                 Koniec = koniec,
                 CelyDen = true,
                 Typ = prazdniny ? "prázdniny" : kategoria?.Nazov ?? "",
-                Farba = prazdniny ? "#8CCB98" : kategoria?.Farba ?? Planovanie.FarbaSiva,
+                Farba = prazdniny ? Planovanie.FarbaPrazdnin : kategoria?.Farba ?? Planovanie.FarbaSiva,
                 Odkaz = p.Zdroje.FirstOrDefault()?.Url,
             });
         }
@@ -654,7 +662,7 @@ public sealed partial class KalendarService
                         Zaciatok = d,
                         CelyDen = true,
                         Typ = "záloha",
-                        Farba = "#A7B1C2",
+                        Farba = Planovanie.FarbaZalohy,
                     });
                 }
             }
@@ -678,7 +686,7 @@ public sealed partial class KalendarService
                         Zaciatok = den,
                         CelyDen = true,
                         Typ = "archív",
-                        Farba = "#C7A27C",
+                        Farba = Planovanie.FarbaArchivu,
                     });
                 }
             }

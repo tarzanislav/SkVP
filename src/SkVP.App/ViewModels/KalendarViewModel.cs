@@ -101,7 +101,6 @@ public sealed partial class KalendarViewModel : ObservableObject
 {
     private const int PocetDniZoznamu = 60;
 
-    private readonly KalendarService _sluzba = new();
     private readonly bool _pripravene;
 
     public KalendarViewModel(MainViewModel hlavny, DateTime datum)
@@ -109,7 +108,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         Hlavny = hlavny;
         _aktualnyDatum = datum.Date;
         _rezim = Enum.TryParse<RezimKalendara>(Databaza.Citaj(KlucRezim), out var r) ? r : RezimKalendara.Mesiac;
-        var nastavenia = _sluzba.Nastavenia;
+        var nastavenia = Sluzba.Nastavenia;
         _ukazNovinky = nastavenia.Novinky;
         _ukazSkolskyRok = nastavenia.SkolskyRok;
         _ukazOsnovy = nastavenia.Osnovy;
@@ -126,14 +125,19 @@ public sealed partial class KalendarViewModel : ObservableObject
             Kraje = new List<string> { NovinkyService.VsetkyKraje };
         }
 
-        _kraj = Kraje.Contains(_sluzba.Kraj) ? _sluzba.Kraj : NovinkyService.VsetkyKraje;
+        _kraj = Kraje.Contains(Sluzba.Kraj) ? Sluzba.Kraj : NovinkyService.VsetkyKraje;
         _pripravene = true;
         Obnov();
     }
 
-    public const string KlucRezim = "kalendar.rezim";
+    private const string KlucRezim = NastaveniaKalendara.Kluc + "rezim";
+    private const string KlucVybavene = NastaveniaKalendara.Kluc + "vybavene";
+    private const string KlucDen = NastaveniaKalendara.Kluc + "den";
 
     public MainViewModel Hlavny { get; }
+
+    /// <summary>Služba s nastavením zobrazenia tohto kalendára (používa ju aj tlač).</summary>
+    public KalendarService Sluzba { get; } = new();
 
     public string[] NazvyDni { get; } = { "Po", "Ut", "St", "Št", "Pi", "So", "Ne" };
 
@@ -193,13 +197,13 @@ public sealed partial class KalendarViewModel : ObservableObject
     [ObservableProperty] private bool _ukazArchiv;
 
     [ObservableProperty]
-    private bool _ukazVybavene = Databaza.Citaj("kalendar.vybavene", "1") != "0";
+    private bool _ukazVybavene = Databaza.Citaj(KlucVybavene, "1") != "0";
 
     /// <summary>Panel vybraného dňa vpravo (na menšej obrazovke sa dá skryť – kalendár má viac miesta).</summary>
     [ObservableProperty]
-    private bool _ukazDen = Databaza.Citaj("kalendar.den", "1") != "0";
+    private bool _ukazDen = Databaza.Citaj(KlucDen, "1") != "0";
 
-    partial void OnUkazDenChanged(bool value) => Databaza.Zapis("kalendar.den", value ? "1" : "0");
+    partial void OnUkazDenChanged(bool value) => Databaza.Zapis(KlucDen, value ? "1" : "0");
 
     partial void OnUkazNovinkyChanged(bool value) => ZmenaZobrazenia();
     partial void OnUkazSkolskyRokChanged(bool value) => ZmenaZobrazenia();
@@ -209,7 +213,7 @@ public sealed partial class KalendarViewModel : ObservableObject
 
     partial void OnUkazVybaveneChanged(bool value)
     {
-        Databaza.Zapis("kalendar.vybavene", value ? "1" : "0");
+        Databaza.Zapis(KlucVybavene, value ? "1" : "0");
         Obnov();
     }
 
@@ -220,11 +224,11 @@ public sealed partial class KalendarViewModel : ObservableObject
             return;
         }
 
-        _sluzba.Nastavenia = _sluzba.Nastavenia with
+        Sluzba.Nastavenia = Sluzba.Nastavenia with
         {
             Novinky = UkazNovinky, SkolskyRok = UkazSkolskyRok, Osnovy = UkazOsnovy, Zalohy = UkazZalohy, Archiv = UkazArchiv,
         };
-        _sluzba.Nastavenia.Uloz();
+        Sluzba.Nastavenia.Uloz();
         Obnov();
     }
 
@@ -237,7 +241,7 @@ public sealed partial class KalendarViewModel : ObservableObject
     partial void OnKrajChanged(string value)
     {
         Databaza.Zapis(NovinkyService.KlucKraj, value);
-        _sluzba.Kraj = value;
+        Sluzba.Kraj = value;
         Obnov();
     }
 
@@ -306,6 +310,13 @@ public sealed partial class KalendarViewModel : ObservableObject
         NacitajLegendu();
     }
 
+    /// <summary>Po zmene udalosti, úlohy alebo poznámky – obnoví kalendár aj počty v menu a na dashboarde.</summary>
+    private void ObnovAjMenu()
+    {
+        Obnov();
+        Hlavny.ObnovPlanovanie();
+    }
+
     private IEnumerable<DenKalendara> VsetkyDni() => Rezim switch
     {
         RezimKalendara.Mesiac => Tyzdne.SelectMany(t => t.Dni),
@@ -314,27 +325,25 @@ public sealed partial class KalendarViewModel : ObservableObject
         _ => Mesiace.SelectMany(m => m.Dni).OfType<DenKalendara>(),
     };
 
-    public static DateTime Pondelok(DateTime datum) => datum.Date.AddDays(-(((int)datum.DayOfWeek + 6) % 7));
-
     private static string MesiacRok(DateTime datum) => PocasieService.VelkePrve(datum.ToString("MMMM yyyy", Planovanie.Sk));
 
     private void NacitajMesiac()
     {
         var prvy = new DateTime(AktualnyDatum.Year, AktualnyDatum.Month, 1);
-        var od = Pondelok(prvy);
+        var od = Planovanie.Pondelok(prvy);
         var dni = Dni(od, od.AddDays(41), prvy.Month);
         Tyzdne = Enumerable.Range(0, 6).Select(t => new TyzdenKalendara(KalendarService.CisloTyzdna(od.AddDays(t * 7)), dni.Skip(t * 7).Take(7).ToList())).ToList();
         Titulok = MesiacRok(prvy);
         var pocet = dni.Where(d => !d.MimoMesiaca).SelectMany(d => d.Vyskyty).Where(v => v.JeVlastny).Select(v => v.Kluc).Distinct().Count();
-        Suhrn = $"{Titulok}: {Tvar(pocet, "udalosť alebo úloha", "udalosti a úlohy", "udalostí a úloh")}. Dvojklikom na deň pridáte udalosť, pravým tlačidlom ďalšie možnosti.";
+        Suhrn = $"{Titulok}: {Preklad.Pocet(pocet, "{0} udalosť alebo úloha", "{0} udalosti a úlohy", "{0} udalostí a úloh")}. Dvojklikom na deň pridáte udalosť, pravým tlačidlom ďalšie možnosti.";
     }
 
     private void NacitajTyzden()
     {
-        var od = Pondelok(AktualnyDatum);
+        var od = Planovanie.Pondelok(AktualnyDatum);
         DniTyzdna = Dni(od, od.AddDays(6), null);
         Titulok = $"{od.Day}. {od.Month}. – {Planovanie.DatumText(od.AddDays(6))}  ·  {KalendarService.CisloTyzdna(od)}. týždeň";
-        Suhrn = $"V týždni: {Tvar(DniTyzdna.SelectMany(d => d.Vyskyty).Count(v => v.JeVlastny), "udalosť alebo úloha", "udalosti a úlohy", "udalostí a úloh")}.";
+        Suhrn = $"V týždni: {Preklad.Pocet(DniTyzdna.SelectMany(d => d.Vyskyty).Count(v => v.JeVlastny), "{0} udalosť alebo úloha", "{0} udalosti a úlohy", "{0} udalostí a úloh")}.";
     }
 
     private void NacitajZoznam()
@@ -343,7 +352,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         var po = od.AddDays(PocetDniZoznamu - 1);
         DniZoznamu = Dni(od, po, null).Where(d => d.MaZaznamVZozname || d.MaSviatok || d.MaPoznamky).ToList();
         Titulok = $"{Planovanie.DatumText(od)} – {Planovanie.DatumText(po)}";
-        Suhrn = $"Zoznam na {PocetDniZoznamu} dní: {Tvar(DniZoznamu.Sum(d => d.Vyskyty.Count), "záznam", "záznamy", "záznamov")}.";
+        Suhrn = $"Zoznam na {PocetDniZoznamu} dní: {Preklad.Pocet(DniZoznamu.Sum(d => d.Vyskyty.Count), "{0} záznam", "{0} záznamy", "{0} záznamov")}.";
     }
 
     private void NacitajSkolskyRok()
@@ -354,7 +363,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         Mesiace = Enumerable.Range(0, 12).Select(i =>
         {
             var prvy = od.AddMonths(i);
-            var posun = ((int)prvy.DayOfWeek + 6) % 7;
+            var posun = Planovanie.DenVTyzdni(prvy);
             var policka = Enumerable.Range(0, 42).Select(p =>
             {
                 var d = prvy.AddDays(p - posun);
@@ -367,13 +376,10 @@ public sealed partial class KalendarViewModel : ObservableObject
         Suhrn = $"Školský rok {rok}: približne {vyucovacie} vyučovacích dní (bez víkendov, sviatkov a prázdnin). Kliknutím na deň ho zobrazíte vpravo, dvojklikom otvoríte mesiac.";
     }
 
-    private static string Tvar(int n, string jeden, string dvaAzStyri, string viac) =>
-        $"{n} " + (n == 1 ? jeden : n is >= 2 and <= 4 ? dvaAzStyri : viac);
-
     private List<DenKalendara> Dni(DateTime od, DateTime po, int? mesiac)
     {
-        var vyskyty = _sluzba.Vyskyty(od, po).Where(v => UkazVybavene || !v.JeVybavena).ToList();
-        var prazdniny = _sluzba.DniPrazdnin(od, po);
+        var vyskyty = Sluzba.Vyskyty(od, po).Where(v => UkazVybavene || !v.JeVybavena).ToList();
+        var prazdniny = Sluzba.DniPrazdnin(od, po);
         var sviatky = new Dictionary<DateOnly, List<SviatokDna>>();
         try
         {
@@ -443,11 +449,11 @@ public sealed partial class KalendarViewModel : ObservableObject
 
     private void NacitajLegendu()
     {
-        var legenda = _sluzba.Typy(lenAktivne: true).Select(t => new PolozkaLegendy(t.Nazov, t.Farba)).ToList();
+        var legenda = Sluzba.Typy(lenAktivne: true).Select(t => new PolozkaLegendy(t.Nazov, t.Farba)).ToList();
         legenda.Add(new PolozkaLegendy("úloha", Planovanie.FarbaUlohy));
         if (UkazSkolskyRok)
         {
-            legenda.Add(new PolozkaLegendy("prázdniny", "#8CCB98"));
+            legenda.Add(new PolozkaLegendy("prázdniny", Planovanie.FarbaPrazdnin));
         }
 
         Legenda = legenda;
@@ -524,8 +530,7 @@ public sealed partial class KalendarViewModel : ObservableObject
     {
         if (Views.UdalostWindow.Otvor(new UdalostEditorVM(Hlavny, null, DenPreNove(den))))
         {
-            Obnov();
-            Hlavny.ObnovPlanovanie();
+            ObnovAjMenu();
         }
     }
 
@@ -546,8 +551,7 @@ public sealed partial class KalendarViewModel : ObservableObject
     {
         if (Views.PoznamkaWindow.Otvor(new PoznamkaEditorVM(Hlavny, null, DenPreNove(den))))
         {
-            Obnov();
-            Hlavny.ObnovPlanovanie();
+            ObnovAjMenu();
         }
     }
 
@@ -560,8 +564,7 @@ public sealed partial class KalendarViewModel : ObservableObject
             case { Zdroj: ZdrojKalendara.Udalost, Id: { } id }:
                 if (Views.UdalostWindow.Otvor(new UdalostEditorVM(Hlavny, id, null)))
                 {
-                    Obnov();
-                    Hlavny.ObnovPlanovanie();
+                    ObnovAjMenu();
                 }
 
                 break;
@@ -589,15 +592,14 @@ public sealed partial class KalendarViewModel : ObservableObject
         }
         else if (v is { Zdroj: ZdrojKalendara.Udalost, Id: { } udalost })
         {
-            _sluzba.NastavStav(udalost, v.JeVybavena ? StavUdalosti.Naplanovane : StavUdalosti.Hotovo);
+            Sluzba.NastavStav(udalost, v.JeVybavena ? StavUdalosti.Naplanovane : StavUdalosti.Hotovo);
         }
         else
         {
             return;
         }
 
-        Obnov();
-        Hlavny.ObnovPlanovanie();
+        ObnovAjMenu();
     }
 
     [RelayCommand]
@@ -618,7 +620,7 @@ public sealed partial class KalendarViewModel : ObservableObject
             return;
         }
 
-        var typ = _sluzba.Typy(lenAktivne: true).FirstOrDefault(t => string.Equals(t.Nazov, v.Typ, StringComparison.CurrentCultureIgnoreCase));
+        var typ = Sluzba.Typy(lenAktivne: true).FirstOrDefault(t => string.Equals(t.Nazov, v.Typ, StringComparison.CurrentCultureIgnoreCase));
         var model = new UdalostEditorVM(Hlavny, null, v.Zaciatok)
         {
             Nazov = v.Nazov,
@@ -634,8 +636,7 @@ public sealed partial class KalendarViewModel : ObservableObject
 
         if (Views.UdalostWindow.Otvor(model))
         {
-            Obnov();
-            Hlavny.ObnovPlanovanie();
+            ObnovAjMenu();
         }
     }
 
@@ -651,8 +652,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         {
             if (Views.PoznamkaWindow.Otvor(new PoznamkaEditorVM(Hlavny, poznamka.Id)))
             {
-                Obnov();
-                Hlavny.ObnovPlanovanie();
+                ObnovAjMenu();
             }
         }
         catch (SkvpException ex)
@@ -678,7 +678,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         return Rezim switch
         {
             RezimKalendara.Mesiac => (prvy, prvy.AddMonths(1).AddDays(-1)),
-            RezimKalendara.Tyzden => (Pondelok(AktualnyDatum), Pondelok(AktualnyDatum).AddDays(6)),
+            RezimKalendara.Tyzden => (Planovanie.Pondelok(AktualnyDatum), Planovanie.Pondelok(AktualnyDatum).AddDays(6)),
             RezimKalendara.Zoznam => (AktualnyDatum.Date, AktualnyDatum.Date.AddDays(PocetDniZoznamu - 1)),
             _ => (zaciatokRoka, zaciatokRoka.AddYears(1).AddDays(-1)),
         };
@@ -697,7 +697,7 @@ public sealed partial class KalendarViewModel : ObservableObject
 
         try
         {
-            File.WriteAllText(cesta, _sluzba.Kalendar(od, od.AddYears(1).AddDays(-1), automaticke: true), new UTF8Encoding(false));
+            File.WriteAllText(cesta, Sluzba.Kalendar(od, od.AddYears(1).AddDays(-1), automaticke: true), new UTF8Encoding(false));
             Hlavny.Oznam($"Kalendár na rok od {Planovanie.DatumText(od)} je uložený: {Path.GetFileName(cesta)} – otvorí ho Outlook aj Google Kalendár (Import).");
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -711,9 +711,6 @@ public sealed partial class KalendarViewModel : ObservableObject
 
     [RelayCommand]
     private void UlozitPdf() => TlacPlanovania.Kalendar(this, pdf: true);
-
-    /// <summary>Služba s rovnakým nastavením zobrazenia (tlač).</summary>
-    public KalendarService Sluzba => _sluzba;
 
     /// <summary>Dni zobrazeného obdobia (tlač).</summary>
     public List<DenKalendara> DniObdobia(DateTime od, DateTime po) => Dni(od, po, null);

@@ -45,7 +45,7 @@ public sealed partial class PanelPlanovaniaVM : ObservableObject
             var ulohy = new UlohyService().Zoznam(patriK: objekty);
             Ulohy = ulohy.Where(u => !u.Hotovo).ToList();
             PocetHotovych = ulohy.Count - Ulohy.Count;
-            Poznamky = new PoznamkyService().PatriaK(objekty);
+            Poznamky = new PoznamkyService().Zoznam(patriK: objekty);
             Terminy = new KalendarService().Najblizsie(objekty);
         }
         catch (Exception)

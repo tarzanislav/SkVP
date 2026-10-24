@@ -22,7 +22,7 @@ public static class ZostavaPlanovania
     private static readonly MdColor Siva = new(0x6B, 0x72, 0x80);
     private static readonly MdColor Ciara = new(0xD5, 0xD9, 0xE0);
     private static readonly MdColor Vikend = new(0xF3, 0xF4, 0xF6);
-    private static readonly MdColor Zelena = Svetla("#8CCB98", 0.72);
+    private static readonly MdColor Zelena = Svetla(Planovanie.FarbaPrazdnin, 0.72);
     private static readonly MdColor Cervena = Tmava("#E07A7A");
 
     /// <summary>Farba zmiešaná s bielou (podiel bielej 0 – 1).</summary>
@@ -122,8 +122,8 @@ public static class ZostavaPlanovania
         }
 
         var podlaDna = dni.ToDictionary(d => d.Datum.Date);
-        var den = prvy.AddDays(-(((int)prvy.DayOfWeek + 6) % 7));
-        var tyzdnov = (int)Math.Ceiling((((int)prvy.DayOfWeek + 6) % 7 + DateTime.DaysInMonth(prvy.Year, prvy.Month)) / 7.0);
+        var den = Planovanie.Pondelok(prvy);
+        var tyzdnov = (int)Math.Ceiling((Planovanie.DenVTyzdni(prvy) + DateTime.DaysInMonth(prvy.Year, prvy.Month)) / 7.0);
         var vyska = Unit.FromCentimeter((21.0 - 2.7 - 2.6) / tyzdnov);
         for (var t = 0; t < tyzdnov; t++)
         {
@@ -173,7 +173,7 @@ public static class ZostavaPlanovania
                 {
                     var p = bunka.AddParagraph(stitok);
                     p.Format.Font.Size = 7;
-                    p.Format.Font.Color = stitok == d.Sviatok ? Cervena : Tmava("#8CCB98");
+                    p.Format.Font.Color = stitok == d.Sviatok ? Cervena : Tmava(Planovanie.FarbaPrazdnin);
                 }
 
                 foreach (var v in d.Vyskyty.Where(v => v.Zdroj != ZdrojKalendara.Prazdniny))
@@ -352,7 +352,7 @@ public static class ZostavaPlanovania
             return doc;
         }
 
-        foreach (var skupina in ulohy.GroupBy(u => u.Skupina).OrderBy(g => Array.IndexOf(UlohyService.PoradieSkupin, g.Key)))
+        foreach (var skupina in ulohy.GroupBy(u => u.Skupina)) // zoznam je už zoradený podľa skupín
         {
             var nadpis = sekcia.AddParagraph($"{skupina.Key} ({skupina.Count()})");
             nadpis.Format.Font.Size = 11;

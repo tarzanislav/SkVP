@@ -80,28 +80,20 @@ public sealed class PoznamkyService
         return vysledok;
     }
 
-    private static List<PoznamkaRiadok> Zorad(IEnumerable<PoznamkaRiadok> poznamky) =>
-        poznamky.OrderByDescending(p => p.Pripnuta).ThenByDescending(p => p.Zmenene).ToList();
-
-    /// <summary>Všetky poznámky (pripnuté hore, potom naposledy zmenené), voliteľne len tie, ktoré zodpovedajú hľadaniu.</summary>
-    public List<PoznamkaRiadok> Zoznam(string? hladat = null)
+    /// <summary>
+    /// Poznámky (pripnuté hore, potom naposledy zmenené) – voliteľne len tie, ktoré zodpovedajú hľadaniu
+    /// a patria k niektorému z objektov (predmet, oblasť s predmetmi, udalosť, úloha).
+    /// </summary>
+    public List<PoznamkaRiadok> Zoznam(string? hladat = null, IReadOnlyCollection<long>? patriK = null)
     {
         using var db = Databaza.Otvor();
-        var vsetky = Citaj(db);
-        if (!string.IsNullOrWhiteSpace(hladat))
-        {
-            vsetky = vsetky.Where(p => Planovanie.Vyhovuje(hladat, p.Nazov, p.Text, p.TykaSaText, p.DatumText)).ToList();
-        }
-
-        return Zorad(vsetky);
-    }
-
-    /// <summary>Poznámky, ktoré patria k niektorému z objektov (predmet, oblasť s predmetmi, udalosť, úloha).</summary>
-    public List<PoznamkaRiadok> PatriaK(IReadOnlyCollection<long> objekty)
-    {
-        using var db = Databaza.Otvor();
-        var vyber = Planovanie.ZaznamyPre(db, objekty);
-        return Zorad(Citaj(db).Where(p => vyber.Contains(p.Id)));
+        var vyber = patriK is null ? null : Planovanie.ZaznamyPre(db, patriK);
+        return Citaj(db)
+            .Where(p => vyber is null || vyber.Contains(p.Id))
+            .Where(p => string.IsNullOrWhiteSpace(hladat) || Planovanie.Vyhovuje(hladat, p.Nazov, p.Text, p.TykaSaText, p.DatumText))
+            .OrderByDescending(p => p.Pripnuta)
+            .ThenByDescending(p => p.Zmenene)
+            .ToList();
     }
 
     /// <summary>Poznámky pre dni v kalendári (od – po vrátane).</summary>

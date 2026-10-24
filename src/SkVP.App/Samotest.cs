@@ -1717,6 +1717,8 @@ internal static class Samotest
         Over(r1.TykaSa.Count == 2 && r1.PoTermine && r1.Skupina == "Po termíne" && r1.TykaSaText == "Fyzika · Chémia" && r1.Podrobnosti.Contains("zodpovedá: PK", StringComparison.Ordinal)
              && zoznam.First(u => u.Id == u2).Skupina == "Dnes" && zoznam.First(u => u.Id == u3).Skupina == "Bez termínu",
             "úlohy: viac predmetov naraz, zodpovedný, skupiny podľa termínu");
+        Over(zoznam.FindIndex(u => u.Id == u1) < zoznam.FindIndex(u => u.Id == u2) && zoznam.FindIndex(u => u.Id == u2) < zoznam.FindIndex(u => u.Id == u3),
+            "úlohy sú zoradené podľa skupín (po termíne, dnes, bez termínu)");
         Over(ulohy.Zoznam(patriK: new[] { fyzika.Id }).Count == 2 && ulohy.Zoznam(patriK: new[] { chemia.Id }).Count == 1
              && ulohy.OtvorenePodlaObjektov()[fyzika.Id] == 2, "úlohy podľa predmetu (filter a odznaky)");
         ulohy.NastavHotovo(u2, true);
@@ -1738,12 +1740,12 @@ internal static class Samotest
         var nacitana = poznamky.Nacitaj(p1)!;
         Over(nacitana.Nazov == "Slovenčina – nápady" && nacitana.Farba == PoznamkyService.Farby[0] && nacitana.TykaSa.SequenceEqual(new[] { fyzika.Id }),
             "poznámka: názov z prvého riadku, predvolená farba, naviazanie na predmet");
-        Over(poznamky.Zoznam("slovencina citanie").Count == 1 && poznamky.Zoznam("fyzika").Count == 1 && poznamky.PatriaK(new[] { fyzika.Id }).Count == 1
+        Over(poznamky.Zoznam("slovencina citanie").Count == 1 && poznamky.Zoznam("fyzika").Count == 1 && poznamky.Zoznam(patriK: new[] { fyzika.Id }).Count == 1
              && poznamky.PreDni(dnes, dnes).Count == 1 && poznamky.Pripnute(3).Count == 1, "poznámky: hľadanie bez diakritiky (aj podľa predmetu), deň, pripnuté");
 
         // ---- udalosti, opakovanie ----
         var typ = kalendar.Typy().First();
-        var pondelok = KalendarViewModel.Pondelok(dnes).AddDays(7);
+        var pondelok = Planovanie.Pondelok(dnes).AddDays(7);
         var tyzdenna = kalendar.Uloz(new Udalost
         {
             Nazov = "Porada vedenia", TypId = typ.Id, Zaciatok = pondelok.AddHours(8), Koniec = pondelok.AddHours(9), Opakovanie = OpakovanieUdalosti.Tyzdenne,

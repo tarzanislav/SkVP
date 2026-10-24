@@ -18,6 +18,14 @@ public sealed record NavrhUlohy(string Kluc, string Text, string Dovod, Priorita
 public static class NavrhyUloh
 {
     public const string KlucSkryte = "ulohy.navrhy.skryte";
+    private const string KlucZapnute = "ulohy.navrhy";
+
+    /// <summary>Navrhované úlohy sú zapnuté (Nastavenia → Kalendár a úlohy).</summary>
+    public static bool Zapnute
+    {
+        get => Databaza.Citaj(KlucZapnute, "1") != "0";
+        set => Databaza.Zapis(KlucZapnute, value ? "1" : "0");
+    }
 
     /// <summary>Kategórie Noviniek, ktoré sa priamo týkajú osnov.</summary>
     private static readonly string[] KategorieOsnov = { "osnovy", "ciele", "tematicke" };

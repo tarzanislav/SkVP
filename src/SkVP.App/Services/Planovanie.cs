@@ -15,9 +15,16 @@ public static class Planovanie
 {
     public static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
 
-    /// <summary>Farba záznamov bez vlastnej farby (úloha v kalendári, objekt bez oblasti).</summary>
+    /// <summary>Farba úlohy v kalendári.</summary>
     public const string FarbaUlohy = "#6C8EBF";
+
+    /// <summary>Farba záznamov bez vlastnej farby (udalosť bez typu, objekt bez oblasti).</summary>
     public const string FarbaSiva = "#94A3B8";
+
+    // farby automatických termínov v kalendári
+    public const string FarbaPrazdnin = "#8CCB98";
+    public const string FarbaZalohy = "#A7B1C2";
+    public const string FarbaArchivu = "#C7A27C";
 
     // ------------------------------------------------------------------ dátumy
 
@@ -27,6 +34,8 @@ public static class Planovanie
 
     public static DateTime? Datum(SqliteDataReader citac, int stlpec) =>
         citac.IsDBNull(stlpec) ? null : Datum(citac.GetString(stlpec));
+
+    public static string? Text(SqliteDataReader citac, int stlpec) => citac.IsDBNull(stlpec) ? null : citac.GetString(stlpec);
 
     public static DateTime? Datum(string? text) =>
         text is { Length: > 0 } && DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var d) ? d : null;
@@ -49,12 +58,17 @@ public static class Planovanie
         };
     }
 
+    /// <summary>Poradie dňa v týždni od pondelka (pondelok 0 … nedeľa 6).</summary>
+    public static int DenVTyzdni(DateTime datum) => ((int)datum.DayOfWeek + 6) % 7;
+
+    public static DateTime Pondelok(DateTime datum) => datum.Date.AddDays(-DenVTyzdni(datum));
+
     public static string DatumText(DateTime? datum) => datum is { } d ? $"{d.Day}. {d.Month}. {d.Year}" : "";
 
     public static string DatumCasText(DateTime datum) => $"{datum.Day}. {datum.Month}. {datum.Year} {datum:H:mm}";
 
     /// <summary>Text bez diakritiky a malými písmenami (hľadanie „slovencina“ nájde „Slovenčina“).</summary>
-    public static string Normalizuj(string? text) => ImportOsnov.BezDiakritiky(text ?? "").ToLower(Sk);
+    private static string Normalizuj(string? text) => ImportOsnov.BezDiakritiky(text ?? "").ToLower(Sk);
 
     /// <summary>Vyhovuje text všetkým slovám hľadania (bez diakritiky)?</summary>
     public static bool Vyhovuje(string hladat, params string?[] texty)
@@ -102,9 +116,14 @@ public static class Planovanie
 
     // ------------------------------------------------------------------ „Týka sa“ (väzby patri)
 
-    private const string SqlNaviazani = """
-        SELECT v.z_id, o.id, o.typ, o.nazov, coalesce(o.farba, r.farba, ''), coalesce(r.nazov, ''),
-               CASE WHEN o.odstranene IS NOT NULL OR r.odstranene IS NOT NULL THEN 1 ELSE 0 END
+    // stĺpce naviazaného objektu: id, typ, názov, farba (vlastná alebo nadradenej oblasti), nadradený, odstránený
+    private const string StlpceNaviazania = """
+        o.id, o.typ, o.nazov, coalesce(o.farba, r.farba, ''), coalesce(r.nazov, ''),
+        CASE WHEN o.odstranene IS NOT NULL OR r.odstranene IS NOT NULL THEN 1 ELSE 0 END
+        """;
+
+    private const string SqlNaviazani = $"""
+        SELECT v.z_id, {StlpceNaviazania}
         FROM vazba v
         JOIN objekt o ON o.id = v.do_id
         LEFT JOIN objekt r ON r.id = o.rodic_id
@@ -119,12 +138,6 @@ public static class Planovanie
     }
 
     /// <summary>K čomu záznam patrí (predmety, oblasti, časti, udalosť, úloha) – aj odstránené, s príznakom.</summary>
-    public static List<Naviazanie> Naviazania(long id)
-    {
-        using var db = Databaza.Otvor();
-        return Naviazania(db, id);
-    }
-
     internal static List<Naviazanie> Naviazania(SqliteConnection db, long id)
     {
         var vysledok = new List<Naviazanie>();
@@ -199,13 +212,8 @@ public static class Planovanie
     public static Naviazanie? Objekt(long id)
     {
         using var db = Databaza.Otvor();
-        using var prikaz = Databaza.Prikaz(db, """
-            SELECT o.id, o.id, o.typ, o.nazov, coalesce(o.farba, r.farba, ''), coalesce(r.nazov, ''),
-                   CASE WHEN o.odstranene IS NOT NULL OR r.odstranene IS NOT NULL THEN 1 ELSE 0 END
-            FROM objekt o
-            LEFT JOIN objekt r ON r.id = o.rodic_id
-            WHERE o.id = $id
-            """, ("$id", id));
+        using var prikaz = Databaza.Prikaz(db, $"SELECT o.id, {StlpceNaviazania} FROM objekt o LEFT JOIN objekt r ON r.id = o.rodic_id WHERE o.id = $id",
+            ("$id", id));
         using var citac = prikaz.ExecuteReader();
         return citac.Read() ? Precitaj(citac) : null;
     }

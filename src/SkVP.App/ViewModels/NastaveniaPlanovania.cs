@@ -1,4 +1,3 @@
-using SkVP.Data;
 using SkVP.Services;
 
 namespace SkVP.ViewModels;
@@ -20,10 +19,10 @@ public sealed partial class NastaveniaViewModel
 
     public bool NavrhovatUlohy
     {
-        get => Databaza.Citaj(UlohyViewModel.KlucNavrhy, "1") != "0";
+        get => NavrhyUloh.Zapnute;
         set
         {
-            Databaza.Zapis(UlohyViewModel.KlucNavrhy, value ? "1" : "0");
+            NavrhyUloh.Zapnute = value;
             OnPropertyChanged();
         }
     }
