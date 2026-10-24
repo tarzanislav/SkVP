@@ -84,7 +84,7 @@ public sealed record PolozkaLegendy(string Nazov, string Farba);
 /// </summary>
 public sealed partial class KalendarViewModel : ObservableObject
 {
-    private const int DniZoznamu = 60;
+    private const int PocetDniZoznamu = 60;
 
     private readonly KalendarService _sluzba = new();
     private readonly bool _pripravene;
@@ -319,10 +319,10 @@ public sealed partial class KalendarViewModel : ObservableObject
     private void NacitajZoznam()
     {
         var od = AktualnyDatum.Date;
-        var po = od.AddDays(DniZoznamu - 1);
+        var po = od.AddDays(PocetDniZoznamu - 1);
         DniZoznamu = Dni(od, po, null).Where(d => d.MaVyskyty || d.MaSviatok || d.MaPoznamky).ToList();
         Titulok = $"{Planovanie.DatumText(od)} – {Planovanie.DatumText(po)}";
-        Suhrn = $"Zoznam na {DniZoznamu} dní: {Tvar(DniZoznamu.Sum(d => d.Vyskyty.Count), "záznam", "záznamy", "záznamov")}.";
+        Suhrn = $"Zoznam na {PocetDniZoznamu} dní: {Tvar(DniZoznamu.Sum(d => d.Vyskyty.Count), "záznam", "záznamy", "záznamov")}.";
     }
 
     private void NacitajSkolskyRok()
@@ -438,7 +438,7 @@ public sealed partial class KalendarViewModel : ObservableObject
     {
         RezimKalendara.Mesiac => new DateTime(AktualnyDatum.Year, AktualnyDatum.Month, 1).AddMonths(-1),
         RezimKalendara.Tyzden => AktualnyDatum.AddDays(-7),
-        RezimKalendara.Zoznam => AktualnyDatum.AddDays(-DniZoznamu),
+        RezimKalendara.Zoznam => AktualnyDatum.AddDays(-PocetDniZoznamu),
         _ => AktualnyDatum.AddYears(-1),
     };
 
@@ -447,7 +447,7 @@ public sealed partial class KalendarViewModel : ObservableObject
     {
         RezimKalendara.Mesiac => new DateTime(AktualnyDatum.Year, AktualnyDatum.Month, 1).AddMonths(1),
         RezimKalendara.Tyzden => AktualnyDatum.AddDays(7),
-        RezimKalendara.Zoznam => AktualnyDatum.AddDays(DniZoznamu),
+        RezimKalendara.Zoznam => AktualnyDatum.AddDays(PocetDniZoznamu),
         _ => AktualnyDatum.AddYears(1),
     };
 
@@ -657,7 +657,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         {
             RezimKalendara.Mesiac => (prvy, prvy.AddMonths(1).AddDays(-1)),
             RezimKalendara.Tyzden => (Pondelok(AktualnyDatum), Pondelok(AktualnyDatum).AddDays(6)),
-            RezimKalendara.Zoznam => (AktualnyDatum.Date, AktualnyDatum.Date.AddDays(DniZoznamu - 1)),
+            RezimKalendara.Zoznam => (AktualnyDatum.Date, AktualnyDatum.Date.AddDays(PocetDniZoznamu - 1)),
             _ => (zaciatokRoka, zaciatokRoka.AddYears(1).AddDays(-1)),
         };
     }
