@@ -1,6 +1,6 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 24. 10. 2026 · posledné vydanie **v0.1.85** (vetva `main` = `vyvoj/etapa1`)
+Aktualizované: 24. 10. 2026 · posledné vydanie **v0.1.98** (vetva `main` = `vyvoj/etapa1`)
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
@@ -263,7 +263,7 @@ testovacia sada, aktualizácie), automatické denné zálohy číslované za seb
   zálohou na pozadí – bez duplicít), kontrola dát v Servise nič nevytvára, `StrukturaOsnov.ZnameOblasti` pozná názvy
   skupín (import z PDF), odstránený nepoužívaný kód (filter krajov a uplynulých v Novinkách, kľúč citátov).
 
-## Kalendár, Úlohy, Poznámky (24. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Kalendár, Úlohy, Poznámky (24. 10. 2026, vydané v0.1.98)
 Analýza a rozhodnutia: `docs/ANALYZA_KALENDAR_ULOHY_POZNAMKY.md` (používateľ schválil: úloha a kalendár jeden zdroj,
 navrhované úlohy z osnov, zobrazenie Školský rok, pole Zodpovedá, úlohy a poznámky v archíve roka; všetky 4 etapy naraz).
 Kód je napísaný nanovo pre SkVP (z EviTA prevzatý len princíp funkcií).
