@@ -293,6 +293,11 @@ Kód je napísaný nanovo pre SkVP (z EviTA prevzatý len princíp funkcií).
   úlohy), export/import nastavení (kľúče `kalendar.*`, `ulohy.*`, typy udalostí), Servis (počty, kontrola dát a väzieb,
   záchrana), Archív (voľba „aj úlohy a poznámky“, zoznam v detaile, PDF v priečinku), testovacia sada (ukážkové
   záznamy, pri vymazaní sady sa odstránia len tie – `TestovaciaSada.KlucPlanovanie`).
+- **Revízia kódu (24. 10. 2026)**: spoločné pomôcky v `Planovanie` (`Text`, `Pondelok`, `DenVTyzdni`, farby
+  automatických termínov), každá služba číta záznamy jednou metódou `Citaj(db, podmienka, …)`; `UlohyService.Zoznam`
+  už vracia úlohy zoradené podľa skupín (zoznam, dashboard aj tlač ho len preberajú); `PoznamkyService.Zoznam(hladat,
+  patriK)`; názvy stavu, opakovania a pripomienky len v `KalendarService`; skloňovanie cez `Preklad.Pocet`; zapnutie
+  návrhov `NavrhyUloh.Zapnute`; odstránený nepoužívaný kód (presun udalosti, `NastavTermin`, `NazovPriority` …).
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
