@@ -24,6 +24,7 @@ public partial class App : Application
             return;
         }
 
+        PoleDatumu.Zapni();
         if (e.Args.Contains("--samotest", StringComparer.OrdinalIgnoreCase))
         {
             Dialogy.TichyRezim = true;

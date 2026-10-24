@@ -303,12 +303,10 @@
                             Visibility="{Binding TerminText, Converter={StaticResource NieJePrazdne}}">
                         <TextBlock x:Name="TerminText" Text="{Binding TerminText}" FontSize="12.5" />
                     </Border>
+                    <!-- priorita: farebný pásik pri texte (vysoká – pastelovo červený, nízka – sivý) -->
+                    <Border x:Name="Priorita" DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,2,8,2" Background="Transparent" />
                     <StackPanel>
-                        <DockPanel>
-                            <TextBlock x:Name="Priorita" DockPanel.Dock="Left" Text="!" FontWeight="Bold" FontSize="14.5" Margin="0,0,5,0" Visibility="Collapsed"
-                                       Foreground="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
-                            <TextBlock x:Name="Text" Text="{Binding Text}" FontSize="14.5" TextWrapping="Wrap" />
-                        </DockPanel>
+                        <TextBlock x:Name="Text" Text="{Binding Text}" FontSize="14.5" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding Podrobnosti}" FontSize="12.5" Margin="0,1,0,0" TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                    Visibility="{Binding MaPodrobnosti, Converter={StaticResource BoolNaViditelnost}}" />
@@ -316,10 +314,12 @@
                 </DockPanel>
                 <DataTemplate.Triggers>
                     <DataTrigger Binding="{Binding Vysoka}" Value="True">
-                        <Setter TargetName="Priorita" Property="Visibility" Value="Visible" />
+                        <Setter TargetName="Priorita" Property="Background" Value="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}}" />
+                        <Setter TargetName="Priorita" Property="ToolTip" Value="Vysoká priorita" />
                         <Setter TargetName="Text" Property="FontWeight" Value="SemiBold" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Nizka}" Value="True">
+                        <Setter TargetName="Priorita" Property="Background" Value="{Binding Source='#94A3B8', Converter={StaticResource FarbaNaStetec}, ConverterParameter=60}" />
                         <Setter TargetName="Text" Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Dnes}" Value="True">

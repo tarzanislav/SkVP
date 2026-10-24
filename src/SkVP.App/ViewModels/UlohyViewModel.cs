@@ -142,7 +142,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
             var poTermine = vsetky.Count(u => u.PoTermine);
             var hotove = vsetky.Count(u => u.Hotovo);
             SuHotove = hotove > 0;
-            Suhrn = $"Otvorené: {otvorene}  ·  po termíne: {poTermine}  ·  hotové: {hotove}";
+            Suhrn = $"otvorené {otvorene}  ·  po termíne {poTermine}  ·  hotové {hotove}";
             TextPrazdneho = Hladat.Trim().Length > 0 || FilterObjektu.Hodnota is not null
                 ? "Takéto úlohy nie sú."
                 : Filter == FilterUloh.Hotove ? "Zatiaľ nie sú žiadne hotové úlohy." : "Žiadne otvorené úlohy. Napíšte novú úlohu do poľa vyššie.";

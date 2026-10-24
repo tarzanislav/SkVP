@@ -57,17 +57,23 @@ public sealed partial class DenKalendara : ObservableObject
     /// <summary>Bez vyučovania: víkend, sviatok alebo prázdniny.</summary>
     public bool BezVyucovania => Volno || Vikend || JePrazdniny;
 
-    /// <summary>V bunke sa neopakujú prázdniny (deň je podfarbený) – ukážu sa vo výpise dňa.</summary>
-    public List<VyskytVKalendari> Zobrazene => Vyskyty.Where(v => v.Zdroj != ZdrojKalendara.Prazdniny).Take(NajviacVBunke).ToList();
+    /// <summary>
+    /// Záznamy do bunky mesiaca: bez prázdnin (deň je podfarbený) a dlhé automatické obdobia (napr. zber údajov celý mesiac)
+    /// len v prvý deň – inak by zaplnili všetky bunky. Všetko je vo výpise vybraného dňa.
+    /// </summary>
+    private IEnumerable<VyskytVKalendari> VBunke => Vyskyty.Where(v => v.Zdroj != ZdrojKalendara.Prazdniny
+        && !(v.JeAutomaticky && (v.PoslednyDen - v.Zaciatok.Date).Days >= 3 && v.Zaciatok.Date != Datum));
 
-    public int Dalsie => Math.Max(0, Vyskyty.Count(v => v.Zdroj != ZdrojKalendara.Prazdniny) - NajviacVBunke);
+    public List<VyskytVKalendari> Zobrazene => VBunke.Take(NajviacVBunke).ToList();
+
+    public int Dalsie => Math.Max(0, VBunke.Count() - NajviacVBunke);
     public string DalsieText => Dalsie > 0 ? $"+ {Dalsie} ďalšie" : "";
     public string PoznamkyTip => string.Join("\n", Poznamky.Select(p => "• " + p.Nazov));
 
     /// <summary>Farba bodky v prehľade školského roka (prvá vlastná udalosť alebo úloha dňa).</summary>
     public string? FarbaBodky => Vyskyty.FirstOrDefault(v => v.JeVlastny)?.Farba;
 
-    public string Tip => string.Join("\n", new[] { DlhyDatum, Prazdniny ?? "", Sviatok ?? "" }
+    public string Tip => string.Join("\n", new[] { DlhyDatum, Meniny.Length > 0 ? "Meniny: " + Meniny : "", Prazdniny ?? "", Sviatok ?? "" }
         .Concat(Vyskyty.Where(v => v.Zdroj != ZdrojKalendara.Prazdniny).Select(v => "• " + v.KratkyText)).Where(t => t.Length > 0));
 }
 

@@ -46,7 +46,7 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="480" />
+                <ColumnDefinition Width="420" />
             </Grid.ColumnDefinitions>
 
             <!-- nástenka lístkov -->
@@ -85,7 +85,7 @@
                     </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Border Width="236" MinHeight="130" CornerRadius="10" Padding="14,10,10,10" Background="{Binding Farba}">
+                            <Border Width="210" MinHeight="130" CornerRadius="10" Padding="14,10,10,10" Background="{Binding Farba}">
                                 <DockPanel>
                                     <DockPanel DockPanel.Dock="Top">
                                         <Button x:Name="Pripnut" DockPanel.Dock="Right" Style="{StaticResource IkonoveTlacidlo}" Width="26" Height="26" FontSize="12"

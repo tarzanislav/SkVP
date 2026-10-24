@@ -31,15 +31,15 @@
                 <DockPanel Margin="22,8,0,0">
                     <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
                         <ComboBox ItemsSource="{Binding Stavy, Mode=OneTime}" SelectedItem="{Binding VybranyStav}" DisplayMemberPath="Nazov"
-                                  MinWidth="200" ToolTip="Stav spracovania osnovy" Margin="0,0,10,0" />
+                                  MinWidth="170" ToolTip="Stav spracovania osnovy" Margin="0,0,10,0" />
                         <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE76B;" ToolTip="Predchádzajúci predmet"
                                 Command="{Binding OtvorPredchadzajuciCommand}" />
                         <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE76C;" ToolTip="Ďalší predmet"
                                 Command="{Binding OtvorDalsiCommand}" />
-                        <ToggleButton Margin="8,0,0,0" Padding="10,5" IsChecked="{Binding ZobrazitPlanovanie}" ToolTip="Úlohy, termíny a poznámky k tejto osnove">
+                        <ToggleButton Margin="8,0,0,0" Padding="10,5" IsChecked="{Binding ZobrazitPlanovanie}" ToolTip="Úlohy, termíny v kalendári a poznámky k tejto osnove">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource Ikona}" Text="&#xE9D5;" FontSize="14" Margin="0,0,6,0" />
-                                <TextBlock Text="Úlohy a poznámky " />
+                                <TextBlock Text="Úlohy " />
                                 <TextBlock Text="{Binding PanelPlanovania.Pocet}" />
                             </StackPanel>
                         </ToggleButton>

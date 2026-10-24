@@ -308,7 +308,7 @@
                 </Border>
 
                 <!-- úlohy -->
-                <Border CornerRadius="12" Padding="20,16" Margin="8,0,8,0" BorderThickness="1"
+                <Border CornerRadius="12" Padding="20,16" Margin="8,0,0,0" BorderThickness="1"
                         Background="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=18}"
                         BorderBrush="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=55}"
                         Visibility="{Binding UkazUlohy, Converter={StaticResource BoolNaViditelnost}}">
@@ -338,8 +338,10 @@
                     </StackPanel>
                 </Border>
 
-                <!-- pripnuté poznámky -->
-                <Border CornerRadius="12" Padding="20,16" Margin="8,0,0,0" BorderThickness="1"
+            </UniformGrid>
+
+            <!-- pripnuté poznámky – lístky vedľa seba -->
+            <Border CornerRadius="12" Padding="20,16" Margin="0,0,0,16" BorderThickness="1"
                         Background="{Binding Source='#D4B04C', Converter={StaticResource FarbaNaStetec}, ConverterParameter=18}"
                         BorderBrush="{Binding Source='#D4B04C', Converter={StaticResource FarbaNaStetec}, ConverterParameter=55}"
                         Visibility="{Binding UkazPoznamky, Converter={StaticResource BoolNaViditelnost}}">
@@ -354,9 +356,14 @@
                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
                                    Visibility="{Binding PripnutePoznamky.Count, Converter={StaticResource NulaNaViditelnost}}" />
                         <ItemsControl ItemsSource="{Binding PripnutePoznamky}" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Style="{StaticResource RiadokTlacidlo}" Padding="0" Margin="0,0,0,6"
+                                    <Button Style="{StaticResource RiadokTlacidlo}" Padding="0" Margin="0,0,8,6" Width="250"
                                             Command="{Binding DataContext.OtvoritPoznamkuCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}">
                                         <Border CornerRadius="8" Padding="10,6" Background="{Binding Farba}">
@@ -371,7 +378,6 @@
                         </ItemsControl>
                     </StackPanel>
                 </Border>
-            </UniformGrid>
 
             <!-- prázdniny v školskom roku (pastelová tabuľka) -->
             <Border Style="{StaticResource Karta}" Padding="22,18" Margin="0,0,0,16"
