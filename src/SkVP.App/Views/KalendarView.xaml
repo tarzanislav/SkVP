@@ -1,0 +1,497 @@
+<UserControl x:Class="SkVP.Views.KalendarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:SkVP.ViewModels"
+             x:Name="Koren">
+    <UserControl.Resources>
+        <Style x:Key="Rezim" TargetType="RadioButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Padding" Value="12,5" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+        </Style>
+        <Style x:Key="Zdroj" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="FontSize" Value="12.5" />
+        </Style>
+
+        <!-- ponuka dňa (pravé tlačidlo) -->
+        <ContextMenu x:Key="PonukaDna">
+            <MenuItem Header="Nová udalosť…" Command="{Binding PlacementTarget.Tag.NovaUdalostCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}" />
+            <MenuItem Header="Nová úloha s týmto termínom" Command="{Binding PlacementTarget.Tag.NovaUlohaCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}" />
+            <MenuItem Header="Nová poznámka k tomuto dňu…" Command="{Binding PlacementTarget.Tag.NovaPoznamkaCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}" />
+            <Separator />
+            <MenuItem Header="Zobraziť týždeň" Command="{Binding PlacementTarget.Tag.ZobrazTyzdenCommand, RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                      CommandParameter="{Binding}" />
+        </ContextMenu>
+
+        <!-- záznam v bunke dňa: farebný pásik s krátkym textom; dvojklik otvorí -->
+        <DataTemplate x:Key="ZaznamVBunke">
+            <Border x:Name="Pas" CornerRadius="4" Padding="5,1,4,2" Margin="0,0,0,2" ToolTip="{Binding Tip}"
+                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=40}">
+                <Border.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.OtvoritVyskytCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                </Border.InputBindings>
+                <TextBlock x:Name="Text" Text="{Binding KratkyText}" FontSize="12" TextTrimming="CharacterEllipsis"
+                           Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding JeVybavena}" Value="True">
+                    <Setter TargetName="Pas" Property="Opacity" Value="0.55" />
+                    <Setter TargetName="Text" Property="TextDecorations" Value="Strikethrough" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding JeAutomaticky}" Value="True">
+                    <Setter TargetName="Pas" Property="Background" Value="Transparent" />
+                    <Setter TargetName="Pas" Property="BorderThickness" Value="1" />
+                    <Setter TargetName="Pas" Property="BorderBrush" Value="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=88}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- bunka mesiaca -->
+        <DataTemplate x:Key="BunkaDna" DataType="{x:Type vm:DenKalendara}">
+            <Border x:Name="Bunka" Margin="0,0,1,1" Padding="6,4,6,4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderThickness="2" BorderBrush="Transparent" ToolTip="{Binding Tip}"
+                    Tag="{Binding DataContext, ElementName=Koren}" ContextMenu="{StaticResource PonukaDna}" Cursor="Hand">
+                <Border.InputBindings>
+                    <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.VybratDenCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.NovaUdalostCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                </Border.InputBindings>
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top">
+                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource Ikona}" Text="&#xE70B;" FontSize="11" ToolTip="{Binding PoznamkyTip}"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding MaPoznamky, Converter={StaticResource BoolNaViditelnost}}" />
+                        <Border x:Name="Kruh" CornerRadius="11" MinWidth="22" Height="22" Padding="4,0" HorizontalAlignment="Left">
+                            <TextBlock x:Name="Cislo" Text="{Binding Cislo}" FontSize="13.5" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock x:Name="Popis" Margin="6,0,0,0" FontSize="11" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="{Binding Meniny}" />
+                    </DockPanel>
+                    <TextBlock x:Name="Stitok" DockPanel.Dock="Top" FontSize="11" TextTrimming="CharacterEllipsis" Visibility="Collapsed" Margin="0,1,0,1" />
+                    <Button DockPanel.Dock="Bottom" Style="{StaticResource RiadokTlacidlo}" Padding="4,0" HorizontalAlignment="Left"
+                            Command="{Binding DataContext.ZobrazTyzdenCommand, ElementName=Koren}" CommandParameter="{Binding}"
+                            Visibility="{Binding DalsieText, Converter={StaticResource NieJePrazdne}}">
+                        <TextBlock Text="{Binding DalsieText}" FontSize="11.5" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                    </Button>
+                    <ItemsControl ItemsSource="{Binding Zobrazene}" ItemTemplate="{StaticResource ZaznamVBunke}" Focusable="False" Margin="0,3,0,0" />
+                </DockPanel>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Zvyraznit}" Value="True">
+                    <Setter TargetName="Bunka" Property="Background" Value="{DynamicResource LayerFillColorDefaultBrush}" />
+                    <Setter TargetName="Cislo" Property="Foreground" Value="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding JePrazdniny}" Value="True">
+                    <Setter TargetName="Bunka" Property="Background" Value="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=20}" />
+                    <Setter TargetName="Stitok" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="Stitok" Property="Text" Value="{Binding Prazdniny}" />
+                    <Setter TargetName="Stitok" Property="Foreground" Value="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding MaSviatok}" Value="True">
+                    <Setter TargetName="Stitok" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="Stitok" Property="Text" Value="{Binding Sviatok}" />
+                    <Setter TargetName="Stitok" Property="Foreground" Value="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding MimoMesiaca}" Value="True">
+                    <Setter TargetName="Bunka" Property="Opacity" Value="0.45" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Dnes}" Value="True">
+                    <Setter TargetName="Kruh" Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                    <Setter TargetName="Cislo" Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Vybrany}" Value="True">
+                    <Setter TargetName="Bunka" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- záznam v detaile dňa, v týždni a v zozname: čas, názov, typ, „Týka sa“ a akcie -->
+        <DataTemplate x:Key="ZaznamDetail">
+            <Border x:Name="Karta" CornerRadius="8" Padding="10,7" Margin="0,0,0,6"
+                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=22}">
+                <Border.InputBindings>
+                    <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.OtvoritVyskytCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                </Border.InputBindings>
+                <DockPanel>
+                    <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,1,10,1"
+                            Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                    <StackPanel>
+                        <TextBlock Text="{Binding CasText}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock x:Name="Nazov" Text="{Binding Nazov}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                            <Run Text="{Binding Typ, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding StavText, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding TykaSaText}" FontSize="12" TextWrapping="Wrap" Margin="0,1,0,0"
+                                   Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
+                                   Visibility="{Binding TykaSaText, Converter={StaticResource NieJePrazdne}}" />
+                        <WrapPanel Margin="0,5,0,0">
+                            <Button Padding="8,2" Margin="0,0,4,0" Command="{Binding DataContext.OtvoritVyskytCommand, ElementName=Koren}" CommandParameter="{Binding}"
+                                    Visibility="{Binding JeVlastny, Converter={StaticResource BoolNaViditelnost}}">
+                                <TextBlock Text="Otvoriť" FontSize="12" />
+                            </Button>
+                            <Button Padding="8,2" Margin="0,0,4,0" Command="{Binding DataContext.PrepnutHotovoCommand, ElementName=Koren}" CommandParameter="{Binding}"
+                                    Visibility="{Binding JeVlastny, Converter={StaticResource BoolNaViditelnost}}" ToolTip="Úloha hotová / udalosť prebehla – alebo späť">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE73E;" FontSize="11" Margin="0,0,5,0" />
+                                    <TextBlock Text="Hotovo" FontSize="12" />
+                                </StackPanel>
+                            </Button>
+                            <Button Padding="8,2" Margin="0,0,4,0" Command="{Binding DataContext.OtvoritZdrojCommand, ElementName=Koren}" CommandParameter="{Binding}"
+                                    Visibility="{Binding MaOdkaz, Converter={StaticResource BoolNaViditelnost}}" ToolTip="Oficiálny zdroj termínu">
+                                <TextBlock Text="Zdroj" FontSize="12" />
+                            </Button>
+                            <Button Padding="8,2" Margin="0,0,4,0" Command="{Binding DataContext.PrevziatDoKalendaraCommand, ElementName=Koren}" CommandParameter="{Binding}"
+                                    Visibility="{Binding JeAutomaticky, Converter={StaticResource BoolNaViditelnost}}"
+                                    ToolTip="Vytvoriť z termínu vlastnú udalosť – s pripomienkou a naviazaním na predmety">
+                                <TextBlock Text="Prevziať do kalendára" FontSize="12" />
+                            </Button>
+                        </WrapPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding JeVybavena}" Value="True">
+                    <Setter TargetName="Karta" Property="Opacity" Value="0.6" />
+                    <Setter TargetName="Nazov" Property="TextDecorations" Value="Strikethrough" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- poznámka dňa -->
+        <DataTemplate x:Key="PoznamkaDna">
+            <Button Style="{StaticResource RiadokTlacidlo}" Padding="0" Margin="0,0,0,6"
+                    Command="{Binding DataContext.OtvoritPoznamkuCommand, ElementName=Koren}" CommandParameter="{Binding}">
+                <Border CornerRadius="8" Padding="10,6" Background="{Binding Farba}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{StaticResource AtramentStetec}" />
+                        <TextBlock Text="{Binding Nahlad}" FontSize="12.5" TextWrapping="Wrap" MaxHeight="52" TextTrimming="CharacterEllipsis" Foreground="#3F4650" />
+                    </StackPanel>
+                </Border>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel Margin="40,26,40,18">
+        <!-- hlavička -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Top">
+                <Button Style="{DynamicResource AccentButtonStyle}" Padding="14,6" Command="{Binding NovaUdalostCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE710;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Nová udalosť" />
+                    </StackPanel>
+                </Button>
+                <Button Padding="12,6" Margin="6,0,0,0" Command="{Binding TypyCommand}" ToolTip="Typy udalostí a ich farby">
+                    <TextBlock Text="Typy…" />
+                </Button>
+                <Button Padding="12,6" Margin="6,0,0,0" Command="{Binding ExportIcsCommand}" ToolTip="Uložiť kalendár pre Outlook alebo Google Kalendár (.ics)">
+                    <TextBlock Text="Export .ics…" />
+                </Button>
+                <Button Padding="12,6" Margin="6,0,0,0" Command="{Binding UlozitPdfCommand}" ToolTip="Zobrazené obdobie do PDF">
+                    <TextBlock Text="PDF…" />
+                </Button>
+                <Button Padding="12,6" Margin="6,0,0,0" Command="{Binding TlacitCommand}" ToolTip="Vytlačiť zobrazené obdobie">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE749;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Tlačiť…" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <StackPanel>
+                <TextBlock Text="{Binding Titulok}" Style="{StaticResource Nadpis}" Margin="0" />
+                <TextBlock Text="{Binding Suhrn}" Style="{StaticResource Popis}" FontSize="13.5" Margin="0,2,0,0" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- navigácia a režimy -->
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE76B;" Command="{Binding PredchadzajuceCommand}" ToolTip="Predchádzajúce" Margin="0,0,0,6" />
+            <Button Content="Dnes" Padding="12,4" Margin="2,0,2,6" Command="{Binding DnesCommand}" />
+            <Button Style="{StaticResource IkonoveTlacidlo}" Content="&#xE76C;" Command="{Binding NasledujuceCommand}" ToolTip="Nasledujúce" Margin="0,0,14,6" />
+            <TextBlock Text="Skočiť na" VerticalAlignment="Center" Margin="0,0,6,6" />
+            <DatePicker SelectedDate="{Binding SkocNa}" Width="140" Margin="0,0,18,6" />
+            <RadioButton Style="{StaticResource Rezim}" GroupName="rezim" Content="Mesiac" IsChecked="{Binding JeMesiac}" Margin="0,0,4,6" />
+            <RadioButton Style="{StaticResource Rezim}" GroupName="rezim" Content="Týždeň" IsChecked="{Binding JeTyzden}" Margin="0,0,4,6" />
+            <RadioButton Style="{StaticResource Rezim}" GroupName="rezim" Content="Zoznam" IsChecked="{Binding JeZoznam}" Margin="0,0,4,6" />
+            <RadioButton Style="{StaticResource Rezim}" GroupName="rezim" Content="Školský rok" IsChecked="{Binding JeSkolskyRok}" Margin="0,0,18,6" />
+            <TextBlock Text="Kraj" VerticalAlignment="Center" Margin="0,0,6,6" />
+            <ComboBox ItemsSource="{Binding Kraje}" SelectedItem="{Binding Kraj}" Width="150" Margin="0,0,0,6" ToolTip="Jarné prázdniny podľa kraja (spoločné s dashboardom)" />
+        </WrapPanel>
+        <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+            <TextBlock Text="Zobraziť:" VerticalAlignment="Center" Margin="0,0,8,6" Style="{StaticResource Popis}" />
+            <ToggleButton Style="{StaticResource Zdroj}" Content="Prázdniny a školský rok" IsChecked="{Binding UkazSkolskyRok}" />
+            <ToggleButton Style="{StaticResource Zdroj}" Content="Maturita a prijímačky (Novinky)" IsChecked="{Binding UkazNovinky}" />
+            <ToggleButton Style="{StaticResource Zdroj}" Content="Platnosť osnov" IsChecked="{Binding UkazOsnovy}" />
+            <ToggleButton Style="{StaticResource Zdroj}" Content="Archivácia" IsChecked="{Binding UkazArchiv}" />
+            <ToggleButton Style="{StaticResource Zdroj}" Content="Týždenná záloha" IsChecked="{Binding UkazZalohy}" />
+            <ToggleButton Style="{StaticResource Zdroj}" Content="Hotové a zrušené" IsChecked="{Binding UkazVybavene}" />
+        </WrapPanel>
+
+        <!-- legenda -->
+        <ItemsControl DockPanel.Dock="Bottom" ItemsSource="{Binding Legenda}" Margin="0,8,0,0" Focusable="False">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,14,4">
+                        <Border Width="12" Height="12" CornerRadius="3" Margin="0,0,6,0" Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                        <TextBlock Text="{Binding Nazov}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="14" />
+                <ColumnDefinition Width="330" />
+            </Grid.ColumnDefinitions>
+
+            <!-- mesiac -->
+            <DockPanel Visibility="{Binding JeMesiac, Converter={StaticResource BoolNaViditelnost}}">
+                <DockPanel DockPanel.Dock="Top" Margin="34,0,0,4">
+                    <ItemsControl ItemsSource="{Binding NazvyDni}" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="7" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" FontWeight="SemiBold" FontSize="13" Margin="8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Tyzdne}" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="1" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Left" Width="34" Text="{Binding Cislo}" FontSize="11" Margin="0,6,0,0" TextAlignment="Center"
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" ToolTip="Číslo týždňa" />
+                                <ItemsControl ItemsSource="{Binding Dni}" ItemTemplate="{StaticResource BunkaDna}" Focusable="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="7" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                </ItemsControl>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </DockPanel>
+
+            <!-- týždeň -->
+            <ItemsControl ItemsSource="{Binding DniTyzdna}" Focusable="False" Visibility="{Binding JeTyzden, Converter={StaticResource BoolNaViditelnost}}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="7" Rows="1" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:DenKalendara}">
+                        <Border x:Name="Stlpec" Margin="0,0,6,0" CornerRadius="8" Padding="8,8" BorderThickness="2" BorderBrush="Transparent"
+                                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" Cursor="Hand"
+                                Tag="{Binding DataContext, ElementName=Koren}" ContextMenu="{StaticResource PonukaDna}">
+                            <Border.InputBindings>
+                                <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.VybratDenCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                                <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.NovaUdalostCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                            </Border.InputBindings>
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+                                    <TextBlock x:Name="Den" FontSize="14" FontWeight="SemiBold"><Run Text="{Binding KratkyNazovDna, Mode=OneWay}" /><Run Text=" " /><Run Text="{Binding DatumText, Mode=OneWay}" /></TextBlock>
+                                    <TextBlock Text="{Binding Meniny}" FontSize="11.5" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                    <TextBlock Text="{Binding Prazdniny}" FontSize="11.5" TextWrapping="Wrap"
+                                               Foreground="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
+                                               Visibility="{Binding JePrazdniny, Converter={StaticResource BoolNaViditelnost}}" />
+                                    <TextBlock Text="{Binding Sviatok}" FontSize="11.5" TextWrapping="Wrap"
+                                               Foreground="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
+                                               Visibility="{Binding MaSviatok, Converter={StaticResource BoolNaViditelnost}}" />
+                                </StackPanel>
+                                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding Zobrazene}" ItemTemplate="{StaticResource ZaznamVBunke}" Focusable="False" />
+                                </ScrollViewer>
+                            </DockPanel>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Zvyraznit}" Value="True">
+                                <Setter TargetName="Stlpec" Property="Background" Value="{DynamicResource LayerFillColorDefaultBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding JePrazdniny}" Value="True">
+                                <Setter TargetName="Stlpec" Property="Background" Value="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=20}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Dnes}" Value="True">
+                                <Setter TargetName="Den" Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Vybrany}" Value="True">
+                                <Setter TargetName="Stlpec" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <!-- zoznam na 60 dní -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding JeZoznam, Converter={StaticResource BoolNaViditelnost}}">
+                <StackPanel>
+                    <TextBlock Text="V tomto období nie sú žiadne udalosti, úlohy ani termíny." Style="{StaticResource Popis}" FontSize="14"
+                               Visibility="{Binding DniZoznamu.Count, Converter={StaticResource NulaNaViditelnost}}" />
+                    <ItemsControl ItemsSource="{Binding DniZoznamu}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type vm:DenKalendara}">
+                                <DockPanel Margin="0,0,0,10">
+                                    <Border DockPanel.Dock="Left" Width="150" Padding="0,4,12,0" Background="Transparent" Cursor="Hand">
+                                        <Border.InputBindings>
+                                            <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.VybratDenCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                                        </Border.InputBindings>
+                                        <StackPanel>
+                                            <TextBlock x:Name="Den" Text="{Binding NazovDna}" FontSize="14" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding DatumText}" FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock Text="{Binding Sviatok}" FontSize="11.5" TextWrapping="Wrap"
+                                                       Foreground="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
+                                                       Visibility="{Binding MaSviatok, Converter={StaticResource BoolNaViditelnost}}" />
+                                        </StackPanel>
+                                    </Border>
+                                    <StackPanel>
+                                        <ItemsControl ItemsSource="{Binding Vyskyty}" ItemTemplate="{StaticResource ZaznamDetail}" Focusable="False" />
+                                        <ItemsControl ItemsSource="{Binding Poznamky}" ItemTemplate="{StaticResource PoznamkaDna}" Focusable="False" />
+                                    </StackPanel>
+                                </DockPanel>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Dnes}" Value="True">
+                                        <Setter TargetName="Den" Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- školský rok: 12 mesiacov september – august -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Visibility="{Binding JeSkolskyRok, Converter={StaticResource BoolNaViditelnost}}">
+                <ItemsControl ItemsSource="{Binding Mesiace}" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="4" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource Karta}" Padding="10,8" Margin="0,0,10,10">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" FontSize="14" Margin="2,0,0,6" />
+                                    <ItemsControl ItemsSource="{Binding DataContext.NazvyDni, ElementName=Koren}" Focusable="False">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="7" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding}" FontSize="10.5" TextAlignment="Center" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <ItemsControl ItemsSource="{Binding Dni}" Focusable="False">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Columns="7" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border x:Name="Policko" Height="24" Margin="1" CornerRadius="4" Background="Transparent" BorderThickness="1.5"
+                                                        BorderBrush="Transparent" ToolTip="{Binding Tip}" Cursor="Hand">
+                                                    <Border.InputBindings>
+                                                        <MouseBinding Gesture="LeftClick" Command="{Binding DataContext.VybratDenCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                                                        <MouseBinding Gesture="LeftDoubleClick" Command="{Binding DataContext.ZobrazMesiacCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                                                    </Border.InputBindings>
+                                                    <Grid>
+                                                        <TextBlock x:Name="Cislo" Text="{Binding Cislo}" FontSize="11.5" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        <Ellipse Width="5" Height="5" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,1"
+                                                                 Fill="{Binding FarbaBodky, Converter={StaticResource FarbaNaStetec}}"
+                                                                 Visibility="{Binding FarbaBodky, Converter={StaticResource NieJePrazdne}}" />
+                                                    </Grid>
+                                                </Border>
+                                                <DataTemplate.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                        <Setter TargetName="Policko" Property="Visibility" Value="Hidden" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Zvyraznit}" Value="True">
+                                                        <Setter TargetName="Cislo" Property="Foreground" Value="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding JePrazdniny}" Value="True">
+                                                        <Setter TargetName="Policko" Property="Background" Value="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=55}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Dnes}" Value="True">
+                                                        <Setter TargetName="Policko" Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                                        <Setter TargetName="Cislo" Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Vybrany}" Value="True">
+                                                        <Setter TargetName="Policko" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                                    </DataTrigger>
+                                                </DataTemplate.Triggers>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <!-- vybraný deň -->
+            <Border Grid.Column="2" Style="{StaticResource Karta}" Padding="0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="16,14,16,16" DataContext="{Binding VybranyDen}">
+                        <TextBlock Text="{Binding DlhyDatum}" Style="{StaticResource Podnadpis}" TextWrapping="Wrap" Margin="0,0,0,4" />
+                        <TextBlock FontSize="13" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding Meniny, Converter={StaticResource NieJePrazdne}}">
+                            <Run Text="Meniny:" /> <Run Text="{Binding Meniny, Mode=OneWay}" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding Sviatok}" FontSize="13" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,2,0,0"
+                                   Foreground="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
+                                   Visibility="{Binding MaSviatok, Converter={StaticResource BoolNaViditelnost}}" />
+                        <Border CornerRadius="8" Padding="10,5" Margin="0,6,0,0"
+                                Background="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=38}"
+                                Visibility="{Binding JePrazdniny, Converter={StaticResource BoolNaViditelnost}}">
+                            <TextBlock Text="{Binding Prazdniny}" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{Binding Source='#8CCB98', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />
+                        </Border>
+                        <WrapPanel Margin="0,10,0,8">
+                            <Button Padding="9,3" Margin="0,0,4,4" Command="{Binding DataContext.NovaUdalostCommand, ElementName=Koren}" CommandParameter="{Binding}">
+                                <TextBlock Text="+ Udalosť" FontSize="12.5" />
+                            </Button>
+                            <Button Padding="9,3" Margin="0,0,4,4" Command="{Binding DataContext.NovaUlohaCommand, ElementName=Koren}" CommandParameter="{Binding}">
+                                <TextBlock Text="+ Úloha" FontSize="12.5" />
+                            </Button>
+                            <Button Padding="9,3" Margin="0,0,4,4" Command="{Binding DataContext.NovaPoznamkaCommand, ElementName=Koren}" CommandParameter="{Binding}">
+                                <TextBlock Text="+ Poznámka" FontSize="12.5" />
+                            </Button>
+                        </WrapPanel>
+                        <TextBlock Text="V tento deň nie je nič naplánované." Style="{StaticResource Popis}" FontSize="13" Margin="0,4,0,8"
+                                   Visibility="{Binding MaVyskyty, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                        <ItemsControl ItemsSource="{Binding Vyskyty}" ItemTemplate="{StaticResource ZaznamDetail}" Focusable="False" />
+                        <TextBlock Text="Poznámky k dňu" Style="{StaticResource Stitok}" Visibility="{Binding MaPoznamky, Converter={StaticResource BoolNaViditelnost}}" />
+                        <ItemsControl ItemsSource="{Binding Poznamky}" ItemTemplate="{StaticResource PoznamkaDna}" Focusable="False" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </DockPanel>
+</UserControl>

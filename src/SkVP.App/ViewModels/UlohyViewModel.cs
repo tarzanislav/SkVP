@@ -39,10 +39,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
     {
         Hlavny = hlavny;
         TykaSa = new TykaSaVM(hlavny, () => Zmena(hned: true));
-        Filtre = new[] { new Volba<long?>(null, "Všetky predmety a oblasti") }
-            .Concat(hlavny.VsetkySkupiny.Where(s => s.Aktivna).SelectMany(s =>
-                new[] { new Volba<long?>(s.Id, s.Nazov) }.Concat(s.Predmety.Select(p => new Volba<long?>(p.Id, "      " + p.Nazov)))))
-            .ToList();
+        Filtre = FilterOsnov.Volby(hlavny);
         _filterObjektu = Filtre[0];
         _ukladanie.Tick += (_, _) =>
         {
@@ -72,7 +69,9 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
 
     public MainViewModel Hlavny { get; }
 
-    public static IReadOnlyList<Volba<PrioritaUlohy>> Priority { get; } = new[]
+    public IReadOnlyList<Volba<PrioritaUlohy>> Priority => ZoznamPriority;
+
+    private static readonly IReadOnlyList<Volba<PrioritaUlohy>> ZoznamPriority = new[]
     {
         new Volba<PrioritaUlohy>(PrioritaUlohy.Vysoka, "vysoká"),
         new Volba<PrioritaUlohy>(PrioritaUlohy.Normalna, "normálna"),
@@ -121,23 +120,12 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
     [ObservableProperty]
     private string _textPrazdneho = "";
 
-    /// <summary>Objekty, podľa ktorých sa filtruje (skupina aj s jej predmetmi).</summary>
-    private IReadOnlyCollection<long>? FiltrovaneObjekty()
-    {
-        if (FilterObjektu.Hodnota is not { } id)
-        {
-            return null;
-        }
-
-        return Hlavny.NajdiOblast(id) is { } skupina ? skupina.Predmety.Select(p => p.Id).Append(id).ToList() : new[] { id };
-    }
-
     public void Obnov()
     {
         var vybrana = Vybrana?.Id;
         try
         {
-            var vsetky = _sluzba.Zoznam(patriK: FiltrovaneObjekty());
+            var vsetky = _sluzba.Zoznam(patriK: FilterOsnov.Objekty(Hlavny, FilterObjektu));
             if (Hladat.Trim().Length > 0)
             {
                 vsetky = vsetky.Where(u => Planovanie.Vyhovuje(Hladat, u.Text, u.Popis, u.Zodpovedny, u.TykaSaText)).ToList();
@@ -405,6 +393,27 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
             UlozTeraz();
             Hlavny.OtvorKalendar(t);
         }
+    }
+
+    private string PodnadpisTlace => string.Join(" · ", new[]
+    {
+        FilterObjektu.Hodnota is null ? "" : FilterObjektu.Nazov.Trim(),
+        Filter switch { FilterUloh.Otvorene => "otvorené", FilterUloh.Hotove => "hotové", _ => "" },
+    }.Where(t => t.Length > 0));
+
+    /// <summary>Vytlačí zobrazený zoznam úloh (podľa filtra a hľadania).</summary>
+    [RelayCommand]
+    private void Tlacit()
+    {
+        UlozTeraz();
+        TlacPlanovania.Ulohy(Zoznam, PodnadpisTlace, pdf: false);
+    }
+
+    [RelayCommand]
+    private void UlozitPdf()
+    {
+        UlozTeraz();
+        TlacPlanovania.Ulohy(Zoznam, PodnadpisTlace, pdf: true);
     }
 
     // ------------------------------------------------------------------ navrhované úlohy z osnov

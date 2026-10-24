@@ -76,7 +76,10 @@ public sealed partial class ServisViewModel : ObservableObject
             long Pocet(string sql) => Convert.ToInt64(Databaza.Skalar(db, sql) ?? 0L, CultureInfo.InvariantCulture);
             return $"Oblasti: {Pocet("SELECT count(*) FROM objekt WHERE typ = 'oblast' AND odstranene IS NULL")}  •  " +
                    $"predmety: {Pocet("SELECT count(*) FROM objekt WHERE typ = 'predmet' AND odstranene IS NULL")}  •  " +
-                   $"dokumenty: {Pocet("SELECT count(*) FROM dokument")}  •  archivované verzie: {Pocet("SELECT count(*) FROM verzia")}";
+                   $"dokumenty: {Pocet("SELECT count(*) FROM dokument")}  •  archivované verzie: {Pocet("SELECT count(*) FROM verzia")}  •  " +
+                   $"udalosti: {Pocet("SELECT count(*) FROM objekt WHERE typ = 'udalost' AND odstranene IS NULL")}  •  " +
+                   $"úlohy: {Pocet("SELECT count(*) FROM objekt WHERE typ = 'uloha' AND odstranene IS NULL")}  •  " +
+                   $"poznámky: {Pocet("SELECT count(*) FROM objekt WHERE typ = 'poznamka' AND odstranene IS NULL")}";
         }
     }
 

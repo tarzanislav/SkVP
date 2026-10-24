@@ -1,0 +1,119 @@
+<UserControl x:Class="SkVP.Views.PoznamkaEditor"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:SkVP.Views">
+    <!-- úprava poznámky (DataContext = PoznamkaEditorVM): lístok vo farbe, diktovanie, deň, udalosť a „Týka sa“ -->
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,10">
+            <ToggleButton DockPanel.Dock="Right" Padding="10,4" IsChecked="{Binding Pripnuta}" ToolTip="Pripnutá poznámka je hore a na dashboarde">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE718;" FontSize="13" Margin="0,0,6,0" />
+                    <TextBlock Text="Pripnúť" />
+                </StackPanel>
+            </ToggleButton>
+            <TextBlock Text="Farba" Style="{StaticResource Stitok}" Margin="0,0,10,0" VerticalAlignment="Center" />
+            <ItemsControl ItemsSource="{Binding Farby}" VerticalAlignment="Center" Focusable="False">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Width="22" Height="22" Margin="0,0,6,0" Cursor="Hand" ToolTip="Farba lístka"
+                                Command="{Binding DataContext.NastavFarbuCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Ellipse x:Name="Kruh" Fill="{Binding}" Stroke="{DynamicResource ControlStrokeColorDefaultBrush}" StrokeThickness="1" />
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Kruh" Property="Stroke" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <Setter TargetName="Kruh" Property="StrokeThickness" Value="2" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </DockPanel>
+
+        <!-- prepojenia a info -->
+        <StackPanel DockPanel.Dock="Bottom" Margin="0,10,0,0">
+            <DockPanel Margin="0,0,0,4">
+                <Button DockPanel.Dock="Left" x:Name="Diktovat" Padding="12,4" Margin="0,0,6,0" Click="Diktovat_Click"
+                        ToolTip="Diktovať do mikrofónu – text sa zapíše na miesto kurzora (slovenčina)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock x:Name="IkonaDiktovania" Style="{StaticResource Ikona}" Text="&#xE720;" FontSize="13" Margin="0,0,6,0" />
+                        <TextBlock x:Name="TextDiktovania" Text="Diktovať" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Left" Padding="8,4" Margin="0,0,10,0" Click="NastavenieDiktovania_Click" ToolTip="Nastavenie diktovania">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE713;" FontSize="13" />
+                </Button>
+                <Rectangle DockPanel.Dock="Left" x:Name="Hlasitost" Height="6" Width="0" RadiusX="3" RadiusY="3" Margin="0,0,10,0"
+                           Fill="{DynamicResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
+                <TextBlock x:Name="StavDiktovania" VerticalAlignment="Center" TextWrapping="Wrap" Style="{StaticResource Popis}" FontSize="12" />
+            </DockPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Deň v kalendári" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                    <DockPanel>
+                        <Button DockPanel.Dock="Right" Padding="8,3" Margin="4,0,0,0" Command="{Binding BezDnaCommand}" ToolTip="Bez dňa">
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE711;" FontSize="10" />
+                        </Button>
+                        <Button DockPanel.Dock="Right" Content="Dnes" Padding="8,3" Margin="4,0,0,0" Command="{Binding DnesCommand}" />
+                        <DatePicker SelectedDate="{Binding Datum}" />
+                    </DockPanel>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Poznámka k udalosti" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                    <ComboBox ItemsSource="{Binding Udalosti}" SelectedItem="{Binding Udalost}" ToolTip="Napr. zápis z porady alebo predmetovej komisie" />
+                </StackPanel>
+            </Grid>
+            <TextBlock Text="Týka sa" Style="{StaticResource Stitok}" />
+            <v:TykaSaPole DataContext="{Binding TykaSa}" />
+            <DockPanel Margin="0,12,0,0">
+                <Button DockPanel.Dock="Right" Padding="12,5" Command="{Binding OdstranitCommand}" ToolTip="Odstrániť poznámku (dá sa vrátiť späť)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Odstrániť" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Right" Padding="12,5" Margin="0,0,8,0" Command="{Binding KopirovatCommand}"
+                        ToolTip="Skopírovať text do schránky – napr. na vloženie do osnovy (Ctrl+V)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE8C8;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Kopírovať text" />
+                    </StackPanel>
+                </Button>
+                <TextBlock Text="{Binding Info}" Style="{StaticResource Popis}" FontSize="12.5" VerticalAlignment="Center" />
+            </DockPanel>
+        </StackPanel>
+
+        <!-- lístok: názov, text a diktovanie -->
+        <Border CornerRadius="10" Padding="16,12" BorderThickness="1" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Background="{Binding Farba}">
+            <DockPanel>
+                <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                    <TextBox x:Name="PoleNazov" Text="{Binding Nazov, UpdateSourceTrigger=PropertyChanged}" FontSize="17" FontWeight="SemiBold"
+                             Background="Transparent" BorderThickness="0,0,0,1" Foreground="{StaticResource AtramentStetec}"
+                             CaretBrush="{StaticResource AtramentStetec}" />
+                    <TextBlock Text="Názov (nepovinný – inak prvý riadok textu)" Margin="10,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                               FontSize="15" Foreground="#8A8F98"
+                               Visibility="{Binding Nazov, Converter={StaticResource NieJePrazdne}, ConverterParameter=opacne}" />
+                </Grid>
+                <TextBox x:Name="PoleText" Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto" MinHeight="160" FontSize="14.5" Background="Transparent" BorderThickness="0"
+                         Foreground="{StaticResource AtramentStetec}" CaretBrush="{StaticResource AtramentStetec}" />
+            </DockPanel>
+        </Border>
+    </DockPanel>
+</UserControl>

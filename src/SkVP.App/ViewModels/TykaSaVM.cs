@@ -74,3 +74,19 @@ public sealed partial class TykaSaVM : ObservableObject
         }
     }
 }
+
+/// <summary>Filter „Týka sa“ v zoznamoch úloh a poznámok: všetko, skupina osnov (aj s predmetmi) alebo jeden predmet.</summary>
+public static class FilterOsnov
+{
+    public static IReadOnlyList<Volba<long?>> Volby(MainViewModel hlavny) =>
+        new[] { new Volba<long?>(null, "Všetky predmety a oblasti") }
+            .Concat(hlavny.VsetkySkupiny.Where(s => s.Aktivna).SelectMany(s =>
+                new[] { new Volba<long?>(s.Id, s.Nazov) }.Concat(s.Predmety.Select(p => new Volba<long?>(p.Id, "      " + p.Nazov)))))
+            .ToList();
+
+    /// <summary>Objekty, podľa ktorých sa filtruje (null = bez filtra).</summary>
+    public static IReadOnlyCollection<long>? Objekty(MainViewModel hlavny, Volba<long?> volba) =>
+        volba.Hodnota is not { } id ? null
+        : hlavny.NajdiOblast(id) is { } skupina ? skupina.Predmety.Select(p => p.Id).Append(id).ToList()
+        : new[] { id };
+}

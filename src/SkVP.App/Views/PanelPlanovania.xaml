@@ -1,0 +1,113 @@
+<UserControl x:Class="SkVP.Views.PanelPlanovania"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Koren">
+    <!-- panel „Úlohy a poznámky“ pri predmete, časti alebo oblasti (DataContext = PanelPlanovaniaVM) -->
+    <DockPanel Margin="18,16,14,16">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Úlohy a poznámky" Style="{StaticResource Podnadpis}" Margin="0,0,0,4" />
+            <TextBlock Style="{StaticResource Popis}" Margin="0,0,0,10"
+                       Text="Čo treba k osnove urobiť, termíny v kalendári a poznámky – všetko, čo k nej patrí." />
+            <Grid>
+                <TextBox x:Name="PoleUloha" Text="{Binding NovaUloha, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding PridatUlohuCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <TextBlock Text="Nová úloha – napíšte a stlačte Enter" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                           Visibility="{Binding NovaUloha, Converter={StaticResource NieJePrazdne}, ConverterParameter=opacne}" />
+            </Grid>
+            <WrapPanel Margin="0,8,0,0">
+                <Button Padding="10,3" Margin="0,0,6,4" Command="{Binding NovyTerminCommand}" ToolTip="Udalosť v kalendári naviazaná na túto osnovu">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE787;" FontSize="12" Margin="0,0,6,0" />
+                        <TextBlock Text="+ Termín" FontSize="12.5" />
+                    </StackPanel>
+                </Button>
+                <Button Padding="10,3" Margin="0,0,6,4" Command="{Binding NovaPoznamkaCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE70B;" FontSize="12" Margin="0,0,6,0" />
+                        <TextBlock Text="+ Poznámka" FontSize="12.5" />
+                    </StackPanel>
+                </Button>
+            </WrapPanel>
+        </StackPanel>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="0,8,0,0">
+            <StackPanel>
+                <!-- úlohy -->
+                <DockPanel Margin="0,4,0,4">
+                    <Button DockPanel.Dock="Right" Style="{StaticResource RiadokTlacidlo}" Padding="6,1" Command="{Binding VsetkyUlohyCommand}">
+                        <TextBlock Text="Všetky →" FontSize="12" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                    </Button>
+                    <TextBlock FontWeight="SemiBold" FontSize="13.5"><Run Text="Otvorené úlohy (" /><Run Text="{Binding Ulohy.Count, Mode=OneWay}" /><Run Text=")" /></TextBlock>
+                </DockPanel>
+                <TextBlock Text="Žiadne otvorené úlohy." Style="{StaticResource Popis}" FontSize="12.5"
+                           Visibility="{Binding Ulohy.Count, Converter={StaticResource NulaNaViditelnost}}" />
+                <ItemsControl ItemsSource="{Binding Ulohy}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel>
+                                <Button DockPanel.Dock="Right" Style="{StaticResource IkonoveTlacidlo}" Width="24" Height="24" FontSize="11" Content="&#xE8A7;"
+                                        ToolTip="Otvoriť v Úlohách" VerticalAlignment="Top"
+                                        Command="{Binding DataContext.OtvoritUlohuCommand, ElementName=Koren}" CommandParameter="{Binding}" />
+                                <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource RiadokUlohy}" />
+                            </DockPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="{Binding HotoveText}" Style="{StaticResource Popis}" FontSize="12" Margin="0,2,0,0"
+                           Visibility="{Binding HotoveText, Converter={StaticResource NieJePrazdne}}" />
+
+                <!-- termíny -->
+                <TextBlock Margin="0,16,0,4" FontWeight="SemiBold" FontSize="13.5"
+                           Visibility="{Binding Terminy.Count, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                    <Run Text="Najbližšie termíny (" /><Run Text="{Binding Terminy.Count, Mode=OneWay}" /><Run Text=")" />
+                </TextBlock>
+                <ItemsControl ItemsSource="{Binding Terminy}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource RiadokTlacidlo}" Padding="8,5" Margin="0,0,0,4" ToolTip="{Binding Tip}"
+                                    Command="{Binding DataContext.OtvoritTerminCommand, ElementName=Koren}" CommandParameter="{Binding}">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,1,10,1"
+                                            Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                    <StackPanel>
+                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{Binding Zaciatok, StringFormat='{}{0:ddd d. M.}', ConverterCulture=sk-SK, Mode=OneWay}" /><Run Text="  " /><Run Text="{Binding CasText, Mode=OneWay}" />
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </DockPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- poznámky -->
+                <TextBlock Margin="0,16,0,6" FontWeight="SemiBold" FontSize="13.5">
+                    <Run Text="Poznámky (" /><Run Text="{Binding Poznamky.Count, Mode=OneWay}" /><Run Text=")" />
+                </TextBlock>
+                <TextBlock Text="Zatiaľ žiadne poznámky." Style="{StaticResource Popis}" FontSize="12.5"
+                           Visibility="{Binding Poznamky.Count, Converter={StaticResource NulaNaViditelnost}}" />
+                <ItemsControl ItemsSource="{Binding Poznamky}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource RiadokTlacidlo}" Padding="0" Margin="0,0,0,6"
+                                    Command="{Binding DataContext.OtvoritPoznamkuCommand, ElementName=Koren}" CommandParameter="{Binding}">
+                                <Border CornerRadius="8" Padding="10,7" Background="{Binding Farba}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextWrapping="Wrap" Foreground="{StaticResource AtramentStetec}" />
+                                        <TextBlock Text="{Binding Nahlad}" FontSize="12.5" TextWrapping="Wrap" MaxHeight="54" TextTrimming="CharacterEllipsis"
+                                                   Foreground="#3F4650" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

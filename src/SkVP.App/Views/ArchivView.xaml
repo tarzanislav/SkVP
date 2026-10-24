@@ -54,6 +54,8 @@
                                 <TextBlock Text="Archivovať osnovy roka…" />
                             </StackPanel>
                         </Button>
+                        <CheckBox Content="aj úlohy a poznámky k osnovám z tohto roka" IsChecked="{Binding AjUlohyAPoznamky}" Margin="14,0,0,6"
+                                  VerticalAlignment="Center" ToolTip="Zachová sa, prečo a ako sa osnovy počas roka menili (v archíve aj ako PDF)" />
                     </WrapPanel>
                 </StackPanel>
             </Border>
@@ -325,6 +327,27 @@
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
+
+                                <!-- úlohy a poznámky k osnovám z daného roka -->
+                                <StackPanel Margin="0,18,0,0" Visibility="{Binding ZaznamyPlanovania.Count, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                                    <TextBlock Style="{StaticResource Podnadpis}" FontSize="16">
+                                        <Run Text="Úlohy a poznámky k osnovám (" /><Run Text="{Binding ZaznamyPlanovania.Count, Mode=OneWay}" /><Run Text=")" />
+                                    </TextBlock>
+                                    <ItemsControl ItemsSource="{Binding ZaznamyPlanovania}" Focusable="False">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border CornerRadius="8" Padding="12,7" Margin="0,0,0,6" Background="{DynamicResource LayerFillColorDefaultBrush}">
+                                                    <StackPanel>
+                                                        <TextBox Style="{StaticResource VyberatelnyText}" Text="{Binding Nazov, Mode=OneWay}" FontWeight="SemiBold" FontSize="14" />
+                                                        <TextBlock Text="{Binding Podrobnosti}" Style="{StaticResource Popis}" FontSize="12" />
+                                                        <TextBox Style="{StaticResource VyberatelnyText}" Text="{Binding Text, Mode=OneWay}" FontSize="13" Margin="0,3,0,0"
+                                                                 Visibility="{Binding Text, Converter={StaticResource NieJePrazdne}}" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </StackPanel>

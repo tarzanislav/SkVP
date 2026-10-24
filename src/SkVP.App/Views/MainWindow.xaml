@@ -38,6 +38,15 @@
         <DataTemplate DataType="{x:Type vm:ServisViewModel}">
             <v:ServisView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:KalendarViewModel}">
+            <v:KalendarView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UlohyViewModel}">
+            <v:UlohyView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PoznamkyViewModel}">
+            <v:PoznamkyView />
+        </DataTemplate>
         <!-- vzdelávacia oblasť (aj úvodné a záverečné časti) ako farebná záložka v ľavom paneli -->
         <DataTemplate x:Key="PolozkaOblasti" DataType="{x:Type vm:OblastVM}">
                                     <Button x:Name="Polozka" Style="{StaticResource RiadokTlacidlo}" Padding="10,7,10,7" Margin="14,1,0,1"
@@ -141,6 +150,51 @@
                         <!-- záverečné časti učebných osnov (len zapnuté) -->
                         <ContentControl Content="{Binding ZaverecneCasti}" ContentTemplate="{StaticResource PolozkaOblasti}" Focusable="False" Margin="0,0,0,6"
                                         Visibility="{Binding ZaverecneCasti.Aktivna, Converter={StaticResource BoolNaViditelnost}, FallbackValue=Collapsed}" />
+
+                        <!-- kalendár, úlohy a poznámky – prepojené s osnovami -->
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeKalendar, Mode=OneWay}"
+                                     Command="{Binding OtvorKalendarCommand}" ToolTip="Kalendár školského roka – udalosti, termíny úloh, prázdniny, maturita">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Right" Style="{StaticResource PocetVMenu}" ToolTip="Dnes"
+                                        Visibility="{Binding PocetDnes, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                                    <TextBlock Text="{Binding PocetDnes}" FontSize="12" FontWeight="Normal" HorizontalAlignment="Center" />
+                                </Border>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE787;" Margin="0,0,14,0" />
+                                    <TextBlock Text="Kalendár" />
+                                </StackPanel>
+                            </DockPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeUlohy, Mode=OneWay}"
+                                     Command="{Binding OtvorUlohyCommand}" ToolTip="Úlohy k osnovám, predmetom a oblastiam">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Right" Style="{StaticResource PocetVMenu}" Margin="4,0,0,0" ToolTip="Po termíne"
+                                        Background="{Binding Source='#E07A7A', Converter={StaticResource FarbaNaStetec}, ConverterParameter=50}"
+                                        Visibility="{Binding PocetUlohPoTermine, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                                    <TextBlock Text="{Binding PocetUlohPoTermine}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                </Border>
+                                <Border DockPanel.Dock="Right" Style="{StaticResource PocetVMenu}" ToolTip="Otvorené úlohy"
+                                        Visibility="{Binding PocetOtvorenychUloh, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
+                                    <TextBlock Text="{Binding PocetOtvorenychUloh}" FontSize="12" FontWeight="Normal" HorizontalAlignment="Center" />
+                                </Border>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE9D5;" Margin="0,0,14,0" />
+                                    <TextBlock Text="Úlohy" />
+                                </StackPanel>
+                            </DockPanel>
+                        </RadioButton>
+                        <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JePoznamky, Mode=OneWay}"
+                                     Command="{Binding OtvorPoznamkyCommand}" ToolTip="Poznámky k osnovám, udalostiam a dňom">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" Text="{Binding PocetPoznamok}" Style="{StaticResource Popis}" VerticalAlignment="Center"
+                                           FontWeight="Normal" Visibility="{Binding PocetPoznamok, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}" />
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE70B;" Margin="0,0,14,0" />
+                                    <TextBlock Text="Poznámky" />
+                                </StackPanel>
+                            </DockPanel>
+                        </RadioButton>
+                        <Border Height="1" Margin="12,6" Background="{DynamicResource CardStrokeColorDefaultBrush}" />
 
                         <RadioButton Style="{StaticResource PolozkaMenu}" IsChecked="{Binding JeTlac, Mode=OneWay}"
                                      Command="{Binding OtvorTlacCommand}">

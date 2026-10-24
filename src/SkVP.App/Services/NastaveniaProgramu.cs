@@ -20,6 +20,8 @@ public static class NastaveniaProgramu
         "testovacia_sada", "migracia.", "zaloha.posledna_automaticka", "tlac.priecinok", "skvp.logo", "aktualizacia.", "Aktualizacie.PoslednaKontrola", "archiv.", "kontrola.",
         // vyrovnávacie pamäte (stiahnuté údaje) – na inom počítači sa stiahnu znova
         "novinky.data", "novinky.spravy", "novinky.overenie", "novinky.historia", "pocasie.data",
+        // skryté navrhované úlohy sa viažu na predmety tejto databázy
+        NavrhyUloh.KlucSkryte,
     };
 
     public sealed class Subor
@@ -35,7 +37,12 @@ public static class NastaveniaProgramu
 
         /// <summary>Text dole na úvodnej strane (dokument Word v base64).</summary>
         public string? TextDoleNaStrane { get; set; }
+
+        /// <summary>Typy udalostí v kalendári (názov a farba).</summary>
+        public List<TypUdalostiVSubore>? TypyUdalosti { get; set; }
     }
+
+    public sealed record TypUdalostiVSubore(string Nazov, string Farba);
 
     private static readonly JsonSerializerOptions Moznosti = new()
     {
@@ -74,6 +81,7 @@ public static class NastaveniaProgramu
             subor.TextDoleNaStrane = Convert.ToBase64String(pata);
         }
 
+        subor.TypyUdalosti = new KalendarService().Typy(lenAktivne: true).Select(t => new TypUdalostiVSubore(t.Nazov, t.Farba)).ToList();
         return subor;
     }
 
@@ -96,12 +104,15 @@ public static class NastaveniaProgramu
         _ when kluc.StartsWith("dashboard.", StringComparison.Ordinal) || kluc.StartsWith("pocasie.", StringComparison.Ordinal)
                || kluc.StartsWith("citaty.", StringComparison.Ordinal) => "dashboard (bloky, miesto počasia, skryté výroky)",
         _ when kluc.StartsWith("novinky.", StringComparison.Ordinal) => "Novinky a prázdniny (kraj)",
+        _ when kluc.StartsWith("kalendar.", StringComparison.Ordinal) || kluc.StartsWith("ulohy.", StringComparison.Ordinal) => SkupinaKalendar,
         _ => "ďalšie nastavenia",
     };
 
     public const string SkupinaLogo = "logo školy";
     public const string SkupinaCasti = "úvodné a záverečné časti učebných osnov (zapnuté / vypnuté)";
     public const string SkupinaPata = "text dole na úvodnej strane";
+    public const string SkupinaKalendar = "kalendár a úlohy (zobrazenie, prehľad dňa, upozornenia, navrhované úlohy)";
+    public const string SkupinaTypy = "typy udalostí v kalendári (názvy a farby)";
 
     /// <summary>Prehľad obsahu súboru nastavení: skupiny v poradí (s logom a textom dole na úvodnej strane).</summary>
     private static readonly string[] PoradieSkupin =
@@ -110,7 +121,7 @@ public static class NastaveniaProgramu
         "úvodná strana, hlavička, päta a údaje o škole v zostavách", SkupinaPata, "voľby tlače a zostáv",
         "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)", "obojstranná tlač", "vzhľad", "jazyk programu",
         SkupinaCasti, "úprava osnov (Word / editor)", "diktovanie (spôsob a model reči)", "dashboard (bloky, miesto počasia, skryté výroky)",
-        "Novinky a prázdniny (kraj)", "zálohovanie (frekvencia, počet, priečinok)", "aktualizácie",
+        "Novinky a prázdniny (kraj)", SkupinaKalendar, SkupinaTypy, "zálohovanie (frekvencia, počet, priečinok)", "aktualizácie",
     };
 
     public static IReadOnlyList<string> Prehlad(Subor subor)
@@ -124,6 +135,11 @@ public static class NastaveniaProgramu
         if (subor.TextDoleNaStrane is { Length: > 0 })
         {
             skupiny.Add(SkupinaPata);
+        }
+
+        if (subor.TypyUdalosti is { Count: > 0 })
+        {
+            skupiny.Add(SkupinaTypy);
         }
 
         return skupiny.OrderBy(g => Array.IndexOf(PoradieSkupin, g) is var i && i >= 0 ? i : 99).ToList();
@@ -144,6 +160,11 @@ public static class NastaveniaProgramu
             if (!skupiny.Contains(SkupinaPata))
             {
                 subor.TextDoleNaStrane = null;
+            }
+
+            if (!skupiny.Contains(SkupinaTypy))
+            {
+                subor.TypyUdalosti = null;
             }
         }
 
@@ -204,6 +225,19 @@ public static class NastaveniaProgramu
         if (subor.TextDoleNaStrane is { Length: > 0 } pata && (skupiny is null || skupiny.Contains(SkupinaPata)))
         {
             TitulnaStrana.UlozDataPaty(Convert.FromBase64String(pata));
+        }
+
+        // typy udalostí: rovnaký názov dostane farbu zo súboru, nové typy sa doplnia (žiadny sa nemaže)
+        if (subor.TypyUdalosti is { Count: > 0 } typy && (skupiny is null || skupiny.Contains(SkupinaTypy)))
+        {
+            var kalendar = new KalendarService();
+            var doterajsie = kalendar.Typy();
+            foreach (var typ in typy.Where(t => !string.IsNullOrWhiteSpace(t.Nazov)))
+            {
+                var existujuci = doterajsie.FirstOrDefault(d => string.Equals(d.Nazov, typ.Nazov.Trim(), StringComparison.CurrentCultureIgnoreCase));
+                kalendar.UlozTyp(existujuci?.Id ?? 0, typ.Nazov, typ.Farba);
+                pocet++;
+            }
         }
 
         return pocet;

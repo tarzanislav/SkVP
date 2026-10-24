@@ -1,0 +1,46 @@
+<Window x:Class="SkVP.Views.TypyUdalostiWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Typy udalostí" Width="560" Height="620" MinWidth="460" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <DockPanel Margin="24,20,24,20">
+        <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="Typy udalostí" Style="{StaticResource Podnadpis}" FontSize="20" />
+            <TextBlock Style="{StaticResource Popis}" Margin="0,0,0,12"
+                       Text="Typ určuje farbu udalosti v kalendári. Názov opravíte priamo v zozname, farbu kliknutím na krúžok. Typ, ktorý používajú udalosti, sa pri odstránení len skryje z ponuky." />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom">
+            <DockPanel Margin="0,12,0,0">
+                <Button DockPanel.Dock="Right" Padding="14,5" Margin="8,0,0,0" Click="Pridat_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE710;" FontSize="12" Margin="0,0,8,0" />
+                        <TextBlock Text="Pridať typ" />
+                    </StackPanel>
+                </Button>
+                <TextBox x:Name="NovyNazov" KeyDown="NovyNazov_KeyDown" ToolTip="Názov nového typu, napr. Exkurzia" />
+            </DockPanel>
+            <Button Content="Zavrieť" MinWidth="110" HorizontalAlignment="Right" Margin="0,14,0,0" IsCancel="True" IsDefault="False" Click="Zavriet_Click" />
+        </StackPanel>
+
+        <ListBox x:Name="Zoznam" HorizontalContentAlignment="Stretch">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <DockPanel Margin="0,3">
+                        <Button DockPanel.Dock="Right" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE74D;" FontSize="12" ToolTip="Odstrániť typ"
+                                Click="Odstranit_Click" Tag="{Binding}" />
+                        <Button DockPanel.Dock="Left" Width="22" Height="22" Margin="0,0,10,0" Cursor="Hand" ToolTip="Zmeniť farbu"
+                                Click="Farba_Click" Tag="{Binding}">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Ellipse Fill="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                        <TextBox Text="{Binding Nazov, UpdateSourceTrigger=LostFocus}" LostFocus="Nazov_LostFocus" Tag="{Binding}" />
+                    </DockPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
+</Window>

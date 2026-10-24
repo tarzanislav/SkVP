@@ -8,6 +8,14 @@ using SkVP.Models;
 namespace SkVP.Services;
 
 /// <summary>Archív osnov jedného školského roka.</summary>
+/// <summary>Úloha alebo poznámka k osnovám zachovaná v archíve školského roka.</summary>
+public sealed record ZaznamPlanovaniaArchivu(string Druh, string Nazov, string? Text, DateTime? Datum, string? Stav, string TykaSa)
+{
+    public bool JeUloha => Druh == "uloha";
+    public string DruhText => JeUloha ? "úloha" : "poznámka";
+    public string Podrobnosti => string.Join("  ·  ", new[] { DruhText, Stav ?? "", Datum is { } d ? Planovanie.DatumText(d) : "", TykaSa }.Where(t => t.Length > 0));
+}
+
 public sealed record ZaznamArchivuRoka(long Id, string SkolskyRok, DateTime Vytvorene, string? Priecinok, int Dokumentov, int Predmetov, string? Poznamka)
 {
     public bool MaPrehlad => Predmetov > 0;
@@ -463,11 +471,12 @@ public static class ArchivSkolskehoRoka
     public static void Odstran(long archivId)
     {
         using var db = Databaza.Otvor();
-        Databaza.Vykonaj(db, "DELETE FROM archiv_polozka WHERE archiv_id = $a; DELETE FROM archiv_rok WHERE id = $a;", ("$a", archivId));
+        Databaza.Vykonaj(db, "DELETE FROM archiv_polozka WHERE archiv_id = $a; DELETE FROM archiv_zaznam WHERE archiv_id = $a; DELETE FROM archiv_rok WHERE id = $a;",
+            ("$a", archivId));
     }
 
-    /// <summary>Archivuje celé osnovy za školský rok. Vráti záznam archívu.</summary>
-    public static ZaznamArchivuRoka Archivuj(string skolskyRok)
+    /// <summary>Archivuje celé osnovy za školský rok, voliteľne aj úlohy a poznámky k osnovám z toho roka. Vráti záznam archívu.</summary>
+    public static ZaznamArchivuRoka Archivuj(string skolskyRok, bool ajUlohyAPoznamky = true)
     {
         var ciel = Path.Combine(Priecinok, skolskyRok.Replace('/', '-'));
         if (Directory.Exists(ciel) && Directory.EnumerateFileSystemEntries(ciel).Any())
@@ -542,6 +551,11 @@ public static class ArchivSkolskehoRoka
             }
         }
 
+        if (ajUlohyAPoznamky)
+        {
+            ArchivujPlanovanie(archivId, od, po, ciel, skolskyRok);
+        }
+
         // celé osnovy v jednom dokumente – Word a archívne PDF/A-2b (bez farebného profilu Windows bežné PDF)
         var celok = ZostavaOsnov.Zostav(new VolbyZostavy());
         var nazovCelku = ImportOsnov.BezpecnyNazov($"Učebné osnovy {skolskyRok.Replace('/', '-')}");
@@ -556,6 +570,64 @@ public static class ArchivSkolskehoRoka
         }
 
         return Zoznam().First(z => z.Id == archivId);
+    }
+
+    /// <summary>
+    /// Úlohy a poznámky, ktoré patria k osnovám (predmetom, oblastiam, častiam) a vznikli alebo sa menili v školskom roku –
+    /// aby sa zachovalo, prečo a ako sa osnovy menili. Uložia sa do archívu v programe aj ako PDF do priečinka archívu.
+    /// </summary>
+    private static void ArchivujPlanovanie(long archivId, DateTime od, DateTime po, string ciel, string skolskyRok)
+    {
+        bool VRoku(DateTime? d) => d is { } x && x >= od && x <= po;
+        static bool KOsnovam(IReadOnlyList<Naviazanie> n) => n.Any(x => x.JeOsnova && !x.Odstranene);
+        static string TykaSa(IReadOnlyList<Naviazanie> n) => string.Join(", ", n.Where(x => x.JeOsnova && !x.Odstranene).Select(x => x.Nazov));
+
+        var ulohy = new UlohyService().Zoznam().Where(u => KOsnovam(u.TykaSa) && (VRoku(u.Vytvorene) || VRoku(u.DatumHotovo) || VRoku(u.Termin))).ToList();
+        var poznamky = new PoznamkyService().Zoznam().Where(p => KOsnovam(p.TykaSa) && (VRoku(p.Vytvorene) || VRoku(p.Zmenene))).ToList();
+        using (var db = Databaza.Otvor())
+        {
+            void Pridaj(string druh, string nazov, string? text, DateTime? datum, string? stav, string tykaSa) =>
+                Databaza.Vykonaj(db, "INSERT INTO archiv_zaznam(archiv_id, druh, nazov, text, datum, stav, tyka_sa) VALUES($a, $d, $n, $t, $dt, $s, $ts)",
+                    ("$a", archivId), ("$d", druh), ("$n", nazov), ("$t", text), ("$dt", Planovanie.Iso(datum)), ("$s", stav), ("$ts", tykaSa));
+
+            foreach (var u in ulohy)
+            {
+                Pridaj("uloha", u.Text, u.Popis, u.DatumHotovo ?? u.Termin, u.Hotovo ? "hotová" : "otvorená", TykaSa(u.TykaSa));
+            }
+
+            foreach (var p in poznamky)
+            {
+                Pridaj("poznamka", p.Nazov, p.Text, p.Zmenene, null, TykaSa(p.TykaSa));
+            }
+        }
+
+        if (ulohy.Count > 0)
+        {
+            SuboryZostavy.Uloz(ZostavaPlanovania.Ulohy(ulohy, $"školský rok {skolskyRok}"), Path.Combine(ciel, ImportOsnov.BezpecnyNazov($"Úlohy k osnovám {skolskyRok.Replace('/', '-')}") + ".pdf"),
+                new VolbyPdf());
+        }
+
+        if (poznamky.Count > 0)
+        {
+            SuboryZostavy.Uloz(ZostavaPlanovania.Poznamky(poznamky, $"školský rok {skolskyRok}"),
+                Path.Combine(ciel, ImportOsnov.BezpecnyNazov($"Poznámky k osnovám {skolskyRok.Replace('/', '-')}") + ".pdf"), new VolbyPdf());
+        }
+    }
+
+    /// <summary>Úlohy a poznámky zachované v archíve školského roka.</summary>
+    public static List<ZaznamPlanovaniaArchivu> ZaznamyPlanovania(long archivId)
+    {
+        var vysledok = new List<ZaznamPlanovaniaArchivu>();
+        using var db = Databaza.Otvor();
+        using var prikaz = Databaza.Prikaz(db, "SELECT druh, nazov, text, datum, stav, tyka_sa FROM archiv_zaznam WHERE archiv_id = $a ORDER BY druh DESC, id", ("$a", archivId));
+        using var citac = prikaz.ExecuteReader();
+        while (citac.Read())
+        {
+            vysledok.Add(new ZaznamPlanovaniaArchivu(citac.GetString(0), citac.GetString(1), citac.IsDBNull(2) ? null : citac.GetString(2),
+                Planovanie.Datum(citac, 3), citac.IsDBNull(4) ? null : citac.GetString(4), citac.IsDBNull(5) ? "" : citac.GetString(5)));
+        }
+
+        return vysledok;
     }
 
     /// <summary>Celé osnovy roka v PDF (z priečinka archívu), alebo null.</summary>

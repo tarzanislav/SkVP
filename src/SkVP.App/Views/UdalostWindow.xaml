@@ -1,0 +1,144 @@
+<Window x:Class="SkVP.Views.UdalostWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="clr-namespace:SkVP.Views"
+        Title="{Binding Titulok}" Width="660" SizeToContent="Height" MaxHeight="920"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="CanResizeWithGrip">
+    <DockPanel>
+        <Border DockPanel.Dock="Bottom" Padding="24,12" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                Background="{DynamicResource LayerFillColorDefaultBrush}">
+            <DockPanel>
+                <Button DockPanel.Dock="Left" MinWidth="110" Click="Odstranit_Click" x:Name="Odstranit" ToolTip="Odstrániť udalosť (dá sa vrátiť späť)">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE74D;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Odstrániť" />
+                    </StackPanel>
+                </Button>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Uložiť" MinWidth="120" Style="{DynamicResource AccentButtonStyle}" IsDefault="True" Click="Ulozit_Click" />
+                    <Button Content="Zrušiť" MinWidth="100" Margin="8,0,0,0" IsCancel="True" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24,18,24,18">
+                <TextBlock Text="{Binding Titulok}" Style="{StaticResource Podnadpis}" FontSize="20" />
+                <TextBlock Text="Názov" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
+                <TextBox x:Name="PoleNazov" Text="{Binding Nazov, UpdateSourceTrigger=PropertyChanged}" FontSize="15" />
+
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="170" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Typ" Style="{StaticResource Stitok}" />
+                        <ComboBox ItemsSource="{Binding Typy}" SelectedItem="{Binding Typ}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse Width="12" Height="12" Margin="0,0,8,0" Fill="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                        <TextBlock Text="{Binding Nazov}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="Stav" Style="{StaticResource Stitok}" />
+                        <ComboBox ItemsSource="{Binding Stavy}" DisplayMemberPath="Nazov" SelectedValuePath="Hodnota" SelectedValue="{Binding Stav}" />
+                    </StackPanel>
+                </Grid>
+
+                <CheckBox Content="Celý deň (alebo obdobie cez viac dní)" IsChecked="{Binding CelyDen}" Margin="0,14,0,0" />
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="90" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="90" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Dátum" Style="{StaticResource Stitok}" />
+                        <DatePicker SelectedDate="{Binding Datum}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Visibility="{Binding JeCas, Converter={StaticResource BoolNaViditelnost}}">
+                        <TextBlock Text="od" Style="{StaticResource Stitok}" />
+                        <TextBox Text="{Binding CasZaciatku, UpdateSourceTrigger=PropertyChanged}" ToolTip="Napr. 8:00" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Do (posledný deň, nepovinné)" Style="{StaticResource Stitok}" />
+                        <DatePicker SelectedDate="{Binding Koniec}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="6" Visibility="{Binding JeCas, Converter={StaticResource BoolNaViditelnost}}">
+                        <TextBlock Text="do" Style="{StaticResource Stitok}" />
+                        <TextBox Text="{Binding CasKonca, UpdateSourceTrigger=PropertyChanged}" ToolTip="Napr. 9:30 (nepovinné)" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="14" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Opakovanie" Style="{StaticResource Stitok}" />
+                        <ComboBox ItemsSource="{Binding Opakovania}" DisplayMemberPath="Nazov" SelectedValuePath="Hodnota" SelectedValue="{Binding Opakovanie}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Visibility="{Binding Opakuje, Converter={StaticResource BoolNaViditelnost}}">
+                        <TextBlock Text="Opakovať do (nepovinné)" Style="{StaticResource Stitok}" />
+                        <DatePicker SelectedDate="{Binding OpakovanieDo}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="4">
+                        <TextBlock Text="Pripomienka" Style="{StaticResource Stitok}" />
+                        <ComboBox ItemsSource="{Binding Pripomienky}" DisplayMemberPath="Nazov" SelectedValuePath="Hodnota" SelectedValue="{Binding Pripomienka}" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Miesto (nepovinné)" Style="{StaticResource Stitok}" />
+                <TextBox Text="{Binding Miesto, UpdateSourceTrigger=PropertyChanged}" ToolTip="Napr. zborovňa, učebňa 12" />
+
+                <TextBlock Text="Týka sa" Style="{StaticResource Stitok}" />
+                <v:TykaSaPole DataContext="{Binding TykaSa}" />
+
+                <TextBlock Text="Popis" Style="{StaticResource Stitok}" />
+                <TextBox Text="{Binding Popis, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="70" MaxHeight="180"
+                         VerticalScrollBarVisibility="Auto" />
+
+                <DockPanel Margin="0,14,0,4">
+                    <Button DockPanel.Dock="Right" Padding="10,3" Command="{Binding NovaPoznamkaCommand}" ToolTip="Napr. zápis z porady">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE710;" FontSize="11" Margin="0,0,6,0" />
+                            <TextBlock Text="Poznámka k udalosti" FontSize="12.5" />
+                        </StackPanel>
+                    </Button>
+                    <TextBlock Text="Poznámky k udalosti" Style="{StaticResource Stitok}" Margin="0" VerticalAlignment="Center" />
+                </DockPanel>
+                <ItemsControl ItemsSource="{Binding Poznamky}" Focusable="False">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource RiadokTlacidlo}" Padding="0" Margin="0,0,0,4"
+                                    Command="{Binding DataContext.OtvoritPoznamkuCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}">
+                                <Border CornerRadius="8" Padding="10,6" Background="{Binding Farba}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" Foreground="{StaticResource AtramentStetec}" />
+                                        <TextBlock Text="{Binding Nahlad}" FontSize="12.5" TextTrimming="CharacterEllipsis" Foreground="#3F4650" />
+                                    </StackPanel>
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</Window>

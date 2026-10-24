@@ -79,6 +79,7 @@ public partial class App : Application
         okno.Show();
 
         okno.Dispatcher.InvokeAsync(okno.Model.ObnovNeprevzateZWordu, DispatcherPriority.ApplicationIdle);
+        okno.Dispatcher.InvokeAsync(okno.Model.SpustiPlanovanie, DispatcherPriority.ApplicationIdle);
         if (priecinokOsnov is not null)
         {
             // prvé spustenie podľa ŠVP: predmety z učebných osnov v priečinku (podľa názvu v úvodnej tabuľke)

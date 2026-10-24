@@ -92,6 +92,24 @@
                 </StackPanel>
             </Border>
 
+            <!-- kalendár, úlohy a poznámky -->
+            <Border Style="{StaticResource Karta}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Kalendár a úlohy" Style="{StaticResource Podnadpis}" />
+                    <CheckBox IsChecked="{Binding PrehladPriSpusteni}">
+                        <TextBlock TextWrapping="Wrap">Pri spustení programu ukázať prehľad dňa – dnešné udalosti, pripomienky a úlohy po termíne</TextBlock>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding Upozornenia}" Margin="0,6,0,0">
+                        <TextBlock TextWrapping="Wrap">Počas práce pripomenúť udalosti podľa ich pripomienky (v oznámení dole v okne)</TextBlock>
+                    </CheckBox>
+                    <CheckBox IsChecked="{Binding NavrhovatUlohy}" Margin="0,6,0,0">
+                        <TextBlock TextWrapping="Wrap">V sekcii Úlohy ukazovať navrhované úlohy z osnov a Noviniek (osnovy na kontrolu, nezačaté, bez platnosti, dôležité novinky)</TextBlock>
+                    </CheckBox>
+                    <TextBlock Style="{StaticResource Popis}" Margin="0,10,0,0"
+                               Text="Čo kalendár zobrazuje (prázdniny, termíny maturity a prijímačiek, platnosť osnov, archivácia, záloha) zapnete priamo v kalendári. Kraj pre jarné prázdniny je spoločný s dashboardom." />
+                </StackPanel>
+            </Border>
+
             <!-- vzhľad -->
             <Border Style="{StaticResource Karta}" Margin="0,0,0,16">
                 <StackPanel>

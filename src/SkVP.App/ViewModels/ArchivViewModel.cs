@@ -118,6 +118,14 @@ public sealed partial class ArchivViewModel : ObservableObject
     [ObservableProperty]
     private StatistikyArchivu? _statistiky;
 
+    /// <summary>Pri archivácii uložiť aj úlohy a poznámky k osnovám z daného roka.</summary>
+    [ObservableProperty]
+    private bool _ajUlohyAPoznamky = true;
+
+    /// <summary>Úlohy a poznámky k osnovám zachované vo vybranom archíve.</summary>
+    [ObservableProperty]
+    private List<ZaznamPlanovaniaArchivu> _zaznamyPlanovania = new();
+
     public ObservableCollection<DlazdicaStatistiky> Dlazdice { get; } = new();
 
     public ObservableCollection<OblastArchivuVM> Oblasti { get; } = new();
@@ -187,6 +195,7 @@ public sealed partial class ArchivViewModel : ObservableObject
     {
         Dlazdice.Clear();
         _vsetkyOblasti = new();
+        ZaznamyPlanovania = Vybrany is { } a ? ArchivSkolskehoRoka.ZaznamyPlanovania(a.Id) : new List<ZaznamPlanovaniaArchivu>();
         if (Vybrany is not { } archiv)
         {
             Statistiky = null;
@@ -269,14 +278,14 @@ public sealed partial class ArchivViewModel : ObservableObject
     [RelayCommand]
     private void ArchivovatRok()
     {
-        if (Spusti(SkolskyRok, Hlavny) is { } zaznam)
+        if (Spusti(SkolskyRok, Hlavny, AjUlohyAPoznamky) is { } zaznam)
         {
             Obnov(zaznam.Id);
         }
     }
 
     /// <summary>Spoločná archivácia školského roka (sekcie Archív a Servis). Vráti záznam, alebo null.</summary>
-    public static ZaznamArchivuRoka? Spusti(string skolskyRok, MainViewModel hlavny)
+    public static ZaznamArchivuRoka? Spusti(string skolskyRok, MainViewModel hlavny, bool ajUlohyAPoznamky = true)
     {
         if (!Dialogy.Potvrd($"Archivovať celé učebné osnovy za školský rok {skolskyRok}?\n\n" +
                             "Všetky osnovy a charakteristiky oblastí sa uložia do archívu v programe (sekcia Archív – prehľad so štatistikami roka), " +
@@ -289,7 +298,8 @@ public sealed partial class ArchivViewModel : ObservableObject
         try
         {
             ZaznamArchivuRoka? zaznam = null;
-            Dialogy.Cakaj(() => zaznam = ArchivSkolskehoRoka.Archivuj(skolskyRok));
+            Dialogy.Cakaj(() => zaznam = ArchivSkolskehoRoka.Archivuj(skolskyRok, ajUlohyAPoznamky));
+            hlavny.ObnovPlanovanie();
             hlavny.Oznam($"Osnovy školského roka {skolskyRok} sú archivované ({zaznam!.Predmetov} predmetov, {zaznam.Dokumentov} dokumentov).");
             return zaznam;
         }

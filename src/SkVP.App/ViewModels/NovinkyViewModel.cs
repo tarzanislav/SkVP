@@ -4,6 +4,7 @@ using System.Text;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SkVP.Data;
+using SkVP.Models;
 using SkVP.Pomocne;
 using SkVP.Services;
 
@@ -427,6 +428,56 @@ public sealed partial class NovinkyViewModel : ObservableObject
 
     partial void OnHladatChanged(string value) => Obnov();
     partial void OnVybranaTemaChanged(string? value) => Obnov();
+
+    /// <summary>Termín do kalendára SkVP ako vlastná udalosť (s pripomienkou týždeň vopred, dá sa upraviť).</summary>
+    [RelayCommand]
+    private void PridatDoKalendara(PolozkaNovinkyVM? polozka)
+    {
+        if (polozka?.Polozka is not { Zaciatok: { } od, Koniec: { } dokedy } p)
+        {
+            return;
+        }
+
+        var model = new UdalostEditorVM(Hlavny, null, od.ToDateTime(TimeOnly.MinValue))
+        {
+            Nazov = p.DatumOd is null ? $"Termín: {p.Nazov}" : p.Nazov,
+            Popis = p.Text + (p.Zdroje.FirstOrDefault() is { } zdroj ? "\n\nZdroj: " + zdroj.Url : ""),
+            CelyDen = true,
+            Koniec = dokedy > od ? dokedy.ToDateTime(TimeOnly.MinValue) : null,
+            Pripomienka = PripomienkaUdalosti.TyzdenVopred,
+        };
+        model.Typ = model.Typy.FirstOrDefault(t => string.Equals(t.Nazov, polozka.Kategoria.Nazov, StringComparison.CurrentCultureIgnoreCase)) ?? model.Typ;
+        if (Views.UdalostWindow.Otvor(model))
+        {
+            Hlavny.ObnovPlanovanie();
+            Hlavny.Oznam($"Termín „{model.Nazov}“ je v kalendári SkVP.");
+        }
+    }
+
+    /// <summary>Úloha z informácie (napr. zapracovať zmenu ŠVP do osnov) – s odkazom na zdroj; rovnakú úlohu nevytvorí dvakrát.</summary>
+    [RelayCommand]
+    private void VytvoritUlohu(PolozkaNovinkyVM? polozka)
+    {
+        if (polozka is null)
+        {
+            return;
+        }
+
+        var p = polozka.Polozka;
+        var zdroj = $"novinka:{p.Id}";
+        var sluzba = new UlohyService();
+        if (sluzba.Zdroje().Contains(zdroj))
+        {
+            Hlavny.Oznam("Úloha k tejto informácii už existuje.", () => Hlavny.OtvorUlohy(null), "Otvoriť úlohy");
+            return;
+        }
+
+        var text = p.Druh == NovinkyService.DruhTermin ? p.Nazov : $"Zapracovať do osnov: {p.Nazov}";
+        var id = sluzba.Pridaj(text, termin: p.Druh == NovinkyService.DruhTermin ? p.Zaciatok?.ToDateTime(TimeOnly.MinValue) : null,
+            popis: p.Text + (p.Zdroje.FirstOrDefault() is { } z ? "\n\nZdroj: " + z.Url : ""), zdroj: zdroj);
+        Hlavny.ObnovPlanovanie();
+        Hlavny.Oznam($"Úloha „{text}“ je pridaná.", () => Hlavny.OtvorUlohy(id), "Otvoriť úlohu");
+    }
 
     /// <summary>Skopíruje celú informáciu (nadpis, termín, text, zdroje) do schránky.</summary>
     [RelayCommand]

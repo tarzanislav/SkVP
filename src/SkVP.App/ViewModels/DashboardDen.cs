@@ -70,6 +70,7 @@ public sealed partial class DashboardViewModel
         AktualizujCitat(CitatyService.CitatDna(DateOnly.FromDateTime(DateTime.Today)));
         PripravPocasie();
         PripravPrazdniny();
+        PripravPlanovanie();
         _panelyPripravene = true;
         if (!BezSiete && !Dialogy.TichyRezim && UkazPocasie)
         {

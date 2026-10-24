@@ -65,6 +65,15 @@
                             VerticalAlignment="Top" ToolTip="Kopírovať celú informáciu (nadpis, termín, text, zdroje)"
                             Command="{Binding DataContext.KopirovatCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             CommandParameter="{Binding}" />
+                    <Button DockPanel.Dock="Right" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE9D5;" FontSize="13" Width="30" Height="28"
+                            VerticalAlignment="Top" ToolTip="Vytvoriť úlohu (napr. zapracovať do osnov) – s odkazom na túto informáciu"
+                            Command="{Binding DataContext.VytvoritUlohuCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}" />
+                    <Button DockPanel.Dock="Right" Style="{StaticResource IkonoveTlacidlo}" Content="&#xE787;" FontSize="13" Width="30" Height="28"
+                            VerticalAlignment="Top" ToolTip="Pridať termín do kalendára SkVP (s pripomienkou)"
+                            Command="{Binding DataContext.PridatDoKalendaraCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"
+                            Visibility="{Binding Polozka.MaTermin, Converter={StaticResource BoolNaViditelnost}}" />
                     <WrapPanel>
                         <Border CornerRadius="10" Padding="8,2,9,3" Margin="0,0,8,4"
                                 Background="{Binding DruhFarba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=30}">

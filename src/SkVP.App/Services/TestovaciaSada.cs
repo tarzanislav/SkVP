@@ -24,6 +24,9 @@ public static class TestovaciaSada
     /// <summary>Záznam o údajoch vymyslenej školy, ktoré zapísala testovacia sada (aby sa dali vymazať bez zvyškov).</summary>
     public const string KlucUdajeSkoly = "testovacia_sada.skola";
 
+    /// <summary>Id ukážkových udalostí, úloh a poznámok sady – pri vymazaní sady sa odstránia práve tieto.</summary>
+    public const string KlucPlanovanie = "testovacia_sada.planovanie";
+
     // ---- vymyslená škola testovacej sady (nikde neexistuje) ----
 
     public const string SkolaSady = "Gymnázium Javorová";
@@ -220,8 +223,109 @@ public static class TestovaciaSada
         }
 
         NahrajSkolu();
+        NahrajPlanovanie(predmety);
         Databaza.Zapis(KlucNainstalovana, "1");
         return new Vysledok(osnovy, charakteristiky, suvislosti);
+    }
+
+    /// <summary>
+    /// Ukážkové udalosti, úlohy a poznámky vymyslenej školy – naviazané na predmety sady, s termínmi okolo dneška, aby
+    /// kalendár, úlohy aj panel pri predmete hneď ukázali, ako sa s nimi pracuje.
+    /// </summary>
+    private static void NahrajPlanovanie(IReadOnlyDictionary<string, Objekt> predmety)
+    {
+        long[] Predmety(params string[] nazvy) => nazvy.Where(predmety.ContainsKey).Select(n => predmety[n].Id).ToArray();
+        var dnes = DateTime.Today;
+        var streda = dnes.AddDays(((int)DayOfWeek.Wednesday - (int)dnes.DayOfWeek + 6) % 7 + 1); // najbližšia streda po dnešku
+        var kalendar = new KalendarService();
+        var typy = kalendar.Typy();
+        long? Typ(string nazov) => typy.FirstOrDefault(t => t.Nazov.StartsWith(nazov, StringComparison.CurrentCultureIgnoreCase))?.Id;
+        var ulohy = new UlohyService();
+        var poznamky = new PoznamkyService();
+        var id = new List<long>();
+
+        var komisia = kalendar.Uloz(new Udalost
+        {
+            Nazov = "Predmetová komisia prírodovedných predmetov", TypId = Typ("Predmetová komisia"), Zaciatok = streda.AddHours(14),
+            Koniec = streda.AddHours(15.5), Pripomienka = PripomienkaUdalosti.DenVopred, Miesto = "učebňa chémie",
+            Popis = "Kontrola osnov prírodovedných predmetov pred schválením.", TykaSa = Predmety("Fyzika", "Chémia", "Biológia").ToList(),
+        });
+        id.Add(komisia);
+        id.Add(kalendar.Uloz(new Udalost
+        {
+            Nazov = "Pedagogická rada – schválenie školského vzdelávacieho programu", TypId = Typ("Pedagogická rada"),
+            Zaciatok = dnes.AddDays(21).AddHours(13.5), Koniec = dnes.AddDays(21).AddHours(15), Pripomienka = PripomienkaUdalosti.TyzdenVopred,
+            Miesto = "zborovňa",
+        }));
+        id.Add(kalendar.Uloz(new Udalost
+        {
+            Nazov = "Metodické združenie cudzích jazykov", TypId = Typ("Predmetová komisia"), Zaciatok = streda.AddHours(14),
+            Koniec = streda.AddHours(15), Opakovanie = OpakovanieUdalosti.Mesacne, OpakovanieDo = dnes.AddMonths(8),
+            Pripomienka = PripomienkaUdalosti.DenVopred, TykaSa = Predmety("Anglický jazyk", "Nemecký jazyk", "Ruský jazyk").ToList(),
+        }));
+
+        id.Add(ulohy.Pridaj("Skontrolovať osnovu matematiky pred predmetovou komisiou", dnes.AddDays(5), PrioritaUlohy.Vysoka,
+            Predmety("Matematika"), "Overiť výkonový štandard 1. ročníka a hodinovú dotáciu.", zodpovedny: "PK matematiky"));
+        id.Add(ulohy.Pridaj("Zapracovať zmeny ŠVP do osnov cudzích jazykov", dnes.AddDays(14), PrioritaUlohy.Normalna,
+            Predmety("Anglický jazyk", "Nemecký jazyk"), zodpovedny: "MZ cudzích jazykov"));
+        id.Add(ulohy.Pridaj("Doplniť zdroje a literatúru do semináru z dejepisu", null, PrioritaUlohy.Nizka, Predmety("Seminár z dejepisu")));
+        id.Add(ulohy.Pridaj("Odovzdať tematické plány vedeniu školy", dnes.AddDays(-2), PrioritaUlohy.Vysoka));
+        var hotova = ulohy.Pridaj("Pripraviť podklady na pedagogickú radu", dnes.AddDays(-5));
+        ulohy.NastavHotovo(hotova, true);
+        id.Add(hotova);
+
+        id.Add(poznamky.Uloz(new Poznamka
+        {
+            Nazov = "Nápady na seminár z dejepisu", Pripnuta = true, Farba = PoznamkyService.Farby[0],
+            Text = "Exkurzia do múzea SNP
+Projekt: dejiny našej obce
+Viac práce s prameňmi", TykaSa = Predmety("Seminár z dejepisu").ToList(),
+        }));
+        id.Add(poznamky.Uloz(new Poznamka
+        {
+            Nazov = "Zápis z predmetovej komisie", Farba = PoznamkyService.Farby[4], Datum = streda,
+            Text = "Fyzika – doplniť laboratórne práce
+Chémia – bez zmeny
+Biológia – presunúť genetiku do 3. ročníka",
+            TykaSa = Predmety("Fyzika", "Chémia", "Biológia").Append(komisia).ToList(),
+        }));
+        // opakované nahratie sady doplní zoznam (pri vymazaní sa odstránia všetky ukážkové záznamy)
+        try
+        {
+            if (Databaza.Citaj(KlucPlanovanie) is { Length: > 0 } doterajsie && JsonSerializer.Deserialize<List<long>>(doterajsie) is { } stare)
+            {
+                id.InsertRange(0, stare);
+            }
+        }
+        catch (JsonException)
+        {
+            // poškodený zoznam sa nahradí novým
+        }
+
+        Databaza.Zapis(KlucPlanovanie, JsonSerializer.Serialize(id));
+    }
+
+    /// <summary>Odstráni ukážkové udalosti, úlohy a poznámky sady (vlastné záznamy používateľa zostanú).</summary>
+    private static void VymazPlanovanie(Microsoft.Data.Sqlite.SqliteConnection db)
+    {
+        List<long>? id = null;
+        try
+        {
+            id = Databaza.Skalar(db, "SELECT hodnota FROM nastavenie WHERE kluc = $k", ("$k", KlucPlanovanie)) is string json
+                ? JsonSerializer.Deserialize<List<long>>(json)
+                : null;
+        }
+        catch (JsonException)
+        {
+            // poškodený zoznam – nič sa nemaže
+        }
+
+        foreach (var i in id ?? new List<long>())
+        {
+            Databaza.Vykonaj(db, "DELETE FROM objekt WHERE id = $id AND typ IN ('udalost', 'uloha', 'poznamka')", ("$id", i));
+        }
+
+        Databaza.Vykonaj(db, "DELETE FROM nastavenie WHERE kluc = $k", ("$k", KlucPlanovanie));
     }
 
     /// <summary>
@@ -402,13 +506,16 @@ public static class TestovaciaSada
         VymazSkolu();
         using var db = Databaza.Otvor();
         using var transakcia = db.BeginTransaction();
+        VymazPlanovanie(db);
+        // súvislosti osnov sa mažú; naviazania vlastných úloh, udalostí a poznámok na predmety zostanú
         Databaza.Vykonaj(db, """
+            DELETE FROM archiv_zaznam;
             DELETE FROM archiv_polozka;
             DELETE FROM archiv_rok;
             DELETE FROM verzia;
             DELETE FROM dokument;
-            DELETE FROM vazba;
-            UPDATE objekt SET stav = NULL;
+            DELETE FROM vazba WHERE typ <> 'patri';
+            UPDATE objekt SET stav = NULL WHERE typ NOT IN ('udalost', 'uloha', 'poznamka');
             DELETE FROM nastavenie WHERE kluc = $k;
             """, ("$k", KlucNainstalovana));
         transakcia.Commit();
@@ -424,14 +531,15 @@ public static class TestovaciaSada
         using var db = Databaza.Otvor();
         using var transakcia = db.BeginTransaction();
         Databaza.Vykonaj(db, """
+            DELETE FROM archiv_zaznam;
             DELETE FROM archiv_polozka;
             DELETE FROM archiv_rok;
             DELETE FROM verzia;
             DELETE FROM dokument;
             DELETE FROM vazba;
             DELETE FROM objekt;
-            DELETE FROM nastavenie WHERE kluc = $k OR kluc LIKE 'osnovy.%';
-            """, ("$k", KlucNainstalovana));
+            DELETE FROM nastavenie WHERE kluc = $k OR kluc = $p OR kluc LIKE 'osnovy.%' OR kluc = $n;
+            """, ("$k", KlucNainstalovana), ("$p", KlucPlanovanie), ("$n", NavrhyUloh.KlucSkryte));
         transakcia.Commit();
         using var dbVacuum = Databaza.Otvor();
         Databaza.Vykonaj(dbVacuum, "VACUUM");

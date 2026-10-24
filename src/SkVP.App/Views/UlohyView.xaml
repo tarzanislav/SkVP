@@ -24,6 +24,15 @@
                         <TextBlock Text="Odstrániť hotové" />
                     </StackPanel>
                 </Button>
+                <Button Padding="12,5" Margin="8,0,0,0" Command="{Binding UlozitPdfCommand}" ToolTip="Zobrazený zoznam do PDF">
+                    <TextBlock Text="PDF…" />
+                </Button>
+                <Button Padding="12,5" Margin="6,0,0,0" Command="{Binding TlacitCommand}" ToolTip="Vytlačiť zobrazený zoznam">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE749;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Tlačiť…" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
             <StackPanel>
                 <TextBlock Text="Úlohy" Style="{StaticResource Nadpis}" Margin="0" />

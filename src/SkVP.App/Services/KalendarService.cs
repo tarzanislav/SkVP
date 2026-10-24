@@ -252,6 +252,19 @@ public sealed partial class KalendarService
         return udalost;
     }
 
+    /// <summary>Udalosti na výber (prepojenie poznámky) – najbližšie budúce a nedávne, najviac rok dozadu aj dopredu.</summary>
+    public List<Udalost> UdalostiNaVyber()
+    {
+        var dnes = DateTime.Today;
+        using var db = Databaza.Otvor();
+        return Udalosti(db, dnes.AddYears(1))
+            .Where(u => u.Zaciatok >= dnes.AddYears(-1) || u.Opakovanie != OpakovanieUdalosti.Ziadne)
+            .OrderBy(u => Math.Abs((u.Zaciatok.Date - dnes).TotalDays))
+            .Take(200)
+            .OrderBy(u => u.Zaciatok)
+            .ToList();
+    }
+
     private static List<Udalost> Udalosti(SqliteConnection db, DateTime po1)
     {
         var vysledok = new List<Udalost>();

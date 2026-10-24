@@ -124,6 +124,8 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
         Oblast = oblast;
         _nazov = oblast.Nazov;
         Dokument = new DokumentStrankyVM(hlavny, oblast.Id, () => $"Charakteristika – {Oblast.Nazov}", sablonaOsnovy: false);
+        // úlohy a poznámky oblasti aj jej predmetov
+        PanelPlanovania = new PanelPlanovaniaVM(hlavny, oblast.Id, () => Oblast.Predmety.Select(p => p.Id).Append(Oblast.Id).ToList());
         foreach (var predmet in oblast.Predmety)
         {
             predmet.NacitajUdajeOsnovy();
@@ -224,6 +226,20 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
 
     /// <summary>Charakteristika vzdelávacej oblasti (dokument Word).</summary>
     public DokumentStrankyVM Dokument { get; }
+
+    /// <summary>Úlohy, termíny a poznámky oblasti a jej predmetov (panel vpravo).</summary>
+    public PanelPlanovaniaVM PanelPlanovania { get; }
+
+    [ObservableProperty]
+    private bool _zobrazitPlanovanie;
+
+    partial void OnZobrazitPlanovanieChanged(bool value)
+    {
+        if (value)
+        {
+            PanelPlanovania.Obnov();
+        }
+    }
 
     public MainViewModel Hlavny { get; }
 
@@ -330,6 +346,8 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         _nazov = predmet.Nazov;
         _vybranyStav = VsetkyStavy.First(s => s.Kod == predmet.StavKod);
         _zobrazitSuvislosti = new ObjektService().Suvislosti(predmet.Id).Count > 0;
+        PanelPlanovania = new PanelPlanovaniaVM(hlavny, predmet.Id, () => new[] { Predmet.Id });
+        _zobrazitPlanovanie = !_zobrazitSuvislosti && PanelPlanovania.Pocet > 0;
         // úvodné a záverečné časti nemajú šablónu osnovy predmetu (úvodnú tabuľku)
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id,
             () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast);
@@ -414,6 +432,29 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
 
     [ObservableProperty]
     private bool _zobrazitSuvislosti;
+
+    /// <summary>Úlohy, termíny a poznámky k predmetu (panel vpravo – striedavo so súvislosťami).</summary>
+    public PanelPlanovaniaVM PanelPlanovania { get; }
+
+    [ObservableProperty]
+    private bool _zobrazitPlanovanie;
+
+    partial void OnZobrazitSuvislostiChanged(bool value)
+    {
+        if (value)
+        {
+            ZobrazitPlanovanie = false;
+        }
+    }
+
+    partial void OnZobrazitPlanovanieChanged(bool value)
+    {
+        if (value)
+        {
+            ZobrazitSuvislosti = false;
+            PanelPlanovania.Obnov();
+        }
+    }
 
     public ObservableCollection<SuvislostVM> Suvislosti { get; } = new();
 

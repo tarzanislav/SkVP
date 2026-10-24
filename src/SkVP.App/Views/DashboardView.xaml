@@ -272,6 +272,107 @@
                 </Border>
             </UniformGrid>
 
+            <!-- kalendár na najbližší týždeň, úlohy a pripnuté poznámky -->
+            <UniformGrid Rows="1" Margin="0,0,0,16" Visibility="{Binding MaPlanovanie, Converter={StaticResource BoolNaViditelnost}}">
+                <!-- kalendár -->
+                <Border CornerRadius="12" Padding="20,16" Margin="0,0,8,0" BorderThickness="1"
+                        Background="{Binding Source='#7C9CE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=18}"
+                        BorderBrush="{Binding Source='#7C9CE0', Converter={StaticResource FarbaNaStetec}, ConverterParameter=55}"
+                        Visibility="{Binding UkazKalendar, Converter={StaticResource BoolNaViditelnost}}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,6">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource RiadokTlacidlo}" Padding="6,1" Command="{Binding Hlavny.OtvorKalendarCommand}">
+                                <TextBlock Text="Kalendár →" FontSize="12.5" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </Button>
+                            <TextBlock Text="Kalendár" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding KalendarSuhrn}" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,6" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ItemsControl ItemsSource="{Binding NajblizsieVKalendari}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource RiadokTlacidlo}" Padding="6,3" ToolTip="{Binding Tip}"
+                                            Command="{Binding DataContext.OtvoritVyskytCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <DockPanel>
+                                            <Border DockPanel.Dock="Left" Width="4" CornerRadius="2" Margin="0,1,8,1"
+                                                    Background="{Binding Farba, Converter={StaticResource FarbaNaStetec}}" />
+                                            <TextBlock DockPanel.Dock="Left" Width="62" FontSize="12.5" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                                       Text="{Binding Zaciatok, StringFormat='{}{0:ddd d. M.}', ConverterCulture=sk-SK}" />
+                                            <TextBlock Text="{Binding KratkyText}" FontSize="13.5" TextTrimming="CharacterEllipsis" />
+                                        </DockPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- úlohy -->
+                <Border CornerRadius="12" Padding="20,16" Margin="8,0,8,0" BorderThickness="1"
+                        Background="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=18}"
+                        BorderBrush="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=55}"
+                        Visibility="{Binding UkazUlohy, Converter={StaticResource BoolNaViditelnost}}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,6">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource RiadokTlacidlo}" Padding="6,1" Command="{Binding Hlavny.OtvorUlohyCommand}">
+                                <TextBlock Text="Úlohy →" FontSize="12.5" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </Button>
+                            <TextBlock Text="Úlohy" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </DockPanel>
+                        <Grid Margin="0,0,0,6">
+                            <TextBox Text="{Binding NovaUloha, UpdateSourceTrigger=PropertyChanged}" VerticalContentAlignment="Center">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding PridatUlohuCommand}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <TextBlock Text="Nová úloha – Enter" Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"
+                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                       Visibility="{Binding NovaUloha, Converter={StaticResource NieJePrazdne}, ConverterParameter=opacne}" />
+                        </Grid>
+                        <TextBlock Text="{Binding UlohySuhrn}" FontSize="13" Margin="0,0,0,4" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <ItemsControl ItemsSource="{Binding UlohyNaPaneli}" ItemTemplate="{StaticResource RiadokUlohy}" Focusable="False" />
+                        <Button HorizontalAlignment="Left" Style="{StaticResource RiadokTlacidlo}" Padding="6,1" Command="{Binding Hlavny.OtvorUlohyCommand}"
+                                Visibility="{Binding DalsieUlohy, Converter={StaticResource NieJePrazdne}}">
+                            <TextBlock Text="{Binding DalsieUlohy}" FontSize="12.5" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- pripnuté poznámky -->
+                <Border CornerRadius="12" Padding="20,16" Margin="8,0,0,0" BorderThickness="1"
+                        Background="{Binding Source='#D4B04C', Converter={StaticResource FarbaNaStetec}, ConverterParameter=18}"
+                        BorderBrush="{Binding Source='#D4B04C', Converter={StaticResource FarbaNaStetec}, ConverterParameter=55}"
+                        Visibility="{Binding UkazPoznamky, Converter={StaticResource BoolNaViditelnost}}">
+                    <StackPanel>
+                        <DockPanel Margin="0,0,0,6">
+                            <Button DockPanel.Dock="Right" Style="{StaticResource RiadokTlacidlo}" Padding="6,1" Command="{Binding Hlavny.OtvorPoznamkyCommand}">
+                                <TextBlock Text="Poznámky →" FontSize="12.5" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </Button>
+                            <TextBlock Text="Pripnuté poznámky" FontSize="15" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </DockPanel>
+                        <TextBlock Text="Pripnite dôležité poznámky – zobrazia sa tu." FontSize="13" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                   Visibility="{Binding PripnutePoznamky.Count, Converter={StaticResource NulaNaViditelnost}}" />
+                        <ItemsControl ItemsSource="{Binding PripnutePoznamky}" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource RiadokTlacidlo}" Padding="0" Margin="0,0,0,6"
+                                            Command="{Binding DataContext.OtvoritPoznamkuCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <Border CornerRadius="8" Padding="10,6" Background="{Binding Farba}">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Nazov}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Foreground="{StaticResource AtramentStetec}" />
+                                                <TextBlock Text="{Binding Nahlad}" FontSize="12.5" TextTrimming="CharacterEllipsis" Foreground="#3F4650" />
+                                            </StackPanel>
+                                        </Border>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
             <!-- prázdniny v školskom roku (pastelová tabuľka) -->
             <Border Style="{StaticResource Karta}" Padding="22,18" Margin="0,0,0,16"
                     Visibility="{Binding UkazPrazdniny, Converter={StaticResource BoolNaViditelnost}}">
@@ -485,7 +586,10 @@
                 <CheckBox Content="Dátum, meniny a sviatky" IsChecked="{Binding UkazDnes}" Margin="0,0,16,0" />
                 <CheckBox Content="Počasie" IsChecked="{Binding UkazPocasie}" Margin="0,0,16,0" />
                 <CheckBox Content="Výrok dňa" IsChecked="{Binding UkazCitat}" Margin="0,0,16,0" />
-                <CheckBox Content="Prázdniny" IsChecked="{Binding UkazPrazdniny}" />
+                <CheckBox Content="Prázdniny" IsChecked="{Binding UkazPrazdniny}" Margin="0,0,16,0" />
+                <CheckBox Content="Kalendár" IsChecked="{Binding UkazKalendar}" Margin="0,0,16,0" />
+                <CheckBox Content="Úlohy" IsChecked="{Binding UkazUlohy}" Margin="0,0,16,0" />
+                <CheckBox Content="Pripnuté poznámky" IsChecked="{Binding UkazPoznamky}" />
             </WrapPanel>
         </StackPanel>
     </ScrollViewer>

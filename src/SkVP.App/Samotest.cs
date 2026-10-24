@@ -77,6 +77,7 @@ internal static class Samotest
             TestNoviniek();
             TestDashboarduDna();
             TestCastiOsnov();
+            TestPlanovania();
             TestObrazoviek(aplikacia);
 
             if (Chyby.Count > 0)
@@ -1682,6 +1683,210 @@ internal static class Samotest
         Krok("úvodné a záverečné časti učebných osnov v poriadku");
     }
 
+    /// <summary>Kalendár, úlohy a poznámky: naviazanie na predmety, opakovanie, automatické termíny, návrhy, tlač, archív, nastavenia.</summary>
+    private static void TestPlanovania()
+    {
+        var model = new MainViewModel();
+        var dnes = DateTime.Today;
+        var sluzba = new ObjektService();
+        var predmety = model.Oblasti.SelectMany(o => o.Predmety).ToList();
+        var fyzika = predmety.First(p => p.Nazov == "Fyzika");
+        var chemia = predmety.First(p => p.Nazov == "Chémia");
+        var oblastFyziky = fyzika.Oblast;
+        Over(DiagnostikaService.VerziaSchemy() == 3 && new KalendarService().Typy().Count == Databaza.PredvoleneTypyUdalosti.Count,
+            "databáza verzie 3: tabuľky kalendára, úloh a poznámok a predvolené typy udalostí");
+
+        // ---- úlohy ----
+        var ulohy = new UlohyService();
+        var prazdna = false;
+        try
+        {
+            ulohy.Pridaj("   ");
+        }
+        catch (SkvpException)
+        {
+            prazdna = true;
+        }
+
+        Over(prazdna, "úloha bez textu sa neuloží");
+        var u1 = ulohy.Pridaj("Skontrolovať laboratórne práce", dnes.AddDays(-1), PrioritaUlohy.Vysoka, new[] { fyzika.Id, chemia.Id }, zodpovedny: "PK prírodovedných predmetov");
+        var u2 = ulohy.Pridaj("Pripraviť pracovné listy", dnes, tykaSa: new[] { fyzika.Id });
+        var u3 = ulohy.Pridaj("Všeobecná úloha bez termínu", priorita: PrioritaUlohy.Nizka);
+        var zoznam = ulohy.Zoznam();
+        var r1 = zoznam.First(u => u.Id == u1);
+        Over(r1.TykaSa.Count == 2 && r1.PoTermine && r1.Skupina == "Po termíne" && r1.TykaSaText == "Fyzika · Chémia" && r1.Podrobnosti.Contains("zodpovedá: PK", StringComparison.Ordinal)
+             && zoznam.First(u => u.Id == u2).Skupina == "Dnes" && zoznam.First(u => u.Id == u3).Skupina == "Bez termínu",
+            "úlohy: viac predmetov naraz, zodpovedný, skupiny podľa termínu");
+        Over(ulohy.Zoznam(patriK: new[] { fyzika.Id }).Count == 2 && ulohy.Zoznam(patriK: new[] { chemia.Id }).Count == 1
+             && ulohy.OtvorenePodlaObjektov()[fyzika.Id] == 2, "úlohy podľa predmetu (filter a odznaky)");
+        ulohy.NastavHotovo(u2, true);
+        var (otvorene, poTermine, hotove) = ulohy.Pocty();
+        Over(otvorene == 2 && poTermine == 1 && hotove == 1 && ulohy.Zoznam()[^1].Id == u2, "hotová úloha je na konci, počty otvorených, po termíne a hotových");
+        var odstranene = ulohy.OdstranHotove();
+        Over(odstranene.SequenceEqual(new[] { u2 }) && ulohy.Zoznam().All(u => u.Id != u2), "odstránenie hotových úloh");
+        Planovanie.Obnov(u2);
+        Over(ulohy.Zoznam().Any(u => u.Id == u2 && u.Hotovo), "odstránenú úlohu sa dá vrátiť späť");
+
+        // úloha s termínom je aj v kalendári (jeden zdroj)
+        var kalendar = new KalendarService();
+        Over(kalendar.Vyskyty(dnes.AddDays(-1), dnes.AddDays(-1)).Any(v => v.JeUloha && v.Id == u1 && v.TykaSa.Count == 2),
+            "úloha s termínom je v kalendári");
+
+        // ---- poznámky ----
+        var poznamky = new PoznamkyService();
+        var p1 = poznamky.Uloz(new Poznamka { Text = "Slovenčina – nápady\nčítanie s porozumením", TykaSa = new List<long> { fyzika.Id }, Datum = dnes, Pripnuta = true });
+        var nacitana = poznamky.Nacitaj(p1)!;
+        Over(nacitana.Nazov == "Slovenčina – nápady" && nacitana.Farba == PoznamkyService.Farby[0] && nacitana.TykaSa.SequenceEqual(new[] { fyzika.Id }),
+            "poznámka: názov z prvého riadku, predvolená farba, naviazanie na predmet");
+        Over(poznamky.Zoznam("slovencina citanie").Count == 1 && poznamky.Zoznam("fyzika").Count == 1 && poznamky.PatriaK(new[] { fyzika.Id }).Count == 1
+             && poznamky.PreDni(dnes, dnes).Count == 1 && poznamky.Pripnute(3).Count == 1, "poznámky: hľadanie bez diakritiky (aj podľa predmetu), deň, pripnuté");
+
+        // ---- udalosti, opakovanie ----
+        var typ = kalendar.Typy().First();
+        var pondelok = KalendarViewModel.Pondelok(dnes).AddDays(7);
+        var tyzdenna = kalendar.Uloz(new Udalost
+        {
+            Nazov = "Porada vedenia", TypId = typ.Id, Zaciatok = pondelok.AddHours(8), Koniec = pondelok.AddHours(9), Opakovanie = OpakovanieUdalosti.Tyzdenne,
+            OpakovanieDo = pondelok.AddDays(21), Pripomienka = PripomienkaUdalosti.DenVopred, TykaSa = new List<long> { oblastFyziky.Id },
+        });
+        var opakovania = KalendarService.Opakovania(kalendar.Nacitaj(tyzdenna)!, pondelok.AddDays(-30), pondelok.AddDays(60)).ToList();
+        Over(opakovania.Count == 4 && opakovania[3] == pondelok.AddDays(21).AddHours(8), "týždenné opakovanie do dátumu (4 výskyty)");
+        var mesacna = new Udalost { Nazov = "x", Zaciatok = new DateTime(2027, 1, 31, 10, 0, 0), Opakovanie = OpakovanieUdalosti.Mesacne };
+        Over(KalendarService.Opakovania(mesacna, new DateTime(2027, 2, 1), new DateTime(2027, 4, 30)).Select(d => d.Day).SequenceEqual(new[] { 28, 31, 30 }),
+            "mesačné opakovanie 31. dňa (február 28., marec 31., apríl 30.)");
+        var viacDni = new Udalost { Nazov = "y", Zaciatok = new DateTime(2027, 5, 10), Koniec = new DateTime(2027, 5, 12), CelyDen = true };
+        Over(KalendarService.Opakovania(viacDni, new DateTime(2027, 5, 12), new DateTime(2027, 5, 12)).Count() == 1, "udalosť cez viac dní zasahuje aj do posledného dňa");
+        var chyba = false;
+        try
+        {
+            kalendar.Uloz(new Udalost { Nazov = "Zlá", Zaciatok = dnes.AddHours(10), Koniec = dnes.AddHours(9) });
+        }
+        catch (SkvpException)
+        {
+            chyba = true;
+        }
+
+        Over(chyba, "koniec udalosti pred začiatkom sa neuloží");
+        Over(kalendar.Najblizsie(new[] { oblastFyziky.Id }, dni: 40).Count == 4, "najbližšie termíny pri oblasti (panel Úlohy a poznámky)");
+        kalendar.PresunNaDen(tyzdenna, pondelok.AddDays(1));
+        Over(kalendar.Nacitaj(tyzdenna)!.Zaciatok == pondelok.AddDays(1).AddHours(8), "presun udalosti na iný deň (čas zostane)");
+
+        // ---- automatické termíny školského roka ----
+        kalendar.Kraj = "KE, PO";
+        var prazdniny = kalendar.DniPrazdnin(new DateTime(2027, 2, 1), new DateTime(2027, 3, 31));
+        Over(prazdniny.ContainsKey(new DateTime(2027, 2, 22)) && !prazdniny.ContainsKey(new DateTime(2027, 3, 1)) && prazdniny[new DateTime(2027, 2, 22)] == "Jarné prázdniny"
+             && prazdniny.ContainsKey(new DateTime(2027, 3, 26)), "prázdniny podľa kraja (jarné KE, PO; veľkonočné všade)");
+        var rok = kalendar.Vyskyty(new DateTime(2026, 9, 1), new DateTime(2027, 8, 31));
+        Over(rok.Any(v => v.Zdroj == ZdrojKalendara.Novinky && v.MaOdkaz && v.Zaciatok == new DateTime(2027, 3, 10))
+             && rok.Any(v => v.Zdroj == ZdrojKalendara.SkolskyRok && v.Nazov.StartsWith("Koniec prvého polroka", StringComparison.Ordinal))
+             && rok.Any(v => v.Zdroj == ZdrojKalendara.Archiv && v.Zaciatok == new DateTime(2027, 6, 30))
+             && rok.Count(v => v.Zdroj == ZdrojKalendara.Prazdniny && v.Nazov.StartsWith("Jarné", StringComparison.Ordinal)) == 1,
+            "automatické termíny: maturita (Novinky, so zdrojom), polrok, pripomienka archivácie, prázdniny kraja");
+        kalendar.Nastavenia = kalendar.Nastavenia with { Novinky = false };
+        Over(!kalendar.Vyskyty(new DateTime(2027, 3, 10), new DateTime(2027, 3, 10)).Any(v => v.Zdroj == ZdrojKalendara.Novinky), "zdroje automatických termínov sa dajú vypnúť");
+        Over(KalendarService.DatumPlatnosti("od 1.9.2026") == new DateTime(2026, 9, 1) && KalendarService.DatumPlatnosti("od 1. 9. 2027") == new DateTime(2027, 9, 1)
+             && KalendarService.KratkyNazovPrazdnin("Jarné prázdniny 2027/2028 – Košický, Prešovský kraj") == "Jarné prázdniny", "platnosť osnovy a názov prázdnin");
+
+        // ---- export .ics ----
+        var ics = new KalendarService().Ics(dnes.AddDays(-7), dnes.AddDays(120), automaticke: true);
+        Over(ics.StartsWith("BEGIN:VCALENDAR\r\n", StringComparison.Ordinal) && ics.Contains("RRULE:FREQ=WEEKLY;UNTIL=", StringComparison.Ordinal)
+             && ics.Contains("TRIGGER:-PT1440M", StringComparison.Ordinal) && ics.Contains("SUMMARY:Úloha: Skontrolovať laboratórne práce", StringComparison.Ordinal)
+             && ics.Split("\r\n").All(r => Encoding.UTF8.GetByteCount(r) <= 75) && ics.EndsWith("END:VCALENDAR\r\n", StringComparison.Ordinal),
+            "export .ics: opakovanie, pripomienka, úlohy, zalomenie riadkov podľa normy");
+
+        // ---- predmet odstránený: naviazanie zostane, súvislosti ho neukazujú ----
+        Over(sluzba.Suvislosti(fyzika.Id).All(s => s.TypVazby != TypVazby.Patri), "úlohy a poznámky nie sú medzi odbornými súvislosťami predmetu");
+        sluzba.Odstran(chemia.Id);
+        Over(ulohy.Zoznam().First(u => u.Id == u1).TykaSa.Any(t => t.Id == chemia.Id && t.Odstranene), "odstránený predmet zostane pri úlohe ako odstránený");
+        sluzba.Obnov(chemia.Id);
+
+        // ---- navrhované úlohy z osnov ----
+        model.NastavStav(fyzika, StavyOsnovy.NaKontrolu);
+        Over(model.MaVratitSpat && model.TextAkcie == "Vytvoriť úlohu", "pri stave „Na kontrolu“ program ponúkne úlohu");
+        var navrhy = NavrhyUloh.Zostav();
+        var kontrola = navrhy.FirstOrDefault(n => n.Kluc == $"kontrola:{fyzika.Id}");
+        Over(kontrola is { Vysoka: true } && kontrola.TykaSa.SequenceEqual(new[] { fyzika.Id }) && navrhy.Any(n => n.Kluc.StartsWith("nezacate:", StringComparison.Ordinal)),
+            $"navrhované úlohy: kontrola osnovy, nezačaté osnovy ({navrhy.Count} návrhov)");
+        model.VratitSpatCommand.Execute(null);
+        Over(ulohy.Zoznam().Any(u => u.Zdroj == $"kontrola:{fyzika.Id}") && NavrhyUloh.Zostav().All(n => n.Kluc != $"kontrola:{fyzika.Id}"),
+            "ponúknutá úloha sa vytvorila a návrh zmizol");
+        var nezacate = NavrhyUloh.Zostav().First(n => n.Kluc.StartsWith("nezacate:", StringComparison.Ordinal));
+        NavrhyUloh.Skry(nezacate.Kluc);
+        Over(NavrhyUloh.Zostav().All(n => n.Kluc != nezacate.Kluc), "skrytý návrh sa neukazuje");
+        NavrhyUloh.ZobrazSkryte();
+        model.NastavStav(fyzika, null);
+
+        // ---- obrazovky (modely) ----
+        model.ObnovPlanovanie();
+        Over(model.PocetOtvorenychUloh == ulohy.Pocty().Otvorene && model.PocetUlohPoTermine == 1 && model.PocetPoznamok == 1 && fyzika.OtvoreneUlohy >= 2
+             && oblastFyziky.OtvoreneUlohy >= fyzika.OtvoreneUlohy, "počty v menu a odznaky úloh pri predmete a oblasti");
+        model.OtvorUlohy(u1);
+        var ulohyVm = (UlohyViewModel)model.Stranka!;
+        Over(ulohyVm.Vybrana?.Id == u1 && ulohyVm.Zobrazenie is not null && ulohyVm.TykaSa.Polozky.Count == 2, "sekcia Úlohy otvorí vybranú úlohu");
+        ulohyVm.FilterObjektu = ulohyVm.Filtre.First(f => f.Hodnota == fyzika.Id);
+        ulohyVm.NovyText = "Úloha pridaná s filtrom predmetu";
+        ulohyVm.PridatCommand.Execute(null);
+        Over(ulohy.Zoznam().First(u => u.Text == "Úloha pridaná s filtrom predmetu").PatriK(fyzika.Id), "nová úloha sa naviaže na predmet z filtra");
+        ulohyVm.Zodpovedny = "p. Nováková";
+        ulohyVm.UlozTeraz();
+        Over(ulohy.Nacitaj(ulohyVm.Vybrana!.Id)!.Zodpovedny == "p. Nováková", "podrobnosti úlohy sa ukladajú priebežne");
+        model.OtvorPoznamky(p1);
+        var poznamkyVm = (PoznamkyViewModel)model.Stranka!;
+        Over(poznamkyVm.Editor?.Id == p1, "sekcia Poznámky otvorí vybranú poznámku");
+        poznamkyVm.NovaPoznamkaCommand.Execute(null);
+        poznamkyVm.Editor!.Text = "Nová poznámka zo samotestu";
+        poznamkyVm.Editor.Uloz();
+        Over(poznamky.Zoznam("samotestu").Count == 1 && poznamkyVm.Zoznam.Count == 2, "nová poznámka sa uloží a objaví na nástenke");
+        model.OtvorKalendar(pondelok);
+        var kalendarVm = (KalendarViewModel)model.Stranka!;
+        Over(kalendarVm.Tyzdne.Count == 6 && kalendarVm.VybranyDen?.Datum == pondelok, "kalendár: mesiac (6 týždňov), vybraný deň");
+        foreach (var rezim in Enum.GetValues<RezimKalendara>())
+        {
+            kalendarVm.Rezim = rezim;
+        }
+
+        Over(kalendarVm.Mesiace.Count == 12 && kalendarVm.Mesiace[0].Nazov.StartsWith("September", StringComparison.Ordinal), "kalendár: školský rok september – august");
+        foreach (var rezim in Enum.GetValues<RezimKalendara>())
+        {
+            kalendarVm.Rezim = rezim;
+            kalendarVm.UlozitPdfCommand.Execute(null);
+        }
+
+        kalendarVm.Rezim = RezimKalendara.Mesiac;
+        ulohyVm.UlozitPdfCommand.Execute(null);
+        poznamkyVm.UlozitPdfCommand.Execute(null);
+        Over(Directory.EnumerateFiles(Databaza.PriecinokDokumentov, "*.pdf").Count(f => Path.GetFileName(f) is var n
+                 && (n.StartsWith("Kalendar", StringComparison.Ordinal) || n.StartsWith("Skolsky rok", StringComparison.Ordinal) || n is "Ulohy.pdf" or "Poznamky.pdf")) >= 4,
+            "tlač do PDF: mesiac, školský rok, zoznam, úlohy, poznámky");
+        var panel = new PanelPlanovaniaVM(model, oblastFyziky.Id, () => oblastFyziky.Predmety.Select(p => p.Id).Append(oblastFyziky.Id).ToList());
+        Over(panel.Ulohy.Count >= 2 && panel.Poznamky.Count >= 1 && panel.Terminy.Count >= 1, "panel Úlohy a poznámky pri oblasti (aj úlohy jej predmetov)");
+        var dashboard = new DashboardViewModel(model);
+        Over(dashboard.UlohyNaPaneli.Count > 0 && dashboard.PripnutePoznamky.Count == 1, "dashboard: úlohy a pripnuté poznámky");
+        Over(model.NovePripomienky(pondelok.AddDays(1).AddHours(-11)).Count == 1, "pripomienka udalosti deň vopred");
+        Over(!new KalendarService().Prehlad(dnes).JePrazdny, "prehľad dňa");
+
+        // ---- nastavenia, servis, archív ----
+        var subor = NastaveniaProgramu.Vytvor();
+        Over(subor.TypyUdalosti?.Count == Databaza.PredvoleneTypyUdalosti.Count && NastaveniaProgramu.Skupina("kalendar.rezim") == NastaveniaProgramu.SkupinaKalendar
+             && NastaveniaProgramu.Prehlad(subor).Contains(NastaveniaProgramu.SkupinaTypy), "export nastavení: kalendár a typy udalostí");
+        Over(DiagnostikaService.KontrolaVazieb().Ok && DiagnostikaService.KontrolaDat().Riadky.Any(r => r.StartsWith("Udalostí v kalendári", StringComparison.Ordinal)),
+            "servis: kontrola väzieb a dát s úlohami a poznámkami");
+        var archiv = ArchivSkolskehoRoka.Archivuj(ArchivSkolskehoRoka.Aktualny());
+        var zaznamy = ArchivSkolskehoRoka.ZaznamyPlanovania(archiv.Id);
+        Over(zaznamy.Any(z => z.JeUloha && z.TykaSa.Contains("Fyzika", StringComparison.Ordinal)) && zaznamy.Any(z => !z.JeUloha)
+             && Directory.EnumerateFiles(archiv.Priecinok!, "Úlohy k osnovám*.pdf").Any(), "archív školského roka obsahuje úlohy a poznámky k osnovám (aj PDF)");
+        ArchivSkolskehoRoka.Odstran(archiv.Id);
+        Directory.Delete(archiv.Priecinok!, true);
+
+        // upratanie – obrazovky a ďalšie testy začínajú bez týchto záznamov
+        using (var db = Databaza.Otvor())
+        {
+            Databaza.Vykonaj(db, "DELETE FROM objekt WHERE typ IN ('udalost', 'uloha', 'poznamka')");
+        }
+
+        Krok("kalendár, úlohy a poznámky v poriadku");
+    }
+
     private static void TestObrazoviek(App aplikacia)
     {
         var okno = new MainWindow { Width = 1440, Height = 900, WindowStartupLocation = WindowStartupLocation.Manual, Left = 0, Top = 0 };
@@ -1977,6 +2182,78 @@ internal static class Samotest
         Pumpuj();
         Snimka(okno, "22_sada_seminar");
 
+        // kalendár, úlohy a poznámky s ukážkovými záznamami testovacej sady
+        Over(new UlohyService().Zoznam().Count >= 5 && new PoznamkyService().Pocet() >= 2 && model.PocetOtvorenychUloh >= 4,
+            "testovacia sada: ukážkové úlohy, udalosti a poznámky");
+        model.OtvorKalendar(null);
+        Pumpuj();
+        Snimka(okno, "26_kalendar_mesiac");
+        var kalendarObr = (KalendarViewModel)model.Stranka!;
+        kalendarObr.Rezim = RezimKalendara.Tyzden;
+        Pumpuj();
+        Snimka(okno, "26b_kalendar_tyzden");
+        kalendarObr.Rezim = RezimKalendara.Zoznam;
+        Pumpuj();
+        Snimka(okno, "26c_kalendar_zoznam");
+        kalendarObr.Rezim = RezimKalendara.SkolskyRok;
+        Pumpuj();
+        Snimka(okno, "26d_kalendar_skolsky_rok");
+        kalendarObr.Rezim = RezimKalendara.Mesiac;
+        Pumpuj();
+        var udalostSady = new KalendarService().Vyskyty(DateTime.Today, DateTime.Today.AddDays(30)).First(v => v.Zdroj == ZdrojKalendara.Udalost);
+        var oknoUdalosti = new UdalostWindow(new UdalostEditorVM(model, udalostSady.Id, null)) { Owner = okno };
+        oknoUdalosti.Show();
+        Pumpuj();
+        Snimka(oknoUdalosti, "26e_okno_udalosti");
+        oknoUdalosti.Close();
+        var oknoTypov = new TypyUdalostiWindow { Owner = okno };
+        oknoTypov.Show();
+        Pumpuj();
+        Snimka(oknoTypov, "26f_okno_typy_udalosti");
+        oknoTypov.Close();
+        var oknoPrehladu = new PrehladDnaWindow(new KalendarService().Prehlad(DateTime.Today)) { Owner = okno };
+        oknoPrehladu.Show();
+        Pumpuj();
+        Snimka(oknoPrehladu, "26g_okno_prehlad_dna");
+        oknoPrehladu.Close();
+
+        model.OtvorUlohy(new UlohyService().Zoznam().First(u => u.MaTykaSa && !u.Hotovo).Id);
+        Pumpuj();
+        Snimka(okno, "27_ulohy");
+        model.OtvorPoznamky(null);
+        Pumpuj();
+        Snimka(okno, "27b_poznamky");
+        var poznamkaSady = new PoznamkyService().Zoznam().First();
+        var oknoPoznamky = new PoznamkaWindow(new PoznamkaEditorVM(model, poznamkaSady.Id)) { Owner = okno };
+        oknoPoznamky.Show();
+        Pumpuj();
+        Snimka(oknoPoznamky, "27c_okno_poznamky");
+        oknoPoznamky.Close();
+        var fyzikaSady = model.Oblasti[2].Predmety.First(p => p.Nazov == "Fyzika");
+        model.OtvorPredmet(fyzikaSady);
+        Pumpuj();
+        ((PredmetViewModel)model.Stranka!).ZobrazitPlanovanie = true;
+        Pumpuj();
+        Over(((PredmetViewModel)model.Stranka!).PanelPlanovania.Pocet >= 2, "panel Úlohy a poznámky pri predmete (fyzika: udalosť a poznámka)");
+        Snimka(okno, "27d_predmet_ulohy_a_poznamky");
+        model.OtvorOblast(model.Oblasti[2]);
+        Pumpuj();
+        ((OblastViewModel)model.Stranka!).ZobrazitPlanovanie = true;
+        Pumpuj();
+        Snimka(okno, "27e_oblast_ulohy_a_poznamky");
+        model.OtvorDashboard();
+        Pumpuj();
+        SnimkyStranky(okno, "27f_dashboard_planovanie", 3);
+        App.NastavTemu(NastaveniaSkoly.TemaTmava);
+        model.OtvorKalendar(null);
+        Pumpuj();
+        Snimka(okno, "27g_tmavy_kalendar");
+        model.OtvorPoznamky(null);
+        Pumpuj();
+        Snimka(okno, "27h_tmave_poznamky");
+        App.NastavTemu(NastaveniaSkoly.TemaSvetla);
+        Pumpuj();
+
         // oprava názvu predmetu priamo v riadku – zmení sa aj v texte osnovy
         var nemcina = model.Oblasti[0].Predmety.First(p => p.Nazov == "Konverzácia v nemeckom jazyku");
         var dokumentyUi = new DokumentService();
@@ -2056,7 +2333,11 @@ internal static class Samotest
         UlozObrazokStrany(vykreslenieSady, 2, Path.Combine(Databaza.PriecinokDokumentov, "sada_hlavicka.png"));
 
         var zalohyPred = new ZalohaService().Zalohy().Count;
+        var vlastnaUloha = new UlohyService().Pridaj("Vlastná úloha počas skúšania", tykaSa: new[] { sjl.Id });
         model.Vymaz(vsetko: false);
+        Over(new UlohyService().Zoznam().Select(u => u.Id).SequenceEqual(new[] { vlastnaUloha }) && new PoznamkyService().Pocet() == 0
+             && new UlohyService().Zoznam()[0].PatriK(sjl.Id) && Databaza.Citaj(TestovaciaSada.KlucPlanovanie) is null,
+            "vymazanie sady odstráni jej ukážkové úlohy, udalosti a poznámky; vlastná úloha aj s naviazaním na predmet zostane");
         Over(!model.JeTestovaciaSada && model.Oblasti.Count == 7 && model.PocetPredmetov == 43, "vymazanie osnov – oblasti a predmety zostali");
         Over(model.Oblasti.SelectMany(o => o.Predmety).All(p => p.Stav == StavOsnovy.Prazdna) && new DokumentService().Verzie(sjl.Id).Count == 0, "osnovy aj archív sú vymazané");
         Over(new ZalohaService().Zalohy().Count == zalohyPred + 1, "pred vymazaním sa vytvorila záloha");

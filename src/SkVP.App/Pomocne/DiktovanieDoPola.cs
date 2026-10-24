@@ -30,6 +30,24 @@ public sealed class DiktovanieDoPola
         _hlasitost = hlasitost;
     }
 
+    /// <summary>Ako sa práve diktuje (hlasové písanie Windows alebo prepis v počítači) – text pri tlačidle Diktovať.</summary>
+    public static string PopisSposobu() => Diktovanie.Sposob == SposobDiktovania.Offline
+        ? Diktovanie.Model.JeStiahnuty
+            ? $"Prepis v počítači bez internetu (model {Diktovanie.Model.Nazov}) – kliknite Diktovať, hovorte a potom Zastaviť a prepísať."
+            : "Prepis bez internetu: model ešte nie je stiahnutý – otvorte nastavenie diktovania (ozubené koliesko)."
+        : HlasovePisanie.Slovencina is null
+            ? "Hlasové písanie Windows (Win+H) – pre slovenčinu pridajte v Nastaveniach Windows slovenskú klávesnicu (Čas a jazyk → Jazyk a oblasť)."
+            : "Hlasové písanie Windows (Win+H) – potrebuje internet. Bez internetu: ozubené koliesko → Prepis v počítači.";
+
+    /// <summary>Pri prepise bez internetu načíta model do pamäte vopred (prepis potom začne bez čakania).</summary>
+    public static void PripravModel()
+    {
+        if (Diktovanie.Sposob == SposobDiktovania.Offline)
+        {
+            _ = PrepisHlasu.PripravAsync(Diktovanie.Model);
+        }
+    }
+
     /// <summary>Volá sa po prepise a vložení textu (napr. na rozpoznanie položiek).</summary>
     public event Action? Vlozene;
 

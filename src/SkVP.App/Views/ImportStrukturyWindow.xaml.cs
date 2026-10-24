@@ -107,22 +107,9 @@ public partial class ImportStrukturyWindow : Window
         }
     }
 
-    private void UkazSposob() => _diktovanie?.UkazStav(Diktovanie.Sposob == SposobDiktovania.Offline
-        ? Diktovanie.Model.JeStiahnuty
-            ? $"Prepis v počítači bez internetu (model {Diktovanie.Model.Nazov}) – kliknite Diktovať, hovorte a potom Zastaviť a prepísať."
-            : "Prepis bez internetu: model ešte nie je stiahnutý – otvorte nastavenie diktovania (ozubené koliesko)."
-        : HlasovePisanie.Slovencina is null
-            ? "Hlasové písanie Windows (Win+H) – pre slovenčinu pridajte v Nastaveniach Windows slovenskú klávesnicu (Čas a jazyk → Jazyk a oblasť)."
-            : "Hlasové písanie Windows (Win+H) – potrebuje internet. Bez internetu: ozubené koliesko → Prepis v počítači.");
+    private void UkazSposob() => _diktovanie?.UkazStav(DiktovanieDoPola.PopisSposobu());
 
-    /// <summary>Pri prepise bez internetu sa model načíta do pamäte hneď pri otvorení okna (prepis potom začne bez čakania).</summary>
-    private static void PripravModel()
-    {
-        if (Diktovanie.Sposob == SposobDiktovania.Offline)
-        {
-            _ = PrepisHlasu.PripravAsync(Diktovanie.Model);
-        }
-    }
+    private static void PripravModel() => DiktovanieDoPola.PripravModel();
 
     private async void Diktovat_Click(object sender, RoutedEventArgs e)
     {
