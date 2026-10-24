@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ucebnyPlan nazov="Vzdelávacie oblasti a predmety" typ="Gymnázium – úplné stredné všeobecné vzdelanie (ISCED 344)">
+  <oblast nazov="Jazyk a komunikácia">
+    <predmet>Slovenský jazyk a literatúra</predmet>
+    <predmet>Anglický jazyk</predmet>
+    <predmet>Nemecký jazyk</predmet>
+    <predmet>Ruský jazyk</predmet>
+    <predmet>Seminár zo slovenského jazyka a literatúry</predmet>
+    <predmet>Konverzácia v anglickom jazyku</predmet>
+    <predmet>Konverzácia v nemeckom jazyku</predmet>
+    <predmet>Reálie v anglickom jazyku</predmet>
+    <predmet>Jazykom k maturite</predmet>
+  </oblast>
+  <oblast nazov="Matematika a práca s informáciami">
+    <predmet>Matematika</predmet>
+    <predmet>Informatika</predmet>
+    <predmet>Aplikovaná informatika</predmet>
+    <predmet>Aplikovaná matematika</predmet>
+    <predmet>Technika</predmet>
+    <predmet>Cvičenia z matematiky</predmet>
+    <predmet>Matematika pre maturantov</predmet>
+    <predmet>Informatika pre maturantov</predmet>
+  </oblast>
+  <oblast nazov="Človek a príroda">
+    <predmet>Fyzika</predmet>
+    <predmet>Chémia</predmet>
+    <predmet>Biológia</predmet>
+    <predmet>Experimentálna prírodoveda</predmet>
+    <predmet>Seminár z biológie</predmet>
+    <predmet>Seminár z chémie</predmet>
+    <predmet>Seminár z fyziky</predmet>
+    <predmet>Biológia pre maturantov</predmet>
+    <predmet>Chémia pre maturantov</predmet>
+    <predmet>Fyzika pre maturantov</predmet>
+  </oblast>
+  <oblast nazov="Človek a spoločnosť">
+    <predmet>Dejepis</predmet>
+    <predmet>Geografia</predmet>
+    <predmet>Občianska náuka</predmet>
+    <predmet>Finančná gramotnosť</predmet>
+    <predmet>Seminár z dejepisu</predmet>
+    <predmet>Seminár z geografie</predmet>
+    <predmet>Dejepis pre maturantov</predmet>
+    <predmet>Geografia pre maturantov</predmet>
+    <predmet>Občianska náuka pre maturantov</predmet>
+  </oblast>
+  <oblast nazov="Umenie a kultúra">
+    <predmet>Umenie a kultúra</predmet>
+  </oblast>
+  <oblast nazov="Človek a hodnoty">
+    <predmet>Etická výchova</predmet>
+    <predmet>Náboženská výchova</predmet>
+  </oblast>
+  <oblast nazov="Zdravie a pohyb">
+    <predmet>Telesná a športová výchova</predmet>
+    <predmet>Športová príprava</predmet>
+    <predmet>Základy športovej prípravy</predmet>
+    <predmet>Športová príprava pre maturantov</predmet>
+  </oblast>
+</ucebnyPlan>

@@ -1,0 +1,18 @@
+{
+  "Program": "SkVP",
+  "Verzia": "0.1.99",
+  "Vytvorene": "2026-10-24T02:30:20.5456015+00:00",
+  "Nastavenia": {
+    "org.dic": "2020999999",
+    "org.email": "skola@vzor.example",
+    "org.ico": "12345678",
+    "org.mesto": "Bratislava",
+    "org.psc": "821 08",
+    "org.stat": "Česko",
+    "org.telefon": "+421 900 111 222",
+    "org.ulica": "Nová 7",
+    "org.zlozka": "Gymnázium",
+    "skvp.adresa": "Vzorová 1, 999 99 Vzorovo, Česko",
+    "skvp.skola": "Spojená škola Vzorová"
+  }
+}
