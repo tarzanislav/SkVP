@@ -430,24 +430,25 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
     [ObservableProperty]
     private List<NavrhUlohy> _navrhy = new();
 
+    /// <summary>Zoznam návrhov je rozbalený (predvolene zbalený – vidno len počet, zoznam úloh má viac miesta).</summary>
     [ObservableProperty]
-    private bool _ukazNavrhy = Databaza.Citaj(KlucNavrhy, "1") != "0";
+    private bool _ukazNavrhy = Databaza.Citaj(KlucRozbaleneNavrhy, "0") == "1";
 
     [ObservableProperty]
     private int _pocetSkrytych;
 
+    /// <summary>Navrhované úlohy zapnuté (Nastavenia → Kalendár a úlohy).</summary>
     public const string KlucNavrhy = "ulohy.navrhy";
 
-    partial void OnUkazNavrhyChanged(bool value)
-    {
-        Databaza.Zapis(KlucNavrhy, value ? "1" : "0");
-    }
+    public const string KlucRozbaleneNavrhy = "ulohy.navrhy.rozbalene";
+
+    partial void OnUkazNavrhyChanged(bool value) => Databaza.Zapis(KlucRozbaleneNavrhy, value ? "1" : "0");
 
     private void NacitajNavrhy()
     {
         try
         {
-            Navrhy = NavrhyUloh.BezVybavenych(_vsetkyNavrhy);
+            Navrhy = Databaza.Citaj(KlucNavrhy, "1") == "0" ? new List<NavrhUlohy>() : NavrhyUloh.BezVybavenych(_vsetkyNavrhy);
             PocetSkrytych = NavrhyUloh.Skryte().Count;
         }
         catch (Exception)

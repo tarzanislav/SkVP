@@ -60,8 +60,11 @@
                 Visibility="{Binding Navrhy.Count, Converter={StaticResource NulaNaViditelnost}, ConverterParameter=opacne}">
             <StackPanel>
                 <DockPanel>
-                    <ToggleButton DockPanel.Dock="Right" Padding="10,3" IsChecked="{Binding UkazNavrhy}">
-                        <TextBlock Text="Zobraziť" FontSize="12.5" />
+                    <ToggleButton DockPanel.Dock="Right" Padding="10,3" IsChecked="{Binding UkazNavrhy}" ToolTip="Rozbaliť alebo zbaliť zoznam návrhov">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Návrhy" FontSize="12.5" />
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE70D;" FontSize="10" Margin="6,0,0,0" />
+                        </StackPanel>
                     </ToggleButton>
                     <TextBlock Style="{StaticResource Ikona}" Text="&#xE82F;" FontSize="16" Margin="0,0,10,0"
                                Foreground="{Binding Source='#E39B5B', Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}" />

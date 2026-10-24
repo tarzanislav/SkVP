@@ -268,6 +268,12 @@
             <RadioButton Style="{StaticResource Rezim}" GroupName="rezim" Content="Zoznam" IsChecked="{Binding JeZoznam}" Margin="0,0,4,6" />
             <RadioButton Style="{StaticResource Rezim}" GroupName="rezim" Content="Školský rok" IsChecked="{Binding JeSkolskyRok}" Margin="0,0,14,6" />
             <ComboBox ItemsSource="{Binding Kraje}" SelectedItem="{Binding Kraj}" Width="130" Margin="0,0,6,6" ToolTip="Kraj pre jarné prázdniny (spoločný s dashboardom)" />
+            <ToggleButton Padding="10,4" Margin="0,0,6,6" IsChecked="{Binding UkazDen}" ToolTip="Panel vybraného dňa vpravo">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE8A0;" FontSize="13" Margin="0,0,6,0" />
+                    <TextBlock Text="Deň" />
+                </StackPanel>
+            </ToggleButton>
             <ToggleButton x:Name="PrepinacZobrazenia" Padding="10,4" Margin="0,0,0,6" ToolTip="Čo kalendár ukazuje okrem vlastných udalostí a úloh">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Zobraziť" />
@@ -312,8 +318,7 @@
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="14" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
             <!-- mesiac -->
@@ -445,7 +450,8 @@
             </ScrollViewer>
 
             <!-- vybraný deň -->
-            <Border Grid.Column="2" Style="{StaticResource Karta}" Padding="0">
+            <Border Grid.Column="1" Style="{StaticResource Karta}" Padding="0" Width="300" Margin="14,0,0,0"
+                    Visibility="{Binding UkazDen, Converter={StaticResource BoolNaViditelnost}}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="16,14,16,16" DataContext="{Binding VybranyDen}">
                         <TextBlock Text="{Binding DlhyDatum}" Style="{StaticResource Podnadpis}" TextWrapping="Wrap" Margin="0,0,0,4" />

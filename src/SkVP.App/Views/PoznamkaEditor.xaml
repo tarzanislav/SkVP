@@ -57,27 +57,18 @@
                            Fill="{DynamicResource AccentFillColorDefaultBrush}" VerticalAlignment="Center" />
                 <TextBlock x:Name="StavDiktovania" VerticalAlignment="Center" TextWrapping="Wrap" Style="{StaticResource Popis}" FontSize="12" />
             </DockPanel>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="14" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackPanel>
-                    <TextBlock Text="Deň v kalendári" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
-                    <DockPanel>
-                        <Button DockPanel.Dock="Right" Padding="8,3" Margin="4,0,0,0" Command="{Binding BezDnaCommand}" ToolTip="Bez dňa">
-                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE711;" FontSize="10" />
-                        </Button>
-                        <Button DockPanel.Dock="Right" Content="Dnes" Padding="8,3" Margin="4,0,0,0" Command="{Binding DnesCommand}" />
-                        <DatePicker SelectedDate="{Binding Datum}" />
-                    </DockPanel>
-                </StackPanel>
-                <StackPanel Grid.Column="2">
-                    <TextBlock Text="Poznámka k udalosti" Style="{StaticResource Stitok}" Margin="0,0,0,4" />
-                    <ComboBox ItemsSource="{Binding Udalosti}" SelectedItem="{Binding Udalost}" ToolTip="Napr. zápis z porady alebo predmetovej komisie" />
-                </StackPanel>
-            </Grid>
+            <DockPanel Margin="0,4,0,0">
+                <TextBlock Text="Deň v kalendári" Style="{StaticResource Stitok}" Margin="0,0,10,0" Width="104" VerticalAlignment="Center" />
+                <Button DockPanel.Dock="Right" Padding="8,3" Margin="4,0,0,0" Command="{Binding BezDnaCommand}" ToolTip="Bez dňa">
+                    <TextBlock Style="{StaticResource Ikona}" Text="&#xE711;" FontSize="10" />
+                </Button>
+                <Button DockPanel.Dock="Right" Content="Dnes" Padding="8,3" Margin="4,0,0,0" Command="{Binding DnesCommand}" />
+                <DatePicker SelectedDate="{Binding Datum}" />
+            </DockPanel>
+            <DockPanel Margin="0,6,0,0">
+                <TextBlock Text="K udalosti" Style="{StaticResource Stitok}" Margin="0,0,10,0" Width="104" VerticalAlignment="Center" />
+                <ComboBox ItemsSource="{Binding Udalosti}" SelectedItem="{Binding Udalost}" ToolTip="Napr. zápis z porady alebo predmetovej komisie" />
+            </DockPanel>
             <TextBlock Text="Týka sa" Style="{StaticResource Stitok}" />
             <v:TykaSaPole DataContext="{Binding TykaSa}" />
             <DockPanel Margin="0,12,0,0">

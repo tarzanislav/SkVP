@@ -186,6 +186,12 @@ public sealed partial class KalendarViewModel : ObservableObject
     [ObservableProperty]
     private bool _ukazVybavene = Databaza.Citaj("kalendar.vybavene", "1") != "0";
 
+    /// <summary>Panel vybraného dňa vpravo (na menšej obrazovke sa dá skryť – kalendár má viac miesta).</summary>
+    [ObservableProperty]
+    private bool _ukazDen = Databaza.Citaj("kalendar.den", "1") != "0";
+
+    partial void OnUkazDenChanged(bool value) => Databaza.Zapis("kalendar.den", value ? "1" : "0");
+
     partial void OnUkazNovinkyChanged(bool value) => ZmenaZobrazenia();
     partial void OnUkazSkolskyRokChanged(bool value) => ZmenaZobrazenia();
     partial void OnUkazOsnovyChanged(bool value) => ZmenaZobrazenia();
