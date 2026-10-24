@@ -282,7 +282,7 @@ Kód je napísaný nanovo pre SkVP (z EviTA prevzatý len princíp funkcií).
   pripnutie, 8 pastelových farieb, diktovanie (`DiktovanieDoPola.PopisSposobu/PripravModel`), deň, udalosť, Týka sa,
   Kopírovať text (do osnovy Ctrl+V), automatické ukladanie, tlač a PDF.
 - **Kalendár** (`KalendarViewModel`, `KalendarView`, `UdalostEditorVM`, `UdalostWindow`, `TypyUdalostiWindow`):
-  mesiac, týždeň, zoznam 60 dní, školský rok (12 mesiacov); vpravo vybraný deň (meniny, sviatok, prázdniny, záznamy
+  mesiac, týždeň a zoznam 60 dní (dlhé automatické obdobia len v prvý deň), školský rok (12 mesiacov); vpravo vybraný deň (dá sa skryť) (meniny, sviatok, prázdniny, záznamy
   s akciami Otvoriť/Hotovo/Zdroj/Prevziať do kalendára, poznámky); prepínače zdrojov (prázdniny a školský rok,
   maturita a prijímačky, platnosť osnov, archivácia, týždenná záloha, hotové); kraj spoločný s dashboardom; export .ics,
   tlač a PDF (mesiac A4 na šírku, školský rok na jednej strane, zoznam).

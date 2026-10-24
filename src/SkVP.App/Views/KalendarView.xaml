@@ -196,8 +196,8 @@
                     </StackPanel>
                     <StackPanel>
                         <TextBlock Text="nič naplánované" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,2,0,0"
-                                   Visibility="{Binding MaVyskyty, Converter={StaticResource InverzBoolNaViditelnost}}" />
-                        <ItemsControl ItemsSource="{Binding Vyskyty}" ItemTemplate="{StaticResource ZaznamDetail}" Focusable="False" />
+                                   Visibility="{Binding MaZaznamVZozname, Converter={StaticResource InverzBoolNaViditelnost}}" />
+                        <ItemsControl ItemsSource="{Binding VZozname}" ItemTemplate="{StaticResource ZaznamDetail}" Focusable="False" />
                         <ItemsControl ItemsSource="{Binding Poznamky}" ItemTemplate="{StaticResource PoznamkaDna}" Focusable="False" />
                     </StackPanel>
                 </DockPanel>

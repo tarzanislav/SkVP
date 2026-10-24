@@ -57,12 +57,21 @@ public sealed partial class DenKalendara : ObservableObject
     /// <summary>Bez vyučovania: víkend, sviatok alebo prázdniny.</summary>
     public bool BezVyucovania => Volno || Vikend || JePrazdniny;
 
+    /// <summary>Prvý deň zobrazeného obdobia – dlhé obdobia sa ukážu aj v ňom, ak sa začali skôr.</summary>
+    public bool PrvyZobrazeny { get; init; }
+
     /// <summary>
-    /// Záznamy do bunky mesiaca: bez prázdnin (deň je podfarbený) a dlhé automatické obdobia (napr. zber údajov celý mesiac)
-    /// len v prvý deň – inak by zaplnili všetky bunky. Všetko je vo výpise vybraného dňa.
+    /// Záznamy do týždňa a zoznamu: dlhé automatické obdobia (napr. zber údajov celý mesiac, prázdniny) len v ich prvý deň
+    /// a v prvý zobrazený deň – inak by sa opakovali v každom dni. Všetko je vo výpise vybraného dňa.
     /// </summary>
-    private IEnumerable<VyskytVKalendari> VBunke => Vyskyty.Where(v => v.Zdroj != ZdrojKalendara.Prazdniny
-        && !(v.JeAutomaticky && (v.PoslednyDen - v.Zaciatok.Date).Days >= 3 && v.Zaciatok.Date != Datum));
+    public List<VyskytVKalendari> VZozname => Vyskyty
+        .Where(v => !(v.JeAutomaticky && (v.PoslednyDen - v.Zaciatok.Date).Days >= 3 && v.Zaciatok.Date != Datum && !PrvyZobrazeny))
+        .ToList();
+
+    public bool MaZaznamVZozname => VZozname.Count > 0;
+
+    /// <summary>Záznamy do bunky mesiaca: ako v zozname, bez prázdnin (deň je podfarbený).</summary>
+    private IEnumerable<VyskytVKalendari> VBunke => VZozname.Where(v => v.Zdroj != ZdrojKalendara.Prazdniny);
 
     public List<VyskytVKalendari> Zobrazene => VBunke.Take(NajviacVBunke).ToList();
 
@@ -332,7 +341,7 @@ public sealed partial class KalendarViewModel : ObservableObject
     {
         var od = AktualnyDatum.Date;
         var po = od.AddDays(PocetDniZoznamu - 1);
-        DniZoznamu = Dni(od, po, null).Where(d => d.MaVyskyty || d.MaSviatok || d.MaPoznamky).ToList();
+        DniZoznamu = Dni(od, po, null).Where(d => d.MaZaznamVZozname || d.MaSviatok || d.MaPoznamky).ToList();
         Titulok = $"{Planovanie.DatumText(od)} – {Planovanie.DatumText(po)}";
         Suhrn = $"Zoznam na {PocetDniZoznamu} dní: {Tvar(DniZoznamu.Sum(d => d.Vyskyty.Count), "záznam", "záznamy", "záznamov")}.";
     }
@@ -417,6 +426,7 @@ public sealed partial class KalendarViewModel : ObservableObject
             {
                 Datum = d,
                 MimoMesiaca = mesiac is { } m && d.Month != m,
+                PrvyZobrazeny = d == od.Date,
                 Dnes = d == dnes,
                 Vikend = d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday,
                 Volno = sviatkyDna.Any(x => x.DenPracovnehoPokoja),
