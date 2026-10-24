@@ -29,7 +29,7 @@ public static class ZostavaPlanovania
     public static MdColor Svetla(string hex, double biela)
     {
         var f = PdfVystup.Farba(hex);
-        byte Mix(byte c) => (byte)Math.Round(c + (255 - c) * biela);
+        byte Mix(uint c) => (byte)Math.Round(c + (255 - c) * biela);
         return new MdColor(Mix(f.R), Mix(f.G), Mix(f.B));
     }
 
@@ -37,7 +37,7 @@ public static class ZostavaPlanovania
     public static MdColor Tmava(string hex)
     {
         var f = PdfVystup.Farba(hex);
-        byte Tmav(byte c) => (byte)Math.Round(c * 0.55);
+        byte Tmav(uint c) => (byte)Math.Round(c * 0.55);
         return new MdColor(Tmav(f.R), Tmav(f.G), Tmav(f.B));
     }
 
