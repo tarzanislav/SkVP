@@ -1,0 +1,78 @@
+name: Analýza kódu
+
+# Hĺbková kontrola: všetky analyzátory .NET (CA – správnosť, výkon, spoľahlivosť, bezpečnosť), vybrané pravidlá IDE
+# (nepoužívaný kód), zraniteľné, zastarané a neaktuálne balíky. Výsledok sa zverejní na vetve analyza-vystupy.
+on:
+  push:
+    branches: [ 'analyza/**' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  analyza:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Pravidlá nepoužívaného kódu
+        shell: pwsh
+        run: |
+          @"
+          root = true
+          [*.cs]
+          dotnet_diagnostic.IDE0051.severity = warning
+          dotnet_diagnostic.IDE0052.severity = warning
+          dotnet_diagnostic.IDE0060.severity = warning
+          dotnet_diagnostic.IDE0059.severity = warning
+          dotnet_diagnostic.IDE0035.severity = warning
+          dotnet_diagnostic.IDE0044.severity = warning
+          dotnet_diagnostic.IDE0005.severity = warning
+          dotnet_diagnostic.IDE0064.severity = warning
+          dotnet_diagnostic.IDE0080.severity = warning
+          dotnet_diagnostic.IDE0100.severity = warning
+          dotnet_diagnostic.IDE0110.severity = warning
+          "@ | Set-Content .editorconfig -Encoding utf8
+
+      - name: Zostavenie so všetkými analyzátormi
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force vystup | Out-Null
+          dotnet build SkVP.sln -c Release -p:AnalysisLevel=latest-all -p:AnalysisMode=All -p:EnforceCodeStyleInBuild=true `
+            -p:GenerateDocumentationFile=true "-p:NoWarn=CS1591%3BCS1573%3BCS1572%3BCS1574%3BCS1584%3BCS1658%3BCS1587%3BCS1570%3BWPF0001%3BMVVMTK0045" `
+            -nologo -clp:NoSummary "-flp:logfile=vystup/build.log;verbosity=normal" | Out-Null
+          $riadky = Get-Content vystup/build.log | Select-String -Pattern ': warning ([A-Z]+[0-9]+):' |
+            ForEach-Object { ($_.Line -replace '^\s*\d+>', '').Trim() } | Sort-Object -Unique
+          $riadky | Set-Content vystup/upozornenia.txt -Encoding utf8
+          $riadky | ForEach-Object { if ($_ -match ': warning ([A-Z]+[0-9]+):') { $Matches[1] } } | Group-Object | Sort-Object Count -Descending |
+            ForEach-Object { "{0,6}  {1}" -f $_.Count, $_.Name } | Set-Content vystup/pravidla.txt -Encoding utf8
+          Get-Content vystup/pravidla.txt
+          Get-Content vystup/build.log | Select-String -Pattern ': error ' | Select-Object -First 20
+
+      - name: Balíky – zraniteľné, zastarané, neaktuálne
+        shell: pwsh
+        run: |
+          dotnet list SkVP.sln package --vulnerable --include-transitive | Out-File vystup/balicky_zranitelne.txt -Encoding utf8
+          dotnet list SkVP.sln package --deprecated --include-transitive | Out-File vystup/balicky_zastarane.txt -Encoding utf8
+          dotnet list SkVP.sln package --outdated | Out-File vystup/balicky_neaktualne.txt -Encoding utf8
+          dotnet list SkVP.sln package --include-transitive | Out-File vystup/balicky_vsetky.txt -Encoding utf8
+          Get-Content vystup/balicky_zranitelne.txt, vystup/balicky_neaktualne.txt
+
+      - name: Zverejniť výsledok
+        if: ${{ !cancelled() }}
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          Set-Location vystup
+          git init -q -b analyza-vystupy
+          git config user.name "SkVP analýza"
+          git config user.email "zostavenie@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Analýza ${{ github.sha }}"
+          git push -q -f "https://x-access-token:$env:GH_TOKEN@github.com/${{ github.repository }}.git" analyza-vystupy
