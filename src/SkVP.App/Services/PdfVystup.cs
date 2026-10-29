@@ -935,12 +935,7 @@ public static class PdfVystup
         medzera.Format.SpaceBefore = 0;
     }
 
-    public static string PocetPredmetov(int pocet) => pocet switch
-    {
-        1 => "1 predmet",
-        >= 2 and <= 4 => $"{pocet} predmety",
-        _ => $"{pocet} predmetov",
-    };
+    public static string PocetPredmetov(int pocet) => Preklad.Pocet(pocet, "{0} predmet", "{0} predmety", "{0} predmetov");
 
     private static string Zalozka(long id) => "obj" + id.ToString(CultureInfo.InvariantCulture);
 

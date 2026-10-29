@@ -299,6 +299,31 @@ Kód je napísaný nanovo pre SkVP (z EviTA prevzatý len princíp funkcií).
   patriK)`; názvy stavu, opakovania a pripomienky len v `KalendarService`; skloňovanie cez `Preklad.Pocet`; zapnutie
   návrhov `NavrhyUloh.Zapnute`; odstránený nepoužívaný kód (presun udalosti, `NastavTermin`, `NazovPriority` …).
 
+## Hĺbková revízia celého kódu (29. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+Nástroje: všetky analyzátory .NET (AnalysisMode=All, vybrané IDE pravidlá) a kontrola balíkov v GitHub Actions
+(`.github/workflows/analyza.yml` na vetve `analyza/kod`, výsledky na vetve `analyza-vystupy`), duplicity (jscpd),
+zložitosť (lizard), porovnanie s EviTA (jscpd medzi projektmi), chyby väzieb XAML v samoteste.
+- **Bezpečnosť** (so súhlasom používateľa): Microsoft.Data.Sqlite 10.0.14 (SQLite s opravou CVE-2025-6965);
+  P/Invoke systémových DLL len zo System32, SkvpHlas.dll len z priečinka programu; import nastavení – prípona loga
+  nesmie byť cesta (samotest); XML z importu štruktúry bez DTD; sťahovanie z webu najviac 50 MB.
+  Ostatné knižnice (ClosedXML, MVVM Toolkit, OpenXml, PDFsharp) zámerne bez aktualizácie.
+- **Správnosť**: `MainViewModel.Prejdi(sekcia, Func<object>)` – stará stránka sa uloží pred vytvorením novej;
+  `DocxCitac` mapuje aj XmlException; import osnovy nezlyhá pre pomocnú kópiu; nedokončený archív roka sa celý
+  odstráni; záloha cez `.zip.tmp` a premenovanie; mikrofón kontroluje návratové kódy waveIn a uvoľní pamäť až po
+  skončení vlákna; automatické termíny v kalendári bez stavu.
+- **Výkon**: `UvodnaTabulka.Precitaj(id)` s vyrovnávacou pamäťou podľa SHA-256 dokumentu (oblasť, kalendár,
+  dashboard, návrhy úloh už neparsujú všetky osnovy pri každom otvorení); súvislosti predmetu raz; kraj raz.
+  Zámerne nezmenené: `Pooling=false` (súbor DB nie je zamknutý pri obnove a záchrane).
+- **Čistota**: `CastiOsnov.FarbaSkupiny`, `ImportOsnov.BezpecnyNazov` (jediný), `ZabudovaneZdroje.Json<T>`,
+  `NavrhyUloh.KontrolaOsnovy`, `PolozkaArchivuRoka.TypSkupiny`, `Preklad.Pocet`, `TlacWindow.ZobrazVolby`;
+  odstránené nepotrebné using a duplicitný alias `NovinkyViewModel.VsetkyKraje`.
+- **Samotest**: chyby väzieb XAML sú chybou testu (výnimka: prechodné hlásenie šablóny DatePicker v téme Fluent).
+- **Originalita**: približne 3 800 riadkov (13 % kódu SkVP) je takmer zhodných s EviTA – tlač a PDF (TlacWindow,
+  SuboryZostavy, PdfNorma, RozvrhTlace, ObojstrannaTlac/Window, NahladDokumentu, PozadieDokumentu, ObrazkyDokumentu),
+  diktovanie (PrepisHlasu, Diktovanie, DiktovanieDoPola, DiktovanieWindow, Mikrofon, HlasovePisanie), OCR (CitaniePdf),
+  aktualizácia, počasie, Dialogy. Kalendár/úlohy/poznámky sú prevažne pôvodné (`KalendarViewModel.Dni` prepísané).
+  Rozhodnutie o prepise týchto modulov čaká na používateľa.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.

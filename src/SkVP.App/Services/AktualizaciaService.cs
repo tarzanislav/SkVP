@@ -172,8 +172,19 @@ public sealed class AktualizaciaService
                 }
             }
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException
+                                       || (ex is TaskCanceledException && !zrusenie.IsCancellationRequested))
         {
+            // neúplný inštalátor sa nesmie spustiť ani zostať na disku
+            try
+            {
+                File.Delete(ciel);
+            }
+            catch (IOException)
+            {
+                // zmaže ho ďalšie sťahovanie (prepíše sa)
+            }
+
             throw new SkvpException($"Novú verziu sa nepodarilo stiahnuť.\n\n{ex.Message}");
         }
 

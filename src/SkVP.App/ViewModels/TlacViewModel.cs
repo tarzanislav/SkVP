@@ -315,17 +315,7 @@ public sealed partial class TlacViewModel : ObservableObject
     [RelayCommand]
     private void Oddialit() => Zvacsenie = Math.Max(0.3, Math.Round(Zvacsenie - 0.1, 2));
 
-    public static string PocetStranText(int pocet) => pocet switch
-    {
-        1 => "1 strana",
-        >= 2 and <= 4 => $"{pocet} strany",
-        _ => $"{pocet} strán",
-    };
+    public static string PocetStranText(int pocet) => Preklad.Pocet(pocet, "{0} strana", "{0} strany", "{0} strán");
 
-    public static string OblastiText(int pocet) => pocet switch
-    {
-        1 => "1 oblasť",
-        >= 2 and <= 4 => $"{pocet} oblasti",
-        _ => $"{pocet} oblastí",
-    };
+    public static string OblastiText(int pocet) => Preklad.Pocet(pocet, "{0} oblasť", "{0} oblasti", "{0} oblastí");
 }

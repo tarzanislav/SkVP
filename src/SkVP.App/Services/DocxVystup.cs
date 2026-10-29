@@ -28,25 +28,12 @@ public static class DocxVystup
         public int PosunNadpisov = 2;
     }
 
-    /// <summary>Celý dokument ako obsah súboru Word (napr. príloha PDF/A-3b).</summary>
+    /// <summary>Celý dokument ako obsah súboru Word (napr. príloha PDF/A-3b) – priamo v pamäti, bez dočasného súboru.</summary>
     public static byte[] Data(CelyDokument dokument)
     {
-        var docasny = Path.Combine(Path.GetTempPath(), $"SkVP_{Guid.NewGuid():N}.docx");
-        try
-        {
-            Uloz(dokument, docasny);
-            return File.ReadAllBytes(docasny);
-        }
-        finally
-        {
-            try
-            {
-                File.Delete(docasny);
-            }
-            catch (IOException)
-            {
-            }
-        }
+        using var pamat = new MemoryStream();
+        Zapis(dokument, pamat);
+        return pamat.ToArray();
     }
 
     public static void Uloz(CelyDokument dokument, string cesta)
@@ -57,7 +44,13 @@ public static class DocxVystup
             Directory.CreateDirectory(priecinok);
         }
 
-        using var docx = WordprocessingDocument.Create(cesta, WordprocessingDocumentType.Document);
+        using var subor = new FileStream(cesta, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+        Zapis(dokument, subor);
+    }
+
+    private static void Zapis(CelyDokument dokument, Stream ciel)
+    {
+        using var docx = WordprocessingDocument.Create(ciel, WordprocessingDocumentType.Document);
         var hlavna = docx.AddMainDocumentPart();
         hlavna.Document = new Document(new Body());
         var telo = hlavna.Document.Body!;
