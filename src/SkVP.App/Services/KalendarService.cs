@@ -83,9 +83,13 @@ public sealed record VyskytVKalendari
 
     public string Tip => string.Join("\n", new[] { Nazov, CasText, Typ, TykaSaText, Popis ?? "" }.Where(t => t.Length > 0));
 
+    /// <summary>Stav vlastnej udalosti alebo úlohy; automatický termín (prázdniny, Novinky …) stav nemá.</summary>
     public string StavText => JeUloha
         ? JeVybavena ? "hotová" : "otvorená"
-        : KalendarService.NazovStavu(Stav);
+        : JeAutomaticky ? "" : KalendarService.NazovStavu(Stav);
+
+    /// <summary>„Pedagogická rada · naplánovaná“, pri automatickom termíne len jeho druh („prázdniny“).</summary>
+    public string TypAStav => string.Join("  ·  ", new[] { Typ, StavText }.Where(t => t.Length > 0));
 }
 
 /// <summary>Čo kalendár ukazuje okrem vlastných udalostí a úloh, a čo robí pri spustení programu.</summary>

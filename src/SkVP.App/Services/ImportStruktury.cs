@@ -224,7 +224,9 @@ public static partial class ImportStruktury
         XDocument dokument;
         try
         {
-            dokument = XDocument.Parse(xml);
+            // súbor môže byť z internetu: bez definícií DTD a bez načítania externých entít
+            using var citac = XmlReader.Create(new StringReader(xml), new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null });
+            dokument = XDocument.Load(citac);
         }
         catch (XmlException ex)
         {
@@ -491,7 +493,8 @@ public static partial class ImportStruktury
 
     // ---- webová stránka ----
 
-    private static readonly HttpClient Klient = new() { Timeout = TimeSpan.FromSeconds(40) };
+    /// <summary>Stránka alebo súbor z webu najviac 50 MB (väčší sa nestiahne – pamäť programu).</summary>
+    private static readonly HttpClient Klient = new() { Timeout = TimeSpan.FromSeconds(40), MaxResponseContentBufferSize = 50L * 1024 * 1024 };
 
     static ImportStruktury() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 

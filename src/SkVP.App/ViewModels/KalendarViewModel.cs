@@ -379,55 +379,14 @@ public sealed partial class KalendarViewModel : ObservableObject
     {
         var vyskyty = Sluzba.Vyskyty(od, po).Where(v => UkazVybavene || !v.JeVybavena).ToList();
         var prazdniny = Sluzba.DniPrazdnin(od, po);
-        var sviatky = new Dictionary<DateOnly, List<SviatokDna>>();
-        try
-        {
-            for (var rok = od.Year; rok <= po.Year; rok++)
-            {
-                foreach (var s in KalendariumDb.Spolocna.Sviatky(rok))
-                {
-                    if (!sviatky.TryGetValue(s.Datum, out var zoznam))
-                    {
-                        sviatky[s.Datum] = zoznam = new List<SviatokDna>();
-                    }
-
-                    zoznam.Add(s);
-                }
-            }
-        }
-        catch (Exception)
-        {
-            // kalendár funguje aj bez Kalendária
-        }
-
-        var poznamky = new List<PoznamkaRiadok>();
-        try
-        {
-            poznamky = new PoznamkyService().PreDni(od, po);
-        }
-        catch (Exception)
-        {
-            // bez poznámok
-        }
-
+        var sviatky = SviatkyRokov(od.Year, po.Year);
+        var poznamky = PoznamkyDni(od, po);
+        var meniny = new MeninyKalendaria();
         var dnes = DateTime.Today;
-        var dni = new List<DenKalendara>();
-        for (var d = od.Date; d <= po.Date; d = d.AddDays(1))
+        return Enumerable.Range(0, (po.Date - od.Date).Days + 1).Select(i => od.Date.AddDays(i)).Select(d =>
         {
-            var den = DateOnly.FromDateTime(d);
-            var sviatkyDna = sviatky.TryGetValue(den, out var s) ? s : new List<SviatokDna>();
-            var meniny = "";
-            try
-            {
-                meniny = string.Join(", ", KalendariumDb.Spolocna.Meniny(den));
-            }
-            catch (Exception)
-            {
-                // bez menín
-            }
-
-            var datum = d;
-            dni.Add(new DenKalendara
+            var sviatkyDna = sviatky[DateOnly.FromDateTime(d)].ToList();
+            return new DenKalendara
             {
                 Datum = d,
                 MimoMesiaca = mesiac is { } m && d.Month != m,
@@ -436,14 +395,61 @@ public sealed partial class KalendarViewModel : ObservableObject
                 Vikend = d.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday,
                 Volno = sviatkyDna.Any(x => x.DenPracovnehoPokoja),
                 Sviatok = sviatkyDna.Count == 0 ? null : string.Join(", ", sviatkyDna.Select(x => x.Nazov)),
-                Meniny = meniny,
-                Prazdniny = prazdniny.TryGetValue(d, out var p) ? p : null,
-                Vyskyty = vyskyty.Where(v => v.Zaciatok.Date <= datum && v.PoslednyDen >= datum).ToList(),
-                Poznamky = poznamky.Where(x => x.Datum?.Date == datum).ToList(),
-            });
-        }
+                Meniny = meniny.Dna(d),
+                Prazdniny = prazdniny.GetValueOrDefault(d),
+                Vyskyty = vyskyty.Where(v => v.Zaciatok.Date <= d && v.PoslednyDen >= d).ToList(),
+                Poznamky = poznamky[d].ToList(),
+            };
+        }).ToList();
+    }
 
-        return dni;
+    /// <summary>Sviatky a dni pracovného pokoja z Kalendária (bez Kalendária žiadne – kalendár funguje aj tak).</summary>
+    private static ILookup<DateOnly, SviatokDna> SviatkyRokov(int od, int po)
+    {
+        try
+        {
+            return Enumerable.Range(od, po - od + 1).SelectMany(rok => KalendariumDb.Spolocna.Sviatky(rok)).ToLookup(s => s.Datum);
+        }
+        catch (Exception)
+        {
+            return Array.Empty<SviatokDna>().ToLookup(s => s.Datum);
+        }
+    }
+
+    private static ILookup<DateTime, PoznamkaRiadok> PoznamkyDni(DateTime od, DateTime po)
+    {
+        try
+        {
+            return new PoznamkyService().PreDni(od, po).ToLookup(p => p.Datum!.Value.Date);
+        }
+        catch (Exception)
+        {
+            return Array.Empty<PoznamkaRiadok>().ToLookup(p => p.Datum!.Value.Date);
+        }
+    }
+
+    /// <summary>Meniny z Kalendária; keď Kalendárium nie je dostupné, ďalšie dni sa už neskúšajú.</summary>
+    private sealed class MeninyKalendaria
+    {
+        private bool _dostupne = true;
+
+        public string Dna(DateTime den)
+        {
+            if (!_dostupne)
+            {
+                return "";
+            }
+
+            try
+            {
+                return string.Join(", ", KalendariumDb.Spolocna.Meniny(DateOnly.FromDateTime(den)));
+            }
+            catch (Exception)
+            {
+                _dostupne = false;
+                return "";
+            }
+        }
     }
 
     private void NacitajLegendu()

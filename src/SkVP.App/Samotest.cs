@@ -925,6 +925,20 @@ internal static class Samotest
         var pocet = NastaveniaProgramu.Import(NastaveniaProgramu.Nacitaj(subor));
         Over(pocet > 3 && Databaza.Citaj(UdajeSkVP.KlucAdresa) == "Skúšobná 1, Vzorovo", $"export a import nastavení ({pocet})");
         Databaza.Zapis(UdajeSkVP.KlucAdresa, "");
+
+        // podvrhnutý súbor nastavení: prípona loga ako cesta mimo dočasného priečinka sa odmietne (nič sa nezapíše)
+        var podvrh = new NastaveniaProgramu.Subor { Logo = Convert.ToBase64String(new byte[] { 1, 2, 3 }), LogoPripona = @"\..\..\skvp_podvrh.png" };
+        var odmietnute = false;
+        try
+        {
+            NastaveniaProgramu.Import(podvrh);
+        }
+        catch (SkvpException)
+        {
+            odmietnute = true;
+        }
+
+        Over(odmietnute, "import nastavení: prípona loga nemôže byť cesta");
         Krok("servis v poriadku");
     }
 
@@ -2937,14 +2951,22 @@ internal static class Samotest
 
     private static readonly ZachytavacVazieb ChybyVazieb = new();
 
+    /// <summary>
+    /// Známe prechodné hlásenie šablóny poľa dátumu (téma Fluent hľadá DatePicker skôr, ako je textové pole v ňom umiestnené);
+    /// väzba sa hneď potom pripojí správne.
+    /// </summary>
+    private const string ZnamaChybaPolaDatumu = "AncestorType='System.Windows.Controls.DatePicker'";
+
     private static void ZapisChybyVazieb()
     {
         System.Diagnostics.PresentationTraceSources.DataBindingSource.Listeners.Remove(ChybyVazieb);
-        Krok($"chyby väzieb XAML: {ChybyVazieb.Chyby.Count}");
-        foreach (var chyba in ChybyVazieb.Chyby.Take(60))
+        var chyby = ChybyVazieb.Chyby.Where(c => !c.Contains(ZnamaChybaPolaDatumu, StringComparison.Ordinal)).ToList();
+        foreach (var chyba in chyby.Take(40))
         {
             Krok("  väzba: " + chyba);
         }
+
+        Over(chyby.Count == 0, $"väzby XAML na všetkých obrazovkách bez chýb ({chyby.Count})");
     }
 
     private static void Krok(string text)

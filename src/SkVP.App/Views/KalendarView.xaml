@@ -121,9 +121,7 @@
                     <StackPanel>
                         <TextBlock Text="{Binding CasText}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         <TextBlock x:Name="Nazov" Text="{Binding Nazov}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                            <Run Text="{Binding Typ, Mode=OneWay}" /><Run Text="  ·  " /><Run Text="{Binding StavText, Mode=OneWay}" />
-                        </TextBlock>
+                        <TextBlock Text="{Binding TypAStav}" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         <TextBlock Text="{Binding TykaSaText}" FontSize="12" TextWrapping="Wrap" Margin="0,1,0,0"
                                    Foreground="{Binding Farba, Converter={StaticResource FarbaNaStetec}, ConverterParameter=T}"
                                    Visibility="{Binding TykaSaText, Converter={StaticResource NieJePrazdne}}" />

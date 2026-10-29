@@ -189,6 +189,18 @@ public static class NastaveniaProgramu
         }
     }
 
+    private static byte[] ZBase64(string text)
+    {
+        try
+        {
+            return Convert.FromBase64String(text);
+        }
+        catch (FormatException)
+        {
+            throw new SkvpException("Súbor nastavení je poškodený (logo alebo text úvodnej strany sa nedá prečítať).");
+        }
+    }
+
     /// <summary>Zapíše nastavenia zo súboru (doterajšie s rovnakým kľúčom sa prepíšu). Vráti počet nastavení.</summary>
     public static int Import(Subor subor, IReadOnlyCollection<string>? skupiny = null)
     {
@@ -208,12 +220,19 @@ public static class NastaveniaProgramu
             }
         }
 
-        if (subor.Logo is { Length: > 0 } logo && subor.LogoPripona is { Length: > 0 } pripona && (skupiny is null || skupiny.Contains(SkupinaLogo)))
+        if (subor.Logo is { Length: > 0 } logo && (skupiny is null || skupiny.Contains(SkupinaLogo)))
         {
+            // prípona zo súboru sa použije len ako známa prípona obrázka – nie ako časť cesty (súbor môže byť podvrhnutý)
+            var pripona = (subor.LogoPripona ?? "").ToLowerInvariant();
+            if (pripona is not (".png" or ".jpg" or ".jpeg" or ".bmp" or ".gif"))
+            {
+                throw new SkvpException("Logo v súbore nastavení nie je obrázok PNG, JPEG, BMP ani GIF.");
+            }
+
             var docasne = Path.Combine(Path.GetTempPath(), $"skvp_logo_{Guid.NewGuid():N}{pripona}");
             try
             {
-                File.WriteAllBytes(docasne, Convert.FromBase64String(logo));
+                File.WriteAllBytes(docasne, ZBase64(logo));
                 NastaveniaSkoly.NastavLogo(docasne);
             }
             finally
@@ -224,7 +243,7 @@ public static class NastaveniaProgramu
 
         if (subor.TextDoleNaStrane is { Length: > 0 } pata && (skupiny is null || skupiny.Contains(SkupinaPata)))
         {
-            TitulnaStrana.UlozDataPaty(Convert.FromBase64String(pata));
+            TitulnaStrana.UlozDataPaty(ZBase64(pata));
         }
 
         // typy udalostí: rovnaký názov dostane farbu zo súboru, nové typy sa doplnia (žiadny sa nemaže)
