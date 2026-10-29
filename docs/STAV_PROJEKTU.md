@@ -1,6 +1,7 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 24. 10. 2026 · posledné vydanie **v0.1.98** (vetva `main` = `vyvoj/etapa1`)
+Aktualizované: 29. 10. 2026 · posledné vydanie **v0.1.98**; na vetve `vyvoj/etapa1` je nevydaná hĺbková revízia
+a vlastné riešenia namiesto kódu z EviTA (pozri posledné dve časti)
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
