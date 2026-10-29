@@ -318,11 +318,30 @@ zložitosť (lizard), porovnanie s EviTA (jscpd medzi projektmi), chyby väzieb 
   `NavrhyUloh.KontrolaOsnovy`, `PolozkaArchivuRoka.TypSkupiny`, `Preklad.Pocet`, `TlacWindow.ZobrazVolby`;
   odstránené nepotrebné using a duplicitný alias `NovinkyViewModel.VsetkyKraje`.
 - **Samotest**: chyby väzieb XAML sú chybou testu (výnimka: prechodné hlásenie šablóny DatePicker v téme Fluent).
-- **Originalita**: približne 3 800 riadkov (13 % kódu SkVP) je takmer zhodných s EviTA – tlač a PDF (TlacWindow,
-  SuboryZostavy, PdfNorma, RozvrhTlace, ObojstrannaTlac/Window, NahladDokumentu, PozadieDokumentu, ObrazkyDokumentu),
-  diktovanie (PrepisHlasu, Diktovanie, DiktovanieDoPola, DiktovanieWindow, Mikrofon, HlasovePisanie), OCR (CitaniePdf),
-  aktualizácia, počasie, Dialogy. Kalendár/úlohy/poznámky sú prevažne pôvodné (`KalendarViewModel.Dni` prepísané).
-  Rozhodnutie o prepise týchto modulov čaká na používateľa.
+- **Originalita**: pôvodne približne 3 800 riadkov (13 % kódu SkVP) takmer zhodných s EviTA – prepísané, pozri nižšie.
+
+## Vlastné riešenia namiesto kódu z EviTA (29. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+Moduly prevzaté z EviTA sú nanovo navrhnuté a napísané; správanie, uložené nastavenia (`tlac.volby`, `tlac.pdf`,
+`tlac.obojstranne`, `pocasie.*`, `diktovanie.*`) a rozhrania pre ostatný kód zostali. Zhoda s EviTA (jscpd, 50 tokenov,
+6 riadkov): **3 797 → 364 riadkov (12,8 % → 1,2 %)**; zvyšok sú najmä rovnaké dátové tvary (enumy, kľúče PDF podľa normy,
+zoznam modelov Whisper) a nastavovanie ovládacích prvkov.
+- **Tlač a PDF**: `Impozicia` – jeden výpočet rozmiestnenia strán (mriežka 1/2/4/8, brožúra, opakovanie, dierovač,
+  zväčšenie bez orezania obsahu) pre tlač, náhľad, PDF aj obrázky; kreslenie cez `IPlatnoListu` (`ListyTlace` pre WPF,
+  `SkladaniePdf` pre PDF) namiesto dvoch kópií tej istej geometrie. `PlanTlace` – tlačové úlohy obojstrannej tlače
+  (duplex, ručné otáčanie, poradie, otočenie zadných strán) ako čistý výpočet; strany sa kreslia až pri tlači.
+  `TlacoveFronty`, `SkusobnyList`, sprievodca obojstrannou tlačou riadený údajmi, `ProfilObojstrannej.ZDuplexu/ZRucneho`.
+  `VolbyPdf` a vlastnosti formátov (`FormatyVystupu`) v samostatnom súbore, `PrilohaPdf.Word`. `PdfNorma`: XMP cez
+  System.Xml.Linq, prírastková aktualizácia z posledného traileru (overené qpdf a pikepdf: PDF/A-2b, PDF/A-3b s prílohou,
+  PDF/X-4). Viacstranový TIFF bez všetkých nekomprimovaných strán v pamäti.
+- **Diktovanie**: `Mikrofon` – waveIn so signálom z Windows (CALLBACK_EVENT) namiesto opakovaného zisťovania, buffery
+  v poradí plnenia, jeden blok pamäte; `PrepisHlasu` – jeden prístup k modelu pod zámkom, WAV cez `ReadOnlySpan`;
+  `Stahovanie` – spoločné sťahovanie modelu aj inštalátora, SHA-256 počas sťahovania, súbor až po overení;
+  `HlasovePisanie` s úniou INPUT (správna veľkosť na 32 aj 64 bitoch).
+- **Ostatné**: `PocasieService` a `AktualizaciaService` – odpovede služieb cez typové záznamy System.Text.Json,
+  spoločný HttpClient; `CitaniePdf` – jazyk OCR z dostupných jazykov Windows, riadky textu lineárne; `Dialogy` – tichý
+  režim samotestu na jednom mieste; `Prevodniky` – spoločné predky; `Databaza.CitajJson/ZapisJson`; `Preklad.VelkePrve`.
+- **Samotest** doplnený: rozmiestnenie strán (brožúra, 2 a 8 na list, opakovanie, dierovač, zväčšenie), plán tlačových
+  úloh, odpovede sprievodcu a profil tlačiarne, staršie a poškodené uložené voľby tlače.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
