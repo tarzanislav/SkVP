@@ -1,6 +1,6 @@
 using System.IO;
 using System.Net.Http;
-using System.Security.Cryptography;
+using Microsoft.Data.Sqlite;
 using SkVP.Data;
 
 namespace SkVP.Services;
@@ -15,22 +15,24 @@ public enum SposobDiktovania
     Offline,
 }
 
-/// <summary>Model na prepis reči (whisper.cpp, formát ggml) – súbor sa overí podľa SHA-256.</summary>
+/// <summary>Model na prepis reči (whisper.cpp, formát ggml); stiahnutý súbor sa overí podľa SHA-256.</summary>
 public sealed record ModelHlasu(string Kluc, string NazovSk, string PopisSk, string Subor, string Url, string Sha256, int VelkostMb)
 {
     public string Nazov => Preklad.T(NazovSk);
     public string Popis => Preklad.T(PopisSk);
+
+    /// <summary>Súbor modelu stiahnutý programom SkVP.</summary>
     public string Cesta => Path.Combine(Diktovanie.PriecinokModelov, Subor);
 
-    /// <summary>Rovnaký model stiahnutý programom EviTA (na tom istom počítači) – netreba ho sťahovať druhýkrát.</summary>
+    /// <summary>Ten istý model stiahnutý programom EviTA na tomto počítači – netreba ho sťahovať druhýkrát.</summary>
     public string CestaEvita => Path.Combine(Diktovanie.PriecinokModelovEvita, Subor);
 
-    /// <summary>Súbor modelu, ktorý sa použije: vlastný, inak model z EviTA.</summary>
-    public string CestaNaPouzitie => File.Exists(Cesta) || !File.Exists(CestaEvita) ? Cesta : CestaEvita;
+    /// <summary>Súbor, ktorý sa použije: vlastný, inak z EviTA (ak nie je ani jeden, vlastný – na stiahnutie).</summary>
+    public string CestaNaPouzitie => !File.Exists(Cesta) && File.Exists(CestaEvita) ? CestaEvita : Cesta;
 
-    public bool JeZEvity => !File.Exists(Cesta) && File.Exists(CestaEvita);
+    public bool JeZEvity => CestaNaPouzitie != Cesta;
 
-    public bool JeStiahnuty => File.Exists(Cesta) || File.Exists(CestaEvita);
+    public bool JeStiahnuty => File.Exists(CestaNaPouzitie);
 }
 
 /// <summary>Nastavenia diktovania a správa modelov na prepis bez internetu.</summary>
@@ -42,8 +44,10 @@ public static class Diktovanie
     /// <summary>Jazyk prepisu (slovenčina).</summary>
     public const string Jazyk = "sk";
 
-    /// <summary>Úvodný text pre model – slovenský pravopis, interpunkcia a slovník školského vzdelávacieho programu.</summary>
-    /// Je v tvare, aký má mať prepis (oblasť, dvojbodka, predmety oddelené čiarkou, bodka) – model ho napodobní.
+    /// <summary>
+    /// Úvodný text pre model – slovenský pravopis, interpunkcia a slovník školského vzdelávacieho programu. Je v tvare,
+    /// aký má mať prepis (oblasť, dvojbodka, predmety oddelené čiarkou, bodka) – model ho napodobní.
+    /// </summary>
     public const string Vyzva =
         "Jazyk a komunikácia: slovenský jazyk a literatúra, anglický jazyk, nemecký jazyk, ruský jazyk. " +
         "Matematika a práca s informáciami: matematika, informatika. Človek a príroda: fyzika, chémia, biológia. " +
@@ -76,111 +80,62 @@ public static class Diktovanie
 
     public static SposobDiktovania Sposob
     {
-        get
-        {
-            try
-            {
-                return Databaza.Citaj(KlucSposob) == "offline" ? SposobDiktovania.Offline : SposobDiktovania.Windows;
-            }
-            catch (Exception)
-            {
-                return SposobDiktovania.Windows;
-            }
-        }
-        set
-        {
-            Databaza.Zapis(KlucSposob, value == SposobDiktovania.Offline ? "offline" : "windows");
-        }
+        get => Nastavenie(KlucSposob) == "offline" ? SposobDiktovania.Offline : SposobDiktovania.Windows;
+        set => Databaza.Zapis(KlucSposob, value == SposobDiktovania.Offline ? "offline" : "windows");
     }
 
     public static ModelHlasu Model
     {
         get
         {
-            try
-            {
-                var kluc = Databaza.Citaj(KlucModel);
-                return Modely.FirstOrDefault(m => m.Kluc == kluc) ?? Modely[0];
-            }
-            catch (Exception)
-            {
-                return Modely[0];
-            }
+            var kluc = Nastavenie(KlucModel);
+            return Modely.FirstOrDefault(m => m.Kluc == kluc) ?? Modely[0];
         }
-        set
+
+        set => Databaza.Zapis(KlucModel, value.Kluc);
+    }
+
+    /// <summary>Nastavenie diktovania; nedostupná databáza = predvolené (diktovanie nesmie zhodiť okno).</summary>
+    private static string? Nastavenie(string kluc)
+    {
+        try
         {
-            Databaza.Zapis(KlucModel, value.Kluc);
+            return Databaza.Citaj(kluc);
+        }
+        catch (SqliteException)
+        {
+            return null;
         }
     }
 
-    /// <summary>Stiahne model, overí SHA-256 a až potom ho uloží (pri chybe nič nezostane).</summary>
+    /// <summary>Stiahne model a overí SHA-256; použiteľný súbor vznikne až po overení.</summary>
     public static async Task StiahniAsync(ModelHlasu model, IProgress<double>? priebeh, CancellationToken zrusenie)
     {
-        Directory.CreateDirectory(PriecinokModelov);
-        var docasny = model.Cesta + ".stahuje";
+        VysledokStahovania vysledok;
         try
         {
-            using var klient = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
-            klient.DefaultRequestHeaders.UserAgent.ParseAdd($"SkVP/{AktualizaciaService.AktualnaVerzia}");
-            using var odpoved = await klient.GetAsync(model.Url, HttpCompletionOption.ResponseHeadersRead, zrusenie);
-            odpoved.EnsureSuccessStatusCode();
-            var spolu = odpoved.Content.Headers.ContentLength ?? model.VelkostMb * 1024L * 1024L;
-            await using (var zdroj = await odpoved.Content.ReadAsStreamAsync(zrusenie))
-            await using (var ciel = new FileStream(docasny, FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20, true))
-            {
-                var buffer = new byte[1 << 20];
-                long precitane = 0;
-                int n;
-                while ((n = await zdroj.ReadAsync(buffer, zrusenie)) > 0)
-                {
-                    await ciel.WriteAsync(buffer.AsMemory(0, n), zrusenie);
-                    precitane += n;
-                    priebeh?.Report(Math.Min(0.99, (double)precitane / Math.Max(1, spolu)));
-                }
-            }
-
-            if (!await OverAsync(docasny, model.Sha256, zrusenie))
-            {
-                throw new SkvpException(Preklad.T("Stiahnutý model nemá správny kontrolný súčet (SHA-256) – nepoužije sa. Skúste to znova."));
-            }
-
-            File.Move(docasny, model.Cesta, true);
-            priebeh?.Report(1);
+            vysledok = await Stahovanie.StiahniAsync(model.Url,
+                new CielStahovania(model.Cesta, model.Sha256, OdhadVelkosti: model.VelkostMb * 1024L * 1024L), priebeh, zrusenie);
         }
         catch (HttpRequestException ex)
         {
             throw new SkvpException(Preklad.F($"Model sa nepodarilo stiahnuť. Skontrolujte pripojenie k internetu.\n\n{ex.Message}"));
         }
-        finally
+
+        if (vysledok != VysledokStahovania.Overeny)
         {
-            try
-            {
-                if (File.Exists(docasny))
-                {
-                    File.Delete(docasny);
-                }
-            }
-            catch (IOException)
-            {
-                // dočasný súbor sa zmaže nabudúce
-            }
+            throw new SkvpException(Preklad.T("Stiahnutý model nemá správny kontrolný súčet (SHA-256) – nepoužije sa. Skúste to znova."));
         }
     }
 
     /// <summary>SHA-256 súboru sa zhoduje s očakávaným.</summary>
-    public static async Task<bool> OverAsync(string cesta, string sha256, CancellationToken zrusenie = default)
-    {
-        await using var subor = new FileStream(cesta, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 20, true);
-        var hash = await SHA256.HashDataAsync(subor, zrusenie);
-        return Convert.ToHexString(hash).Equals(sha256, StringComparison.OrdinalIgnoreCase);
-    }
+    public static Task<bool> OverAsync(string cesta, string sha256, CancellationToken zrusenie = default) =>
+        Stahovanie.OverAsync(cesta, sha256, zrusenie);
 
+    /// <summary>Vymaže vlastný súbor modelu (model z EviTA zostane – patrí jej).</summary>
     public static void Vymaz(ModelHlasu model)
     {
         PrepisHlasu.Zavri();
-        if (File.Exists(model.Cesta))
-        {
-            File.Delete(model.Cesta);
-        }
+        File.Delete(model.Cesta);
     }
 }

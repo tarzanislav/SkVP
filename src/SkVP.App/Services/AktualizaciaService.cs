@@ -3,7 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Cryptography;
 using System.Text.Json;
 using SkVP.Data;
 
@@ -33,7 +32,7 @@ public sealed class AktualizaciaService
     private const string KlucKontrolovat = "Aktualizacie.Kontrolovat";
     private const string KlucPoslednaKontrola = "Aktualizacie.PoslednaKontrola";
 
-    private static readonly HttpClient Klient = VytvorKlienta();
+    private static HttpClient Klient => Stahovanie.Klient;
 
     /// <summary>Verzia nainštalovaného programu (napr. 0.2.7).</summary>
     public static Version AktualnaVerzia
@@ -142,74 +141,28 @@ public sealed class AktualizaciaService
         return null;
     }
 
-    /// <summary>Stiahne inštalátor do dočasného priečinka a overí jeho veľkosť a kontrolný súčet.</summary>
+    /// <summary>Stiahne inštalátor do dočasného priečinka a overí jeho veľkosť a kontrolný súčet. Vráti cestu k nemu.</summary>
     public async Task<string> StiahniAsync(DostupnaVerzia verzia, IProgress<double>? priebeh, CancellationToken zrusenie = default)
     {
-        var priecinok = Path.Combine(Path.GetTempPath(), "SkVP_aktualizacia");
-        Directory.CreateDirectory(priecinok);
-        var ciel = Path.Combine(priecinok, verzia.SuborNazov);
-
+        var ciel = Path.Combine(Path.GetTempPath(), "SkVP_aktualizacia", verzia.SuborNazov);
+        VysledokStahovania vysledok;
         try
         {
-            using var odpoved = await Klient.GetAsync(verzia.SuborAdresa, HttpCompletionOption.ResponseHeadersRead, zrusenie);
-            odpoved.EnsureSuccessStatusCode();
-            var spolu = odpoved.Content.Headers.ContentLength ?? verzia.SuborVelkost;
-
-            await using (var vstup = await odpoved.Content.ReadAsStreamAsync(zrusenie))
-            await using (var vystup = File.Create(ciel))
-            {
-                var buffer = new byte[81920];
-                long precitane = 0;
-                int pocet;
-                while ((pocet = await vstup.ReadAsync(buffer, zrusenie)) > 0)
-                {
-                    await vystup.WriteAsync(buffer.AsMemory(0, pocet), zrusenie);
-                    precitane += pocet;
-                    if (spolu > 0)
-                    {
-                        priebeh?.Report((double)precitane / spolu);
-                    }
-                }
-            }
+            vysledok = await Stahovanie.StiahniAsync(verzia.SuborAdresa,
+                new CielStahovania(ciel, verzia.Sha256, verzia.SuborVelkost > 0 ? verzia.SuborVelkost : null), priebeh, zrusenie);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException
                                        || (ex is TaskCanceledException && !zrusenie.IsCancellationRequested))
         {
-            // neúplný inštalátor sa nesmie spustiť ani zostať na disku
-            try
-            {
-                File.Delete(ciel);
-            }
-            catch (IOException)
-            {
-                // zmaže ho ďalšie sťahovanie (prepíše sa)
-            }
-
             throw new SkvpException($"Novú verziu sa nepodarilo stiahnuť.\n\n{ex.Message}");
         }
 
-        if (verzia.SuborVelkost > 0 && new FileInfo(ciel).Length != verzia.SuborVelkost)
+        return vysledok switch
         {
-            File.Delete(ciel);
-            throw new SkvpException("Stiahnutý súbor nemá správnu veľkosť. Skúste aktualizáciu znova.");
-        }
-
-        if (verzia.Sha256 is not null)
-        {
-            string sucet;
-            await using (var stream = File.OpenRead(ciel))
-            {
-                sucet = Convert.ToHexString(await SHA256.HashDataAsync(stream, zrusenie));
-            }
-
-            if (!string.Equals(sucet, verzia.Sha256, StringComparison.OrdinalIgnoreCase))
-            {
-                File.Delete(ciel);
-                throw new SkvpException("Kontrolný súčet stiahnutého súboru nesedí. Skúste aktualizáciu znova.");
-            }
-        }
-
-        return ciel;
+            VysledokStahovania.ZlaVelkost => throw new SkvpException("Stiahnutý súbor nemá správnu veľkosť. Skúste aktualizáciu znova."),
+            VysledokStahovania.ZlySucet => throw new SkvpException("Kontrolný súčet stiahnutého súboru nesedí. Skúste aktualizáciu znova."),
+            _ => ciel,
+        };
     }
 
     /// <summary>
@@ -248,11 +201,4 @@ public sealed class AktualizaciaService
 
     private static string? Text(JsonElement prvok, string nazov) =>
         prvok.TryGetProperty(nazov, out var hodnota) && hodnota.ValueKind == JsonValueKind.String ? hodnota.GetString() : null;
-
-    private static HttpClient VytvorKlienta()
-    {
-        var klient = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
-        klient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("SkVP", AktualnaVerzia.ToString()));
-        return klient;
-    }
 }

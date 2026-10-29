@@ -1,17 +1,18 @@
-using SkVP.Data;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
+using SkVP.Data;
 using SkVP.Pomocne;
 using SkVP.Services;
 
 namespace SkVP.Views;
 
-/// <summary>Nastavenie diktovania: hlasové písanie Windows alebo prepis v počítači (stiahnutie a výber modelu).</summary>
+/// <summary>Nastavenie diktovania: hlasové písanie Windows alebo prepis v počítači (výber, stiahnutie a vymazanie modelu).</summary>
 public partial class DiktovanieWindow : Window
 {
-    /// <summary>Riadok zoznamu modelov.</summary>
-    public sealed class VolbaModelu(ModelHlasu model) : INotifyPropertyChanged
+    /// <summary>Riadok zoznamu modelov; zmena výberu hneď prispôsobí tlačidlá okna.</summary>
+    public sealed class VolbaModelu(ModelHlasu model, Action priZmeneVyberu) : ObservableObject
     {
         private bool _vybrany;
 
@@ -19,23 +20,25 @@ public partial class DiktovanieWindow : Window
         public string Nazov => Model.Nazov;
         public string Velkost => $"· {Model.VelkostMb} MB";
         public string Popis => Model.Popis;
-        public string Stav => Model.JeZEvity ? "stiahnutý v programe EviTA – použije sa aj tu" : Model.JeStiahnuty ? "stiahnutý" : "";
+
+        public string Stav => Model.JeZEvity ? Preklad.T("stiahnutý v programe EviTA – použije sa aj tu")
+            : Model.JeStiahnuty ? Preklad.T("stiahnutý")
+            : "";
 
         public bool Vybrany
         {
             get => _vybrany;
             set
             {
-                _vybrany = value;
-                Zmena();
+                if (SetProperty(ref _vybrany, value))
+                {
+                    priZmeneVyberu();
+                }
             }
         }
 
-        public void Obnov() => Zmena(nameof(Stav));
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void Zmena([CallerMemberName] string? nazov = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nazov));
+        /// <summary>Po stiahnutí alebo vymazaní modelu.</summary>
+        public void ObnovStav() => OnPropertyChanged(nameof(Stav));
     }
 
     private readonly List<VolbaModelu> _modely;
@@ -44,82 +47,71 @@ public partial class DiktovanieWindow : Window
     public DiktovanieWindow()
     {
         InitializeComponent();
-        var vybrany = Diktovanie.Model;
-        _modely = Diktovanie.Modely.Select(m => new VolbaModelu(m) { Vybrany = m == vybrany }).ToList();
+        var ulozeny = Diktovanie.Model;
+        _modely = Diktovanie.Modely.Select(m => new VolbaModelu(m, ObnovTlacidla)).ToList();
+        _modely.First(m => m.Model == ulozeny).Vybrany = true;
         Modely.ItemsSource = _modely;
-        foreach (var m in _modely)
-        {
-            m.PropertyChanged += (_, e) =>
-            {
-                if (e.PropertyName == nameof(VolbaModelu.Vybrany))
-                {
-                    Aktualizuj();
-                }
-            };
-        }
 
         (Diktovanie.Sposob == SposobDiktovania.Offline ? Offline : Windows).IsChecked = true;
         Prekazka.Text = PrepisHlasu.Prekazka() ?? "";
-        SlovencinaInfo.Text = HlasovePisanie.Slovencina is null
-            ? Preklad.T("Slovenská klávesnica v systéme nie je – hlasové písanie by rozpoznávalo iný jazyk.")
-            : Preklad.T("Slovenčina je v systéme nastavená.");
-        SlovencinaInfo.SetResourceReference(System.Windows.Controls.TextBlock.ForegroundProperty,
-            HlasovePisanie.Slovencina is null ? "SystemFillColorCautionBrush" : "SystemFillColorSuccessBrush");
+        var slovencina = HlasovePisanie.Slovencina is not null;
+        SlovencinaInfo.Text = slovencina
+            ? Preklad.T("Slovenčina je v systéme nastavená.")
+            : Preklad.T("Slovenská klávesnica v systéme nie je – hlasové písanie by rozpoznávalo iný jazyk.");
+        SlovencinaInfo.SetResourceReference(TextBlock.ForegroundProperty, slovencina ? "SystemFillColorSuccessBrush" : "SystemFillColorCautionBrush");
         Closing += (_, _) => _stahovanie?.Cancel();
-        Aktualizuj();
+        ObnovTlacidla();
     }
 
-    public ModelHlasu VybranyModel => _modely.FirstOrDefault(m => m.Vybrany)?.Model ?? Diktovanie.Modely[0];
+    private ModelHlasu VybranyModel => _modely.Find(m => m.Vybrany)?.Model ?? Diktovanie.Modely[0];
 
-    private void Aktualizuj()
+    private bool PrepisVPocitaci => Offline.IsChecked == true;
+
+    private void ObnovTlacidla()
     {
-        SekciaModelov.IsEnabled = Offline.IsChecked == true && PrepisHlasu.Prekazka() is null;
         var model = VybranyModel;
+        SekciaModelov.IsEnabled = PrepisVPocitaci && PrepisHlasu.Prekazka() is null;
         Stiahnut.IsEnabled = _stahovanie is null && !model.JeStiahnuty;
-        Vymazat.IsEnabled = _stahovanie is null && System.IO.File.Exists(model.Cesta);
+        Vymazat.IsEnabled = _stahovanie is null && File.Exists(model.Cesta);
     }
 
-    private void Sposob_Click(object sender, RoutedEventArgs e) => Aktualizuj();
+    private void Sposob_Click(object sender, RoutedEventArgs e) => ObnovTlacidla();
 
     private async void Stiahnut_Click(object sender, RoutedEventArgs e) => await StiahnutAsync();
 
-    /// <summary>Stiahne vybraný model (s priebehom, dá sa zrušiť zatvorením okna).</summary>
-    public async Task StiahnutAsync()
+    /// <summary>Stiahne vybraný model s priebehom; zatvorením okna sa sťahovanie zruší.</summary>
+    private async Task StiahnutAsync()
     {
         var model = VybranyModel;
-        _stahovanie = new CancellationTokenSource();
-        Priebeh.Visibility = Visibility.Visible;
+        using var zrusenie = new CancellationTokenSource();
+        _stahovanie = zrusenie;
         Priebeh.Value = 0;
+        Priebeh.Visibility = Visibility.Visible;
         StavStahovania.Text = Preklad.F($"Sťahuje sa {model.Nazov} ({model.VelkostMb} MB)…");
-        Aktualizuj();
+        ObnovTlacidla();
         try
         {
-            var priebeh = new Progress<double>(p =>
+            var priebeh = new Progress<double>(podiel =>
             {
-                Priebeh.Value = p;
-                StavStahovania.Text = Preklad.F($"Sťahuje sa {model.Nazov}: {p * 100:0} % z {model.VelkostMb} MB");
+                Priebeh.Value = podiel;
+                StavStahovania.Text = Preklad.F($"Sťahuje sa {model.Nazov}: {podiel * 100:0} % z {model.VelkostMb} MB");
             });
-            await Diktovanie.StiahniAsync(model, priebeh, _stahovanie.Token);
+            await Diktovanie.StiahniAsync(model, priebeh, zrusenie.Token);
             StavStahovania.Text = Preklad.T("Model je stiahnutý a overený (SHA-256). Diktovanie funguje aj bez internetu.");
         }
         catch (OperationCanceledException)
         {
             StavStahovania.Text = Preklad.T("Sťahovanie je zrušené.");
         }
-        catch (SkvpException ex)
-        {
-            StavStahovania.Text = ex.Message;
-        }
         catch (Exception ex)
         {
-            StavStahovania.Text = ex.GetBaseException().Message;
+            StavStahovania.Text = ex is SkvpException ? ex.Message : ex.GetBaseException().Message;
         }
         finally
         {
             _stahovanie = null;
             Priebeh.Visibility = Visibility.Collapsed;
-            _modely.ForEach(m => m.Obnov());
-            Aktualizuj();
+            ObnovStavy();
         }
     }
 
@@ -135,32 +127,38 @@ public partial class DiktovanieWindow : Window
         {
             Diktovanie.Vymaz(model);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
             Dialogy.Chyba(Preklad.T("Model sa nepodarilo vymazať."), ex);
         }
 
-        _modely.ForEach(m => m.Obnov());
-        Aktualizuj();
+        ObnovStavy();
+    }
+
+    private void ObnovStavy()
+    {
+        _modely.ForEach(m => m.ObnovStav());
+        ObnovTlacidla();
     }
 
     private void Ulozit_Click(object sender, RoutedEventArgs e)
     {
-        var offline = Offline.IsChecked == true;
+        var offline = PrepisVPocitaci;
         if (offline && PrepisHlasu.Prekazka() is { } prekazka)
         {
             Dialogy.Upozornenie(prekazka);
             return;
         }
 
+        var model = VybranyModel;
         Diktovanie.Sposob = offline ? SposobDiktovania.Offline : SposobDiktovania.Windows;
-        if (Diktovanie.Model != VybranyModel)
+        if (Diktovanie.Model != model)
         {
             PrepisHlasu.Zavri();
-            Diktovanie.Model = VybranyModel;
+            Diktovanie.Model = model;
         }
 
-        if (offline && !VybranyModel.JeStiahnuty)
+        if (offline && !model.JeStiahnuty)
         {
             Dialogy.Info(Preklad.T("Vybraný model ešte nie je stiahnutý – stiahnite ho tlačidlom Stiahnuť vybraný model, inak diktovanie nebude fungovať."));
         }
