@@ -80,8 +80,8 @@ public sealed partial class DashboardViewModel
 
     // ------------------------------------------------------------------ dátum, meniny, sviatky
 
-    public string DatumVelky => PocasieService.VelkePrve(DateTime.Today.ToString("d. MMMM yyyy", Sk));
-    public string DenVTyzdni => PocasieService.VelkePrve(DateTime.Today.ToString("dddd", Sk));
+    public string DatumVelky => Preklad.VelkePrve(DateTime.Today.ToString("d. MMMM yyyy", Sk));
+    public string DenVTyzdni => Preklad.VelkePrve(DateTime.Today.ToString("dddd", Sk));
 
     public string TyzdenText =>
         $"{ISOWeek.GetWeekOfYear(DateTime.Today)}. týždeň · {DateTime.Today.DayOfYear}. deň roka";
@@ -112,7 +112,7 @@ public sealed partial class DashboardViewModel
 
             var sviatky = kalendar.SviatkyDna(dnes);
             JeDnesVolno = sviatky.Any(sv => sv.DenPracovnehoPokoja);
-            Sviatky = sviatky.Select(sv => $"{PocasieService.VelkePrve(sv.DruhText)}: {sv.Nazov}" +
+            Sviatky = sviatky.Select(sv => $"{Preklad.VelkePrve(sv.DruhText)}: {sv.Nazov}" +
                                            (sv.Druh != Kalendarium.DruhSviatku.PamatnyDen && !sv.DenPracovnehoPokoja ? " (nie je deň pracovného pokoja)" : ""))
                 .ToList();
 

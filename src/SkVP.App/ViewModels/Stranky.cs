@@ -30,7 +30,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     /// <summary>Stena osnov a pokrok: zapnuté úvodné časti (ak majú časti), oblasti, zapnuté záverečné časti.</summary>
     public List<OblastVM> Oblasti => Hlavny.VsetkySkupiny.Where(o => o.JeOblast || (o.Aktivna && o.Pocet > 0)).ToList();
 
-    public string Datum => PocasieService.VelkePrve(DateTime.Today.ToString("dddd d. MMMM yyyy", CultureInfo.GetCultureInfo("sk-SK")));
+    public string Datum => Preklad.VelkePrve(DateTime.Today.ToString("dddd d. MMMM yyyy", CultureInfo.GetCultureInfo("sk-SK")));
 
     public string Pozdrav => DateTime.Now.Hour switch
     {

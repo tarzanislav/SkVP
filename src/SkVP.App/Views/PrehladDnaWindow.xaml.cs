@@ -19,7 +19,7 @@ public partial class PrehladDnaWindow : Window
     public PrehladDnaWindow(PrehladDna prehlad)
     {
         InitializeComponent();
-        Nadpis.Text = PocasieService.VelkePrve(DateTime.Today.ToString("dddd d. MMMM yyyy", Planovanie.Sk));
+        Nadpis.Text = Preklad.VelkePrve(DateTime.Today.ToString("dddd d. MMMM yyyy", Planovanie.Sk));
         Skupina("Dnes", prehlad.Dnes.Select(v => (v.Farba, $"{v.CasText}  ·  {v.Nazov}")));
         Skupina("Pripomienky na najbližšie dni", prehlad.Pripomienky.Select(v => (v.Farba, $"{Planovanie.TerminText(v.Zaciatok)}  ·  {v.Nazov}")));
         Skupina("Úlohy po termíne", prehlad.PoTermine.Select(u => ("#E07A7A", $"{u.TerminText}  ·  {u.Text}")));

@@ -1,9 +1,12 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using SkVP.Data;
 
 namespace SkVP.Services;
@@ -21,18 +24,18 @@ public sealed record DostupnaVerzia(
     string? Sha256);
 
 /// <summary>
-/// Kontrola a inštalácia novej verzie programu. Nové verzie sa zverejňujú ako vydania (releases)
-/// v repozitári na GitHube; inštalátor sa stiahne, overí a spustí v tichom režime.
+/// Nové verzie programu: vydania (releases) v repozitári na GitHube. Inštalátor sa stiahne, overí (veľkosť, SHA-256)
+/// a spustí v tichom režime.
 /// </summary>
-public sealed class AktualizaciaService
+public static class AktualizaciaService
 {
     public const string Repozitar = "tarzanislav/skvp";
     public const string StrankaVydani = "https://github.com/" + Repozitar + "/releases";
 
     private const string KlucKontrolovat = "Aktualizacie.Kontrolovat";
     private const string KlucPoslednaKontrola = "Aktualizacie.PoslednaKontrola";
-
-    private static HttpClient Klient => Stahovanie.Klient;
+    private const int ZrusenieUac = 1223;
+    private static readonly TimeSpan LimitKontroly = TimeSpan.FromSeconds(30);
 
     /// <summary>Verzia nainštalovaného programu (napr. 0.2.7).</summary>
     public static Version AktualnaVerzia
@@ -44,105 +47,77 @@ public sealed class AktualizaciaService
         }
     }
 
-    public bool KontrolovatPriSpusteni() => Databaza.Citaj(KlucKontrolovat) != "0";
-
-    public void NastavKontroluPriSpusteni(bool kontrolovat) => Databaza.Zapis(KlucKontrolovat, kontrolovat ? "1" : "0");
-
-    public DateTime? PoslednaKontrola() =>
-        DateTime.TryParse(Databaza.Citaj(KlucPoslednaKontrola), System.Globalization.CultureInfo.InvariantCulture,
-            System.Globalization.DateTimeStyles.None, out var cas) ? cas : null;
+    /// <summary>Kontrolovať novú verziu pri spustení programu (predvolene áno).</summary>
+    public static bool KontrolovatPriSpusteni
+    {
+        get => Databaza.Citaj(KlucKontrolovat) != "0";
+        set => Databaza.Zapis(KlucKontrolovat, value ? "1" : "0");
+    }
 
     /// <summary>
-    /// Zistí, či je na GitHube novšia verzia. Vráti ju, alebo null, ak je program aktuálny.
-    /// Pri chybe siete vyhodí <see cref="SkvpException"/> so zrozumiteľnou správou.
+    /// Novšia verzia na GitHube, alebo null, ak je program aktuálny. Chyba siete = <see cref="SkvpException"/>
+    /// so zrozumiteľnou správou.
     /// </summary>
-    public async Task<DostupnaVerzia?> SkontrolujAsync(CancellationToken zrusenie = default)
+    public static async Task<DostupnaVerzia?> SkontrolujAsync(CancellationToken zrusenie = default)
     {
+        using var limit = CancellationTokenSource.CreateLinkedTokenSource(zrusenie);
+        limit.CancelAfter(LimitKontroly);
         string json;
-        using var casovac = CancellationTokenSource.CreateLinkedTokenSource(zrusenie);
-        casovac.CancelAfter(TimeSpan.FromSeconds(30));
         try
         {
             using var poziadavka = new HttpRequestMessage(HttpMethod.Get, $"https://api.github.com/repos/{Repozitar}/releases/latest");
             poziadavka.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.github+json"));
-            using var odpoved = await Klient.SendAsync(poziadavka, casovac.Token);
-            if (odpoved.StatusCode == System.Net.HttpStatusCode.NotFound)
+            using var odpoved = await Stahovanie.Klient.SendAsync(poziadavka, limit.Token);
+            if (odpoved.StatusCode == HttpStatusCode.NotFound)
             {
-                throw new SkvpException(
-                    "Na GitHube sa nenašlo žiadne verejné vydanie programu. Repozitár je pravdepodobne súkromný alebo ešte nemá vydanie.");
+                throw new SkvpException("Na GitHube sa nenašlo žiadne verejné vydanie programu. Repozitár je pravdepodobne súkromný alebo ešte nemá vydanie.");
             }
 
             odpoved.EnsureSuccessStatusCode();
-            json = await odpoved.Content.ReadAsStringAsync(casovac.Token);
+            json = await odpoved.Content.ReadAsStringAsync(limit.Token);
         }
         catch (HttpRequestException ex)
         {
             throw new SkvpException($"Nepodarilo sa spojiť s GitHubom. Skontrolujte pripojenie na internet.\n\n{ex.Message}");
         }
-        catch (TaskCanceledException) when (!zrusenie.IsCancellationRequested)
+        catch (OperationCanceledException) when (!zrusenie.IsCancellationRequested)
         {
             throw new SkvpException("GitHub neodpovedal včas. Skúste to neskôr.");
         }
 
         ZapisKontrolu();
-        var vydanie = PrecitajVydanie(json);
-        return vydanie is not null && vydanie.Verzia > AktualnaVerzia ? vydanie : null;
+        return PrecitajVydanie(json) is { } vydanie && vydanie.Verzia > AktualnaVerzia ? vydanie : null;
     }
 
-    /// <summary>Spracuje odpoveď GitHubu o vydaní. Vráti null, ak vydanie nemá inštalátor alebo platnú verziu.</summary>
+    /// <summary>Vydanie z odpovede GitHubu; null, ak nemá platnú verziu alebo inštalátor SkVP_Setup*.exe.</summary>
     public static DostupnaVerzia? PrecitajVydanie(string json)
     {
-        using var dokument = JsonDocument.Parse(json);
-        var koren = dokument.RootElement;
+        var vydanie = JsonSerializer.Deserialize<VydanieGitHub>(json);
+        if (vydanie is null || !Version.TryParse(vydanie.Znacka?.TrimStart('v', 'V'), out var verzia))
+        {
+            return null;
+        }
 
-        var tag = Text(koren, "tag_name")?.TrimStart('v', 'V');
-        if (!Version.TryParse(tag, out var verzia))
+        var instalator = vydanie.Subory?.FirstOrDefault(s =>
+            s.Nazov is { } nazov && !string.IsNullOrEmpty(s.Adresa)
+            && nazov.StartsWith("SkVP_Setup", StringComparison.OrdinalIgnoreCase) && nazov.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+        if (instalator is null)
         {
             return null;
         }
 
         verzia = new Version(verzia.Major, verzia.Minor, Math.Max(0, verzia.Build));
-        if (!koren.TryGetProperty("assets", out var subory) || subory.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        foreach (var subor in subory.EnumerateArray())
-        {
-            var nazov = Text(subor, "name") ?? "";
-            if (!nazov.StartsWith("SkVP_Setup", StringComparison.OrdinalIgnoreCase) ||
-                !nazov.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            var adresa = Text(subor, "browser_download_url");
-            if (string.IsNullOrEmpty(adresa))
-            {
-                continue;
-            }
-
-            var velkost = subor.TryGetProperty("size", out var v) && v.ValueKind == JsonValueKind.Number ? v.GetInt64() : 0;
-            var digest = Text(subor, "digest");
-            var sha = digest is not null && digest.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase) ? digest[7..] : null;
-
-            return new DostupnaVerzia(
-                verzia,
-                Text(koren, "name") ?? $"SkVP {verzia}",
-                Text(koren, "body") ?? "",
-                DateTime.TryParse(Text(koren, "published_at"), out var zverejnene) ? zverejnene.ToLocalTime() : null,
-                Text(koren, "html_url") ?? StrankaVydani,
-                nazov,
-                adresa,
-                velkost,
-                sha);
-        }
-
-        return null;
+        const string PredponaSha = "sha256:";
+        var sha = instalator.Odtlacok is { } odtlacok && odtlacok.StartsWith(PredponaSha, StringComparison.OrdinalIgnoreCase) ? odtlacok[PredponaSha.Length..] : null;
+        DateTime? zverejnene = DateTimeOffset.TryParse(vydanie.Zverejnene, CultureInfo.InvariantCulture, DateTimeStyles.None, out var cas)
+            ? cas.LocalDateTime
+            : null;
+        return new DostupnaVerzia(verzia, vydanie.Nazov ?? $"SkVP {verzia}", vydanie.Popis ?? "", zverejnene, vydanie.Stranka ?? StrankaVydani,
+            instalator.Nazov!, instalator.Adresa!, instalator.Velkost ?? 0, sha);
     }
 
     /// <summary>Stiahne inštalátor do dočasného priečinka a overí jeho veľkosť a kontrolný súčet. Vráti cestu k nemu.</summary>
-    public async Task<string> StiahniAsync(DostupnaVerzia verzia, IProgress<double>? priebeh, CancellationToken zrusenie = default)
+    public static async Task<string> StiahniAsync(DostupnaVerzia verzia, IProgress<double>? priebeh, CancellationToken zrusenie = default)
     {
         var ciel = Path.Combine(Path.GetTempPath(), "SkVP_aktualizacia", verzia.SuborNazov);
         VysledokStahovania vysledok;
@@ -152,7 +127,7 @@ public sealed class AktualizaciaService
                 new CielStahovania(ciel, verzia.Sha256, verzia.SuborVelkost > 0 ? verzia.SuborVelkost : null), priebeh, zrusenie);
         }
         catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException
-                                       || (ex is TaskCanceledException && !zrusenie.IsCancellationRequested))
+                                       || (ex is OperationCanceledException && !zrusenie.IsCancellationRequested))
         {
             throw new SkvpException($"Novú verziu sa nepodarilo stiahnuť.\n\n{ex.Message}");
         }
@@ -166,10 +141,10 @@ public sealed class AktualizaciaService
     }
 
     /// <summary>
-    /// Spustí inštalátor v tichom režime. Windows sa opýta na povolenie (inštalácia do Program Files).
-    /// Po inštalácii sa program spustí znova. Vráti false, ak používateľ povolenie odmietol.
+    /// Spustí inštalátor v tichom režime (Windows sa opýta na povolenie – inštalácia do Program Files); po inštalácii sa
+    /// program spustí znova. False = používateľ povolenie odmietol.
     /// </summary>
-    public bool SpustiInstalator(string instalator)
+    public static bool SpustiInstalator(string instalator)
     {
         try
         {
@@ -180,9 +155,8 @@ public sealed class AktualizaciaService
             });
             return true;
         }
-        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        catch (Win32Exception ex) when (ex.NativeErrorCode == ZrusenieUac)
         {
-            // používateľ odmietol povolenie v okne Kontrola používateľských kont
             return false;
         }
     }
@@ -193,12 +167,25 @@ public sealed class AktualizaciaService
         {
             Databaza.Zapis(KlucPoslednaKontrola, Databaza.Teraz());
         }
-        catch (Exception)
+        catch (Microsoft.Data.Sqlite.SqliteException)
         {
             // záznam o kontrole nie je dôležitý
         }
     }
 
-    private static string? Text(JsonElement prvok, string nazov) =>
-        prvok.TryGetProperty(nazov, out var hodnota) && hodnota.ValueKind == JsonValueKind.String ? hodnota.GetString() : null;
+    // odpoveď GitHub API (len použité údaje)
+
+    private sealed record VydanieGitHub(
+        [property: JsonPropertyName("tag_name")] string? Znacka,
+        [property: JsonPropertyName("name")] string? Nazov,
+        [property: JsonPropertyName("body")] string? Popis,
+        [property: JsonPropertyName("published_at")] string? Zverejnene,
+        [property: JsonPropertyName("html_url")] string? Stranka,
+        [property: JsonPropertyName("assets")] List<SuborGitHub>? Subory);
+
+    private sealed record SuborGitHub(
+        [property: JsonPropertyName("name")] string? Nazov,
+        [property: JsonPropertyName("browser_download_url")] string? Adresa,
+        [property: JsonPropertyName("size")] long? Velkost,
+        [property: JsonPropertyName("digest")] string? Odtlacok);
 }

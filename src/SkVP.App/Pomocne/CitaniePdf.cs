@@ -1,11 +1,10 @@
 using System.Diagnostics;
 using System.IO;
-using System.Text.Json;
 using System.Text;
+using System.Text.Json;
 using SkVP.Data;
 using SkVP.Services;
 using Windows.Data.Pdf;
-using Windows.Globalization;
 using Windows.Graphics.Imaging;
 using Windows.Media.Ocr;
 using Windows.Storage;
@@ -14,109 +13,79 @@ using Windows.Storage.Streams;
 namespace SkVP.Pomocne;
 
 /// <summary>
-/// Text z PDF (aj skenovaného) alebo obrázka – vstavaným čítaním PDF a rozpoznávaním textu (OCR) systému Windows, bez
-/// internetu a bez ďalších knižníc (prevzaté z EviTA). Slová sa skladajú do riadkov podľa polohy, aby riadok tabuľky zostal spolu.
+/// Text z PDF (aj skenovaného) alebo obrázka cez súčasti Windows – vykreslenie PDF a rozpoznávanie textu (OCR) –
+/// bez internetu a bez ďalších knižníc. Slová sa skladajú do riadkov podľa polohy, aby riadok tabuľky zostal spolu.
 /// </summary>
+/// <remarks>
+/// Rozpoznáva sa v samostatnom procese SkVP (<see cref="Parameter"/>): súčasti Windows na PDF a OCR pri ukončení procesu
+/// niekedy padajú (0xC000000D) – v pomocnom procese to nevadí a hlavný program zostane v poriadku.
+/// </remarks>
 public static class CitaniePdf
 {
-    /// <summary>Jazyk rozpoznávania: slovenčina, inak čeština, inak jazyk používateľa Windows. Null = OCR nie je.</summary>
-    public static OcrEngine? Engine(out string jazyk)
-    {
-        jazyk = "";
-        try
-        {
-            foreach (var kod in new[] { "sk", "sk-SK", "cs", "cs-CZ" })
-            {
-                var l = new Language(kod);
-                if (OcrEngine.IsLanguageSupported(l) && OcrEngine.TryCreateFromLanguage(l) is { } e)
-                {
-                    jazyk = l.DisplayName;
-                    return e;
-                }
-            }
+    /// <summary>Parameter pomocného procesu: SkVP.exe --ocr &lt;súbor&gt; &lt;výsledok.json&gt;.</summary>
+    public const string Parameter = "--ocr";
 
-            if (OcrEngine.TryCreateFromUserProfileLanguages() is { } predvoleny)
-            {
-                jazyk = predvoleny.RecognizerLanguage.DisplayName;
-                return predvoleny;
-            }
-        }
-        catch (Exception)
-        {
-            // OCR v systéme nie je
-        }
+    private const int NajviacStran = 200;
+    private const double DpiStrany = 300;
+    private static readonly TimeSpan CasovyLimit = TimeSpan.FromMinutes(10);
 
-        return null;
-    }
-
-    /// <summary>Výsledok rozpoznania v pomocnom procese.</summary>
+    /// <summary>Výsledok pomocného procesu (súbor JSON).</summary>
     private sealed record VysledokOcr(string? Text, string? Jazyk, string? Chyba);
 
-    /// <summary>Text z PDF (každá strana sa vykreslí a rozpozná) alebo z obrázka.</summary>
-    /// <remarks>
-    /// Rozpoznáva sa v samostatnom procese SkVP (parameter --ocr): súčasti Windows na PDF a OCR pri ukončení procesu
-    /// padajú (0xC000000D) – v pomocnom procese to nevadí a hlavný program zostane v poriadku.
-    /// </remarks>
+    private static string NedostupneOcr => Preklad.T("Rozpoznávanie textu (OCR) nie je vo Windows dostupné. Uložte dokument vo Worde (DOCX) a naimportujte ho.");
+
+    /// <summary>Prečíta text z PDF (každá strana sa vykreslí a rozpozná) alebo z obrázka v pomocnom procese.</summary>
     public static async Task<(string Text, string Jazyk)> PrecitajAsync(string cesta, CancellationToken zrusenie = default)
     {
-        var vystup = Path.Combine(Path.GetTempPath(), $"skvp_ocr_{Guid.NewGuid():N}.json");
-        var program = Environment.ProcessPath ?? throw new SkvpException(Preklad.T("Rozpoznávanie textu (OCR) nie je vo Windows dostupné. Uložte dokument vo Worde (DOCX) a naimportujte ho."));
+        var program = Environment.ProcessPath ?? throw new SkvpException(NedostupneOcr);
+        var vysledokSubor = Path.Combine(Path.GetTempPath(), $"skvp_ocr_{Guid.NewGuid():N}.json");
         var spustenie = new ProcessStartInfo(program) { UseShellExecute = false, CreateNoWindow = true };
-        spustenie.ArgumentList.Add(Parameter);
-        spustenie.ArgumentList.Add(Path.GetFullPath(cesta));
-        spustenie.ArgumentList.Add(vystup);
+        foreach (var argument in new[] { Parameter, Path.GetFullPath(cesta), vysledokSubor })
+        {
+            spustenie.ArgumentList.Add(argument);
+        }
+
         try
         {
-            using var proces = Process.Start(spustenie) ?? throw new InvalidOperationException("--ocr");
+            using var proces = Process.Start(spustenie) ?? throw new SkvpException(NedostupneOcr);
             using var limit = CancellationTokenSource.CreateLinkedTokenSource(zrusenie);
-            limit.CancelAfter(TimeSpan.FromMinutes(10));
+            limit.CancelAfter(CasovyLimit);
             try
             {
                 await proces.WaitForExitAsync(limit.Token);
             }
             catch (OperationCanceledException)
             {
-                proces.Kill(true);
+                proces.Kill(entireProcessTree: true);
                 zrusenie.ThrowIfCancellationRequested();
                 throw new SkvpException(Preklad.T("Rozpoznávanie textu trvalo príliš dlho. Skúste menší súbor alebo dokument vo Worde."));
             }
 
-            if (!File.Exists(vystup))
-            {
-                throw new SkvpException(Preklad.F($"Rozpoznávanie textu zlyhalo (kód {proces.ExitCode})."));
-            }
-
-            var vysledok = JsonSerializer.Deserialize<VysledokOcr>(await File.ReadAllTextAsync(vystup, zrusenie));
-            if (vysledok?.Chyba is { } chyba)
-            {
-                throw new SkvpException(chyba);
-            }
-
-            return (vysledok?.Text ?? "", vysledok?.Jazyk ?? "");
+            var vysledok = File.Exists(vysledokSubor)
+                ? JsonSerializer.Deserialize<VysledokOcr>(await File.ReadAllTextAsync(vysledokSubor, zrusenie))
+                : throw new SkvpException(Preklad.F($"Rozpoznávanie textu zlyhalo (kód {proces.ExitCode})."));
+            return vysledok?.Chyba is { } chyba ? throw new SkvpException(chyba) : (vysledok?.Text ?? "", vysledok?.Jazyk ?? "");
         }
         finally
         {
             try
             {
-                File.Delete(vystup);
+                File.Delete(vysledokSubor);
             }
-            catch (Exception)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                // dočasný súbor
+                // dočasný súbor v priečinku TEMP
             }
         }
     }
 
-    /// <summary>Parameter pomocného procesu: SkVP.exe --ocr &lt;súbor&gt; &lt;výstup.json&gt;.</summary>
-    public const string Parameter = "--ocr";
-
     /// <summary>Pomocný proces: rozpozná text, zapíše výsledok a hneď sa ukončí (bez upratovania súčastí Windows).</summary>
-    public static void SpustiPomocnyProces(string cesta, string vystup)
+    public static void SpustiPomocnyProces(string cesta, string vysledokSubor)
     {
         VysledokOcr vysledok;
         try
         {
-            var (text, jazyk) = Task.Run(() => PrecitajVPozadiAsync(cesta, CancellationToken.None)).GetAwaiter().GetResult();
+            var (text, jazyk) = Task.Run(() => RozpoznajAsync(cesta)).GetAwaiter().GetResult();
             vysledok = new VysledokOcr(text, jazyk, null);
         }
         catch (SkvpException ex)
@@ -128,95 +97,139 @@ public static class CitaniePdf
             vysledok = new VysledokOcr(null, null, Preklad.F($"Dokument sa nepodarilo prečítať: {ex.GetBaseException().Message}"));
         }
 
-        File.WriteAllText(vystup, JsonSerializer.Serialize(vysledok));
+        File.WriteAllText(vysledokSubor, JsonSerializer.Serialize(vysledok));
         Process.GetCurrentProcess().Kill();
     }
 
-    private static async Task<(string Text, string Jazyk)> PrecitajVPozadiAsync(string cesta, CancellationToken zrusenie)
+    /// <summary>
+    /// Rozpoznávanie v jazyku dokumentov: slovenčina, inak čeština (oba jazyky majú rovnaké znaky s diakritikou), inak
+    /// jazyk používateľa Windows. Null = OCR v systéme nie je.
+    /// </summary>
+    private static OcrEngine? Rozpoznavac(out string jazyk)
     {
-        var engine = Engine(out var jazyk)
-                     ?? throw new SkvpException(Preklad.T("Rozpoznávanie textu (OCR) nie je vo Windows dostupné. Uložte dokument vo Worde (DOCX) a naimportujte ho."));
-        var text = new StringBuilder();
-        var subor = await StorageFile.GetFileFromPathAsync(Path.GetFullPath(cesta));
-        if (Path.GetExtension(cesta).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+        try
         {
-            var pdf = await PdfDocument.LoadFromFileAsync(subor);
-            for (uint i = 0; i < Math.Min(pdf.PageCount, 200u); i++)
-            {
-                zrusenie.ThrowIfCancellationRequested();
-                using var strana = pdf.GetPage(i);
-                using var prud = new InMemoryRandomAccessStream();
-                var mierka = Math.Min(300.0 / 96.0, OcrEngine.MaxImageDimension / Math.Max(strana.Size.Width, strana.Size.Height));
-                await strana.RenderToStreamAsync(prud, new PdfPageRenderOptions
-                {
-                    DestinationWidth = (uint)(strana.Size.Width * mierka),
-                    DestinationHeight = (uint)(strana.Size.Height * mierka),
-                    BackgroundColor = Windows.UI.Color.FromArgb(255, 255, 255, 255),
-                });
-                text.AppendLine(await RozpoznajAsync(engine, prud));
-            }
+            var dostupne = OcrEngine.AvailableRecognizerLanguages;
+            var vhodny = new[] { "sk", "cs" }
+                .Select(kod => dostupne.FirstOrDefault(l => l.LanguageTag.Equals(kod, StringComparison.OrdinalIgnoreCase)
+                                                             || l.LanguageTag.StartsWith(kod + "-", StringComparison.OrdinalIgnoreCase)))
+                .FirstOrDefault(l => l is not null);
+            var rozpoznavac = vhodny is not null ? OcrEngine.TryCreateFromLanguage(vhodny) : OcrEngine.TryCreateFromUserProfileLanguages();
+            jazyk = rozpoznavac?.RecognizerLanguage.DisplayName ?? "";
+            return rozpoznavac;
         }
-        else
+        catch (Exception)
         {
-            using var prud = await subor.OpenReadAsync();
-            text.AppendLine(await RozpoznajAsync(engine, prud));
+            // súčasť OCR v tejto verzii Windows nie je
+            jazyk = "";
+            return null;
+        }
+    }
+
+    private static async Task<(string Text, string Jazyk)> RozpoznajAsync(string cesta)
+    {
+        var rozpoznavac = Rozpoznavac(out var jazyk) ?? throw new SkvpException(NedostupneOcr);
+        var subor = await StorageFile.GetFileFromPathAsync(Path.GetFullPath(cesta));
+        var text = new StringBuilder();
+        if (!Path.GetExtension(cesta).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+        {
+            using var obrazok = await subor.OpenReadAsync();
+            text.AppendLine(await RozpoznajObrazokAsync(rozpoznavac, obrazok));
+            return (text.ToString(), jazyk);
+        }
+
+        var pdf = await PdfDocument.LoadFromFileAsync(subor);
+        for (uint i = 0; i < Math.Min(pdf.PageCount, NajviacStran); i++)
+        {
+            using var strana = pdf.GetPage(i);
+            using var obraz = new InMemoryRandomAccessStream();
+            // čo najostrejšie, ale v hraniciach OCR (najdlhšia strana obrázka)
+            var mierka = Math.Min(DpiStrany / 96, OcrEngine.MaxImageDimension / Math.Max(strana.Size.Width, strana.Size.Height));
+            await strana.RenderToStreamAsync(obraz, new PdfPageRenderOptions
+            {
+                DestinationWidth = (uint)(strana.Size.Width * mierka),
+                DestinationHeight = (uint)(strana.Size.Height * mierka),
+                BackgroundColor = Windows.UI.Color.FromArgb(255, 255, 255, 255),
+            });
+            text.AppendLine(await RozpoznajObrazokAsync(rozpoznavac, obraz));
         }
 
         return (text.ToString(), jazyk);
     }
 
-    private static async Task<string> RozpoznajAsync(OcrEngine engine, IRandomAccessStream prud)
+    private static async Task<string> RozpoznajObrazokAsync(OcrEngine rozpoznavac, IRandomAccessStream obraz)
     {
-        var dekoder = await BitmapDecoder.CreateAsync(prud);
-        var najviac = OcrEngine.MaxImageDimension;
+        var dekoder = await BitmapDecoder.CreateAsync(obraz);
         var transformacia = new BitmapTransform();
-        if (dekoder.PixelWidth > najviac || dekoder.PixelHeight > najviac)
+        var najdlhsia = Math.Max(dekoder.PixelWidth, dekoder.PixelHeight);
+        if (najdlhsia > OcrEngine.MaxImageDimension)
         {
-            var k = (double)najviac / Math.Max(dekoder.PixelWidth, dekoder.PixelHeight);
-            transformacia.ScaledWidth = (uint)(dekoder.PixelWidth * k);
-            transformacia.ScaledHeight = (uint)(dekoder.PixelHeight * k);
+            var zmensenie = (double)OcrEngine.MaxImageDimension / najdlhsia;
+            transformacia.ScaledWidth = (uint)(dekoder.PixelWidth * zmensenie);
+            transformacia.ScaledHeight = (uint)(dekoder.PixelHeight * zmensenie);
         }
 
-        using var obraz = await dekoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transformacia,
+        using var bitmapa = await dekoder.GetSoftwareBitmapAsync(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Premultiplied, transformacia,
             ExifOrientationMode.RespectExifOrientation, ColorManagementMode.DoNotColorManage);
-        var vysledok = await engine.RecognizeAsync(obraz);
-        return Riadky(vysledok.Lines.SelectMany(l => l.Words).Select(w => (w.Text, w.BoundingRect.X, w.BoundingRect.Y, w.BoundingRect.Height,
-            w.BoundingRect.Width)));
+        var vysledok = await rozpoznavac.RecognizeAsync(bitmapa);
+        return Riadky(vysledok.Lines.SelectMany(riadok => riadok.Words)
+            .Select(slovo => new Slovo(slovo.Text, slovo.BoundingRect.X, slovo.BoundingRect.Y, slovo.BoundingRect.Width, slovo.BoundingRect.Height)));
     }
 
-    /// <summary>Slová do riadkov podľa výšky na strane; veľká medzera medzi slovami = tabulátor (stĺpec tabuľky).</summary>
-    public static string Riadky(IEnumerable<(string Text, double X, double Y, double Vyska, double Sirka)> slova)
+    private readonly record struct Slovo(string Text, double X, double Y, double Sirka, double Vyska)
     {
-        var zoznam = slova.OrderBy(s => s.Y + s.Vyska / 2).ToList();
-        var riadky = new List<List<(string Text, double X, double Y, double Vyska, double Sirka)>>();
-        foreach (var slovo in zoznam)
+        public double Stred => Y + Vyska / 2;
+        public double Koniec => X + Sirka;
+    }
+
+    /// <summary>Riadok textu – priebežný priemer stredu a výšky jeho slov.</summary>
+    private sealed class Riadok
+    {
+        private double _sucetStredov;
+        private double _sucetVysok;
+
+        public List<Slovo> Slova { get; } = new();
+        public double Stred => _sucetStredov / Slova.Count;
+        public double Vyska => _sucetVysok / Slova.Count;
+
+        public void Pridaj(Slovo slovo)
         {
-            var stred = slovo.Y + slovo.Vyska / 2;
-            var riadok = riadky.LastOrDefault();
-            if (riadok is not null && Math.Abs(riadok.Average(s => s.Y + s.Vyska / 2) - stred) < Math.Max(4, riadok.Average(s => s.Vyska) * 0.55))
+            Slova.Add(slovo);
+            _sucetStredov += slovo.Stred;
+            _sucetVysok += slovo.Vyska;
+        }
+    }
+
+    /// <summary>
+    /// Slová zoradené zhora nadol do riadkov: slovo patrí k riadku, ak je jeho stred blízko stredu riadku (vzhľadom na
+    /// výšku písma). V riadku zľava doprava; veľká medzera medzi slovami = tabulátor (stĺpec tabuľky).
+    /// </summary>
+    private static string Riadky(IEnumerable<Slovo> slova)
+    {
+        var riadky = new List<Riadok>();
+        foreach (var slovo in slova.OrderBy(s => s.Stred))
+        {
+            if (riadky.Count == 0 || Math.Abs(riadky[^1].Stred - slovo.Stred) >= Math.Max(4, riadky[^1].Vyska * 0.55))
             {
-                riadok.Add(slovo);
+                riadky.Add(new Riadok());
             }
-            else
-            {
-                riadky.Add(new() { slovo });
-            }
+
+            riadky[^1].Pridaj(slovo);
         }
 
         var text = new StringBuilder();
         foreach (var riadok in riadky)
         {
-            var poradie = riadok.OrderBy(s => s.X).ToList();
-            var vyska = poradie.Average(s => s.Vyska);
-            for (var i = 0; i < poradie.Count; i++)
+            Slovo? predosle = null;
+            foreach (var slovo in riadok.Slova.OrderBy(s => s.X))
             {
-                if (i > 0)
+                if (predosle is { } p)
                 {
-                    var medzera = poradie[i].X - (poradie[i - 1].X + poradie[i - 1].Sirka);
-                    text.Append(medzera > vyska * 1.8 ? '\t' : ' ');
+                    text.Append(slovo.X - p.Koniec > riadok.Vyska * 1.8 ? '\t' : ' ');
                 }
 
-                text.Append(poradie[i].Text);
+                text.Append(slovo.Text);
+                predosle = slovo;
             }
 
             text.AppendLine();

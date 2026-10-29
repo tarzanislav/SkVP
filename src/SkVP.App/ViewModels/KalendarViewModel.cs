@@ -44,9 +44,9 @@ public sealed partial class DenKalendara : ObservableObject
     private bool _vybrany;
 
     public int Cislo => Datum.Day;
-    public string NazovDna => PocasieService.VelkePrve(Datum.ToString("dddd", Planovanie.Sk));
+    public string NazovDna => Preklad.VelkePrve(Datum.ToString("dddd", Planovanie.Sk));
     public string DatumText => $"{Datum.Day}. {Datum.Month}.";
-    public string DlhyDatum => PocasieService.VelkePrve(Datum.ToString("dddd d. MMMM yyyy", Planovanie.Sk));
+    public string DlhyDatum => Preklad.VelkePrve(Datum.ToString("dddd d. MMMM yyyy", Planovanie.Sk));
     public bool MaSviatok => !string.IsNullOrEmpty(Sviatok);
     public bool JePrazdniny => Prazdniny is not null;
     public bool MaPoznamky => Poznamky.Count > 0;
@@ -324,7 +324,7 @@ public sealed partial class KalendarViewModel : ObservableObject
         _ => Mesiace.SelectMany(m => m.Dni).OfType<DenKalendara>(),
     };
 
-    private static string MesiacRok(DateTime datum) => PocasieService.VelkePrve(datum.ToString("MMMM yyyy", Planovanie.Sk));
+    private static string MesiacRok(DateTime datum) => Preklad.VelkePrve(datum.ToString("MMMM yyyy", Planovanie.Sk));
 
     private void NacitajMesiac()
     {

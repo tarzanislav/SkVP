@@ -676,7 +676,7 @@ public sealed partial class NovinkyViewModel : ObservableObject
             .OrderBy(p => p.Polozka.Zaciatok).ThenBy(p => p.Polozka.Koniec)
             .GroupBy(p => (p.Polozka.Zaciatok!.Value.Year, p.Polozka.Zaciatok!.Value.Month))
             .Select(g => new MesiacTerminovnikaVM(
-                PocasieService.VelkePrve(new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy", sk)), g.ToList()))
+                Preklad.VelkePrve(new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMMM yyyy", sk)), g.ToList()))
             .ToList();
 
         Spravy = (_spravy?.Spravy ?? new List<SpravaZoZdroja>())

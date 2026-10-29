@@ -104,7 +104,7 @@ public static class ZostavaPlanovania
     public static Document Mesiac(DateTime mesiac, IReadOnlyList<DenZostavy> dni)
     {
         var prvy = new DateTime(mesiac.Year, mesiac.Month, 1);
-        var doc = Novy("Kalendár – " + PocasieService.VelkePrve(prvy.ToString("MMMM yyyy", Planovanie.Sk)), naSirku: true, out var sekcia);
+        var doc = Novy("Kalendár – " + Preklad.VelkePrve(prvy.ToString("MMMM yyyy", Planovanie.Sk)), naSirku: true, out var sekcia);
         var tabulka = Tabulka(sekcia);
         var sirka = (29.7 - 2.8) / 7;
         for (var i = 0; i < 7; i++)
@@ -214,7 +214,7 @@ public static class ZostavaPlanovania
         hlavicka.Shading.Color = Vikend;
         for (var m = 0; m < 12; m++)
         {
-            hlavicka.Cells[m + 1].AddParagraph(PocasieService.VelkePrve(od.AddMonths(m).ToString("MMMM", Planovanie.Sk)));
+            hlavicka.Cells[m + 1].AddParagraph(Preklad.VelkePrve(od.AddMonths(m).ToString("MMMM", Planovanie.Sk)));
         }
 
         var podlaDna = dni.ToDictionary(d => d.Datum.Date);
@@ -307,7 +307,7 @@ public static class ZostavaPlanovania
                 riadok.Borders.Top.Color = Ciara;
                 if (prvy)
                 {
-                    var den = riadok.Cells[0].AddParagraph(PocasieService.VelkePrve(d.Datum.ToString("ddd d. M.", Planovanie.Sk)));
+                    var den = riadok.Cells[0].AddParagraph(Preklad.VelkePrve(d.Datum.ToString("ddd d. M.", Planovanie.Sk)));
                     den.Format.Font.Bold = true;
                     if (d.Sviatok is not null && nazov != d.Sviatok)
                     {

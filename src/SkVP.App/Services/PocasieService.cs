@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using SkVP.Data;
 
 namespace SkVP.Services;
@@ -9,46 +9,55 @@ namespace SkVP.Services;
 /// <summary>Mesto alebo obec, pre ktorú sa zobrazuje počasie.</summary>
 public sealed record MiestoPocasia(string Nazov, string? Oblast, string? Okres, string? Krajina, string? KodKrajiny, double Sirka, double Dlzka)
 {
-    public string Popis => string.Join(", ", new[] { Nazov, Okres, Oblast, Krajina }.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct());
-
-    public string Suradnice => string.Create(CultureInfo.InvariantCulture, $"{Sirka:0.00}°, {Dlzka:0.00}°");
+    /// <summary>Napr. „Banská Bystrica, Okres Banská Bystrica, Banskobystrický kraj, Slovensko“.</summary>
+    [JsonIgnore]
+    public string Popis => string.Join(", ", new[] { Nazov, Okres, Oblast, Krajina }.Where(cast => !string.IsNullOrWhiteSpace(cast)).Distinct());
 }
 
 /// <summary>Predpoveď na jeden deň.</summary>
 public sealed record PocasieDna(DateTime Datum, int Kod, double? Max, double? Min, int? Zrazky)
 {
-    public string Symbol => PocasieService.Symbol(Kod, true);
-    public string Popis => PocasieService.Popis(Kod);
-    public string Den => Datum.Date == DateTime.Today ? "dnes"
-        : Datum.Date == DateTime.Today.AddDays(1) ? "zajtra"
-        : PocasieService.VelkePrve(Datum.ToString("ddd", PocasieService.Kultura));
-    public string MaxText => Max is { } m ? $"{Math.Round(m):0}°" : "";
-    public string MinText => Min is { } m ? $"{Math.Round(m):0}°" : "";
-    public string ZrazkyText => Zrazky is > 0 and var z ? $"{z} %" : "";
+    [JsonIgnore] public string Symbol => PocasieService.Symbol(Kod, den: true);
+    [JsonIgnore] public string Popis => PocasieService.Popis(Kod);
+
+    [JsonIgnore]
+    public string Den => (Datum.Date - DateTime.Today).Days switch
+    {
+        0 => "dnes",
+        1 => "zajtra",
+        _ => Preklad.VelkePrve(Datum.ToString("ddd", Planovanie.Sk)),
+    };
+
+    [JsonIgnore] public string MaxText => PocasieService.Stupne(Max, "°");
+    [JsonIgnore] public string MinText => PocasieService.Stupne(Min, "°");
+    [JsonIgnore] public string ZrazkyText => Zrazky is > 0 and var z ? $"{z} %" : "";
 }
 
-/// <summary>Aktuálne počasie a predpoveď na niekoľko dní.</summary>
+/// <summary>Aktuálne počasie a predpoveď na niekoľko dní (ukladá sa aj ako vyrovnávacia pamäť).</summary>
 public sealed record Pocasie(
     MiestoPocasia Miesto, DateTime Stiahnute, double? Teplota, double? Pocitova, int? Vlhkost, double? Vietor, double? Zrazky, int Kod, bool Den,
     List<PocasieDna> Dni)
 {
-    public string Symbol => PocasieService.Symbol(Kod, Den);
-    public string Popis => PocasieService.VelkePrve(PocasieService.Popis(Kod));
-    public string TeplotaText => Teplota is { } t ? $"{Math.Round(t):0} °C" : "–";
-    public string PocitovaText => Pocitova is { } p ? $"pocitovo {Math.Round(p):0} °C" : "";
-    public string VlhkostText => Vlhkost is { } v ? $"vlhkosť {v} %" : "";
-    public string VietorText => Vietor is { } v ? $"vietor {Math.Round(v):0} km/h" : "";
-    public string ZrazkyText => Zrazky is > 0 and var z ? $"zrážky {z.ToString("0.0", PocasieService.Kultura)} mm" : "";
+    [JsonIgnore] public string Symbol => PocasieService.Symbol(Kod, Den);
+    [JsonIgnore] public string Popis => Preklad.VelkePrve(PocasieService.Popis(Kod));
+    [JsonIgnore] public string TeplotaText => Teplota is null ? "–" : PocasieService.Stupne(Teplota, " °C");
 
     /// <summary>Podrobnosti v jednom riadku („pocitovo 8 °C · vlhkosť 70 % · vietor 12 km/h“).</summary>
-    public string Podrobnosti => string.Join("  ·  ", new[] { PocitovaText, VlhkostText, VietorText, ZrazkyText }.Where(t => t.Length > 0));
+    [JsonIgnore]
+    public string Podrobnosti => string.Join("  ·  ", new[]
+    {
+        Pocitova is null ? "" : "pocitovo " + PocasieService.Stupne(Pocitova, " °C"),
+        Vlhkost is { } vlhkost ? $"vlhkosť {vlhkost} %" : "",
+        Vietor is { } vietor ? $"vietor {(int)Math.Round(vietor)} km/h" : "",
+        Zrazky is > 0 and var zrazky ? $"zrážky {zrazky.ToString("0.0", Planovanie.Sk)} mm" : "",
+    }.Where(cast => cast.Length > 0));
 
-    public string Aktualizovane => $"{PocasieService.Zdroj} · aktualizované o {Stiahnute.ToString("H:mm", PocasieService.Kultura)}";
+    [JsonIgnore] public string Aktualizovane => $"{PocasieService.Zdroj} · aktualizované o {Stiahnute.ToString("H:mm", Planovanie.Sk)}";
 }
 
 /// <summary>
-/// Počasie na dashboarde zo služby Open-Meteo (bez registrácie a kľúča; prevzaté z programu EviTA). Miesto sa vyhľadá
-/// podľa názvu mesta alebo obce; predvolene podľa mesta v Údajoch o organizácii.
+/// Počasie na dashboarde zo služby Open-Meteo (bez registrácie a kľúča). Miesto sa vyhľadá podľa názvu mesta alebo obce,
+/// predvolene podľa mesta v Údajoch o organizácii. Posledná predpoveď sa pamätá, takže dashboard ju ukáže aj bez siete.
 /// </summary>
 public sealed class PocasieService
 {
@@ -56,28 +65,40 @@ public sealed class PocasieService
     public const string KlucData = "pocasie.data";
     public const string Zdroj = "Open-Meteo.com";
 
-    public static readonly CultureInfo Kultura = CultureInfo.GetCultureInfo("sk-SK");
+    private static readonly TimeSpan CasovyLimit = TimeSpan.FromSeconds(20);
+    private static readonly TimeSpan PlatnostPredpovede = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan PrestavkaPoPokuse = TimeSpan.FromMinutes(10);
 
-    private static readonly HttpClient Klient = VytvorKlienta();
+    /// <summary>Kódy počasia WMO: popis a symbol (znak písma Segoe UI Symbol / Emoji) cez deň.</summary>
+    private static readonly Dictionary<int, (string Popis, string Symbol)> KodyWmo = new()
+    {
+        [0] = ("jasno", "☀"), [1] = ("prevažne jasno", "🌤"), [2] = ("polooblačno", "⛅"), [3] = ("zamračené", "☁"),
+        [45] = ("hmla", "🌫"), [48] = ("hmla s námrazou", "🌫"),
+        [51] = ("slabé mrholenie", "🌦"), [53] = ("mrholenie", "🌦"), [55] = ("husté mrholenie", "🌦"),
+        [56] = ("mrznúce mrholenie", "🌦"), [57] = ("mrznúce mrholenie", "🌦"),
+        [61] = ("slabý dážď", "🌧"), [63] = ("dážď", "🌧"), [65] = ("silný dážď", "🌧"), [66] = ("mrznúci dážď", "🌧"), [67] = ("mrznúci dážď", "🌧"),
+        [71] = ("slabé sneženie", "❄"), [73] = ("sneženie", "❄"), [75] = ("silné sneženie", "❄"), [77] = ("snehové zrná", "❄"),
+        [80] = ("slabé prehánky", "🌧"), [81] = ("prehánky", "🌧"), [82] = ("prívalové prehánky", "🌧"),
+        [85] = ("snehové prehánky", "❄"), [86] = ("snehové prehánky", "❄"),
+        [95] = ("búrka", "⛈"), [96] = ("búrka s krupobitím", "⛈"), [99] = ("búrka s krupobitím", "⛈"),
+    };
+
     private static DateTime _poslednyPokus = DateTime.MinValue;
 
-    public MiestoPocasia? NacitajMiesto()
-    {
-        try
-        {
-            var json = Databaza.Citaj(KlucMiesto);
-            return string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<MiestoPocasia>(json);
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
+    public MiestoPocasia? NacitajMiesto() => Databaza.CitajJson<MiestoPocasia>(KlucMiesto);
 
-    /// <summary>Uloží miesto (null = zrušiť). Vyrovnávacia pamäť sa vymaže.</summary>
+    /// <summary>Uloží miesto (null = zrušiť) a zabudne predpoveď pre predošlé miesto.</summary>
     public void UlozMiesto(MiestoPocasia? miesto)
     {
-        Databaza.Zapis(KlucMiesto, miesto is null ? null : JsonSerializer.Serialize(miesto));
+        if (miesto is null)
+        {
+            Databaza.Zapis(KlucMiesto, null);
+        }
+        else
+        {
+            Databaza.ZapisJson(KlucMiesto, miesto);
+        }
+
         Databaza.Zapis(KlucData, null);
         _poslednyPokus = DateTime.MinValue;
     }
@@ -91,15 +112,12 @@ public sealed class PocasieService
             throw new SkvpException("Napíšte aspoň dve písmená názvu mesta alebo obce.");
         }
 
-        var adresa = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(nazov)}&count=20&language=sk&format=json";
-        var json = await Stiahni(adresa, zrusenie).ConfigureAwait(false);
+        var json = await StiahniAsync($"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(nazov)}&count=20&language=sk&format=json",
+            zrusenie).ConfigureAwait(false);
         return PrecitajMiesta(json);
     }
 
-    /// <summary>
-    /// Miesto podľa mesta v Údajoch o organizácii (prvé nájdené na Slovensku, inak prvé vôbec) – použije sa,
-    /// kým si používateľ nevyberie iné.
-    /// </summary>
+    /// <summary>Miesto podľa mesta v Údajoch o organizácii (na Slovensku prednostne slovenské) – kým si používateľ nevyberie iné.</summary>
     public async Task<MiestoPocasia?> MiestoOrganizacieAsync(CancellationToken zrusenie = default)
     {
         var udaje = UdajeOrganizacie.Nacitaj();
@@ -110,181 +128,120 @@ public sealed class PocasieService
         }
 
         var miesta = await HladajAsync(mesto, zrusenie).ConfigureAwait(false);
-        var slovensko = UdajeOrganizacie.JeSlovensko(udaje.Stat.Length == 0 ? UdajeOrganizacie.PredvolenyStat : udaje.Stat);
-        return miesta.FirstOrDefault(m => !slovensko || string.Equals(m.KodKrajiny, "SK", StringComparison.OrdinalIgnoreCase))
+        var naSlovensku = UdajeOrganizacie.JeSlovensko(udaje.Stat.Length == 0 ? UdajeOrganizacie.PredvolenyStat : udaje.Stat);
+        return (naSlovensku ? miesta.Find(m => string.Equals(m.KodKrajiny, "SK", StringComparison.OrdinalIgnoreCase)) : null)
                ?? miesta.FirstOrDefault();
     }
 
-    public static List<MiestoPocasia> PrecitajMiesta(string json)
-    {
-        using var dokument = JsonDocument.Parse(json);
-        var vysledok = new List<MiestoPocasia>();
-        if (!dokument.RootElement.TryGetProperty("results", out var vysledky) || vysledky.ValueKind != JsonValueKind.Array)
-        {
-            return vysledok;
-        }
+    /// <summary>Predpoveď z vyrovnávacej pamäte, ak patrí k uloženému miestu.</summary>
+    public Pocasie? ZVyrovnavacejPamate() =>
+        Databaza.CitajJson<Pocasie>(KlucData) is { } pocasie && NacitajMiesto() is { } miesto && pocasie.Miesto == miesto ? pocasie : null;
 
-        foreach (var m in vysledky.EnumerateArray())
-        {
-            var nazov = Text(m, "name");
-            if (string.IsNullOrWhiteSpace(nazov) || Cislo(m, "latitude") is not { } sirka || Cislo(m, "longitude") is not { } dlzka)
-            {
-                continue;
-            }
-
-            vysledok.Add(new MiestoPocasia(nazov, Text(m, "admin1"), Text(m, "admin2"), Text(m, "country"), Text(m, "country_code"), sirka, dlzka));
-        }
-
-        return vysledok;
-    }
-
-    public Pocasie? ZVyrovnavacejPamate()
-    {
-        try
-        {
-            var miesto = NacitajMiesto();
-            var json = Databaza.Citaj(KlucData);
-            var pocasie = string.IsNullOrEmpty(json) ? null : JsonSerializer.Deserialize<Pocasie>(json);
-            return pocasie is not null && miesto is not null && pocasie.Miesto == miesto ? pocasie : null;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
-    }
-
-    /// <summary>Treba stiahnuť nové údaje? (najviac raz za 30 minút; po neúspechu o 10 minút)</summary>
+    /// <summary>Treba stiahnuť nové údaje? Najviac raz za 30 minút, po neúspešnom pokuse najskôr o 10 minút.</summary>
     public bool TrebaObnovit(Pocasie? pocasie) =>
-        DateTime.Now - _poslednyPokus > TimeSpan.FromMinutes(10)
-        && (pocasie is null || DateTime.Now - pocasie.Stiahnute > TimeSpan.FromMinutes(30));
+        DateTime.Now - _poslednyPokus > PrestavkaPoPokuse && (pocasie is null || DateTime.Now - pocasie.Stiahnute > PlatnostPredpovede);
 
     public async Task<Pocasie> StiahniAsync(MiestoPocasia miesto, CancellationToken zrusenie = default)
     {
         _poslednyPokus = DateTime.Now;
-        var adresa = string.Create(CultureInfo.InvariantCulture,
-                $"https://api.open-meteo.com/v1/forecast?latitude={miesto.Sirka:0.####}&longitude={miesto.Dlzka:0.####}")
-            + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,precipitation,is_day"
-            + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=5";
-        var json = await Stiahni(adresa, zrusenie).ConfigureAwait(false);
-        var pocasie = PrecitajPredpoved(json, miesto, DateTime.Now);
-        Databaza.Zapis(KlucData, JsonSerializer.Serialize(pocasie));
+        var adresa = string.Create(CultureInfo.InvariantCulture, $"https://api.open-meteo.com/v1/forecast?latitude={miesto.Sirka:0.####}&longitude={miesto.Dlzka:0.####}")
+                     + "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,precipitation,is_day"
+                     + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=5";
+        var pocasie = PrecitajPredpoved(await StiahniAsync(adresa, zrusenie).ConfigureAwait(false), miesto, DateTime.Now);
+        Databaza.ZapisJson(KlucData, pocasie);
         return pocasie;
     }
 
+    /// <summary>Miesta z odpovede vyhľadávania Open-Meteo (miesta bez súradníc sa vynechajú).</summary>
+    public static List<MiestoPocasia> PrecitajMiesta(string json) =>
+        (JsonSerializer.Deserialize<OdpovedHladania>(json)?.Vysledky ?? new())
+        .Where(m => !string.IsNullOrWhiteSpace(m.Nazov) && m.Sirka.HasValue && m.Dlzka.HasValue)
+        .Select(m => new MiestoPocasia(m.Nazov!, m.Oblast, m.Okres, m.Krajina, m.KodKrajiny, m.Sirka!.Value, m.Dlzka!.Value))
+        .ToList();
+
+    /// <summary>Aktuálny stav a predpoveď po dňoch z odpovede Open-Meteo.</summary>
     public static Pocasie PrecitajPredpoved(string json, MiestoPocasia miesto, DateTime stiahnute)
     {
-        using var dokument = JsonDocument.Parse(json);
-        var koren = dokument.RootElement;
-        if (!koren.TryGetProperty("current", out var teraz))
+        var odpoved = JsonSerializer.Deserialize<OdpovedPredpovede>(json);
+        if (odpoved?.Teraz is not { } teraz)
         {
             throw new SkvpException("Odpoveď služby počasia neobsahuje aktuálne údaje.");
         }
 
         var dni = new List<PocasieDna>();
-        if (koren.TryGetProperty("daily", out var denne) && denne.TryGetProperty("time", out var casy) && casy.ValueKind == JsonValueKind.Array)
+        if (odpoved.Dni is { Datumy: { } datumy } denne)
         {
-            var i = 0;
-            foreach (var cas in casy.EnumerateArray())
+            for (var i = 0; i < datumy.Length; i++)
             {
-                if (DateTime.TryParseExact(cas.GetString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datum))
+                if (DateTime.TryParseExact(datumy[i], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datum))
                 {
-                    dni.Add(new PocasieDna(datum, (int)(Prvok(denne, "weather_code", i) ?? 0), Prvok(denne, "temperature_2m_max", i),
-                        Prvok(denne, "temperature_2m_min", i), Prvok(denne, "precipitation_probability_max", i) is { } z ? (int)Math.Round(z) : null));
+                    dni.Add(new PocasieDna(datum, Cele(Prvok(denne.Kody, i)) ?? 0, Prvok(denne.Max, i), Prvok(denne.Min, i), Cele(Prvok(denne.Zrazky, i))));
                 }
-
-                i++;
             }
         }
 
-        return new Pocasie(miesto, stiahnute,
-            Cislo(teraz, "temperature_2m"), Cislo(teraz, "apparent_temperature"),
-            Cislo(teraz, "relative_humidity_2m") is { } v ? (int)Math.Round(v) : null,
-            Cislo(teraz, "wind_speed_10m"), Cislo(teraz, "precipitation"),
-            (int)(Cislo(teraz, "weather_code") ?? 0), Cislo(teraz, "is_day") is not 0d,
-            dni);
+        return new Pocasie(miesto, stiahnute, teraz.Teplota, teraz.Pocitova, Cele(teraz.Vlhkost), teraz.Vietor, teraz.Zrazky,
+            Cele(teraz.Kod) ?? 0, teraz.Den is not 0d, dni);
     }
 
     /// <summary>Popis počasia podľa kódu WMO.</summary>
-    public static string Popis(int kod) => kod switch
-    {
-        0 => "jasno",
-        1 => "prevažne jasno",
-        2 => "polooblačno",
-        3 => "zamračené",
-        45 => "hmla",
-        48 => "hmla s námrazou",
-        51 => "slabé mrholenie",
-        53 => "mrholenie",
-        55 => "husté mrholenie",
-        56 or 57 => "mrznúce mrholenie",
-        61 => "slabý dážď",
-        63 => "dážď",
-        65 => "silný dážď",
-        66 or 67 => "mrznúci dážď",
-        71 => "slabé sneženie",
-        73 => "sneženie",
-        75 => "silné sneženie",
-        77 => "snehové zrná",
-        80 => "slabé prehánky",
-        81 => "prehánky",
-        82 => "prívalové prehánky",
-        85 or 86 => "snehové prehánky",
-        95 => "búrka",
-        96 or 99 => "búrka s krupobitím",
-        _ => "neznáme",
-    };
+    public static string Popis(int kod) => KodyWmo.TryGetValue(kod, out var wmo) ? wmo.Popis : "neznáme";
 
-    /// <summary>Symbol počasia (znak písma Segoe UI Symbol / Emoji).</summary>
-    public static string Symbol(int kod, bool den) => kod switch
-    {
-        0 => den ? "☀" : "☾",
-        1 => den ? "🌤" : "☾",
-        2 => "⛅",
-        3 => "☁",
-        45 or 48 => "🌫",
-        51 or 53 or 55 or 56 or 57 => "🌦",
-        61 or 63 or 65 or 66 or 67 or 80 or 81 or 82 => "🌧",
-        71 or 73 or 75 or 77 or 85 or 86 => "❄",
-        95 or 96 or 99 => "⛈",
-        _ => "?",
-    };
+    /// <summary>Symbol počasia; v noci pri jasnej oblohe mesiac.</summary>
+    public static string Symbol(int kod, bool den) =>
+        !den && kod is 0 or 1 ? "☾" : KodyWmo.TryGetValue(kod, out var wmo) ? wmo.Symbol : "?";
 
-    public static string VelkePrve(string text) =>
-        string.IsNullOrEmpty(text) ? text : char.ToUpper(text[0], Kultura) + text[1..];
+    /// <summary>Teplota zaokrúhlená na celé stupne (bez „-0“); bez údaja prázdny text.</summary>
+    public static string Stupne(double? teplota, string jednotka) => teplota is { } t ? $"{(int)Math.Round(t)}{jednotka}" : "";
 
-    private static async Task<string> Stiahni(string adresa, CancellationToken zrusenie)
+    private static double? Prvok(double?[]? hodnoty, int index) => hodnoty is not null && index < hodnoty.Length ? hodnoty[index] : null;
+
+    private static int? Cele(double? hodnota) => hodnota is { } h ? (int)Math.Round(h) : null;
+
+    private static async Task<string> StiahniAsync(string adresa, CancellationToken zrusenie)
     {
+        using var limit = CancellationTokenSource.CreateLinkedTokenSource(zrusenie);
+        limit.CancelAfter(CasovyLimit);
         try
         {
-            return await Klient.GetStringAsync(adresa, zrusenie).ConfigureAwait(false);
+            return await Stahovanie.Klient.GetStringAsync(adresa, limit.Token).ConfigureAwait(false);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ex is HttpRequestException || (ex is OperationCanceledException && !zrusenie.IsCancellationRequested))
         {
             throw new SkvpException("Údaje o počasí sa nepodarilo stiahnuť – skontrolujte pripojenie k internetu.");
         }
     }
 
-    private static string? Text(JsonElement e, string nazov) =>
-        e.TryGetProperty(nazov, out var h) && h.ValueKind == JsonValueKind.String ? h.GetString() : null;
+    // tvar odpovedí Open-Meteo (len použité údaje)
 
-    private static double? Cislo(JsonElement e, string nazov) =>
-        e.TryGetProperty(nazov, out var h) && h.ValueKind == JsonValueKind.Number ? h.GetDouble() : null;
+    private sealed record OdpovedHladania([property: JsonPropertyName("results")] List<NajdeneMiesto>? Vysledky);
 
-    private static double? Prvok(JsonElement e, string nazov, int index)
-    {
-        if (!e.TryGetProperty(nazov, out var pole) || pole.ValueKind != JsonValueKind.Array || index >= pole.GetArrayLength())
-        {
-            return null;
-        }
+    private sealed record NajdeneMiesto(
+        [property: JsonPropertyName("name")] string? Nazov,
+        [property: JsonPropertyName("latitude")] double? Sirka,
+        [property: JsonPropertyName("longitude")] double? Dlzka,
+        [property: JsonPropertyName("country_code")] string? KodKrajiny,
+        [property: JsonPropertyName("country")] string? Krajina,
+        [property: JsonPropertyName("admin1")] string? Oblast,
+        [property: JsonPropertyName("admin2")] string? Okres);
 
-        var h = pole[index];
-        return h.ValueKind == JsonValueKind.Number ? h.GetDouble() : null;
-    }
+    private sealed record OdpovedPredpovede(
+        [property: JsonPropertyName("current")] UdajeTeraz? Teraz,
+        [property: JsonPropertyName("daily")] UdajeDni? Dni);
 
-    private static HttpClient VytvorKlienta()
-    {
-        var klient = new HttpClient { Timeout = TimeSpan.FromSeconds(20) };
-        klient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("SkVP", AktualizaciaService.AktualnaVerzia.ToString()));
-        return klient;
-    }
+    private sealed record UdajeTeraz(
+        [property: JsonPropertyName("temperature_2m")] double? Teplota,
+        [property: JsonPropertyName("apparent_temperature")] double? Pocitova,
+        [property: JsonPropertyName("relative_humidity_2m")] double? Vlhkost,
+        [property: JsonPropertyName("weather_code")] double? Kod,
+        [property: JsonPropertyName("wind_speed_10m")] double? Vietor,
+        [property: JsonPropertyName("precipitation")] double? Zrazky,
+        [property: JsonPropertyName("is_day")] double? Den);
+
+    private sealed record UdajeDni(
+        [property: JsonPropertyName("time")] string[]? Datumy,
+        [property: JsonPropertyName("weather_code")] double?[]? Kody,
+        [property: JsonPropertyName("temperature_2m_max")] double?[]? Max,
+        [property: JsonPropertyName("temperature_2m_min")] double?[]? Min,
+        [property: JsonPropertyName("precipitation_probability_max")] double?[]? Zrazky);
 }

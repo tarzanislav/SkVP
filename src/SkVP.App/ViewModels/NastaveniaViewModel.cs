@@ -25,7 +25,7 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         _typ = udaje.Typ;
         _obdobie = udaje.Obdobie;
         _tema = Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem);
-        _kontrolovatAktualizacie = new AktualizaciaService().KontrolovatPriSpusteni();
+        _kontrolovatAktualizacie = AktualizaciaService.KontrolovatPriSpusteni;
         _upravaVoWorde = Databaza.Citaj(Word.KlucRezimUpravy, Word.RezimWord) == Word.RezimWord;
         NacitajLogo();
         _jazyk = Preklad.Aktualny;
@@ -205,7 +205,7 @@ public sealed partial class NastaveniaViewModel : ObservableObject
     {
         if (_nacitane)
         {
-            new AktualizaciaService().NastavKontroluPriSpusteni(value);
+            AktualizaciaService.KontrolovatPriSpusteni = value;
         }
     }
 
@@ -349,7 +349,7 @@ public sealed partial class NastaveniaViewModel : ObservableObject
         StavAktualizacie = "Kontrolujem…";
         try
         {
-            var nova = await new AktualizaciaService().SkontrolujAsync();
+            var nova = await AktualizaciaService.SkontrolujAsync();
             Hlavny.NovaVerzia = nova;
             StavAktualizacie = nova is null ? "Máte najnovšiu verziu." : $"Je dostupná verzia {nova.Verzia}.";
         }

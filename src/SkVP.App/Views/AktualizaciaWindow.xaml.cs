@@ -5,111 +5,121 @@ using SkVP.Services;
 
 namespace SkVP.Views;
 
-/// <summary>Ponuka novej verzie: novinky, stiahnutie, záloha a spustenie inštalácie.</summary>
+/// <summary>Ponuka novej verzie: novinky, potom stiahnutie, záloha databázy a spustenie inštalácie.</summary>
 public partial class AktualizaciaWindow : Window
 {
     private readonly DostupnaVerzia _verzia;
-    private readonly AktualizaciaService _sluzba = new();
-    private CancellationTokenSource? _zrusenie;
-    private bool _prebieha;
+
+    /// <summary>Aktualizácia práve prebieha (dá sa zrušiť); null = okno čaká na rozhodnutie.</summary>
+    private CancellationTokenSource? _priebeh;
 
     public AktualizaciaWindow(DostupnaVerzia verzia)
     {
         InitializeComponent();
         _verzia = verzia;
         Nadpis.Text = $"Je dostupná nová verzia SkVP {verzia.Verzia}";
-        Podnadpis.Text = $"Máte nainštalovanú verziu {AktualizaciaService.AktualnaVerzia}" +
-                         (verzia.Zverejnene is { } datum ? $". Nová verzia je zverejnená {datum.ToString("d. M. yyyy H:mm")}." : ".");
-        Novinky.Text = UpravNovinky(verzia.Novinky);
-        Closing += (_, e) =>
-        {
-            if (_prebieha)
-            {
-                _zrusenie?.Cancel();
-            }
-        };
+        Podnadpis.Text = $"Máte nainštalovanú verziu {AktualizaciaService.AktualnaVerzia}"
+                         + (verzia.Zverejnene is { } datum ? $". Nová verzia je zverejnená {datum.ToString("d. M. yyyy H:mm", Planovanie.Sk)}." : ".");
+        Novinky.Text = BezMarkdownu(verzia.Novinky);
+        Closing += (_, _) => _priebeh?.Cancel();
     }
 
-    /// <summary>Novinky z GitHubu sú vo formáte Markdown – pre zobrazenie odstránime značky.</summary>
-    public static string UpravNovinky(string text)
+    /// <summary>Novinky z GitHubu (Markdown) ako obyčajný text – bez značiek nadpisov a tučného písma a bez podpisov commitov.</summary>
+    private static string BezMarkdownu(string text)
     {
-        var riadky = text.Replace("\r", "").Split('\n')
-            .Select(r => r.TrimStart('#', ' ').Replace("**", ""))
-            .Where(r => !r.StartsWith("Co-Authored-By", StringComparison.OrdinalIgnoreCase));
-        var vysledok = string.Join(Environment.NewLine, riadky).Trim();
-        return vysledok.Length == 0 ? "Bez popisu zmien." : vysledok;
+        var riadky = text.ReplaceLineEndings("\n").Split('\n')
+            .Where(riadok => !riadok.StartsWith("Co-Authored-By", StringComparison.OrdinalIgnoreCase))
+            .Select(riadok => riadok.TrimStart('#', ' ').Replace("**", "", StringComparison.Ordinal));
+        var cisty = string.Join(Environment.NewLine, riadky).Trim();
+        return cisty.Length > 0 ? cisty : "Bez popisu zmien.";
     }
 
     private async void Aktualizovat_Click(object sender, RoutedEventArgs e)
     {
-        _prebieha = true;
-        _zrusenie = new CancellationTokenSource();
-        Aktualizovat.IsEnabled = false;
-        Neskor.Content = "Zrušiť";
-        PanelPriebeh.Visibility = Visibility.Visible;
-
-        try
+        bool hotovo;
+        using (var priebeh = new CancellationTokenSource())
         {
-            Stav.Text = "Sťahujem novú verziu…";
-            var priebeh = new Progress<double>(p => Priebeh.Value = p * 100);
-            var instalator = await _sluzba.StiahniAsync(_verzia, priebeh, _zrusenie.Token);
-
-            Stav.Text = "Zálohujem databázu…";
-            Priebeh.IsIndeterminate = true;
+            _priebeh = priebeh;
+            UkazPriebeh(true);
             try
             {
-                await Task.Run(() => new ZalohaService().Zalohuj());
+                hotovo = await AktualizujAsync(priebeh.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                hotovo = false; // zrušené tlačidlom alebo zatvorením okna
             }
             catch (SkvpException chyba)
             {
-                if (!Dialogy.Potvrd($"{chyba.Message}\n\nPokračovať v aktualizácii aj bez zálohy?"))
-                {
-                    Obnov();
-                    return;
-                }
+                Dialogy.Upozornenie(chyba.Message);
+                hotovo = false;
             }
-
-            Stav.Text = "Spúšťam inštaláciu…";
-            if (!_sluzba.SpustiInstalator(instalator))
+            finally
             {
-                Dialogy.Upozornenie("Aktualizácia sa nespustila – Windows nedostal povolenie na inštaláciu. Môžete to skúsiť znova.");
-                Obnov();
-                return;
+                _priebeh = null;
             }
+        }
 
-            _prebieha = false;
+        if (hotovo)
+        {
             DialogResult = true;
             Application.Current.Shutdown();
         }
-        catch (OperationCanceledException)
+        else
         {
-            Obnov();
+            UkazPriebeh(false);
         }
-        catch (SkvpException chyba)
+    }
+
+    /// <summary>Stiahnutie, záloha a spustenie inštalácie. False = používateľ ju zastavil (bez zálohy alebo bez povolenia Windows).</summary>
+    private async Task<bool> AktualizujAsync(CancellationToken zrusenie)
+    {
+        Stav.Text = "Sťahujem novú verziu…";
+        var instalator = await AktualizaciaService.StiahniAsync(_verzia, new Progress<double>(podiel => Priebeh.Value = podiel * 100), zrusenie);
+
+        Stav.Text = "Zálohujem databázu…";
+        Priebeh.IsIndeterminate = true;
+        try
         {
-            Dialogy.Upozornenie(chyba.Message);
-            Obnov();
+            await Task.Run(() => new ZalohaService().Zalohuj(), zrusenie);
         }
+        catch (SkvpException chyba) when (Dialogy.Potvrd($"{chyba.Message}\n\nPokračovať v aktualizácii aj bez zálohy?"))
+        {
+            // pokračuje sa bez zálohy
+        }
+        catch (SkvpException)
+        {
+            return false;
+        }
+
+        Stav.Text = "Spúšťam inštaláciu…";
+        if (AktualizaciaService.SpustiInstalator(instalator))
+        {
+            return true;
+        }
+
+        Dialogy.Upozornenie("Aktualizácia sa nespustila – Windows nedostal povolenie na inštaláciu. Môžete to skúsiť znova.");
+        return false;
     }
 
     private void Neskor_Click(object sender, RoutedEventArgs e)
     {
-        if (_prebieha)
+        if (_priebeh is { } priebeh)
         {
-            _zrusenie?.Cancel();
-            return;
+            priebeh.Cancel();
         }
-
-        DialogResult = false;
+        else
+        {
+            DialogResult = false;
+        }
     }
 
-    private void Obnov()
+    private void UkazPriebeh(bool bezi)
     {
-        _prebieha = false;
-        Aktualizovat.IsEnabled = true;
-        Neskor.Content = "Neskôr";
+        Aktualizovat.IsEnabled = !bezi;
+        Neskor.Content = bezi ? "Zrušiť" : "Neskôr";
+        PanelPriebeh.Visibility = bezi ? Visibility.Visible : Visibility.Collapsed;
         Priebeh.IsIndeterminate = false;
         Priebeh.Value = 0;
-        PanelPriebeh.Visibility = Visibility.Collapsed;
     }
 }

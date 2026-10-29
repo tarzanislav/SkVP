@@ -889,15 +889,14 @@ public sealed partial class MainViewModel : ObservableObject
 
     public async Task SkontrolujAktualizaciuAsync()
     {
-        var sluzba = new AktualizaciaService();
-        if (!sluzba.KontrolovatPriSpusteni())
+        if (!AktualizaciaService.KontrolovatPriSpusteni)
         {
             return;
         }
 
         try
         {
-            NovaVerzia = await sluzba.SkontrolujAsync();
+            NovaVerzia = await AktualizaciaService.SkontrolujAsync();
         }
         catch (Exception)
         {
