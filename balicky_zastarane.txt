@@ -1,0 +1,9 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+
+The following sources were used:
+   https://api.nuget.org/v3/index.json
+   C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+
+The given project `SkVP.App` has no deprecated packages given the current sources.
+The given project `Kalendarium.Core` has no deprecated packages given the current sources.
