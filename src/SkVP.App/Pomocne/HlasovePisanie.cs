@@ -6,38 +6,56 @@ using System.Windows.Input;
 namespace SkVP.Pomocne;
 
 /// <summary>
-/// Hlasové písanie Windows (Win+H): textové pole dostane fokus a slovenskú klávesnicu (ak je v systéme), potom sa
-/// stlačí Win+H. Windows prepisuje reč priamo do poľa – rozpoznávanie robí Microsoft cez internet.
+/// Hlasové písanie Windows (Win+H): pole dostane fokus a slovenskú klávesnicu (ak je v systéme) a program stlačí Win+H.
+/// Windows potom prepisuje reč priamo do poľa – rozpoznávanie robí Microsoft cez internet.
 /// </summary>
 public static class HlasovePisanie
 {
+    private const uint VstupKlavesnice = 1;
+    private const uint KlavesPustena = 0x0002;
+    private const ushort KlavesWin = 0x5B;
+    private const ushort KlavesH = 0x48;
+
+    /// <summary>INPUT z user32 – únia s myšou určuje veľkosť štruktúry na 32 aj 64 bitoch.</summary>
     [StructLayout(LayoutKind.Sequential)]
-    private struct Vstup
+    private struct Input
     {
-        public int Typ;
-        public KlavesovyVstup Klaves;
-        private readonly long _rezerva; // INPUT má 40 bajtov (únia s MOUSEINPUT)
+        public uint Type;
+        public InputUnion Data;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    private struct InputUnion
+    {
+        [FieldOffset(0)] public KeyboardInput Keyboard;
+        [FieldOffset(0)] public MouseInput Mouse;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    private struct KlavesovyVstup
+    private struct KeyboardInput
     {
-        public ushort Kod;
-        public ushort Sken;
-        public uint Priznaky;
-        public uint Cas;
-        public IntPtr Doplnok;
+        public ushort VirtualKey;
+        public ushort ScanCode;
+        public uint Flags;
+        public uint Time;
+        public IntPtr ExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MouseInput
+    {
+        public int X;
+        public int Y;
+        public uint MouseData;
+        public uint Flags;
+        public uint Time;
+        public IntPtr ExtraInfo;
     }
 
     [DllImport("user32.dll", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    private static extern uint SendInput(uint pocet, Vstup[] vstupy, int velkost);
+    private static extern uint SendInput(uint pocet, Input[] vstupy, int velkost);
 
-    private const int TypKlavesnica = 1;
-    private const uint Pustit = 0x0002;
-    private const ushort Win = 0x5B;
-    private const ushort H = 0x48;
-
-    /// <summary>Slovenská klávesnica je v systéme (hlasové písanie potom rozpoznáva po slovensky).</summary>
+    /// <summary>Slovenská klávesnica v systéme – s ňou hlasové písanie rozpoznáva po slovensky.</summary>
     public static CultureInfo? Slovencina =>
         InputLanguageManager.Current.AvailableInputLanguages?.OfType<CultureInfo>().FirstOrDefault(c => c.TwoLetterISOLanguageName == "sk");
 
@@ -56,17 +74,20 @@ public static class HlasovePisanie
         if (Dialogy.TichyRezim)
         {
             Dialogy.TicheHlasenia.Add("[Hlasové písanie] Win+H");
-            return slovencina is not null;
+        }
+        else
+        {
+            // Win dole, H dole, H hore, Win hore
+            Input[] vstupy = [Klaves(KlavesWin, false), Klaves(KlavesH, false), Klaves(KlavesH, true), Klaves(KlavesWin, true)];
+            SendInput((uint)vstupy.Length, vstupy, Marshal.SizeOf<Input>());
         }
 
-        var vstupy = new[]
-        {
-            new Vstup { Typ = TypKlavesnica, Klaves = new KlavesovyVstup { Kod = Win } },
-            new Vstup { Typ = TypKlavesnica, Klaves = new KlavesovyVstup { Kod = H } },
-            new Vstup { Typ = TypKlavesnica, Klaves = new KlavesovyVstup { Kod = H, Priznaky = Pustit } },
-            new Vstup { Typ = TypKlavesnica, Klaves = new KlavesovyVstup { Kod = Win, Priznaky = Pustit } },
-        };
-        SendInput((uint)vstupy.Length, vstupy, Marshal.SizeOf<Vstup>());
         return slovencina is not null;
     }
+
+    private static Input Klaves(ushort kod, bool pustit) => new()
+    {
+        Type = VstupKlavesnice,
+        Data = new InputUnion { Keyboard = new KeyboardInput { VirtualKey = kod, Flags = pustit ? KlavesPustena : 0 } },
+    };
 }

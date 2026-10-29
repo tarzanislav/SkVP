@@ -256,7 +256,8 @@ public static partial class PdfNorma
     private static byte[] NahradObjekt(byte[] pdf, int cislo, int generacia, string xmp)
     {
         var text = Encoding.Latin1.GetString(pdf);
-        var trailer = PoslednyTrailer().Match(text);
+        var zaciatok = text.LastIndexOf("trailer", StringComparison.Ordinal);
+        var trailer = zaciatok < 0 ? Match.Empty : Trailer().Match(text, zaciatok);
         if (!trailer.Success)
         {
             throw new InvalidOperationException("PDF nemá klasickú tabuľku odkazov.");
@@ -286,7 +287,7 @@ public static partial class PdfNorma
         return vystup.ToArray();
     }
 
-    /// <summary>Posledný trailer súboru: jeho slovník a poloha tabuľky odkazov za „startxref“.</summary>
-    [GeneratedRegex(@"trailer\s*<<(?<slovnik>.*?)>>\s*startxref\s+(?<xref>\d+)\s*%%EOF\s*$", RegexOptions.Singleline | RegexOptions.RightToLeft)]
-    private static partial Regex PoslednyTrailer();
+    /// <summary>Trailer: jeho slovník a poloha tabuľky odkazov za „startxref“ (medzi nimi môžu byť komentáre).</summary>
+    [GeneratedRegex(@"\Gtrailer\s*<<(?<slovnik>.*?)>>(?:\s|%[^\r\n]*)*startxref\s+(?<xref>\d+)\s*%%EOF\s*\z", RegexOptions.Singleline)]
+    private static partial Regex Trailer();
 }

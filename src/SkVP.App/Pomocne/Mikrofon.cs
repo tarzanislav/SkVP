@@ -1,44 +1,47 @@
-using SkVP.Data;
 using System.Runtime.InteropServices;
+using SkVP.Data;
 using SkVP.Services;
 
 namespace SkVP.Pomocne;
 
 /// <summary>
-/// Nahrávanie z mikrofónu cez rozhranie Windows (winmm.dll, waveIn) – 16 kHz, mono, 16 bit, ako potrebuje prepis.
+/// Nahrávanie z mikrofónu cez waveIn (winmm.dll) v tvare, aký potrebuje prepis: 16 kHz, mono, 16 bit. Windows
+/// plní kruh bufferov po 100 ms a po každom naplnenom dá signál – vlákno nahrávania len čaká, nič nezisťuje dookola.
 /// Zvuk zostáva len v pamäti počítača.
 /// </summary>
 public sealed class Mikrofon : IDisposable
 {
     private const int WaveMapper = -1;
-    private const int CallbackNull = 0;
-    private const int WhdrDone = 1;
-    private const int PocetBufferov = 8;
-    private const int BajtovBuffera = 3200; // 100 ms
+    private const int CallbackEvent = 0x00050000;
+    private const uint WhdrDone = 0x1;
+    private const int Bufferov = 8;
+    private const int VzoriekBuffera = PrepisHlasu.VzorkovaFrekvencia / 10;
+    private const int BajtovBuffera = VzoriekBuffera * sizeof(short);
+    private static readonly int VelkostHlavicky = Marshal.SizeOf<WaveHdr>();
 
     [StructLayout(LayoutKind.Sequential, Pack = 2)]
     private struct WaveFormatEx
     {
-        public ushort Format;
-        public ushort Kanaly;
-        public uint Frekvencia;
-        public uint BajtovZaSekundu;
-        public ushort Blok;
-        public ushort Bity;
-        public ushort Doplnok;
+        public ushort FormatTag;
+        public ushort Channels;
+        public uint SamplesPerSec;
+        public uint AvgBytesPerSec;
+        public ushort BlockAlign;
+        public ushort BitsPerSample;
+        public ushort Size;
     }
 
     [StructLayout(LayoutKind.Sequential)]
     private struct WaveHdr
     {
         public IntPtr Data;
-        public uint Dlzka;
-        public uint Nahrane;
-        public IntPtr Pouzivatel;
-        public uint Priznaky;
-        public uint Slucky;
-        public IntPtr Dalsi;
-        public IntPtr Rezervovane;
+        public uint BufferLength;
+        public uint BytesRecorded;
+        public IntPtr User;
+        public uint Flags;
+        public uint Loops;
+        public IntPtr Next;
+        public IntPtr Reserved;
     }
 
     // systémové knižnice len zo System32 – podvrhnutá winmm.dll v inom priečinku sa nenačíta
@@ -66,13 +69,15 @@ public sealed class Mikrofon : IDisposable
     [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInClose(IntPtr zariadenie);
 
-    private readonly List<short> _vzorky = new();
-    private readonly IntPtr[] _hlavicky = new IntPtr[PocetBufferov];
+    private readonly AutoResetEvent _naplneny = new(false);
+    private readonly List<short> _zaznam = new();
     private IntPtr _zariadenie;
+    private IntPtr _hlavicky;
+    private IntPtr _data;
     private Thread? _vlakno;
-    private volatile bool _bezi;
+    private volatile bool _nahrava;
 
-    /// <summary>Hlasitosť posledných 100 ms (0 – 1) – na ukazovateľ v okne.</summary>
+    /// <summary>Hlasitosť posledných 100 ms (0 – 1) – na ukazovateľ pri tlačidle. Volá sa z vlákna nahrávania.</summary>
     public event Action<double>? Uroven;
 
     public static bool MaZariadenie => waveInGetNumDevs() > 0;
@@ -82,16 +87,16 @@ public sealed class Mikrofon : IDisposable
     {
         get
         {
-            lock (_vzorky)
+            lock (_zaznam)
             {
-                return _vzorky.Count / (double)PrepisHlasu.VzorkovaFrekvencia;
+                return _zaznam.Count / (double)PrepisHlasu.VzorkovaFrekvencia;
             }
         }
     }
 
     public void Start()
     {
-        if (_bezi)
+        if (_nahrava)
         {
             return;
         }
@@ -103,135 +108,189 @@ public sealed class Mikrofon : IDisposable
 
         var format = new WaveFormatEx
         {
-            Format = 1, Kanaly = 1, Frekvencia = (uint)PrepisHlasu.VzorkovaFrekvencia, BajtovZaSekundu = (uint)PrepisHlasu.VzorkovaFrekvencia * 2,
-            Blok = 2, Bity = 16, Doplnok = 0,
+            FormatTag = 1, // PCM
+            Channels = 1,
+            SamplesPerSec = PrepisHlasu.VzorkovaFrekvencia,
+            AvgBytesPerSec = PrepisHlasu.VzorkovaFrekvencia * sizeof(short),
+            BlockAlign = sizeof(short),
+            BitsPerSample = 16,
         };
-        var vysledok = waveInOpen(out _zariadenie, WaveMapper, ref format, IntPtr.Zero, IntPtr.Zero, CallbackNull);
-        if (vysledok != 0)
+        var kod = waveInOpen(out _zariadenie, WaveMapper, ref format, _naplneny.SafeWaitHandle.DangerousGetHandle(), IntPtr.Zero, CallbackEvent);
+        if (kod != 0)
         {
-            throw new SkvpException(Preklad.F($"Mikrofón sa nepodarilo otvoriť (kód {vysledok}). Skontrolujte v Nastaveniach Windows → Ochrana súkromia → Mikrofón, či majú klasické aplikácie povolený prístup."));
+            _zariadenie = IntPtr.Zero;
+            throw new SkvpException(Preklad.F($"Mikrofón sa nepodarilo otvoriť (kód {kod}). Skontrolujte v Nastaveniach Windows → Ochrana súkromia → Mikrofón, či majú klasické aplikácie povolený prístup."));
         }
 
-        var velkost = Marshal.SizeOf<WaveHdr>();
-        for (var i = 0; i < PocetBufferov; i++)
+        try
         {
-            var hlavicka = new WaveHdr { Data = Marshal.AllocHGlobal(BajtovBuffera), Dlzka = BajtovBuffera };
-            _hlavicky[i] = Marshal.AllocHGlobal(velkost);
-            Marshal.StructureToPtr(hlavicka, _hlavicky[i], false);
-            Skontroluj(waveInPrepareHeader(_zariadenie, _hlavicky[i], velkost));
-            Skontroluj(waveInAddBuffer(_zariadenie, _hlavicky[i], velkost));
+            _data = Marshal.AllocHGlobal(Bufferov * BajtovBuffera);
+            _hlavicky = Marshal.AllocHGlobal(Bufferov * VelkostHlavicky);
+            // najprv všetky hlavičky vyplniť – pri chybe sa potom uvoľňujú len platné hlavičky
+            for (var i = 0; i < Bufferov; i++)
+            {
+                Marshal.StructureToPtr(new WaveHdr { Data = _data + i * BajtovBuffera, BufferLength = BajtovBuffera }, Hlavicka(i), false);
+            }
+
+            for (var i = 0; i < Bufferov; i++)
+            {
+                Over(waveInPrepareHeader(_zariadenie, Hlavicka(i), VelkostHlavicky));
+                Over(waveInAddBuffer(_zariadenie, Hlavicka(i), VelkostHlavicky));
+            }
+
+            Over(waveInStart(_zariadenie));
+        }
+        catch
+        {
+            Uvolni();
+            throw;
         }
 
-        Skontroluj(waveInStart(_zariadenie));
-        _bezi = true;
-        _vlakno = new Thread(Zbieraj) { IsBackground = true, Name = "SkVP mikrofón" };
+        _nahrava = true;
+        _vlakno = new Thread(Nahravaj) { IsBackground = true, Name = "SkVP mikrofón" };
         _vlakno.Start();
     }
 
-    /// <summary>Chyba pri príprave nahrávania: mikrofón sa uvoľní a nahrávka sa nezačne (inak by bola potichu prázdna).</summary>
-    private void Skontroluj(int vysledok)
-    {
-        if (vysledok != 0)
-        {
-            Uvolni();
-            throw new SkvpException(Preklad.F($"Nahrávanie z mikrofónu sa nepodarilo spustiť (kód {vysledok}). Skúste iný mikrofón alebo reštartujte program."));
-        }
-    }
-
-    private void Zbieraj()
-    {
-        var velkost = Marshal.SizeOf<WaveHdr>();
-        var buffer = new short[BajtovBuffera / 2];
-        while (_bezi)
-        {
-            var nieco = false;
-            foreach (var ptr in _hlavicky)
-            {
-                var h = Marshal.PtrToStructure<WaveHdr>(ptr);
-                if ((h.Priznaky & WhdrDone) == 0)
-                {
-                    continue;
-                }
-
-                nieco = true;
-                var pocet = (int)h.Nahrane / 2;
-                Marshal.Copy(h.Data, buffer, 0, pocet);
-                double energia = 0;
-                lock (_vzorky)
-                {
-                    for (var i = 0; i < pocet; i++)
-                    {
-                        _vzorky.Add(buffer[i]);
-                        energia += buffer[i] / 32768.0 * (buffer[i] / 32768.0);
-                    }
-                }
-
-                Uroven?.Invoke(pocet > 0 ? Math.Min(1, Math.Sqrt(energia / pocet) * 4) : 0);
-                if (_bezi)
-                {
-                    h.Priznaky &= ~(uint)WhdrDone;
-                    h.Nahrane = 0;
-                    Marshal.StructureToPtr(h, ptr, false);
-                    waveInAddBuffer(_zariadenie, ptr, velkost);
-                }
-            }
-
-            if (!nieco)
-            {
-                Thread.Sleep(20);
-            }
-        }
-    }
-
-    /// <summary>Ukončí nahrávanie a vráti zvuk (16 kHz mono, float).</summary>
+    /// <summary>Ukončí nahrávanie a vráti celý zvuk (16 kHz mono, float −1 až 1).</summary>
     public float[] Stop()
     {
-        if (!_bezi)
+        if (!_nahrava)
         {
             return Array.Empty<float>();
         }
 
         Zastav();
-        lock (_vzorky)
+        lock (_zaznam)
         {
-            return _vzorky.Select(v => v / 32768f).ToArray();
+            var zvuk = new float[_zaznam.Count];
+            for (var i = 0; i < zvuk.Length; i++)
+            {
+                zvuk[i] = _zaznam[i] / 32768f;
+            }
+
+            return zvuk;
         }
     }
 
-    /// <summary>Zastaví zbieranie a uvoľní zariadenie – pamäť bufferov až potom, ako vlákno skončí (inak by čítalo uvoľnenú pamäť).</summary>
-    private void Zastav()
+    public void Dispose()
     {
-        _bezi = false;
-        if (_vlakno is { } vlakno && !vlakno.Join(2000))
+        // ak vlákno neodpovedá, signál aj pamäť zostanú – môže ich ešte používať
+        if (Zastav())
         {
-            return; // vlákno neodpovedá – radšej neuvoľniť pamäť, ktorú ešte môže čítať
+            _naplneny.Dispose();
+        }
+    }
+
+    private IntPtr Hlavicka(int index) => _hlavicky + index * VelkostHlavicky;
+
+    /// <summary>Chyba pri spúšťaní: nahrávka sa nezačne (inak by bola potichu prázdna).</summary>
+    private static void Over(int kod)
+    {
+        if (kod != 0)
+        {
+            throw new SkvpException(Preklad.F($"Nahrávanie z mikrofónu sa nepodarilo spustiť (kód {kod}). Skúste iný mikrofón alebo reštartujte program."));
+        }
+    }
+
+    /// <summary>
+    /// Vlákno nahrávania: po signále prevezme naplnené buffery v poradí, v akom ich Windows plní (kruhovo od prvého),
+    /// a hneď ich vráti na ďalšie nahrávanie.
+    /// </summary>
+    private void Nahravaj()
+    {
+        var vzorky = new short[VzoriekBuffera];
+        var nasledujuci = 0;
+        while (_nahrava)
+        {
+            _naplneny.WaitOne(250);
+            while (_nahrava)
+            {
+                var adresa = Hlavicka(nasledujuci);
+                var hlavicka = Marshal.PtrToStructure<WaveHdr>(adresa);
+                if ((hlavicka.Flags & WhdrDone) == 0)
+                {
+                    break;
+                }
+
+                var pocet = (int)Math.Min(hlavicka.BytesRecorded / sizeof(short), VzoriekBuffera);
+                Marshal.Copy(hlavicka.Data, vzorky, 0, pocet);
+                ReadOnlySpan<short> usek = vzorky.AsSpan(0, pocet);
+                lock (_zaznam)
+                {
+                    _zaznam.AddRange(usek);
+                }
+
+                Uroven?.Invoke(Hlasitost(usek));
+                hlavicka.Flags &= ~WhdrDone;
+                hlavicka.BytesRecorded = 0;
+                Marshal.StructureToPtr(hlavicka, adresa, false);
+                waveInAddBuffer(_zariadenie, adresa, VelkostHlavicky);
+                nasledujuci = (nasledujuci + 1) % Bufferov;
+            }
+        }
+    }
+
+    /// <summary>Efektívna hodnota úseku, zosilnená pre ukazovateľ (bežná reč je okolo polovice).</summary>
+    private static double Hlasitost(ReadOnlySpan<short> usek)
+    {
+        if (usek.IsEmpty)
+        {
+            return 0;
         }
 
-        _vlakno = null;
+        double sucet = 0;
+        foreach (var vzorka in usek)
+        {
+            sucet += (double)vzorka * vzorka;
+        }
+
+        return Math.Min(1, Math.Sqrt(sucet / usek.Length) / 32768 * 4);
+    }
+
+    /// <summary>Zastaví vlákno a uvoľní zariadenie. False = vlákno neskončilo včas a pamäť bufferov sa neuvoľnila.</summary>
+    private bool Zastav()
+    {
+        _nahrava = false;
+        if (_vlakno is { } vlakno)
+        {
+            _naplneny.Set();
+            if (!vlakno.Join(2000))
+            {
+                return false;
+            }
+
+            _vlakno = null;
+        }
+
         Uvolni();
+        return true;
     }
 
     private void Uvolni()
     {
-        if (_zariadenie == IntPtr.Zero)
+        if (_zariadenie != IntPtr.Zero)
         {
-            return;
+            waveInReset(_zariadenie);
+            if (_hlavicky != IntPtr.Zero)
+            {
+                for (var i = 0; i < Bufferov; i++)
+                {
+                    waveInUnprepareHeader(_zariadenie, Hlavicka(i), VelkostHlavicky);
+                }
+            }
+
+            waveInClose(_zariadenie);
+            _zariadenie = IntPtr.Zero;
         }
 
-        waveInReset(_zariadenie);
-        var velkost = Marshal.SizeOf<WaveHdr>();
-        foreach (var ptr in _hlavicky.Where(p => p != IntPtr.Zero))
+        foreach (var blok in new[] { _hlavicky, _data })
         {
-            var h = Marshal.PtrToStructure<WaveHdr>(ptr);
-            waveInUnprepareHeader(_zariadenie, ptr, velkost);
-            Marshal.FreeHGlobal(h.Data);
-            Marshal.FreeHGlobal(ptr);
+            if (blok != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(blok);
+            }
         }
 
-        Array.Clear(_hlavicky);
-        waveInClose(_zariadenie);
-        _zariadenie = IntPtr.Zero;
+        _hlavicky = _data = IntPtr.Zero;
     }
-
-    public void Dispose() => Zastav();
 }
