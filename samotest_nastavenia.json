@@ -1,0 +1,60 @@
+{
+  "Program": "SkVP",
+  "Verzia": "0.1.109",
+  "Vytvorene": "2026-10-29T07:06:26.1730344+00:00",
+  "Nastavenia": {
+    "org.dic": "",
+    "org.email": "",
+    "org.ico": "",
+    "org.mesto": "",
+    "org.psc": "",
+    "org.stat": "Slovensko",
+    "org.telefon": "",
+    "org.ulica": "",
+    "org.zlozka": "",
+    "skvp.adresa": "Skúšobná 1, Vzorovo",
+    "skvp.skola": "",
+    "skvp.typ": "Gymnázium – úplné stredné všeobecné vzdelanie (ISCED 344)",
+    "tlac.obojstranne": "{\"Sk\\u00FA\\u0161obn\\u00E1 tla\\u010Diare\\u0148\":{\"Rezim\":1,\"OtocitNaVysku\":true,\"OtocitNaSirku\":false,\"ObratitPoradie\":true}}",
+    "tlac.volby": null,
+    "zaloha.frekvencia": "denne"
+  },
+  "TypyUdalosti": [
+    {
+      "Nazov": "Pedagogická rada",
+      "Farba": "#7C9CE0"
+    },
+    {
+      "Nazov": "Predmetová komisia / metodické združenie",
+      "Farba": "#5FB3A1"
+    },
+    {
+      "Nazov": "Termín k osnovám",
+      "Farba": "#E39B5B"
+    },
+    {
+      "Nazov": "Porada",
+      "Farba": "#9AA5B8"
+    },
+    {
+      "Nazov": "Školská akcia",
+      "Farba": "#D98BB4"
+    },
+    {
+      "Nazov": "Rodičovské združenie",
+      "Farba": "#B79BD9"
+    },
+    {
+      "Nazov": "Maturita",
+      "Farba": "#E07A7A"
+    },
+    {
+      "Nazov": "Prijímacie skúšky",
+      "Farba": "#D4B04C"
+    },
+    {
+      "Nazov": "Iné",
+      "Farba": "#94A3B8"
+    }
+  ]
+}

@@ -1,0 +1,995 @@
+﻿07:06:05 priečinok: D:\a\_temp\skvp-samotest
+07:06:06 databáza vytvorená
+07:06:06 ok – vstavaný plán: 7 oblastí (je 7)
+07:06:06 ok – vstavaný plán: 43 predmetov (je 43)
+07:06:06 ok – vstavaný plán: typ školy
+07:06:09 ok – import z Excelu: 7 oblastí, 43 predmetov
+07:06:09 ok – import z Excelu: nadpisy tabuľky
+07:06:09 ok – oblasť s jedným predmetom rovnakého názvu
+07:06:09 ok – vytvorenie oblastí a predmetov
+07:06:09 ok – opakovaný import nič nezdvojí
+07:06:09 ok – typ školy uložený v nastaveniach
+07:06:09 ok – každá oblasť má vlastnú farbu
+07:06:09 ok – poradie oblastí podľa tabuľky
+07:06:09 ok – predmety prvej oblasti v poradí tabuľky
+07:06:09 ok – pridaný predmet je na konci oblasti
+07:06:09 ok – posun vyššie
+07:06:10 ok – predmet je o miesto vyššie
+07:06:10 ok – prvý predmet sa vyššie posunúť nedá
+07:06:10 ok – posun nižšie a koniec zoznamu
+07:06:10 ok – poradie je súvislé 0, 1, 2 …
+07:06:10 ok – presun predmetu do inej oblasti
+07:06:10 ok – premenovanie
+07:06:10 ok – prázdny názov sa nedá uložiť
+07:06:10 ok – odstránenie (kôš)
+07:06:10 ok – vrátenie odstráneného späť na pôvodné miesto
+07:06:10 ok – fyzika má 2 súvislosti
+07:06:10 ok – súvislosť vidno aj z druhej strany
+07:06:10 ok – názov väzby z oboch strán
+07:06:10 ok – zrušenie väzby
+07:06:10 ok – objekt sa nedá prepojiť sám so sebou
+07:06:10 ok – osnova uložená ako dokument Word (4325 B)
+07:06:10 ok – osnova predmetu: dokument Word je platný (kontrola OpenXML)
+07:06:10 ok – Word → program: počet blokov 8 = 8
+07:06:10 ok – Word → program: blok 0 je Nadpis (je Nadpis)
+07:06:10 ok – Word → program: nadpis „Charakteristika predmetu“
+07:06:10 ok – Word → program: blok 1 je Odsek (je Odsek)
+07:06:10 ok – Word → program: text odseku „Predmet rozvíja komunikačné a čitateľské kompetencie žiakov – ľščťžýáíéúäôň.⏎Druhý riadok odseku.“
+07:06:10 ok – Word → program: tučné písmo
+07:06:10 ok – Word → program: kurzíva
+07:06:10 ok – Word → program: podčiarknutie
+07:06:10 ok – Word → program: zarovnanie a odsadenie
+07:06:10 ok – Word → program: blok 2 je Nadpis (je Nadpis)
+07:06:10 ok – Word → program: nadpis „Ciele predmetu“
+07:06:10 ok – Word → program: blok 3 je Zoznam (je Zoznam)
+07:06:10 ok – Word → program: zoznam (3 položky)
+07:06:10 ok – Word → program / položka: počet blokov 1 = 1
+07:06:10 ok – Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – Word → program / položka: text odseku „rozvíjať slovnú zásobu“
+07:06:10 ok – Word → program / položka: tučné písmo
+07:06:10 ok – Word → program / položka: kurzíva
+07:06:10 ok – Word → program / položka: podčiarknutie
+07:06:10 ok – Word → program / položka: zarovnanie a odsadenie
+07:06:10 ok – Word → program / položka: počet blokov 2 = 2
+07:06:10 ok – Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – Word → program / položka: text odseku „čítať s porozumením“
+07:06:10 ok – Word → program / položka: tučné písmo
+07:06:10 ok – Word → program / položka: kurzíva
+07:06:10 ok – Word → program / položka: podčiarknutie
+07:06:10 ok – Word → program / položka: zarovnanie a odsadenie
+07:06:10 ok – Word → program / položka: blok 1 je Zoznam (je Zoznam)
+07:06:10 ok – Word → program / položka: zoznam (2 položky)
+07:06:10 ok – Word → program / položka / položka: počet blokov 1 = 1
+07:06:10 ok – Word → program / položka / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – Word → program / položka / položka: text odseku „umelecké texty“
+07:06:10 ok – Word → program / položka / položka: tučné písmo
+07:06:10 ok – Word → program / položka / položka: kurzíva
+07:06:10 ok – Word → program / položka / položka: podčiarknutie
+07:06:10 ok – Word → program / položka / položka: zarovnanie a odsadenie
+07:06:10 ok – Word → program / položka / položka: počet blokov 1 = 1
+07:06:10 ok – Word → program / položka / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – Word → program / položka / položka: text odseku „odborné texty“
+07:06:10 ok – Word → program / položka / položka: tučné písmo
+07:06:10 ok – Word → program / položka / položka: kurzíva
+07:06:10 ok – Word → program / položka / položka: podčiarknutie
+07:06:10 ok – Word → program / položka / položka: zarovnanie a odsadenie
+07:06:10 ok – Word → program / položka: počet blokov 1 = 1
+07:06:10 ok – Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – Word → program / položka: text odseku „písať jasne a výstižne“
+07:06:10 ok – Word → program / položka: tučné písmo
+07:06:10 ok – Word → program / položka: kurzíva
+07:06:10 ok – Word → program / položka: podčiarknutie
+07:06:10 ok – Word → program / položka: zarovnanie a odsadenie
+07:06:10 ok – Word → program: blok 4 je Nadpis (je Nadpis)
+07:06:10 ok – Word → program: nadpis „Obsahový a výkonový štandard“
+07:06:10 ok – Word → program: blok 5 je Tabulka (je Tabulka)
+07:06:10 ok – Word → program: tabuľka 3×3
+07:06:10 ok – Word → program: tabuľka riadok 0 má 3 buniek (má 3)
+07:06:10 ok – Word → program: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:10 ok – Word → program: text bunky [0,0]
+07:06:10 ok – Word → program: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:10 ok – Word → program: text bunky [0,1]
+07:06:10 ok – Word → program: zlúčenie bunky [0,2] 1×1 (je 1×1)
+07:06:10 ok – Word → program: text bunky [0,2]
+07:06:10 ok – Word → program: tabuľka riadok 1 má 3 buniek (má 3)
+07:06:10 ok – Word → program: zlúčenie bunky [1,0] 1×2 (je 1×2)
+07:06:10 ok – Word → program: text bunky [1,0]
+07:06:10 ok – Word → program: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:10 ok – Word → program: text bunky [1,1]
+07:06:10 ok – Word → program: zlúčenie bunky [1,2] 1×1 (je 1×1)
+07:06:10 ok – Word → program: text bunky [1,2]
+07:06:10 ok – Word → program: tabuľka riadok 2 má 1 buniek (má 1)
+07:06:10 ok – Word → program: zlúčenie bunky [2,0] 2×1 (je 2×1)
+07:06:10 ok – Word → program: text bunky [2,0]
+07:06:10 ok – Word → program: šírky stĺpcov tabuľky
+07:06:10 ok – Word → program: blok 6 je Nadpis (je Nadpis)
+07:06:10 ok – Word → program: nadpis „Poznámka“
+07:06:10 ok – Word → program: blok 7 je Odsek (je Odsek)
+07:06:10 ok – Word → program: text odseku „Text zarovnaný do bloku.“
+07:06:10 ok – Word → program: tučné písmo
+07:06:10 ok – Word → program: kurzíva
+07:06:10 ok – Word → program: podčiarknutie
+07:06:10 ok – Word → program: zarovnanie a odsadenie
+07:06:10 ok – editor programu: počet blokov 8 = 8
+07:06:10 ok – editor programu: blok 0 je Nadpis (je Nadpis)
+07:06:10 ok – editor programu: nadpis „Charakteristika predmetu“
+07:06:10 ok – editor programu: blok 1 je Odsek (je Odsek)
+07:06:10 ok – editor programu: text odseku „Predmet rozvíja komunikačné a čitateľské kompetencie žiakov – ľščťžýáíéúäôň.⏎Druhý riadok odseku.“
+07:06:10 ok – editor programu: tučné písmo
+07:06:10 ok – editor programu: kurzíva
+07:06:10 ok – editor programu: podčiarknutie
+07:06:10 ok – editor programu: zarovnanie a odsadenie
+07:06:10 ok – editor programu: blok 2 je Nadpis (je Nadpis)
+07:06:10 ok – editor programu: nadpis „Ciele predmetu“
+07:06:10 ok – editor programu: blok 3 je Zoznam (je Zoznam)
+07:06:10 ok – editor programu: zoznam (3 položky)
+07:06:10 ok – editor programu / položka: počet blokov 1 = 1
+07:06:10 ok – editor programu / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – editor programu / položka: text odseku „rozvíjať slovnú zásobu“
+07:06:10 ok – editor programu / položka: tučné písmo
+07:06:10 ok – editor programu / položka: kurzíva
+07:06:10 ok – editor programu / položka: podčiarknutie
+07:06:10 ok – editor programu / položka: zarovnanie a odsadenie
+07:06:10 ok – editor programu / položka: počet blokov 2 = 2
+07:06:10 ok – editor programu / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – editor programu / položka: text odseku „čítať s porozumením“
+07:06:10 ok – editor programu / položka: tučné písmo
+07:06:10 ok – editor programu / položka: kurzíva
+07:06:10 ok – editor programu / položka: podčiarknutie
+07:06:10 ok – editor programu / položka: zarovnanie a odsadenie
+07:06:10 ok – editor programu / položka: blok 1 je Zoznam (je Zoznam)
+07:06:10 ok – editor programu / položka: zoznam (2 položky)
+07:06:10 ok – editor programu / položka / položka: počet blokov 1 = 1
+07:06:10 ok – editor programu / položka / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – editor programu / položka / položka: text odseku „umelecké texty“
+07:06:10 ok – editor programu / položka / položka: tučné písmo
+07:06:10 ok – editor programu / položka / položka: kurzíva
+07:06:10 ok – editor programu / položka / položka: podčiarknutie
+07:06:10 ok – editor programu / položka / položka: zarovnanie a odsadenie
+07:06:10 ok – editor programu / položka / položka: počet blokov 1 = 1
+07:06:10 ok – editor programu / položka / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – editor programu / položka / položka: text odseku „odborné texty“
+07:06:10 ok – editor programu / položka / položka: tučné písmo
+07:06:10 ok – editor programu / položka / položka: kurzíva
+07:06:10 ok – editor programu / položka / položka: podčiarknutie
+07:06:10 ok – editor programu / položka / položka: zarovnanie a odsadenie
+07:06:10 ok – editor programu / položka: počet blokov 1 = 1
+07:06:10 ok – editor programu / položka: blok 0 je Odsek (je Odsek)
+07:06:10 ok – editor programu / položka: text odseku „písať jasne a výstižne“
+07:06:10 ok – editor programu / položka: tučné písmo
+07:06:10 ok – editor programu / položka: kurzíva
+07:06:10 ok – editor programu / položka: podčiarknutie
+07:06:10 ok – editor programu / položka: zarovnanie a odsadenie
+07:06:10 ok – editor programu: blok 4 je Nadpis (je Nadpis)
+07:06:10 ok – editor programu: nadpis „Obsahový a výkonový štandard“
+07:06:10 ok – editor programu: blok 5 je Tabulka (je Tabulka)
+07:06:10 ok – editor programu: tabuľka 3×3
+07:06:10 ok – editor programu: tabuľka riadok 0 má 3 buniek (má 3)
+07:06:10 ok – editor programu: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:10 ok – editor programu: text bunky [0,0]
+07:06:10 ok – editor programu: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:10 ok – editor programu: text bunky [0,1]
+07:06:10 ok – editor programu: zlúčenie bunky [0,2] 1×1 (je 1×1)
+07:06:10 ok – editor programu: text bunky [0,2]
+07:06:10 ok – editor programu: tabuľka riadok 1 má 3 buniek (má 3)
+07:06:10 ok – editor programu: zlúčenie bunky [1,0] 1×2 (je 1×2)
+07:06:10 ok – editor programu: text bunky [1,0]
+07:06:10 ok – editor programu: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:10 ok – editor programu: text bunky [1,1]
+07:06:10 ok – editor programu: zlúčenie bunky [1,2] 1×1 (je 1×1)
+07:06:10 ok – editor programu: text bunky [1,2]
+07:06:10 ok – editor programu: tabuľka riadok 2 má 1 buniek (má 1)
+07:06:10 ok – editor programu: zlúčenie bunky [2,0] 2×1 (je 2×1)
+07:06:10 ok – editor programu: text bunky [2,0]
+07:06:10 ok – editor programu: šírky stĺpcov tabuľky
+07:06:10 ok – editor programu: blok 6 je Nadpis (je Nadpis)
+07:06:10 ok – editor programu: nadpis „Poznámka“
+07:06:10 ok – editor programu: blok 7 je Odsek (je Odsek)
+07:06:10 ok – editor programu: text odseku „Text zarovnaný do bloku.“
+07:06:10 ok – editor programu: tučné písmo
+07:06:10 ok – editor programu: kurzíva
+07:06:10 ok – editor programu: podčiarknutie
+07:06:10 ok – editor programu: zarovnanie a odsadenie
+07:06:10 ok – nadpisy so slovenskými štýlmi Wordu (Nadpis 1, Nadpis 2)
+07:06:10 ok – číslovaný zoznam zo slovenského Wordu
+07:06:10 ok – uloženie osnovy do databázy
+07:06:10 ok – rovnaký obsah sa druhý raz neuloží
+07:06:10 ok – prvá verzia nemá čo archivovať
+07:06:10 ok – dĺžka textu osnovy sa zapísala
+07:06:10 ok – uloženie upravenej osnovy
+07:06:10 ok – predchádzajúca verzia je v archíve
+07:06:10 ok – načítanie aktuálnej verzie
+07:06:10 ok – obnovenie staršej verzie (aktuálna sa zarchivovala)
+07:06:10 ok – poškodený súbor sa do databázy neuloží
+07:06:10 ok – vložený nadpis z Wordu sa rozpoznal
+07:06:10 ok – farba vloženého textu sa zrušila
+07:06:10 ok – cudzie písmo vloženého textu sa zrušilo (Segoe UI, Georgia)
+07:06:11 ok – celý dokument: 7 oblastí, 43 predmetov
+07:06:11 ok – celý dokument obsahuje osnovy a charakteristiku
+07:06:11 ok – číslo poradia predmetu 01, 02, 03 …
+07:06:11 ok – PDF celých osnov (97 strán)
+07:06:11 ok – tlač (tichý režim)
+07:06:12 ok – zostava jednej oblasti len so spracovanými osnovami
+07:06:12 ok – zostava vybraných oblastí
+07:06:12 ok – predvolený text dole na úvodnej strane
+07:06:12 ok – uložené texty úvodnej strany
+07:06:12 ok – úvodná strana bez vypnutého riadku a s vlastnými textami
+07:06:12 ok – text dole na úvodnej strane môže obsahovať tabuľku
+07:06:12 ok – úvodná strana s tabuľkou: dokument Word je platný (kontrola OpenXML)
+07:06:12 ok – tabuľka a doplnený rok na úvodnej strane
+07:06:13 ok – predvolené texty úvodnej strany
+07:06:13 ok – celé osnovy vo Worde: dokument Word je platný (kontrola OpenXML)
+07:06:13 ok – export do Wordu: predmety ako Nadpis 2
+07:06:13 zostavy v poriadku
+07:06:13 ok – logo školy je nastavené
+07:06:13 ok – logo na úvodnej strane aj všetky časti hlavičky sú predvolene zapnuté
+07:06:13 ok – predvolený text hlavičky (Školský vzdelávací program – Učebné osnovy)
+07:06:13 ok – logo na úvodnej strane (PDF a tlač)
+07:06:13 ok – logo v hlavičke ďalších strán (PDF a tlač)
+07:06:13 ok – úvodná strana nemá hlavičku
+07:06:14 ok – hlavička s logom: dokument Word je platný (kontrola OpenXML)
+07:06:14 ok – hlavička vo Worde: text, škola a logo (Školský vzdelávací program – Učebné osnovy | Gymnázium Ukážková 1, Vzorovo; obrázkov 1)
+07:06:14 ok – logo na úvodnej strane vo Worde
+07:06:14 ok – vlastný text hlavičky sa uložil
+07:06:14 ok – vypnuté logo na úvodnej strane
+07:06:14 ok – vypnuté logo v hlavičke
+07:06:14 ok – hlavička bez loga: dokument Word je platný (kontrola OpenXML)
+07:06:14 ok – Word: bez loga, s vlastným textom hlavičky
+07:06:14 ok – hlavička bez textu: dokument Word je platný (kontrola OpenXML)
+07:06:14 ok – vypnutý text hlavičky – zostane škola a logo
+07:06:15 ok – celá hlavička vypnutá naraz
+07:06:15 ok – dokument bez hlavičky: dokument Word je platný (kontrola OpenXML)
+07:06:15 ok – Word: dokument bez hlavičky
+07:06:15 ok – po vypnutí celej hlavičky sa jednotlivé časti pamätajú
+07:06:15 ok – predvolená hlavička (logo zostalo)
+07:06:15 ok – text hlavičky rovnaký ako nadpis sa neukladá zvlášť
+07:06:15 logo a hlavička v poriadku
+07:06:15 ok – nahradenie celého názvu v dokumente (2): Predmet Fyzika a astronómia nadväzuje na predmet Fyzika a astronómia z 1. ročníka.
+Fyzikálne pokusy, Fyzika2, Matematika a práca s informáciami, Matematika.
+
+07:06:15 ok – dokument po premenovaní: dokument Word je platný (kontrola OpenXML)
+07:06:15 ok – názov oblasti, ktorý obsahuje názov predmetu, sa nezmení
+07:06:15 ok – dokument bez názvu sa nemení
+07:06:15 ok – premenovanie predmetu Konverzácia v nemeckom jazyku
+07:06:15 ok – nový názov aj v osnove a charakteristike oblasti
+07:06:15 ok – pred premenovaním v texte sa zarchivovala verzia
+07:06:15 ok – opakované premenovanie nič nezmení
+07:06:15 premenovanie v dokumentoch v poriadku
+07:06:16 ok – brožúra 6 strán (-,1 | 2,- | 6,3 | 4,5)
+07:06:16 ok – 2 strany na list (1,2 | 3,4 | 5,-)
+07:06:16 ok – 8 strán na šírku na list na výšku
+07:06:16 ok – opakovanie strán
+07:06:16 ok – prázdna zostava bez listov
+07:06:16 ok – okraj na dierovanie vľavo, na zadnej strane vpravo
+07:06:16 ok – strana bez zväčšenia vyplní bunku
+07:06:16 ok – zväčšenie neoreže obsah strany
+07:06:16 ok – ručné otáčanie (0,2,0,2 ×1 | -o,1o,-o,1o ×1)
+07:06:16 ok – duplex (0,1o,2,-o D ×2)
+07:06:16 ok – jednostranná tlač
+07:06:16 ok – odpovede sprievodcu obojstrannej tlače
+07:06:16 ok – profil tlačiarne sa zapamätá
+07:06:16 ok – uložené voľby tlače
+07:06:16 rozmiestnenie strán a plán tlače v poriadku
+07:06:16 ok – PDF
+07:06:16 ok – PDF/A-2b
+07:06:16 ok – PDF/A-3b s dokumentom Word
+07:06:16 ok – PDF/X-4
+07:06:18 ok – obrázky PNG (5)
+07:06:18 ok – obrázky JPEG (5)
+07:06:20 ok – viacstranový TIFF
+07:06:20 ok – zašifrované PDF s heslom
+07:06:20 výstupy tlače v poriadku
+07:06:20 ok – čistý názov zo súboru
+07:06:20 ok – predmet podľa názvu súboru
+07:06:20 ok – predmet podľa textu dokumentu
+07:06:20 ok – neznámy predmet → nový
+07:06:20 ok – text PDF → nadpisy, odseky, zoznam a tabuľka (Nadpis, Odsek, Nadpis, Zoznam, Nadpis, Tabulka)
+07:06:20 ok – import: rozpoznaný predmet a rok zo súboru
+07:06:20 ok – stará osnova je zarchivovaná s rokom a záznamom
+07:06:20 ok – nová osnova je uložená
+07:06:20 ok – rok zmeny osnov a zdroj importu
+07:06:20 ok – kópia novej osnovy „číslo názov rok“
+07:06:20 ok – súbor archivovanej osnovy „… – archív rok“
+07:06:20 ok – zdrojový súbor zostal
+07:06:21 ok – sprievodca navrhne nový predmet
+07:06:21 ok – import do nového predmetu
+07:06:23 ok – PDF prevedené na Word bez Wordu (203 znakov)
+07:06:23 ok – osnova z PDF: dokument Word je platný (kontrola OpenXML)
+07:06:23 text z PDF: Skolsk)'/ vzdelåvaci program — I-Jéebné osnovy Clovek a priroda Vzdelåvacia oblast' • 1 predmet dovek a priroda • 01
+07:06:23 ok – oblasti a predmety: Excel tam a späť
+07:06:23 ok – oblasti a predmety vo Worde: dokument Word je platný (kontrola OpenXML)
+07:06:23 ok – oblasti a predmety: Word tam a späť (7/44)
+07:06:23 ok – oblasti a predmety z textu PDF (2/4)
+07:06:23 ok – oblasti a predmety z nadpisov a zoznamov Wordu
+07:06:23 ok – export: výber predmetov oblasti
+07:06:23 ok – export osnov do Wordu: dokument Word je platný (kontrola OpenXML)
+07:06:24 ok – export osnov do JPEG (14 strán)
+07:06:25 ok – každý predmet zvlášť s rokom v názve (11): 01 Fyzika 2025.pdf, 02 Chémia.pdf, 03 Biológia.pdf, 04 Experimentálna prírodoveda.pdf
+07:06:25 import a export v poriadku
+07:06:26 ok – záloha učebných osnov vo Worde (26 súborov)
+07:06:26 ok – pri každom dokumente Word je v zálohe aj PDF (13)
+07:06:26 ok – kontrola databázy
+07:06:26 ok – obnova všetkých dát zo zálohy
+07:06:26 ok – pred obnovou sa zálohoval súčasný stav
+07:06:26 ok – nastavenie pravidelnej zálohy
+07:06:26 ok – export a import nastavení (24)
+07:06:26 ok – import nastavení: prípona loga nemôže byť cesta
+07:06:26 servis v poriadku
+07:06:26 ok – rýchla a úplná kontrola integrity
+07:06:26 ok – kontrola väzieb
+07:06:26 ok – kontrola dát (Oblastí: 7, predmetov: 43. | Úvodné časti učebných osnov: bez úvodných častí (vypnuté). | Záverečné časti učebných osnov: bez záverečných častí (vypnuté).)
+07:06:26 ok – optimalizácia, indexy, kompaktovanie
+07:06:26 ok – prehľad databázy
+07:06:26 ok – kontrola väzieb nájde chybnú súvislosť
+07:06:26 ok – oprava väzieb
+07:06:26 ok – záchrana dát (Prenesených záznamov: 98, nečitateľných: 0.)
+07:06:26 správa databázy v poriadku
+07:06:26 ok – oblasti a predmety z HTML tabuľky (5)
+07:06:26 ok – oblasti a predmety z nadpisov a zoznamov HTML
+07:06:26 ok – oblasti a predmety z XML
+07:06:26 ok – oblasti a predmety z JSON
+07:06:26 ok – oblasti a predmety z diktovania (Človek a príroda: Fyzika, Chémia, Biológia | Matematika a práca s informáciami: Matematika, Informatika)
+07:06:26 ok – export a import oblastí a predmetov .json (7 oblastí, 43 predmetov)
+07:06:26 ok – export a import oblastí a predmetov .xml (7 oblastí, 43 predmetov)
+07:06:26 ok – export a import oblastí a predmetov .html (7 oblastí, 43 predmetov)
+07:06:26 ok – charakteristiky zo ŠVP: aktualizácia nahradí len ukážkové texty, prevzatie všetkých archivuje vlastné
+07:06:26 ok – webová stránka v kódovaní windows-1250
+07:06:26 import oblastí a predmetov v poriadku
+07:06:26 ok – adresa bez PSČ, kontrola PSČ a DIČ
+07:06:26 ok – rozdelenie adresy na časti
+07:06:26 ok – údaje o organizácii
+07:06:26 ok – údaje o škole na úvodnej strane, v hlavičke a päte
+07:06:27 ok – údaje o organizácii v dokumente Word (úvodná strana a päta)
+07:06:27 ok – okno úvodnej strany zachová údaje o škole v zostave a uloží adresu po častiach
+07:06:27 ok – údaje o škole aj v exporte oblastí a predmetov
+07:06:28 ok – export nastavení programu po skupinách (bez stavu tohto počítača)
+07:06:28 ok – import len vybraných skupín nastavení
+07:06:28 údaje o organizácii v poriadku
+07:06:28 ok – import z priečinka: 13 súborov
+07:06:28 ok – KAJ – profilácia anglický jazyk (Konverzácia v anglickom jazyku - profilácia anglický jazyk – úroveň B2)
+07:06:28 ok – KAJ – ostatné profilácie (Konverzácia v anglickom jazyku - profilácia šport, informatika, steam – úroveň B2)
+07:06:28 ok – úroveň B1: RUJ, NEJ, KRJ, KNJ
+07:06:28 ok – úroveň B2: Jazykom k maturite, ANJ, Reálie
+07:06:28 ok – SJL a SSJ bez úrovne
+07:06:28 ok – KAJ: jedna profilácia do existujúceho predmetu, druhá ako nový predmet
+07:06:28 ok – Jazykom k maturite: existujúci predmet sa použije raz
+07:06:29 ok – import všetkých jazykových osnov
+07:06:29 predmety oblasti Jazyk a komunikácia: Slovenský jazyk a literatúra | Anglický jazyk – úroveň B2 | Nemecký jazyk – úroveň B1 | Ruský jazyk – úroveň B1 | Seminár zo slovenského jazyka a literatúry | Konverzácia v anglickom jazyku - profilácia anglický jazyk – úroveň B2 | Konverzácia v anglickom jazyku - profilácia šport, informatika, steam – úroveň B2 | Konverzácia v nemeckom jazyku – úroveň B1 | Konverzácia v ruskom jazyku – úroveň B1 | Reálie anglicky hovoriacich krajín – úroveň B2 | Jazykom k maturite - anglický jazyk – úroveň B2 | Jazykom k maturite - ruský jazyk – úroveň B2 | Jazykom k maturite - nemecký jazyk – úroveň B2
+07:06:29 ok – názvy predmetov po importe
+07:06:29 ok – obe konverzácie v anglickom jazyku sú pod sebou
+07:06:29 ok – konverzácia v ruskom jazyku je pod ostatnými konverzáciami
+07:06:29 ok – Jazykom k maturite – všetky tri pod sebou
+07:06:29 ok – úroveň je zaznamenaná pri osnove
+07:06:29 ok – opakovaný import nájde predmet s úrovňou
+07:06:29 jazykové osnovy v poriadku
+07:06:29 ok – úvodná tabuľka: UdajeOsnovy { Profilacie = šport, informatika, anglický jazyk, STEAM, Platnost = od 1.9.2026, MaUdaje = True }
+07:06:29 ok – osnova po oprave úvodnej tabuľky: dokument Word je platný (kontrola OpenXML)
+07:06:29 ok – oprava sa zapísala do dokumentu
+07:06:29 ok – ostatné riadky tabuľky zostali
+07:06:29 ok – údaje v jednej bunke a platnosť bez popisu
+07:06:29 ok – oprava v jednej bunke
+07:06:29 ok – osnova bez úvodnej tabuľky
+07:06:29 úvodná tabuľka v poriadku
+07:06:29 ok – zálohy sú číslované za sebou
+07:06:29 ok – záloha obsahuje databázu
+07:06:29 ok – automatická záloha raz za deň
+07:06:29 ok – údaje Noviniek sú platné
+07:06:29 ok – Novinky: 65 overených informácií v 6 témach, 10 odporúčaných stránok
+07:06:29 ok – Novinky: téma osnovy má aspoň 3 informácie
+07:06:29 ok – Novinky: téma tematicke má aspoň 3 informácie
+07:06:29 ok – Novinky: téma ciele má aspoň 3 informácie
+07:06:29 ok – Novinky: téma maturita má aspoň 3 informácie
+07:06:29 ok – Novinky: téma prijimacky má aspoň 3 informácie
+07:06:29 ok – Novinky: téma skolskyrok má aspoň 3 informácie
+07:06:29 ok – všetky zdroje Noviniek sú oficiálne stránky (žiadne médiá)
+07:06:29 ok – zoznam oficiálnych domén odmieta médiá a podvrhnuté adresy
+07:06:29 Novinky: 30 z 65 informácií má aspoň dva oficiálne zdroje
+07:06:29 ok – texty termínov (rozsah, lehota, účinnosť)
+07:06:29 ok – odpočet termínov (o 6 dní, prebieha, ešte 21 dní, uplynulo)
+07:06:29 ok – najbližšie termíny sú nadchádzajúce a zoradené
+07:06:29 ok – RSS a Atom: správy iba s odkazom na oficiálnu stránku
+07:06:29 ok – správy sa zaradia do tém (nerelevantné bez témy), popis bez HTML, dátum
+07:06:29 ok – krížové potvrdenie: o téme píšu dva oficiálne zdroje
+07:06:29 ok – témy správ podľa kľúčových slov (súťaže a výstavba škôl nie sú vzdelávací obsah)
+07:06:29 ok – overenie údaja na stránke (potvrdené, zmenené, PDF, nedostupné)
+07:06:29 ok – novšie stiahnuté údaje Noviniek sa použijú
+07:06:29 ok – stiahnuté údaje s neoficiálnym zdrojom sa odmietnu
+07:06:29 ok – termíny do kalendára (.ics, celodenné udalosti)
+07:06:30 ok – obrazovka Novinky: 5 blokov (prázdniny sú na dashboarde), najbližšie termíny, termínovník po mesiacoch, filtre tém
+07:06:30 ok – filter témy
+07:06:30 ok – hľadanie v Novinkách (bez diakritiky)
+07:06:30 ok – Novinky: na každej strane bloku sú hore dôležité, potom odporúčané – najviac polovica strany; nič nechýba
+07:06:30 ok – Novinky: blok Maturita – dôležité hore, 6 informácií na strane, 3 strany
+07:06:30 ok – Novinky: ďalšia strana bloku (história) – staršie dôležité a odporúčané sú opäť hore
+07:06:30 ok – Novinky: dôležité sa držia hore, kým nepríde novšia – staršie (aj odporúčané) idú do histórie hore (d4,d3,d2,b7,b6,b5 | d1,o2,o1,b4,b3,b2 | b1)
+07:06:30 ok – Novinky: návrat na novšie informácie
+07:06:30 ok – Novinky: kopírovanie celej informácie
+07:06:30 ok – Novinky: informácia chýbajúca v nových údajoch zostáva v histórii bloku (nemaže sa)
+07:06:30 ok – Novinky: dátum pridania informácií
+07:06:36 overenie Noviniek na stránkach: 29 potvrdených, 67 dostupných, 0 nenájdených, 0 nedostupných
+07:06:37 RSS ministerstva a NIVaM: 9 správ k vzdelávaciemu obsahu, 51 iných, 0 krížovo potvrdených
+07:06:37   [osnovy] 19.10.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: Za tri roky na úroveň OECD. FinQ ukazuje výsledky zmien, na ktorých stojí aj kurikulárna reforma
+07:06:37   [osnovy] 21.9.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: T. Drucker: Slovensko získava uznanie za výsledky PISA. Teraz musíme pripraviť deti na ešte náročnejšiu éru umelej inteligencie
+07:06:37   [osnovy] 7.9.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: PISA 2025: Slovensko sa zlepšilo v prírodných vedách, výzvou zostáva čitateľská gramotnosť a nerovnosti
+07:06:37   [osnovy] 1.9.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: Bratislava bude 8. septembra jedným z centier európskej diskusie o vzdelávaní. OECD predstaví výsledky PISA 2025
+07:06:37   [osnovy] 31.8.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: Kurikulárna tour spojila počas leta tisíce rodičov, detí a odborníkov
+07:06:37   [osnovy] 27.8.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: Séria podujatí ku kurikulárnej reforme sa zavŕši v Bratislave. Novinkou bude Záhrada objaviteľov
+07:06:37   [osnovy] 24.8.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: Vedieť. Rozumieť. Použiť. Od septembra budú podľa nového vzdelávacieho programu učiť všetky základné školy
+07:06:37   [tematicke] 24.8.2026 Ministerstvo školstva, výskumu, vývoja a mládeže SR: Deti dostanú nové učebnice za viac ako 28 miliónov eur. Školy už preberajú publikácie pre nový školský rok
+07:06:37 Novinky v poriadku
+07:06:37 ok – Kalendárium samotestu je v dočasnom priečinku
+07:06:37 ok – Kalendárium: meniny (23. 10. Alojzia) a sviatky (1. 1.)
+07:06:37 ok – pastelové farby: zjemnenie sýtych farieb, čitateľný text vo svetlom aj tmavom vzhľade, paleta oblastí
+07:06:37 ok – databáza výrokov: 1974 výrokov z citaty-slavnych.sk
+07:06:37 ok – v databáze nie sú výroky žijúcich politikov
+07:06:37 ok – výroky diktátorov sú predvolene skryté
+07:06:37 ok – výroky majú jedinečné čísla
+07:06:37 ok – výrok dňa: krátky, rovnaký celý deň, zajtra iný
+07:06:37 ok – skrytý výrok sa nezobrazí
+07:06:37 ok – skrytie výroku sa dá vrátiť
+07:06:37 ok – výrok s autorom v úvodzovkách
+07:06:37 ok – počasie: vyhľadanie miesta
+07:06:37 ok – počasie: aktuálny stav a predpoveď na 5 dní
+07:06:37 ok – počasie z vyrovnávacej pamäte (bez siete)
+07:06:38 počasie zo siete: Banská Bystrica 6 °C, Jasno
+07:06:38 ok – dashboard: meniny, prázdniny v školskom roku, najbližší termín z Noviniek
+07:06:38 ok – dashboard: sviatok 17. 11.
+07:06:38 ok – dashboard: počasie a výrok dňa
+07:06:38 ok – dashboard: tabuľka prázdnin 2026/2027 (posledný deň, termín, nástup, najbližšie prázdniny)
+07:06:38 ok – dashboard: jarné prázdniny podľa kraja
+07:06:38 ok – dashboard: prázdniny 2027/2028
+07:06:38 dashboard – dátum, meniny, sviatky, počasie a výroky v poriadku
+07:06:38 ok – úvodné a záverečné časti učebných osnov: skupiny existujú a sú predvolene vypnuté
+07:06:38 ok – vypnuté úvodné časti sa nedajú otvoriť
+07:06:38 ok – zapnutie skupín posuvníkom sa zapamätá
+07:06:38 ok – do zapnutých úvodných častí sa dá vojsť
+07:06:38 ok – pridanie úvodných a záverečných častí (dokumenty ako pri predmetoch)
+07:06:38 ok – časti sa nájdu ako predmety, do počtu predmetov sa nerátajú
+07:06:38 ok – predmety a časti sa medzi sebou nepresúvajú
+07:06:38 ok – zostava: úvodné časti pred oblasťami, záverečné za nimi, počet predmetov bez častí
+07:06:38 ok – zostava s časťami do PDF aj Wordu
+07:06:39 ok – Tlač a zostavy: voľba úvodných a záverečných častí
+07:06:39 ok – export: úvodné časti do „00 Úvodné časti…“, záverečné do „99 Záverečné časti…“
+07:06:39 ok – okno exportu ponúka úvodné časti
+07:06:39 ok – export oblastí a predmetov obsahuje úvodné a záverečné časti
+07:06:39 ok – import oblastí a predmetov: úvodné časti sa doplnia do svojej skupiny (nevznikne nová oblasť)
+07:06:39 ok – diktovanie rozpozná úvodné časti
+07:06:39 ok – import osnov pozná úvodné časti (zapnuté)
+07:06:39 ok – záloha učebných osnov obsahuje úvodné a záverečné časti
+07:06:40 ok – servis: kontrola dát uvádza úvodné časti
+07:06:40 ok – export nastavení programu: zapnutie častí
+07:06:40 ok – vypnuté úvodné a záverečné časti sa do tlače a importu nezaradia, ich dokumenty zostanú
+07:06:40 úvodné a záverečné časti učebných osnov v poriadku
+07:06:40 ok – databáza verzie 3: tabuľky kalendára, úloh a poznámok a predvolené typy udalostí
+07:06:40 ok – úloha bez textu sa neuloží
+07:06:40 ok – úlohy: viac predmetov naraz, zodpovedný, skupiny podľa termínu
+07:06:40 ok – úlohy sú zoradené podľa skupín (po termíne, dnes, bez termínu)
+07:06:40 ok – úlohy podľa predmetu (filter a odznaky)
+07:06:40 ok – hotová úloha je na konci, počty otvorených, po termíne a hotových
+07:06:40 ok – odstránenie hotových úloh
+07:06:40 ok – odstránenú úlohu sa dá vrátiť späť
+07:06:40 ok – úloha s termínom je v kalendári
+07:06:40 ok – poznámka: názov z prvého riadku, predvolená farba, naviazanie na predmet
+07:06:40 ok – poznámky: hľadanie bez diakritiky (aj podľa predmetu), deň, pripnuté
+07:06:40 ok – týždenné opakovanie do dátumu (4 výskyty)
+07:06:40 ok – mesačné opakovanie 31. dňa (február 28., marec 31., apríl 30.)
+07:06:40 ok – udalosť cez viac dní zasahuje aj do posledného dňa
+07:06:40 ok – koniec udalosti pred začiatkom sa neuloží
+07:06:40 ok – najbližšie termíny pri oblasti (panel Úlohy a poznámky)
+07:06:40 ok – prázdniny podľa kraja (jarné KE, PO; veľkonočné všade)
+07:06:40 ok – automatické termíny: maturita (Novinky, so zdrojom), polrok, pripomienka archivácie, prázdniny kraja
+07:06:40 ok – zdroje automatických termínov sa dajú vypnúť
+07:06:40 ok – platnosť osnovy a názov prázdnin
+07:06:40 ok – export .ics: opakovanie, pripomienka, úlohy, zalomenie riadkov podľa normy
+07:06:40 ok – úlohy a poznámky nie sú medzi odbornými súvislosťami predmetu
+07:06:40 ok – odstránený predmet zostane pri úlohe ako odstránený
+07:06:40 ok – pri stave „Na kontrolu“ program ponúkne úlohu
+07:06:40 ok – navrhované úlohy: kontrola osnovy, nezačaté osnovy (5 návrhov)
+07:06:40 ok – ponúknutá úloha sa vytvorila a návrh zmizol
+07:06:40 ok – skrytý návrh sa neukazuje
+07:06:40 ok – počty v menu a odznaky úloh pri predmete a oblasti
+07:06:40 ok – sekcia Úlohy otvorí vybranú úlohu
+07:06:40 ok – nová úloha sa naviaže na predmet z filtra
+07:06:40 ok – podrobnosti úlohy sa ukladajú priebežne
+07:06:40 ok – sekcia Poznámky otvorí vybranú poznámku
+07:06:40 ok – nová poznámka sa uloží a objaví na nástenke
+07:06:40 ok – kalendár: mesiac (6 týždňov), vybraný deň
+07:06:40 ok – kalendár: školský rok september – august
+07:06:41 ok – tlač do PDF: mesiac, školský rok, zoznam, úlohy, poznámky
+07:06:41 ok – panel Úlohy a poznámky pri oblasti (aj úlohy jej predmetov)
+07:06:41 ok – dashboard: úlohy a pripnuté poznámky
+07:06:41 ok – pripomienka udalosti deň vopred
+07:06:41 ok – prehľad dňa
+07:06:41 ok – export nastavení: kalendár a typy udalostí
+07:06:41 ok – servis: kontrola väzieb a dát s úlohami a poznámkami
+07:06:42 ok – archív školského roka obsahuje úlohy a poznámky k osnovám (aj PDF)
+07:06:42 kalendár, úlohy a poznámky v poriadku
+07:06:43 ok – hlavné okno: 7 oblastí, 43 predmetov
+07:06:43 ok – sekcia Novinky sa otvorí z menu
+07:06:43 ok – Novinky: 4 záložky (témy, termínovník, správy, odporúčané stránky)
+07:06:47 ok – pridanie predmetu v rozhraní (číslo 10)
+07:06:47 ok – posun predmetu vyššie v rozhraní
+07:06:47 ok – posun predmetu nižšie v rozhraní
+07:06:47 ok – presun predmetu ťahaním na začiatok
+07:06:47 ok – presun predmetu do inej oblasti
+07:06:47 ok – odstránenie s možnosťou vrátiť späť
+07:06:47 ok – vrátenie späť
+07:06:47 ok – osnova predmetu je rozpracovaná
+07:06:47 ok – zapnutie úprav
+07:06:47 ok – úprava v programe sa uložila do dokumentu Word
+07:06:47 ok – pred úpravou sa zarchivovala verzia
+07:06:48 ok – šablóna osnovy s nadpismi častí
+07:06:48 ok – nezmenená šablóna sa neuloží
+07:06:48 ok – úprava vo Worde sa začala
+07:06:48 ok – pracovná kópia má čitateľný názov
+07:06:49 ok – zmena uložená vo Worde sa prevzala do databázy
+07:06:49 ok – pred prevzatím z Wordu sa zarchivovala verzia
+07:06:50 ok – súvislosti predmetu v rozhraní
+07:06:51 ok – náhľad celých osnov (60 strán)
+07:06:51 ok – tlač jednej oblasti z jej stránky
+07:06:51 ok – náhľad v okne tlače ukazuje dokument (11 listov)
+07:06:51 ok – 2 strany na list
+07:06:52 ok – brožúra
+07:06:52 ok – archív osnovy s verziami
+07:06:53 ok – sekcia Archív bez archivovaného roka
+07:06:55 ok – testovacia sada: 43 osnov a 7 charakteristík oblastí
+07:06:55 ok – testovacia osnova SJL: dokument Word je platný (kontrola OpenXML)
+07:06:55 ok – testovacia osnova Word → program: počet blokov 29 = 29
+07:06:55 ok – testovacia osnova Word → program: blok 0 je Tabulka (je Tabulka)
+07:06:55 ok – testovacia osnova Word → program: tabuľka 4×2
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 0 má 2 buniek (má 2)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,1]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 1 má 2 buniek (má 2)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,1]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 2 má 2 buniek (má 2)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,1]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 3 má 2 buniek (má 2)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,1]
+07:06:55 ok – testovacia osnova Word → program: šírky stĺpcov tabuľky
+07:06:55 ok – testovacia osnova Word → program: blok 1 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „Charakteristika predmetu“
+07:06:55 ok – testovacia osnova Word → program: blok 2 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Predmet Slovenský jazyk a literatúra je kľúčovým predmetom gymnaziálneho vzdelávania. Spája jazykovú, slohovú a literárnu zložku do jedného celku, ktorý rozvíja čitateľskú gramotnosť, komunikačné zručnosti a estetické cítenie žiakov.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 3 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Jazyková zložka vedie žiakov k uvedomelému používaniu spisovného jazyka a k poznaniu jeho systému. Slohová zložka rozvíja schopnosť tvoriť ústne a písomné prejavy rôznych slohových postupov a žánrov. Literárna zložka sprostredkúva poznanie slovenskej a svetovej literatúry a rozvíja schopnosť interpretovať umelecký text.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 4 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Predmet pripravuje žiakov na maturitnú skúšku zo slovenského jazyka a literatúry (externá časť, písomná forma internej časti a ústna forma).“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 5 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Učebná osnova vychádza zo vzdelávacieho štandardu štátneho vzdelávacieho programu pre gymnáziá so štvorročným vzdelávacím programom.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 6 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „Ciele predmetu“
+07:06:55 ok – testovacia osnova Word → program: blok 7 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Cieľom predmetu je viesť žiakov k tomu, aby vedeli:“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 8 je Zoznam (je Zoznam)
+07:06:55 ok – testovacia osnova Word → program: zoznam (6 položky)
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „používať spisovný jazyk v ústnej aj písomnej podobe v súlade s jazykovou normou“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „s porozumením čítať náučné, publicistické aj umelecké texty a kriticky hodnotiť informácie“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „tvoriť jazykovo správne a štylisticky vhodné texty rôznych slohových postupov a žánrov“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „poznať vývin slovenskej a svetovej literatúry v kontexte literárnych smerov a obdobia“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „interpretovať umelecký text a vyjadriť vlastný čitateľský zážitok a názor“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „rozvíjať vzťah k materinskému jazyku a k národnej kultúre“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 9 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „Obsahový a výkonový štandard“
+07:06:55 ok – testovacia osnova Word → program: blok 10 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „1. ročník“
+07:06:55 ok – testovacia osnova Word → program: blok 11 je Tabulka (je Tabulka)
+07:06:55 ok – testovacia osnova Word → program: tabuľka 5×3
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 0 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 1 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 2 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 3 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 4 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,2]
+07:06:55 ok – testovacia osnova Word → program: šírky stĺpcov tabuľky
+07:06:55 ok – testovacia osnova Word → program: blok 12 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „2. ročník“
+07:06:55 ok – testovacia osnova Word → program: blok 13 je Tabulka (je Tabulka)
+07:06:55 ok – testovacia osnova Word → program: tabuľka 5×3
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 0 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 1 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 2 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 3 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 4 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,2]
+07:06:55 ok – testovacia osnova Word → program: šírky stĺpcov tabuľky
+07:06:55 ok – testovacia osnova Word → program: blok 14 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „3. ročník“
+07:06:55 ok – testovacia osnova Word → program: blok 15 je Tabulka (je Tabulka)
+07:06:55 ok – testovacia osnova Word → program: tabuľka 5×3
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 0 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 1 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 2 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 3 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 4 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,2]
+07:06:55 ok – testovacia osnova Word → program: šírky stĺpcov tabuľky
+07:06:55 ok – testovacia osnova Word → program: blok 16 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „4. ročník“
+07:06:55 ok – testovacia osnova Word → program: blok 17 je Tabulka (je Tabulka)
+07:06:55 ok – testovacia osnova Word → program: tabuľka 5×3
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 0 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [0,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [0,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 1 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [1,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [1,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 2 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [2,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [2,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 3 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [3,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [3,2]
+07:06:55 ok – testovacia osnova Word → program: tabuľka riadok 4 má 3 buniek (má 3)
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,0] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,0]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,1] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,1]
+07:06:55 ok – testovacia osnova Word → program: zlúčenie bunky [4,2] 1×1 (je 1×1)
+07:06:55 ok – testovacia osnova Word → program: text bunky [4,2]
+07:06:55 ok – testovacia osnova Word → program: šírky stĺpcov tabuľky
+07:06:55 ok – testovacia osnova Word → program: blok 18 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „Metódy a formy práce“
+07:06:55 ok – testovacia osnova Word → program: blok 19 je Zoznam (je Zoznam)
+07:06:55 ok – testovacia osnova Word → program: zoznam (6 položky)
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „komunikatívny prístup – práca vo dvojiciach a skupinách, rolové hry, simulácie situácií“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „práca s autentickými textami (články, nahrávky, videá) a s textami rôznych slohových postupov“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „projektové vyučovanie a prezentácie, debaty a diskusie“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „samostatná práca so slovníkmi, gramatickými prehľadmi a digitálnymi nástrojmi“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „sebahodnotenie a vzájomné hodnotenie (portfólio, kontrolné zoznamy)“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „interpretácia umeleckého textu, literárne besedy a návštevy divadelných predstavení“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 20 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „Hodnotenie predmetu“
+07:06:55 ok – testovacia osnova Word → program: blok 21 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Žiak je hodnotený v súlade s platnými predpismi o hodnotení a klasifikácii žiakov stredných škôl a so školským poriadkom.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 22 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Hodnotí sa priebežne počas celého školského roka a súhrnne na konci každého polroka; výsledné hodnotenie nie je aritmetickým priemerom známok, zohľadňuje aj aktivitu, prístup a pokrok žiaka.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 23 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Žiak pozná kritériá hodnotenia vopred; pri písomných prácach učiteľ oznámi rozsah učiva a spôsob bodovania.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 24 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Stupnica pre písomné práce a testy: 100 – 90 % výborný, 89 – 75 % chválitebný, 74 – 50 % dobrý, 49 – 30 % dostatočný, menej ako 30 % nedostatočný.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 25 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „V každom polroku žiak píše jednu slohovú prácu; hodnotí sa obsah, kompozícia, jazyková správnosť a štylistika.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 26 je Nadpis (je Nadpis)
+07:06:55 ok – testovacia osnova Word → program: nadpis „Učebné zdroje“
+07:06:55 ok – testovacia osnova Word → program: blok 27 je Zoznam (je Zoznam)
+07:06:55 ok – testovacia osnova Word → program: zoznam (5 položky)
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „schválené učebnice a pracovné zošity z edičného portfólia ministerstva školstva“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „učebné materiály a pracovné listy pripravené vyučujúcimi predmetovej komisie“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „digitálne vzdelávacie zdroje a školské e-learningové prostredie“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „Krátky slovník slovenského jazyka, Pravidlá slovenského pravopisu“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program / položka: počet blokov 1 = 1
+07:06:55 ok – testovacia osnova Word → program / položka: blok 0 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program / položka: text odseku „čítanky a výber umeleckých diel podľa odporúčaného zoznamu literatúry“
+07:06:55 ok – testovacia osnova Word → program / položka: tučné písmo
+07:06:55 ok – testovacia osnova Word → program / položka: kurzíva
+07:06:55 ok – testovacia osnova Word → program / položka: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program / položka: zarovnanie a odsadenie
+07:06:55 ok – testovacia osnova Word → program: blok 28 je Odsek (je Odsek)
+07:06:55 ok – testovacia osnova Word → program: text odseku „Testovacia sada – ukážkový text na vyskúšanie programu SkVP, nie oficiálny dokument školy.“
+07:06:55 ok – testovacia osnova Word → program: tučné písmo
+07:06:55 ok – testovacia osnova Word → program: kurzíva
+07:06:55 ok – testovacia osnova Word → program: podčiarknutie
+07:06:55 ok – testovacia osnova Word → program: zarovnanie a odsadenie
+07:06:56 ok – testovacia sada je nahratá (upozornenie v programe)
+07:06:56 ok – všetkých 43 predmetov má osnovu
+07:06:56 ok – testovacia sada obsahuje hotové osnovy
+07:06:56 ok – testovacia sada obsahuje súvislosti
+07:06:56 ok – testovacia sada: vymyslená škola, názov programu, texty úvodnej strany a hlavičky
+07:06:56 ok – testovacia sada: logo školy
+07:06:57 ok – testovacia sada: ukážkové úlohy, udalosti a poznámky
+07:07:01 ok – panel Úlohy a poznámky pri predmete (fyzika: udalosť a poznámka)
+07:07:03 ok – oprava názvu predmetu v riadku
+07:07:03 ok – nový názov sa prejavil aj v texte osnovy
+07:07:03 ok – vrátenie názvu späť aj v texte
+07:07:03 ok – údaje osnovy pod názvom predmetu (Profilácie: šport, informatika, anglický jazyk, STEAM | Platnosť: od 1.9.2026)
+07:07:04 ok – oprava údajov sa zapísala do osnovy
+07:07:04 ok – pred opravou údajov sa zarchivovala verzia
+07:07:04 ok – úprava osnovy sa premietne do údajov pod názvom
+07:07:08 ok – archív osnov za školský rok (50 dokumentov)
+07:07:08 ok – v priečinku archívu roka je pri každom dokumente Word aj PDF (50)
+07:07:08 ok – celé osnovy roka zostavené zo snímky v programe (náhľad, tlač, PDF, Word)
+07:07:08 ok – archív školského roka aj v archíve verzií
+07:07:08 ok – záznam o archíve školského roka
+07:07:08 ok – štatistiky archívu roka (43 predmetov, 14 hotových, 75.1 NS)
+07:07:08 ok – počet hotových osnov v archíve
+07:07:08 ok – archív roka si pamätá profilácie a platnosť osnovy
+07:07:08 ok – archív roka obsahuje charakteristiky oblastí
+07:07:08 ok – v minulom školskom roku sa osnovy testovacej sady nemenili
+07:07:12 ok – porovnanie s predchádzajúcim rokom (1 zmenených)
+07:07:12 ok – osnovy zmenené počas aktuálneho školského roka
+07:07:12 ok – sekcia Archív – vybraný rok so štatistikami
+07:07:13 ok – hľadanie v archíve a značka zmenenej osnovy (2 nájdených)
+07:07:13 ok – archivovaná osnova sa dá prečítať
+07:07:13 ok – najstarší archivovaný rok nemá s čím porovnať
+07:07:13 ok – štatistiky archívu v Exceli
+07:07:14 ok – prenos archívu bez verzií zo staršej verzie programu
+07:07:14 ok – archív zo staršej verzie programu prenesený so všetkými údajmi (43 predmetov, 50 dokumentov)
+07:07:14 ok – prenesený archív – údaje a stav osnovy
+07:07:14 ok – prenos starších archívov sa nezopakuje
+07:07:14 ok – prenesený archív v sekcii Archív
+07:07:14 ok – starší archív bez verzií – bez prehľadu predmetov
+07:07:14 ok – odstránenie archívu školského roka z programu
+07:07:15 ok – úvodná strana sady sa zhustením zmestí na jednu stranu (stupeň 2)
+07:07:15 ok – PDF testovacej sady (123 strán)
+07:07:16 ok – vymazanie sady odstráni jej ukážkové úlohy, udalosti a poznámky; vlastná úloha aj s naviazaním na predmet zostane
+07:07:16 ok – vymazanie osnov – oblasti a predmety zostali
+07:07:16 ok – osnovy aj archív sú vymazané
+07:07:16 ok – pred vymazaním sa vytvorila záloha
+07:07:16 ok – vymazanie osnov odstráni aj archív školských rokov v programe
+07:07:16 ok – vymazanie osnov: bez zvyškov vymyslenej školy ()
+07:07:17 ok – opätovné nahratie sady doplní školu aj logo
+07:07:18 ok – vymazanie všetkého
+07:07:18 ok – vymazanie všetkého: bez zvyškov vymyslenej školy ()
+07:07:19 ok – vymazanie sady ponechá vlastný názov školy, ostatné údaje sady zmaže
+07:07:21 ok – testovacia sada do prázdneho programu doplní aj oblasti a predmety
+07:07:21 ok – prepis hlasu bez internetu – knižnica whisper.cpp (v poriadku)
+07:07:21 ok – licencia whisper.cpp je priložená k programu
+07:07:21 ok – okno diktovania rozpozná oblasti a predmety
+07:07:21 ok – diktovanie: oblasť rozpoznaná aj bez dvojbodky (čiarka, pomlčka, malé písmená)
+07:07:21 ok – diktovanie: oblasť rozpoznaná aj pri chybe prepisu v jednom písmene („Človek a prírova“)
+07:07:21 ok – diktovanie: úprava prepisu (ozvena výzvy, ticho, prevzorkovanie na 16 kHz)
+07:07:21 ok – diktovanie: hlasové písanie Windows (Win+H)
+07:07:22 ok – diktovanie: model overený podľa SHA-256
+07:07:32 diktovanie bez internetu: model načítaný za 0.3 s, 6.2 s zvuku prepísaných za 10 s: „Človek a príroda, fyzika, chémia, biolóvia. Zdrávidie a pohyb. Telesná a športová výchova.“
+07:07:32 ok – diktovanie bez internetu: slovenský text rozpoznaný (5 zo 7 výrazov)
+07:07:32 ok – diktovanie bez internetu: z prepisu sa rozpoznali oblasti a predmety (Človek a príroda: Fyzika, Chémia, Biolóvia, Zdrávidie a pohyb, Telesná a športová výchova)
+07:07:33 ok – prvé spustenie podľa ŠVP – 7 oblastí bez predmetov a údaje o škole
+07:07:33 ok – charakteristika oblasti podľa ŠVP
+07:07:33 ok – predmety z priečinka a podpriečinkov podľa úvodnej tabuľky a ich oblasti (Projektové vyučovanie → Človek a hodnoty | Fyzika → Človek a príroda | Seminár z dejepisu → Človek a spoločnosť | Anglický jazyk – úroveň B2 → Jazyk a komunikácia | Telesná a športová výchova → Zdravie a pohyb)
+07:07:34 ok – import osnov vytvorí predmety v oblastiach podľa ŠVP
+07:07:34 ok – predmety sú v správnych oblastiach
+07:07:34 ok – charakteristika oblasti je zhodná so ŠVP
+07:07:34 obrazovky v poriadku
+07:07:34 ok – väzby XAML na všetkých obrazovkách bez chýb (0)
+07:07:34 SAMOTEST OK
