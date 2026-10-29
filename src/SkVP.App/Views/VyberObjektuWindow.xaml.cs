@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using SkVP.Models;
 using SkVP.ViewModels;
 
 namespace SkVP.Views;

@@ -250,9 +250,14 @@ public sealed partial class MainViewModel : ObservableObject
 
     // ---- navigácia ----
 
-    private void Prejdi(string sekcia, object stranka, OblastVM? oblast = null)
+    /// <summary>
+    /// Prechod na inú stránku: rozpísané zmeny doterajšej stránky sa uložia ešte pred vytvorením novej, aby nová stránka
+    /// načítala aktuálne údaje (napr. kalendár práve upravenú úlohu).
+    /// </summary>
+    private void Prejdi(string sekcia, Func<object> vytvorStranku, OblastVM? oblast = null)
     {
         (Stranka as IUkladaPredOdchodom)?.UlozTeraz();
+        var nova = vytvorStranku();
         (Stranka as IDisposable)?.Dispose();
         foreach (var o in VsetkySkupiny)
         {
@@ -260,14 +265,14 @@ public sealed partial class MainViewModel : ObservableObject
         }
 
         Sekcia = sekcia;
-        Stranka = stranka;
+        Stranka = nova;
     }
 
     [RelayCommand]
-    public void OtvorDashboard() => Prejdi(Sekcie.Dashboard, new DashboardViewModel(this));
+    public void OtvorDashboard() => Prejdi(Sekcie.Dashboard, () => new DashboardViewModel(this));
 
     [RelayCommand]
-    public void OtvorOsnovy() => Prejdi(Sekcie.Osnovy, new OsnovyViewModel(this));
+    public void OtvorOsnovy() => Prejdi(Sekcie.Osnovy, () => new OsnovyViewModel(this));
 
     [RelayCommand]
     public void OtvorOblast(OblastVM? oblast)
@@ -280,7 +285,7 @@ public sealed partial class MainViewModel : ObservableObject
 
         if (oblast is not null)
         {
-            Prejdi(Sekcie.Osnovy, new OblastViewModel(this, oblast), oblast);
+            Prejdi(Sekcie.Osnovy, () => new OblastViewModel(this, oblast), oblast);
         }
     }
 
@@ -289,42 +294,42 @@ public sealed partial class MainViewModel : ObservableObject
     {
         if (predmet is not null)
         {
-            Prejdi(Sekcie.Osnovy, new PredmetViewModel(this, predmet), predmet.Oblast);
+            Prejdi(Sekcie.Osnovy, () => new PredmetViewModel(this, predmet), predmet.Oblast);
         }
     }
 
     [RelayCommand]
-    public void OtvorTlac(OblastVM? oblast) => Prejdi(Sekcie.Tlac, new TlacViewModel(this, oblast));
+    public void OtvorTlac(OblastVM? oblast) => Prejdi(Sekcie.Tlac, () => new TlacViewModel(this, oblast));
 
     [RelayCommand]
-    public void OtvorNastavenia() => Prejdi(Sekcie.Nastavenia, new NastaveniaViewModel(this));
+    public void OtvorNastavenia() => Prejdi(Sekcie.Nastavenia, () => new NastaveniaViewModel(this));
 
     [RelayCommand]
-    public void OtvorImportExport() => Prejdi(Sekcie.ImportExport, new ImportExportViewModel(this));
+    public void OtvorImportExport() => Prejdi(Sekcie.ImportExport, () => new ImportExportViewModel(this));
 
     [RelayCommand]
-    public void OtvorArchiv() => Prejdi(Sekcie.Archiv, new ArchivViewModel(this, null));
+    public void OtvorArchiv() => Prejdi(Sekcie.Archiv, () => new ArchivViewModel(this, null));
 
     /// <summary>Sekcia Archív s vybraným archívom školského roka.</summary>
-    public void OtvorArchivRoka(long archivId) => Prejdi(Sekcie.Archiv, new ArchivViewModel(this, archivId));
+    public void OtvorArchivRoka(long archivId) => Prejdi(Sekcie.Archiv, () => new ArchivViewModel(this, archivId));
 
     [RelayCommand]
-    public void OtvorNovinky() => Prejdi(Sekcie.Novinky, new NovinkyViewModel(this));
+    public void OtvorNovinky() => Prejdi(Sekcie.Novinky, () => new NovinkyViewModel(this));
 
     [RelayCommand]
-    public void OtvorServis() => Prejdi(Sekcie.Servis, new ServisViewModel(this));
+    public void OtvorServis() => Prejdi(Sekcie.Servis, () => new ServisViewModel(this));
 
     /// <summary>Kalendár na mesiaci s dátumom (predvolene dnes).</summary>
     [RelayCommand]
-    public void OtvorKalendar(DateTime? datum) => Prejdi(Sekcie.Kalendar, new KalendarViewModel(this, datum ?? DateTime.Today));
+    public void OtvorKalendar(DateTime? datum) => Prejdi(Sekcie.Kalendar, () => new KalendarViewModel(this, datum ?? DateTime.Today));
 
     /// <summary>Úlohy, voliteľne s vybranou úlohou.</summary>
     [RelayCommand]
-    public void OtvorUlohy(long? vybrana) => Prejdi(Sekcie.Ulohy, new UlohyViewModel(this, vybrana));
+    public void OtvorUlohy(long? vybrana) => Prejdi(Sekcie.Ulohy, () => new UlohyViewModel(this, vybrana));
 
     /// <summary>Poznámky, voliteľne s vybranou poznámkou.</summary>
     [RelayCommand]
-    public void OtvorPoznamky(long? vybrana) => Prejdi(Sekcie.Poznamky, new PoznamkyViewModel(this, vybrana));
+    public void OtvorPoznamky(long? vybrana) => Prejdi(Sekcie.Poznamky, () => new PoznamkyViewModel(this, vybrana));
 
     /// <summary>Otvorí ľubovoľný objekt: oblasť alebo časti osnov, predmet, úlohu, poznámku alebo udalosť (v kalendári).</summary>
     public void OtvorObjekt(long id)
@@ -649,15 +654,20 @@ public sealed partial class MainViewModel : ObservableObject
         _sluzba.NastavStav(predmet.Id, stav);
         predmet.StavKod = stav;
         predmet.Oblast.Obnov();
-        if (stav == StavyOsnovy.NaKontrolu && !new UlohyService().Zdroje().Contains($"kontrola:{predmet.Id}"))
+        if (stav != StavyOsnovy.NaKontrolu)
         {
-            // ponuka (nič sa nevytvára samo): úloha na kontrolu osnovy, naviazaná na predmet
+            return;
+        }
+
+        // ponuka (nič sa nevytvára samo): rovnaká úloha ako navrhovaná v Úlohách, naviazaná na predmet
+        var navrh = NavrhyUloh.KontrolaOsnovy(predmet.Id, predmet.Nazov, predmet.Oblast.Nazov, predmet.Oblast.Farba);
+        if (!new UlohyService().Zdroje().Contains(navrh.Kluc))
+        {
             Oznam($"Osnova „{predmet.Nazov}“ je na kontrolu.", () =>
             {
-                new UlohyService().Pridaj($"Skontrolovať osnovu: {predmet.Nazov}", priorita: PrioritaUlohy.Vysoka, tykaSa: new[] { predmet.Id },
-                    zdroj: $"kontrola:{predmet.Id}");
+                NavrhyUloh.Prevezmi(navrh);
                 ObnovPlanovanie();
-                Oznam($"Úloha „Skontrolovať osnovu: {predmet.Nazov}“ je v Úlohách – doplňte termín a zodpovedného.");
+                Oznam($"Úloha „{navrh.Text}“ je v Úlohách – doplňte termín a zodpovedného.");
             }, "Vytvoriť úlohu");
         }
     }

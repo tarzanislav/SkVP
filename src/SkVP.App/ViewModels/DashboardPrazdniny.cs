@@ -71,7 +71,7 @@ public sealed partial class DashboardViewModel
     public List<string> KrajePrazdnin { get; private set; } = new();
 
     [ObservableProperty] private string _vybranyRok = "";
-    [ObservableProperty] private string _vybranyKrajPrazdnin = NovinkyViewModel.VsetkyKraje;
+    [ObservableProperty] private string _vybranyKrajPrazdnin = NovinkyService.VsetkyKraje;
     [ObservableProperty] private List<RiadokPrazdninVM> _riadkyPrazdnin = new();
     [ObservableProperty] private string _obdobieVyucovania = "";
 
@@ -110,9 +110,9 @@ public sealed partial class DashboardViewModel
 
         var prazdniny = _skolskyRok.Where(JePrazdniny).ToList();
         SkolskeRoky = prazdniny.Select(p => SkolskyRok(p.Zaciatok!.Value)).Distinct().Order().ToList();
-        KrajePrazdnin = new[] { NovinkyViewModel.VsetkyKraje }.Concat(prazdniny.Select(p => p.Skupina).OfType<string>().Distinct().Order()).ToList();
-        var kraj = Databaza.Citaj(NovinkyService.KlucKraj, NovinkyViewModel.VsetkyKraje);
-        _vybranyKrajPrazdnin = KrajePrazdnin.Contains(kraj) ? kraj : NovinkyViewModel.VsetkyKraje;
+        KrajePrazdnin = new[] { NovinkyService.VsetkyKraje }.Concat(prazdniny.Select(p => p.Skupina).OfType<string>().Distinct().Order()).ToList();
+        var kraj = Databaza.Citaj(NovinkyService.KlucKraj, NovinkyService.VsetkyKraje);
+        _vybranyKrajPrazdnin = KrajePrazdnin.Contains(kraj) ? kraj : NovinkyService.VsetkyKraje;
         var terajsi = SkolskyRok(DnesPrazdnin);
         _vybranyRok = SkolskeRoky.Contains(terajsi) ? terajsi : SkolskeRoky.FirstOrDefault() ?? "";
         OnPropertyChanged(nameof(SkolskeRoky));
@@ -132,7 +132,7 @@ public sealed partial class DashboardViewModel
     {
         var dnes = DnesPrazdnin;
         var vRoku = _skolskyRok.Where(p => JePrazdniny(p) && SkolskyRok(p.Zaciatok!.Value) == VybranyRok
-                                           && (VybranyKrajPrazdnin == NovinkyViewModel.VsetkyKraje || p.Skupina is null || p.Skupina == VybranyKrajPrazdnin))
+                                           && (VybranyKrajPrazdnin == NovinkyService.VsetkyKraje || p.Skupina is null || p.Skupina == VybranyKrajPrazdnin))
             .OrderBy(p => p.Zaciatok).ThenBy(p => p.Skupina).ToList();
         var najblizsi = vRoku.FirstOrDefault(p => p.Zaciatok > dnes);
         RiadkyPrazdnin = vRoku.Select(p => new RiadokPrazdninVM(p, dnes, p == najblizsi && !vRoku.Any(x => x.Zaciatok <= dnes && x.Koniec >= dnes))).ToList();

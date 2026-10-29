@@ -24,7 +24,7 @@ public sealed partial class ZalohaService
     /// <summary>Ako často sa zálohuje automaticky (pri spustení programu): denne, týždenne alebo vypnuté.</summary>
     public static string Frekvencia
     {
-        get => Databaza.Citaj(KlucFrekvencia) is Tyzdenne or Vypnute ? Databaza.Citaj(KlucFrekvencia)! : Denne;
+        get => Databaza.Citaj(KlucFrekvencia) is { } f && f is Tyzdenne or Vypnute ? f : Denne;
         set => Databaza.Zapis(KlucFrekvencia, value);
     }
 
@@ -43,22 +43,33 @@ public sealed partial class ZalohaService
     private static partial Regex VzorNazvu();
 
     /// <summary>Vytvorí zálohu a vráti cestu k nej.</summary>
+    /// <summary>
+    /// Vytvorí zálohu a vráti cestu k nej. ZIP sa zapisuje pod dočasným názvom a premenuje sa až celý – nedokončená záloha
+    /// (plný alebo odpojený disk) tak nikdy nevyzerá ako platná.
+    /// </summary>
     public string Zalohuj(bool automaticka = false)
     {
-        Directory.CreateDirectory(Databaza.PriecinokZaloh);
-        var cislo = DalsieCislo();
-        var nazov = $"SkVP_zaloha_{cislo:0000}_{DateTime.Now:yyyy-MM-dd_HH-mm}{(automaticka ? "_auto" : "")}.zip";
-        var ciel = Path.Combine(Databaza.PriecinokZaloh, nazov);
         var docasna = Path.Combine(Path.GetTempPath(), $"skvp_{Guid.NewGuid():N}.db");
+        string? rozpisany = null;
         try
         {
+            Directory.CreateDirectory(Databaza.PriecinokZaloh);
+            var nazov = $"SkVP_zaloha_{DalsieCislo():0000}_{DateTime.Now:yyyy-MM-dd_HH-mm}{(automaticka ? "_auto" : "")}.zip";
+            var ciel = Path.Combine(Databaza.PriecinokZaloh, nazov);
+            rozpisany = ciel + ".tmp";
             Databaza.Kopiruj(docasna);
-            using var archiv = ZipFile.Open(ciel, ZipArchiveMode.Create);
-            archiv.CreateEntryFromFile(docasna, "skvp.db", CompressionLevel.Optimal);
-            if (NastaveniaSkoly.CestaLoga() is { } logo)
+            using (var archiv = ZipFile.Open(rozpisany, ZipArchiveMode.Create))
             {
-                archiv.CreateEntryFromFile(logo, Path.GetFileName(logo), CompressionLevel.Optimal);
+                archiv.CreateEntryFromFile(docasna, "skvp.db", CompressionLevel.Optimal);
+                if (NastaveniaSkoly.CestaLoga() is { } logo)
+                {
+                    archiv.CreateEntryFromFile(logo, Path.GetFileName(logo), CompressionLevel.Optimal);
+                }
             }
+
+            File.Move(rozpisany, ciel);
+            rozpisany = null;
+            return ciel;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -66,17 +77,24 @@ public sealed partial class ZalohaService
         }
         finally
         {
-            try
+            ZmazTicho(docasna);
+            if (rozpisany is not null)
             {
-                File.Delete(docasna);
-            }
-            catch (IOException)
-            {
-                // dočasný súbor zmaže systém
+                ZmazTicho(rozpisany);
             }
         }
+    }
 
-        return ciel;
+    private static void ZmazTicho(string cesta)
+    {
+        try
+        {
+            File.Delete(cesta);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // dočasný súbor zmaže systém alebo ďalšia záloha
+        }
     }
 
     /// <summary>
@@ -87,12 +105,13 @@ public sealed partial class ZalohaService
     {
         var dnes = DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
         var posledna = Databaza.Citaj(KlucPoslednaAutomaticka);
-        if (Frekvencia == Vypnute || posledna == dnes)
+        var frekvencia = Frekvencia;
+        if (frekvencia == Vypnute || posledna == dnes)
         {
             return null;
         }
 
-        if (Frekvencia == Tyzdenne && DateTime.TryParseExact(posledna, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datum)
+        if (frekvencia == Tyzdenne && DateTime.TryParseExact(posledna, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var datum)
             && (DateTime.Today - datum).TotalDays < 7)
         {
             return null;
@@ -180,13 +199,7 @@ public sealed partial class ZalohaService
         }
         finally
         {
-            try
-            {
-                File.Delete(docasna);
-            }
-            catch (IOException)
-            {
-            }
+            ZmazTicho(docasna);
         }
     }
 
@@ -276,7 +289,7 @@ public sealed partial class ZalohaService
                 cisloOblasti++;
             }
 
-            var farba = oblast.Farba ?? (jeOblast ? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1) : CastiOsnov.Farba(oblast.Typ));
+            var farba = CastiOsnov.FarbaSkupiny(oblast, cisloOblasti - 1);
             var priecinok = ImportOsnov.BezpecnyNazov(jeOblast ? $"{cisloOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ));
             if (jeOblast && dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
             {

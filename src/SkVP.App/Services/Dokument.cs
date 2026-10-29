@@ -620,10 +620,8 @@ public static class DokumentOsnovy
                     break;
 
                 case Table tabulka:
-                    var linka = new SolidColorBrush(Color.FromRgb(0xC5, 0xCC, 0xD6));
-                    linka.Freeze();
                     tabulka.CellSpacing = 0;
-                    tabulka.BorderBrush = linka;
+                    tabulka.BorderBrush = Linka;
                     tabulka.BorderThickness = new Thickness(0.5);
                     tabulka.ClearValue(TextElement.FontFamilyProperty);
                     tabulka.ClearValue(TextElement.FontSizeProperty);
@@ -633,7 +631,7 @@ public static class DokumentOsnovy
                         {
                             foreach (var bunka in riadok.Cells)
                             {
-                                bunka.BorderBrush = linka;
+                                bunka.BorderBrush = Linka;
                                 bunka.BorderThickness = new Thickness(0.5);
                                 bunka.Padding = new Thickness(7, 4, 7, 4);
                                 bunka.ClearValue(TextElement.FontFamilyProperty);
@@ -711,5 +709,4 @@ public static class DokumentOsnovy
             }
         }
     }
-
 }

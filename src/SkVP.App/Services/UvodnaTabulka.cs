@@ -1,4 +1,6 @@
+using System.Collections.Concurrent;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -92,8 +94,40 @@ public static partial class UvodnaTabulka
         }
     }
 
-    /// <summary>Údaje osnovy predmetu z databázy.</summary>
-    public static UdajeOsnovy Precitaj(long objektId) => Precitaj(new DokumentService().NacitajData(objektId));
+    /// <summary>Už prečítané údaje podľa kontrolného súčtu dokumentu – zmenený dokument má iný súčet, a teda sa prečíta znova.</summary>
+    private static readonly ConcurrentDictionary<string, UdajeOsnovy> Precitane = new(StringComparer.Ordinal);
+
+    /// <summary>
+    /// Údaje osnovy predmetu z databázy. Dokument sa číta len vtedy, keď sa od posledného čítania zmenil – zoznam oblasti,
+    /// kalendár (platnosť osnov) aj navrhované úlohy tak nečítajú všetky osnovy pri každom otvorení.
+    /// </summary>
+    public static UdajeOsnovy Precitaj(long objektId)
+    {
+        var dokumenty = new DokumentService();
+        if (dokumenty.Sha(objektId) is not { } sha)
+        {
+            return UdajeOsnovy.Prazdne;
+        }
+
+        if (Precitane.TryGetValue(sha, out var udaje))
+        {
+            return udaje;
+        }
+
+        var data = dokumenty.NacitajData(objektId);
+        if (data is not { Length: > 0 })
+        {
+            return UdajeOsnovy.Prazdne;
+        }
+
+        if (Precitane.Count > 2000)
+        {
+            Precitane.Clear();
+        }
+
+        // kľúčom je súčet skutočne prečítaných dát (dokument sa medzi dvoma dotazmi mohol zmeniť)
+        return Precitane[Convert.ToHexString(SHA256.HashData(data))] = Precitaj(data);
+    }
 
     /// <summary>
     /// Zapíše opravené profilácie a platnosť do úvodnej tabuľky dokumentu a vráti nový dokument. Ak sa niektorý údaj

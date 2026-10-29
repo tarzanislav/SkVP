@@ -392,8 +392,7 @@ public sealed partial class UlohyViewModel : ObservableObject, IUkladaPredOdchod
     {
         if (Termin is { } t)
         {
-            UlozTeraz();
-            Hlavny.OtvorKalendar(t);
+            Hlavny.OtvorKalendar(t); // rozpísané zmeny uloží prechod na inú stránku
         }
     }
 

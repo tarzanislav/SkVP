@@ -1,6 +1,5 @@
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.DocumentObjectModel.Tables;
-using SkVP.Models;
 using MdColor = MigraDoc.DocumentObjectModel.Color;
 
 namespace SkVP.Services;

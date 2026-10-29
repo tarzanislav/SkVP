@@ -347,9 +347,6 @@ public sealed class SpravaVM
 /// </summary>
 public sealed partial class NovinkyViewModel : ObservableObject
 {
-    /// <summary>Výber kraja pri jarných prázdninách (tabuľka prázdnin na dashboarde).</summary>
-    public const string VsetkyKraje = NovinkyService.VsetkyKraje;
-
     private DataNoviniek _data;
     private List<PolozkaNoviniek> _polozky;
     private OverenieNoviniek? _overenie;

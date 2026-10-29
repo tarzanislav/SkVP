@@ -123,14 +123,14 @@ public static class ZostavaOsnov
                 // úvodné a záverečné časti nemajú charakteristiku; bez častí sa do dokumentu nezaradia
                 if (predmety.Count > 0)
                 {
-                    oblasti.Add(new KapitolaOblasti(oblast.Id, oblast.Nazov, oblast.Farba ?? CastiOsnov.Farba(oblast.Typ), new List<Blok>(), predmety, oblast.Typ));
+                    oblasti.Add(new KapitolaOblasti(oblast.Id, oblast.Nazov, CastiOsnov.FarbaSkupiny(oblast, index - 1), new List<Blok>(), predmety, oblast.Typ));
                 }
 
                 continue;
             }
 
             var charakteristika = volby.CharakteristikyOblasti ? NacitajBloky(dokumenty, oblast.Id) : new List<Blok>();
-            oblasti.Add(new KapitolaOblasti(oblast.Id, oblast.Nazov, oblast.Farba ?? UcebnyPlanService.FarbaOblasti(index - 1),
+            oblasti.Add(new KapitolaOblasti(oblast.Id, oblast.Nazov, CastiOsnov.FarbaSkupiny(oblast, index - 1),
                 charakteristika, predmety));
         }
 
@@ -152,16 +152,8 @@ public static class ZostavaOsnov
     /// <summary>Názov súboru pre export (bez nepovolených znakov).</summary>
     public static string NazovSuboru(CelyDokument dokument, string pripona)
     {
-        var zaklad = $"Ucebne_osnovy_{dokument.Vytvorene:yyyy-MM-dd}";
-        if (dokument.Udaje.Skola.Length > 0)
-        {
-            var skola = new string(dokument.Udaje.Skola.Where(c => !System.IO.Path.GetInvalidFileNameChars().Contains(c)).ToArray()).Trim();
-            if (skola.Length > 0)
-            {
-                zaklad = $"Ucebne_osnovy_{skola}_{dokument.Vytvorene:yyyy-MM-dd}";
-            }
-        }
-
-        return zaklad.Replace(' ', '_') + pripona;
+        var skola = dokument.Udaje.Skola.Trim();
+        var zaklad = skola.Length > 0 ? $"Ucebne_osnovy_{skola}_{dokument.Vytvorene:yyyy-MM-dd}" : $"Ucebne_osnovy_{dokument.Vytvorene:yyyy-MM-dd}";
+        return ImportOsnov.BezpecnyNazov(zaklad).Replace(' ', '_') + pripona;
     }
 }

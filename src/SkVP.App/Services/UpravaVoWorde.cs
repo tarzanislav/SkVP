@@ -119,7 +119,7 @@ public sealed class UpravaVoWorde : IDisposable
     {
         var priecinok = Path.Combine(Priecinok, objektId.ToString(System.Globalization.CultureInfo.InvariantCulture));
         Directory.CreateDirectory(priecinok);
-        var cesta = Path.Combine(priecinok, BezpecnyNazov(nazovSuboru) + ".docx");
+        var cesta = Path.Combine(priecinok, ImportOsnov.BezpecnyNazov(nazovSuboru, "osnova") + ".docx");
         foreach (var stary in Directory.GetFiles(priecinok, "*.docx"))
         {
             if (!string.Equals(stary, cesta, StringComparison.OrdinalIgnoreCase) && !JeOtvoreny(stary))
@@ -289,12 +289,5 @@ public sealed class UpravaVoWorde : IDisposable
         }
 
         return vysledok;
-    }
-
-    public static string BezpecnyNazov(string nazov)
-    {
-        var neplatne = Path.GetInvalidFileNameChars();
-        var cisty = new string(nazov.Select(c => neplatne.Contains(c) ? '_' : c).ToArray()).Trim().TrimEnd('.');
-        return cisty.Length == 0 ? "osnova" : cisty.Length > 120 ? cisty[..120] : cisty;
     }
 }

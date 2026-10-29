@@ -30,14 +30,7 @@ public sealed partial class DashboardViewModel : ObservableObject
     /// <summary>Stena osnov a pokrok: zapnuté úvodné časti (ak majú časti), oblasti, zapnuté záverečné časti.</summary>
     public List<OblastVM> Oblasti => Hlavny.VsetkySkupiny.Where(o => o.JeOblast || (o.Aktivna && o.Pocet > 0)).ToList();
 
-    public string Datum
-    {
-        get
-        {
-            var text = DateTime.Today.ToString("dddd d. MMMM yyyy", CultureInfo.GetCultureInfo("sk-SK"));
-            return char.ToUpper(text[0], CultureInfo.CurrentCulture) + text[1..];
-        }
-    }
+    public string Datum => PocasieService.VelkePrve(DateTime.Today.ToString("dddd d. MMMM yyyy", CultureInfo.GetCultureInfo("sk-SK")));
 
     public string Pozdrav => DateTime.Now.Hour switch
     {
@@ -59,12 +52,9 @@ public sealed partial class DashboardViewModel : ObservableObject
     /// <summary>Zhrnutie stavu osnov v jednej vete (so správnymi tvarmi slov).</summary>
     public string Zhrnutie => PocetPredmetov == 0
         ? "Zatiaľ nie sú zadané žiadne predmety. Pridajte vzdelávacie oblasti a predmety v sekcii Osnovy."
-        : $"Stav {PocetPredmetov} osnov: {Tvar(PocetHotovych, "hotová", "hotové", "hotových")}, " +
-          $"{Tvar(PocetRozpracovanych, "rozpracovaná", "rozpracované", "rozpracovaných")} a " +
-          $"{Tvar(PocetNezacatych, "nezačatá", "nezačaté", "nezačatých")}.";
-
-    private static string Tvar(int pocet, string jeden, string dvaAzStyri, string viac) =>
-        $"{pocet} " + (pocet == 1 ? jeden : pocet is >= 2 and <= 4 ? dvaAzStyri : viac);
+        : $"Stav {PocetPredmetov} osnov: {Preklad.Pocet(PocetHotovych, "{0} hotová", "{0} hotové", "{0} hotových")}, " +
+          $"{Preklad.Pocet(PocetRozpracovanych, "{0} rozpracovaná", "{0} rozpracované", "{0} rozpracovaných")} a " +
+          $"{Preklad.Pocet(PocetNezacatych, "{0} nezačatá", "{0} nezačaté", "{0} nezačatých")}.";
 }
 
 /// <summary>Prehľad všetkých vzdelávacích oblastí (sekcia Osnovy).</summary>
@@ -344,14 +334,14 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         Hlavny = hlavny;
         Predmet = predmet;
         _nazov = predmet.Nazov;
-        _vybranyStav = VsetkyStavy.First(s => s.Kod == predmet.StavKod);
-        _zobrazitSuvislosti = new ObjektService().Suvislosti(predmet.Id).Count > 0;
+        _vybranyStav = VsetkyStavy.FirstOrDefault(s => s.Kod == predmet.StavKod) ?? VsetkyStavy[0];
+        NacitajSuvislosti();
+        _zobrazitSuvislosti = Suvislosti.Count > 0;
         PanelPlanovania = new PanelPlanovaniaVM(hlavny, predmet.Id, () => new[] { Predmet.Id });
         _zobrazitPlanovanie = !_zobrazitSuvislosti && PanelPlanovania.Pocet > 0;
         // úvodné a záverečné časti nemajú šablónu osnovy predmetu (úvodnú tabuľku)
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id,
             () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast);
-        NacitajSuvislosti();
         NacitajInfo();
         predmet.NacitajUdajeOsnovy();
     }

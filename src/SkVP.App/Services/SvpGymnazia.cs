@@ -1,4 +1,3 @@
-using System.Text.Json;
 using SkVP.Data;
 using SkVP.Models;
 
@@ -38,10 +37,7 @@ public static class SvpGymnazia
         {
             if (_dokument is null)
             {
-                using var prud = typeof(SvpGymnazia).Assembly.GetManifestResourceStream("SkVP.SvpGymnazia.json")
-                                 ?? throw new SkvpException("V programe chýba Štátny vzdelávací program pre gymnáziá.");
-                _dokument = JsonSerializer.Deserialize<DokumentSvp>(prud, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-                            ?? new DokumentSvp();
+                _dokument = ZabudovaneZdroje.Json<DokumentSvp>("SkVP.SvpGymnazia.json", "V programe chýba Štátny vzdelávací program pre gymnáziá.");
             }
 
             return _dokument;

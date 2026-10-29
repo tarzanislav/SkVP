@@ -142,7 +142,9 @@ public sealed partial class DashboardViewModel
         try
         {
             var data = NovinkyService.Nacitaj();
-            var prazdniny = data.Polozky.FirstOrDefault(p => p.Kategoria == "skolskyrok" && p.Druh == NovinkyService.DruhTermin
+            var kraj = Databaza.Citaj(NovinkyService.KlucKraj, NovinkyService.VsetkyKraje);
+            bool JeVKraji(PolozkaNoviniek p) => p.Skupina is null || kraj == NovinkyService.VsetkyKraje || p.Skupina == kraj;
+            var prazdniny = data.Polozky.FirstOrDefault(p => p.Kategoria == NovinkyService.TemaSkolskyRok && p.Druh == NovinkyService.DruhTermin
                                                               && p.Nazov.Contains("prázdniny", StringComparison.OrdinalIgnoreCase)
                                                               && p.Zaciatok <= dnes && p.Koniec >= dnes && JeVKraji(p));
             StavSkolskehoRoka = prazdniny is not null
@@ -158,12 +160,6 @@ public sealed partial class DashboardViewModel
             StavSkolskehoRoka = "";
             NajblizsiTermin = "";
         }
-    }
-
-    private static bool JeVKraji(PolozkaNoviniek p)
-    {
-        var kraj = Databaza.Citaj(NovinkyService.KlucKraj, NovinkyViewModel.VsetkyKraje);
-        return p.Skupina is null || kraj == NovinkyViewModel.VsetkyKraje || p.Skupina == kraj;
     }
 
     [RelayCommand]

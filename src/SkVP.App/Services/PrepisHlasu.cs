@@ -15,14 +15,15 @@ public static class PrepisHlasu
     private const string Kniznica = "SkvpHlas.dll";
     public const int VzorkovaFrekvencia = 16000;
 
-    [DllImport(Kniznica, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    // knižnica len z priečinka programu (nie z aktuálneho priečinka ani z PATH) – nedá sa podvrhnúť
+    [DllImport(Kniznica, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     private static extern IntPtr skvp_hlas_otvor(string cesta);
 
-    [DllImport(Kniznica, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Kniznica, CallingConvention = CallingConvention.Cdecl), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     private static extern int skvp_hlas_prepis(IntPtr kontext, float[] zvuk, int vzoriek, byte[] jazyk, int vlakna, byte[] vyzva,
         byte[] vystup, int velkost);
 
-    [DllImport(Kniznica, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(Kniznica, CallingConvention = CallingConvention.Cdecl), DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
     private static extern void skvp_hlas_zavri(IntPtr kontext);
 
     private static readonly SemaphoreSlim Zamok = new(1, 1);

@@ -53,6 +53,11 @@ internal static class Samotest
             Databaza.Inicializuj(); // druhé spustenie nesmie nič pokaziť
             Krok("databáza vytvorená");
 
+            // chyby väzieb XAML (neexistujúca vlastnosť, zlý typ) – WPF ich inak len potichu zapíše do výstupu ladenia
+            System.Diagnostics.PresentationTraceSources.Refresh();
+            System.Diagnostics.PresentationTraceSources.DataBindingSource.Listeners.Add(ChybyVazieb);
+            System.Diagnostics.PresentationTraceSources.DataBindingSource.Switch.Level = System.Diagnostics.SourceLevels.Error;
+
             // Kalendárium (meniny, sviatky) v dočasnom priečinku, dashboard bez sťahovania zo siete
             Environment.SetEnvironmentVariable("KALENDARIUM_DIR", Path.Combine(Databaza.Priecinok, "Kalendarium"));
             App.PripravKalendarium();
@@ -79,6 +84,7 @@ internal static class Samotest
             TestCastiOsnov();
             TestPlanovania();
             TestObrazoviek(aplikacia);
+            ZapisChybyVazieb();
 
             if (Chyby.Count > 0)
             {
@@ -1554,7 +1560,7 @@ internal static class Samotest
 
         // tabuľka prázdnin
         dashboard.DnesPrazdnin = new DateOnly(2026, 10, 23);
-        dashboard.VybranyKrajPrazdnin = NovinkyViewModel.VsetkyKraje;
+        dashboard.VybranyKrajPrazdnin = NovinkyService.VsetkyKraje;
         dashboard.VybranyRok = "2026/2027";
         dashboard.ZostavPrazdniny();
         var riadky = dashboard.RiadkyPrazdnin;
@@ -1568,7 +1574,7 @@ internal static class Samotest
             "dashboard: jarné prázdniny podľa kraja");
         dashboard.VybranyRok = "2027/2028";
         Over(dashboard.RiadkyPrazdnin.Count == 6 && dashboard.RiadkyPrazdnin[0].Termin == "28. – 29. 10. 2027", "dashboard: prázdniny 2027/2028");
-        dashboard.VybranyKrajPrazdnin = NovinkyViewModel.VsetkyKraje;
+        dashboard.VybranyKrajPrazdnin = NovinkyService.VsetkyKraje;
         Krok("dashboard – dátum, meniny, sviatky, počasie a výroky v poriadku");
     }
 
@@ -2901,6 +2907,45 @@ internal static class Samotest
     }
 
     internal static void ZapisPriebeh(string text) => Krok(text);
+
+    /// <summary>Zachytáva chyby väzieb XAML počas samotestu (každá rôzna chyba raz).</summary>
+    private sealed class ZachytavacVazieb : System.Diagnostics.TraceListener
+    {
+        private readonly StringBuilder _riadok = new();
+
+        public SortedSet<string> Chyby { get; } = new(StringComparer.Ordinal);
+
+        public override void Write(string? sprava)
+        {
+            lock (_riadok)
+            {
+                _riadok.Append(sprava);
+            }
+        }
+
+        public override void WriteLine(string? sprava)
+        {
+            lock (_riadok)
+            {
+                _riadok.Append(sprava);
+                // rovnaká chyba v inom prvku zoznamu sa líši len hash kódom objektu
+                Chyby.Add(Regex.Replace(_riadok.ToString(), @"HashCode=\d+", "HashCode=…"));
+                _riadok.Clear();
+            }
+        }
+    }
+
+    private static readonly ZachytavacVazieb ChybyVazieb = new();
+
+    private static void ZapisChybyVazieb()
+    {
+        System.Diagnostics.PresentationTraceSources.DataBindingSource.Listeners.Remove(ChybyVazieb);
+        Krok($"chyby väzieb XAML: {ChybyVazieb.Chyby.Count}");
+        foreach (var chyba in ChybyVazieb.Chyby.Take(60))
+        {
+            Krok("  väzba: " + chyba);
+        }
+    }
 
     private static void Krok(string text)
     {

@@ -38,18 +38,10 @@ public sealed class DocxCitac
 
     public static NacitanyDokument Nacitaj(Stream prud)
     {
-        WordprocessingDocument docx;
+        // časti dokumentu sa čítajú až pri prvom použití – poškodené XML vo vnútri súboru sa prejaví až tu
         try
         {
-            docx = WordprocessingDocument.Open(prud, false);
-        }
-        catch (Exception ex) when (ex is OpenXmlPackageException or FileFormatException or InvalidDataException)
-        {
-            throw new SkvpException($"Súbor nie je platný dokument Word (.docx).\n\n{ex.Message}");
-        }
-
-        using (docx)
-        {
+            using var docx = WordprocessingDocument.Open(prud, false);
             var citac = new DocxCitac();
             citac.PripravStyly(docx.MainDocumentPart?.StyleDefinitionsPart?.Styles);
             citac.PripravCislovanie(docx.MainDocumentPart?.NumberingDefinitionsPart?.Numbering);
@@ -61,6 +53,10 @@ public sealed class DocxCitac
             }
 
             return new NacitanyDokument(bloky, citac._varovania.ToList());
+        }
+        catch (Exception ex) when (ex is OpenXmlPackageException or FileFormatException or InvalidDataException or System.Xml.XmlException)
+        {
+            throw new SkvpException($"Súbor nie je platný dokument Word (.docx).\n\n{ex.Message}");
         }
     }
 

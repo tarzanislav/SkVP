@@ -14,7 +14,7 @@ public sealed partial class OblastVM : ObservableObject
         Id = objekt.Id;
         Typ = objekt.Typ;
         _nazov = objekt.Nazov;
-        _farba = objekt.Farba ?? (JeOblast ? UcebnyPlanService.FarbaOblasti(index) : CastiOsnov.Farba(Typ));
+        _farba = CastiOsnov.FarbaSkupiny(objekt, index);
         _aktivna = JeOblast || CastiOsnov.JeAktivna(Typ);
     }
 

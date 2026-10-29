@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using SkVP.Data;
-using SkVP.Models;
 using SkVP.Pomocne;
 
 namespace SkVP.Services;
@@ -202,7 +201,6 @@ public static partial class ImportOsnov
         return nazov.Length > 0 ? char.ToUpper(nazov[0], CultureInfo.CurrentCulture) + nazov[1..] : nazov;
     }
 
-    /// <summary>Text na porovnanie: malé písmená bez diakritiky.</summary>
     /// <summary>Text bez diakritiky s rovnakou dĺžkou (každý znak sa nahradí základným písmenom: „č“ → „c“).</summary>
     public static string BezDiakritiky(string text)
     {
@@ -215,6 +213,7 @@ public static partial class ImportOsnov
         return vysledok.ToString();
     }
 
+    /// <summary>Text na porovnanie: malé písmená bez diakritiky, slová oddelené jednou medzerou.</summary>
     public static string Kluc(string text)
     {
         var rozlozeny = text.ToLower(CultureInfo.GetCultureInfo("sk-SK")).Normalize(NormalizationForm.FormD);
@@ -268,33 +267,37 @@ public static partial class ImportOsnov
         var dokumenty = new DokumentService();
         var cislo = Cislo(predmetId);
         var teraz = DateTime.Now;
+        // doterajšia osnova je vždy v archíve verzií v databáze; kópie v priečinku Osnovy sú len pomôcka – ich chyba import nezastaví
         var archivovane = false;
         if (dokumenty.NacitajData(predmetId) is { Length: > 0 } stare)
         {
-            var priecinokArchivu = Path.Combine(PriecinokOsnov, "Archív");
-            Directory.CreateDirectory(priecinokArchivu);
-            File.WriteAllBytes(VolnaCesta(priecinokArchivu, InfoOsnovyService.NazovArchivu(cislo, predmet.Nazov, teraz.Year), ".docx"), stare);
+            UlozPomocnuKopiu(Path.Combine(PriecinokOsnov, "Archív"), InfoOsnovyService.NazovArchivu(cislo, predmet.Nazov, teraz.Year), stare, volnyNazov: true);
             archivovane = true;
         }
 
         var dovod = $"Archivované {teraz.ToString("d. M. yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))} (rok {teraz.Year}) – pred importom novej osnovy zo súboru {subor.NazovSuboru}";
         var zmenene = dokumenty.Uloz(predmetId, subor.Docx, dovod);
         InfoOsnovyService.Uloz(predmetId, new InfoOsnovy(rok, teraz, subor.NazovSuboru, uroven is { Length: > 0 } ? uroven : null));
-
-        string? kopia = null;
-        try
-        {
-            var priecinok = Path.Combine(PriecinokOsnov, rok.ToString(CultureInfo.InvariantCulture));
-            Directory.CreateDirectory(priecinok);
-            kopia = Path.Combine(priecinok, BezpecnyNazov(InfoOsnovyService.NazovDokumentu(cislo, predmet.Nazov, rok)) + ".docx");
-            File.WriteAllBytes(kopia, subor.Docx);
-        }
-        catch (IOException)
-        {
-            kopia = null; // kópia v priečinku Osnovy je len pomôcka – osnova je uložená v databáze
-        }
+        var kopia = UlozPomocnuKopiu(Path.Combine(PriecinokOsnov, rok.ToString(CultureInfo.InvariantCulture)),
+            InfoOsnovyService.NazovDokumentu(cislo, predmet.Nazov, rok), subor.Docx, volnyNazov: false);
 
         return new VysledokImportuOsnovy(predmetId, predmet.Nazov, archivovane && zmenene, zmenene, kopia);
+    }
+
+    /// <summary>Uloží kópiu dokumentu do priečinka Osnovy. Vráti cestu, alebo null, ak sa uložiť nedala (priečinok bez prístupu …).</summary>
+    private static string? UlozPomocnuKopiu(string priecinok, string nazov, byte[] data, bool volnyNazov)
+    {
+        try
+        {
+            Directory.CreateDirectory(priecinok);
+            var cesta = volnyNazov ? VolnaCesta(priecinok, nazov, ".docx") : Path.Combine(priecinok, BezpecnyNazov(nazov) + ".docx");
+            File.WriteAllBytes(cesta, data);
+            return cesta;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 
     private static string VolnaCesta(string priecinok, string nazov, string pripona)
@@ -309,6 +312,15 @@ public static partial class ImportOsnov
         return cesta;
     }
 
-    public static string BezpecnyNazov(string nazov) =>
-        new string(nazov.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c).ToArray()).Trim();
+    private static readonly HashSet<char> NeplatneZnaky = Path.GetInvalidFileNameChars().ToHashSet();
+
+    /// <summary>
+    /// Názov súboru alebo priečinka bez znakov, ktoré Windows nepovoľuje, bez bodky na konci (Windows ju zahodí)
+    /// a najviac so 150 znakmi; prázdny názov nahradí náhradným.
+    /// </summary>
+    public static string BezpecnyNazov(string nazov, string nahradny = "dokument")
+    {
+        var cisty = new string(nazov.Select(c => NeplatneZnaky.Contains(c) ? '_' : c).ToArray()).Trim().TrimEnd('.', ' ');
+        return cisty.Length == 0 ? nahradny : cisty.Length > 150 ? cisty[..150].TrimEnd('.', ' ') : cisty;
+    }
 }

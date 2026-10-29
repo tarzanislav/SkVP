@@ -115,6 +115,15 @@ public partial class TlacWindow : Window
         }
 
         Kopie.Text = volby.Kopie.ToString(CultureInfo.InvariantCulture);
+        ZobrazVolby(volby);
+        _nacitavam = false;
+        Prekresli();
+        AktualizujProfil();
+    }
+
+    /// <summary>Rozmiestnenie a úprava strán do volieb okna (pri otvorení aj z kódu).</summary>
+    private void ZobrazVolby(VolbyTlace volby)
+    {
         Obojstranne.IsChecked = volby.Obojstranne;
         (volby.Rozmiestnenie switch
         {
@@ -132,9 +141,6 @@ public partial class TlacWindow : Window
         BezPozadia.IsChecked = volby.BezPozadia;
         Dierovac.IsChecked = volby.Dierovac;
         DierovacMm.Text = volby.DierovacMm.ToString("0.#", CultureInfo.CurrentCulture);
-        _nacitavam = false;
-        Prekresli();
-        AktualizujProfil();
     }
 
     /// <summary>Voľby PDF z okna (rozmiestnenie strán + zabezpečenie).</summary>
@@ -325,23 +331,7 @@ public partial class TlacWindow : Window
     public void NastavVolby(VolbyTlace volby)
     {
         _nacitavam = true;
-        Obojstranne.IsChecked = volby.Obojstranne;
-        (volby.Rozmiestnenie switch
-        {
-            Rozmiestnenie.Dve => Dve,
-            Rozmiestnenie.Styri => Styri,
-            Rozmiestnenie.Osem => Osem,
-            Rozmiestnenie.Brozura => Brozura,
-            _ => Jedna,
-        }).IsChecked = true;
-        Opakovat.IsChecked = volby.OpakovatStranky;
-        Zvacsenie.Value = Math.Round(volby.Zvacsenie * 100);
-        Ramcek.IsChecked = volby.Ramcek;
-        Siva.IsChecked = volby.OdtieneSivej;
-        Zosvetlit.IsChecked = volby.Zosvetlit;
-        BezPozadia.IsChecked = volby.BezPozadia;
-        Dierovac.IsChecked = volby.Dierovac;
-        DierovacMm.Text = volby.DierovacMm.ToString("0.#", CultureInfo.CurrentCulture);
+        ZobrazVolby(volby);
         _nacitavam = false;
         Prekresli();
     }

@@ -1,7 +1,6 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -161,9 +160,7 @@ public static class TestovaciaSada
 
     public static Sada Nacitaj()
     {
-        using var prud = typeof(TestovaciaSada).Assembly.GetManifestResourceStream("SkVP.TestovaciaSada.json")
-                         ?? throw new SkvpException("V programe chýba testovacia sada učebných osnov.");
-        return JsonSerializer.Deserialize<Sada>(prud, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new Sada();
+        return ZabudovaneZdroje.Json<Sada>("SkVP.TestovaciaSada.json", "V programe chýba testovacia sada učebných osnov.");
     }
 
     /// <summary>

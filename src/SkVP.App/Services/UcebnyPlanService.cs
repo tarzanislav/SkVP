@@ -1,5 +1,4 @@
 using System.IO;
-using System.Text.Json;
 using ClosedXML.Excel;
 using SkVP.Data;
 using SkVP.Models;
@@ -44,10 +43,7 @@ public sealed class UcebnyPlanService
     /// <summary>Učebný plán gymnázia dodaný s programom (z tabuľky školy).</summary>
     public static UcebnyPlan Vstavany()
     {
-        using var prud = typeof(UcebnyPlanService).Assembly.GetManifestResourceStream("SkVP.UcebnyPlanGymnazium.json")
-                         ?? throw new SkvpException("V programe chýba vstavaný učebný plán.");
-        return JsonSerializer.Deserialize<UcebnyPlan>(prud, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-               ?? new UcebnyPlan();
+        return ZabudovaneZdroje.Json<UcebnyPlan>("SkVP.UcebnyPlanGymnazium.json", "V programe chýba vstavaný učebný plán.");
     }
 
     public static UcebnyPlan NacitajZExcelu(string cesta)

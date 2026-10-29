@@ -36,6 +36,15 @@ public static class CastiOsnov
 
     public static string Farba(string typ) => typ == TypObjektu.Uvod ? FarbaUvod : FarbaZaver;
 
+    /// <summary>
+    /// Farba skupiny osnov: vlastná, inak podľa poradia vzdelávacej oblasti (pastelová paleta) alebo pevná farba
+    /// úvodných či záverečných častí.
+    /// </summary>
+    public static string FarbaSkupiny(string? farba, string typ, int indexOblasti) =>
+        farba ?? (typ == TypObjektu.Oblast ? UcebnyPlanService.FarbaOblasti(indexOblasti) : Farba(typ));
+
+    public static string FarbaSkupiny(Objekt skupina, int indexOblasti) => FarbaSkupiny(skupina.Farba, skupina.Typ, indexOblasti);
+
     private static string Kluc(string typ) => typ == TypObjektu.Uvod ? KlucUvodAktivne : KlucZaverAktivne;
 
     public static bool JeAktivna(string typ) => Databaza.Citaj(Kluc(typ), "0") == "1";

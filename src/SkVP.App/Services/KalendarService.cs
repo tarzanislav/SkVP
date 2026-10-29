@@ -203,7 +203,7 @@ public sealed partial class KalendarService
             return false;
         }
 
-        if (Typy(lenAktivne: true).Count(t => t.Id != id) == 0)
+        if (!Typy(lenAktivne: true).Any(t => t.Id != id))
         {
             throw new SkvpException("Musí zostať aspoň jeden typ udalosti.");
         }

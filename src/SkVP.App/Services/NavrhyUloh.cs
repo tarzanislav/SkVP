@@ -63,8 +63,7 @@ public static class NavrhyUloh
                 var stav = StavyOsnovy.Urci(predmet.Stav, predmet.DlzkaTextu);
                 if (stav == StavOsnovy.NaKontrolu)
                 {
-                    vysledok.Add(new NavrhUlohy($"kontrola:{predmet.Id}", $"Skontrolovať osnovu: {predmet.Nazov}",
-                        $"Osnova je v stave „Na kontrolu“ ({skupina.Nazov}).", PrioritaUlohy.Vysoka, new[] { predmet.Id }, skupina.Farba ?? Planovanie.FarbaSiva));
+                    vysledok.Add(KontrolaOsnovy(predmet.Id, predmet.Nazov, skupina.Nazov, skupina.Farba));
                 }
                 else if (stav == StavOsnovy.Prazdna)
                 {
@@ -110,6 +109,11 @@ public static class NavrhyUloh
 
         return vysledok;
     }
+
+    /// <summary>Úloha skontrolovať osnovu v stave „Na kontrolu“ (návrh v Úlohách aj ponuka pri zmene stavu osnovy).</summary>
+    public static NavrhUlohy KontrolaOsnovy(long predmetId, string predmet, string skupina, string? farba) =>
+        new($"kontrola:{predmetId}", $"Skontrolovať osnovu: {predmet}", $"Osnova je v stave „Na kontrolu“ ({skupina}).", PrioritaUlohy.Vysoka,
+            new[] { predmetId }, farba ?? Planovanie.FarbaSiva);
 
     private static string Zoznam(IEnumerable<string> nazvy)
     {

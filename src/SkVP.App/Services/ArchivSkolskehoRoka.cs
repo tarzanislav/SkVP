@@ -7,7 +7,6 @@ using SkVP.Models;
 
 namespace SkVP.Services;
 
-/// <summary>Archív osnov jedného školského roka.</summary>
 /// <summary>Úloha alebo poznámka k osnovám zachovaná v archíve školského roka.</summary>
 public sealed record ZaznamPlanovaniaArchivu(string Druh, string Nazov, string? Text, DateTime? Datum, string? Stav, string TykaSa)
 {
@@ -16,6 +15,7 @@ public sealed record ZaznamPlanovaniaArchivu(string Druh, string Nazov, string? 
     public string Podrobnosti => string.Join("  ·  ", new[] { DruhText, Stav ?? "", Datum is { } d ? Planovanie.DatumText(d) : "", TykaSa }.Where(t => t.Length > 0));
 }
 
+/// <summary>Archív osnov jedného školského roka.</summary>
 public sealed record ZaznamArchivuRoka(long Id, string SkolskyRok, DateTime Vytvorene, string? Priecinok, int Dokumentov, int Predmetov, string? Poznamka)
 {
     public bool MaPrehlad => Predmetov > 0;
@@ -33,6 +33,9 @@ public sealed record PolozkaArchivuRoka(
 
     /// <summary>Dokument osnov – predmet alebo úvodná/záverečná časť (nie charakteristika oblasti).</summary>
     public bool JeDokumentOsnov => JePredmet || JeCast;
+
+    /// <summary>Skupina, do ktorej položka patrí: vzdelávacia oblasť, úvodné časti (poradie 0) alebo záverečné časti.</summary>
+    public string TypSkupiny => !JeCast ? TypObjektu.Oblast : PoradieOblasti == 0 ? TypObjektu.Uvod : TypObjektu.Zaver;
     public string CisloText => Cislo.ToString("00", CultureInfo.InvariantCulture);
     public bool MaDokument => Sha is not null;
 }
@@ -241,7 +244,7 @@ public static class ArchivSkolskehoRoka
         {
             var jeOblast = oblast.Typ == TypObjektu.Oblast;
             var poradieSkupiny = jeOblast ? ++cisloOblasti : oblast.Typ == TypObjektu.Uvod ? 0 : 99;
-            var farba = oblast.Farba ?? (jeOblast ? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1) : CastiOsnov.Farba(oblast.Typ));
+            var farba = CastiOsnov.FarbaSkupiny(oblast, cisloOblasti - 1);
             var typDokumentu = CastiOsnov.TypDokumentu(oblast.Typ);
             if (jeOblast && verzie.TryGetValue(oblast.Id, out var charakteristika))
             {
@@ -452,11 +455,11 @@ public static class ArchivSkolskehoRoka
         foreach (var skupina in Polozky(archiv.Id).GroupBy(p => (p.PoradieOblasti, p.Oblast)).OrderBy(g => g.Key.PoradieOblasti))
         {
             var charakteristika = skupina.FirstOrDefault(p => p.Typ == "charakteristika");
-            var typ = !skupina.Any(p => p.JeCast) ? TypObjektu.Oblast : skupina.Key.PoradieOblasti == 0 ? TypObjektu.Uvod : TypObjektu.Zaver;
+            var typ = skupina.First().TypSkupiny;
             var predmety = skupina.Where(p => p.JeDokumentOsnov)
                 .Select(p => new KapitolaPredmetu(p.ObjektId ?? -p.Id, p.Cislo, p.Nazov, p.MaDokument ? Bloky(Data(p.Id)) : new List<Blok>(), p.Stav))
                 .ToList();
-            var farba = skupina.First().Farba ?? (typ == TypObjektu.Oblast ? UcebnyPlanService.FarbaOblasti(skupina.Key.PoradieOblasti - 1) : CastiOsnov.Farba(typ));
+            var farba = CastiOsnov.FarbaSkupiny(skupina.First().Farba, typ, skupina.Key.PoradieOblasti - 1);
             oblasti.Add(new KapitolaOblasti(charakteristika?.ObjektId ?? 0, skupina.Key.Oblast, farba,
                 charakteristika is { MaDokument: true } ? Bloky(Data(charakteristika.Id)) : new List<Blok>(), predmety, typ));
         }
@@ -502,71 +505,95 @@ public static class ArchivSkolskehoRoka
         }
 
         long archivId;
+        var zaciatok = Databaza.Teraz();
         using (var db = Databaza.Otvor())
         {
             Databaza.Vykonaj(db, "INSERT INTO archiv_rok(skolsky_rok, vytvorene, priecinok) VALUES($r, $v, $p)",
-                ("$r", skolskyRok), ("$v", Databaza.Teraz()), ("$p", ciel));
+                ("$r", skolskyRok), ("$v", zaciatok), ("$p", ciel));
             archivId = Convert.ToInt64(Databaza.Skalar(db, "SELECT last_insert_rowid()"), CultureInfo.InvariantCulture);
         }
 
-        var cisloOblasti = 0;
-        // úvodné časti (zapnuté), vzdelávacie oblasti, záverečné časti (zapnuté)
-        foreach (var oblast in CastiOsnov.SkupinyVPoradi(sluzba))
-        {
-            var jeOblast = oblast.Typ == TypObjektu.Oblast;
-            var poradieSkupiny = jeOblast ? ++cisloOblasti : oblast.Typ == TypObjektu.Uvod ? 0 : 99;
-            var farba = oblast.Farba ?? (jeOblast ? UcebnyPlanService.FarbaOblasti(cisloOblasti - 1) : CastiOsnov.Farba(oblast.Typ));
-            var typDokumentu = CastiOsnov.TypDokumentu(oblast.Typ);
-            var priecinokOblasti = Path.Combine(ciel, ImportOsnov.BezpecnyNazov(jeOblast ? $"{cisloOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ)));
-            if (jeOblast && dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
-            {
-                Directory.CreateDirectory(priecinokOblasti);
-                var cestaCharakteristiky = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov($"00 Charakteristika – {oblast.Nazov}") + ".docx");
-                File.WriteAllBytes(cestaCharakteristiky, charakteristika);
-                UlozPdf(cestaCharakteristiky, charakteristika, oblast.Nazov, farba, null, 0, StavOsnovy.Rozpracovana);
-                dokumenty.ArchivujAktualnu(oblast.Id, dovod);
-                Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, poradieSkupiny, 0, "Charakteristika vzdelávacej oblasti",
-                    StavOsnovy.Rozpracovana, oblast.DlzkaTextu, UdajeOsnovy.Prazdne, InfoOsnovy.Prazdne, ZmenenaVRoku(oblast.Id, od, po), charakteristika);
-            }
-
-            var cislo = 0;
-            foreach (var predmet in CastiOsnov.Dokumenty(sluzba, oblast))
-            {
-                cislo++;
-                var osnova = dokumenty.NacitajData(predmet.Id);
-                var info = InfoOsnovyService.Nacitaj(predmet.Id);
-                var stav = StavyOsnovy.Urci(predmet.Stav, predmet.DlzkaTextu);
-                if (osnova is { Length: > 0 })
-                {
-                    Directory.CreateDirectory(priecinokOblasti);
-                    var c = cislo.ToString("00", CultureInfo.InvariantCulture);
-                    var cestaOsnovy = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, info.Rok)) + ".docx");
-                    File.WriteAllBytes(cestaOsnovy, osnova);
-                    UlozPdf(cestaOsnovy, osnova, oblast.Nazov, farba, predmet, cislo, stav);
-                    dokumenty.ArchivujAktualnu(predmet.Id, dovod);
-                }
-
-                Zapis(archivId, predmet.Id, typDokumentu, oblast.Nazov, farba, poradieSkupiny, cislo, predmet.Nazov, stav, predmet.DlzkaTextu,
-                    UvodnaTabulka.Precitaj(osnova), info, ZmenenaVRoku(predmet.Id, od, po), osnova is { Length: > 0 } ? osnova : null);
-            }
-        }
-
-        if (ajUlohyAPoznamky)
-        {
-            ArchivujPlanovanie(archivId, od, po, ciel, skolskyRok);
-        }
-
-        // celé osnovy v jednom dokumente – Word a archívne PDF/A-2b (bez farebného profilu Windows bežné PDF)
-        var celok = ZostavaOsnov.Zostav(new VolbyZostavy());
-        var nazovCelku = ImportOsnov.BezpecnyNazov($"Učebné osnovy {skolskyRok.Replace('/', '-')}");
-        DocxVystup.Uloz(celok, Path.Combine(ciel, nazovCelku + ".docx"));
         try
         {
-            SuboryZostavy.Uloz(PdfVystup.Vytvor(celok), Path.Combine(ciel, nazovCelku + ".pdf"), new VolbyPdf { Format = FormatVystupu.PdfA2b });
+            var cisloOblasti = 0;
+            // úvodné časti (zapnuté), vzdelávacie oblasti, záverečné časti (zapnuté)
+            foreach (var oblast in CastiOsnov.SkupinyVPoradi(sluzba))
+            {
+                var jeOblast = oblast.Typ == TypObjektu.Oblast;
+                var poradieSkupiny = jeOblast ? ++cisloOblasti : oblast.Typ == TypObjektu.Uvod ? 0 : 99;
+                var farba = CastiOsnov.FarbaSkupiny(oblast, cisloOblasti - 1);
+                var typDokumentu = CastiOsnov.TypDokumentu(oblast.Typ);
+                var priecinokOblasti = Path.Combine(ciel, ImportOsnov.BezpecnyNazov(jeOblast ? $"{cisloOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ)));
+                if (jeOblast && dokumenty.NacitajData(oblast.Id) is { Length: > 0 } charakteristika)
+                {
+                    Directory.CreateDirectory(priecinokOblasti);
+                    var cestaCharakteristiky = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov($"00 Charakteristika – {oblast.Nazov}") + ".docx");
+                    File.WriteAllBytes(cestaCharakteristiky, charakteristika);
+                    UlozPdf(cestaCharakteristiky, charakteristika, oblast.Nazov, farba, null, 0, StavOsnovy.Rozpracovana);
+                    dokumenty.ArchivujAktualnu(oblast.Id, dovod);
+                    Zapis(archivId, oblast.Id, "charakteristika", oblast.Nazov, farba, poradieSkupiny, 0, "Charakteristika vzdelávacej oblasti",
+                        StavOsnovy.Rozpracovana, oblast.DlzkaTextu, UdajeOsnovy.Prazdne, InfoOsnovy.Prazdne, ZmenenaVRoku(oblast.Id, od, po), charakteristika);
+                }
+
+                var cislo = 0;
+                foreach (var predmet in CastiOsnov.Dokumenty(sluzba, oblast))
+                {
+                    cislo++;
+                    var osnova = dokumenty.NacitajData(predmet.Id);
+                    var info = InfoOsnovyService.Nacitaj(predmet.Id);
+                    var stav = StavyOsnovy.Urci(predmet.Stav, predmet.DlzkaTextu);
+                    if (osnova is { Length: > 0 })
+                    {
+                        Directory.CreateDirectory(priecinokOblasti);
+                        var c = cislo.ToString("00", CultureInfo.InvariantCulture);
+                        var cestaOsnovy = Path.Combine(priecinokOblasti, ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(c, predmet.Nazov, info.Rok)) + ".docx");
+                        File.WriteAllBytes(cestaOsnovy, osnova);
+                        UlozPdf(cestaOsnovy, osnova, oblast.Nazov, farba, predmet, cislo, stav);
+                        dokumenty.ArchivujAktualnu(predmet.Id, dovod);
+                    }
+
+                    Zapis(archivId, predmet.Id, typDokumentu, oblast.Nazov, farba, poradieSkupiny, cislo, predmet.Nazov, stav, predmet.DlzkaTextu,
+                        UvodnaTabulka.Precitaj(osnova), info, ZmenenaVRoku(predmet.Id, od, po), osnova is { Length: > 0 } ? osnova : null);
+                }
+            }
+
+            if (ajUlohyAPoznamky)
+            {
+                ArchivujPlanovanie(archivId, od, po, ciel, skolskyRok);
+            }
+
+            // celé osnovy v jednom dokumente – Word a archívne PDF/A-2b (bez farebného profilu Windows bežné PDF)
+            var celok = ZostavaOsnov.Zostav(new VolbyZostavy());
+            var nazovCelku = ImportOsnov.BezpecnyNazov($"Učebné osnovy {skolskyRok.Replace('/', '-')}");
+            DocxVystup.Uloz(celok, Path.Combine(ciel, nazovCelku + ".docx"));
+            try
+            {
+                SuboryZostavy.Uloz(PdfVystup.Vytvor(celok), Path.Combine(ciel, nazovCelku + ".pdf"), new VolbyPdf { Format = FormatVystupu.PdfA2b });
+            }
+            catch (SkvpException)
+            {
+                SuboryZostavy.Uloz(PdfVystup.Vytvor(celok), Path.Combine(ciel, nazovCelku + ".pdf"), new VolbyPdf());
+            }
         }
-        catch (SkvpException)
+        catch (Exception)
         {
-            SuboryZostavy.Uloz(PdfVystup.Vytvor(celok), Path.Combine(ciel, nazovCelku + ".pdf"), new VolbyPdf());
+            // nedokončený archív sa nezachová – ani v programe (aj s kópiami v archíve verzií), ani v priečinku
+            Odstran(archivId);
+            using (var db = Databaza.Otvor())
+            {
+                Databaza.Vykonaj(db, "DELETE FROM verzia WHERE dovod = $d AND vytvorene >= $od", ("$d", dovod), ("$od", zaciatok));
+            }
+
+            try
+            {
+                Directory.Delete(ciel, recursive: true);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // priečinok zostane, archív v programe už nie je
+            }
+
+            throw;
         }
 
         return Zoznam().First(z => z.Id == archivId);

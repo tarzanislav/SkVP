@@ -41,28 +41,29 @@ public sealed class Mikrofon : IDisposable
         public IntPtr Rezervovane;
     }
 
-    [DllImport("winmm.dll")]
+    // systémové knižnice len zo System32 – podvrhnutá winmm.dll v inom priečinku sa nenačíta
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInGetNumDevs();
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInOpen(out IntPtr zariadenie, int id, ref WaveFormatEx format, IntPtr spatne, IntPtr instancia, int priznaky);
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInPrepareHeader(IntPtr zariadenie, IntPtr hlavicka, int velkost);
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInUnprepareHeader(IntPtr zariadenie, IntPtr hlavicka, int velkost);
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInAddBuffer(IntPtr zariadenie, IntPtr hlavicka, int velkost);
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInStart(IntPtr zariadenie);
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInReset(IntPtr zariadenie);
 
-    [DllImport("winmm.dll")]
+    [DllImport("winmm.dll"), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern int waveInClose(IntPtr zariadenie);
 
     private readonly List<short> _vzorky = new();
@@ -90,6 +91,11 @@ public sealed class Mikrofon : IDisposable
 
     public void Start()
     {
+        if (_bezi)
+        {
+            return;
+        }
+
         if (!MaZariadenie)
         {
             throw new SkvpException(Preklad.T("V počítači nie je mikrofón (alebo je vypnutý)."));
@@ -112,14 +118,24 @@ public sealed class Mikrofon : IDisposable
             var hlavicka = new WaveHdr { Data = Marshal.AllocHGlobal(BajtovBuffera), Dlzka = BajtovBuffera };
             _hlavicky[i] = Marshal.AllocHGlobal(velkost);
             Marshal.StructureToPtr(hlavicka, _hlavicky[i], false);
-            waveInPrepareHeader(_zariadenie, _hlavicky[i], velkost);
-            waveInAddBuffer(_zariadenie, _hlavicky[i], velkost);
+            Skontroluj(waveInPrepareHeader(_zariadenie, _hlavicky[i], velkost));
+            Skontroluj(waveInAddBuffer(_zariadenie, _hlavicky[i], velkost));
         }
 
+        Skontroluj(waveInStart(_zariadenie));
         _bezi = true;
-        waveInStart(_zariadenie);
         _vlakno = new Thread(Zbieraj) { IsBackground = true, Name = "SkVP mikrofón" };
         _vlakno.Start();
+    }
+
+    /// <summary>Chyba pri príprave nahrávania: mikrofón sa uvoľní a nahrávka sa nezačne (inak by bola potichu prázdna).</summary>
+    private void Skontroluj(int vysledok)
+    {
+        if (vysledok != 0)
+        {
+            Uvolni();
+            throw new SkvpException(Preklad.F($"Nahrávanie z mikrofónu sa nepodarilo spustiť (kód {vysledok}). Skúste iný mikrofón alebo reštartujte program."));
+        }
     }
 
     private void Zbieraj()
@@ -175,13 +191,24 @@ public sealed class Mikrofon : IDisposable
             return Array.Empty<float>();
         }
 
-        _bezi = false;
-        _vlakno?.Join(500);
-        Uvolni();
+        Zastav();
         lock (_vzorky)
         {
             return _vzorky.Select(v => v / 32768f).ToArray();
         }
+    }
+
+    /// <summary>Zastaví zbieranie a uvoľní zariadenie – pamäť bufferov až potom, ako vlákno skončí (inak by čítalo uvoľnenú pamäť).</summary>
+    private void Zastav()
+    {
+        _bezi = false;
+        if (_vlakno is { } vlakno && !vlakno.Join(2000))
+        {
+            return; // vlákno neodpovedá – radšej neuvoľniť pamäť, ktorú ešte môže čítať
+        }
+
+        _vlakno = null;
+        Uvolni();
     }
 
     private void Uvolni()
@@ -206,10 +233,5 @@ public sealed class Mikrofon : IDisposable
         _zariadenie = IntPtr.Zero;
     }
 
-    public void Dispose()
-    {
-        _bezi = false;
-        _vlakno?.Join(500);
-        Uvolni();
-    }
+    public void Dispose() => Zastav();
 }

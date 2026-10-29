@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-
 namespace SkVP.Pomocne;
 
 /// <summary>
@@ -30,7 +29,7 @@ public static class HlasovePisanie
         public IntPtr Doplnok;
     }
 
-    [DllImport("user32.dll", SetLastError = true)]
+    [DllImport("user32.dll", SetLastError = true), DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     private static extern uint SendInput(uint pocet, Vstup[] vstupy, int velkost);
 
     private const int TypKlavesnica = 1;

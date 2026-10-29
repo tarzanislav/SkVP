@@ -5,7 +5,6 @@ using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MigraDoc.Rendering;
-using SkVP.Data;
 using SkVP.Pomocne;
 using SkVP.Services;
 
@@ -42,7 +41,7 @@ public sealed partial class TlacViewModel : ObservableObject
     private readonly DispatcherTimer _odklad = new() { Interval = TimeSpan.FromMilliseconds(350) };
     private DocumentRenderer? _vykreslenie;
     private CelyDokument? _dokument;
-    private bool _nacitane;
+    private readonly bool _nacitane;
 
     public TlacViewModel(MainViewModel hlavny, OblastVM? oblast)
     {

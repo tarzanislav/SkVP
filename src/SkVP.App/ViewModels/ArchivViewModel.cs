@@ -227,7 +227,7 @@ public sealed partial class ArchivViewModel : ObservableObject
             if (oblast is null || oblast.Nazov != p.Oblast)
             {
                 oblast = new OblastArchivuVM(p.Oblast,
-                    p.Farba ?? (p.JeCast ? CastiOsnov.Farba(p.PoradieOblasti == 0 ? TypObjektu.Uvod : TypObjektu.Zaver) : UcebnyPlanService.FarbaOblasti(p.PoradieOblasti - 1)),
+                    CastiOsnov.FarbaSkupiny(p.Farba, p.TypSkupiny, p.PoradieOblasti - 1),
                     p.Typ == "charakteristika" ? p : null);
                 _vsetkyOblasti.Add(oblast);
             }

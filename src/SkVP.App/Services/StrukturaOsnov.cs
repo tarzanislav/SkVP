@@ -2,7 +2,6 @@ using System.IO;
 using ClosedXML.Excel;
 using MigraDoc.DocumentObjectModel;
 using SkVP.Data;
-using SkVP.Models;
 using SkVP.Pomocne;
 
 namespace SkVP.Services;

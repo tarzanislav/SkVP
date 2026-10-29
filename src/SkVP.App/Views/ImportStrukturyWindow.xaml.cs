@@ -25,7 +25,7 @@ public partial class ImportStrukturyWindow : Window
     }
 
     private readonly Rezim _rezim;
-    private DiktovanieDoPola? _diktovanie;
+    private readonly DiktovanieDoPola? _diktovanie;
     private readonly DispatcherTimer _odklad = new() { Interval = TimeSpan.FromMilliseconds(400) };
 
     public ImportStrukturyWindow(Rezim rezim)
