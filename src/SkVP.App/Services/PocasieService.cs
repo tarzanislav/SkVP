@@ -59,7 +59,7 @@ public sealed record Pocasie(
 /// Počasie na dashboarde zo služby Open-Meteo (bez registrácie a kľúča). Miesto sa vyhľadá podľa názvu mesta alebo obce,
 /// predvolene podľa mesta v Údajoch o organizácii. Posledná predpoveď sa pamätá, takže dashboard ju ukáže aj bez siete.
 /// </summary>
-public sealed class PocasieService
+public static class PocasieService
 {
     public const string KlucMiesto = "pocasie.miesto";
     public const string KlucData = "pocasie.data";
@@ -85,10 +85,10 @@ public sealed class PocasieService
 
     private static DateTime _poslednyPokus = DateTime.MinValue;
 
-    public MiestoPocasia? NacitajMiesto() => Databaza.CitajJson<MiestoPocasia>(KlucMiesto);
+    public static MiestoPocasia? NacitajMiesto() => Databaza.CitajJson<MiestoPocasia>(KlucMiesto);
 
     /// <summary>Uloží miesto (null = zrušiť) a zabudne predpoveď pre predošlé miesto.</summary>
-    public void UlozMiesto(MiestoPocasia? miesto)
+    public static void UlozMiesto(MiestoPocasia? miesto)
     {
         if (miesto is null)
         {
@@ -104,7 +104,7 @@ public sealed class PocasieService
     }
 
     /// <summary>Vyhľadá mestá a obce podľa názvu (napr. „Pezinok“, „Nová Dubnica“).</summary>
-    public async Task<List<MiestoPocasia>> HladajAsync(string nazov, CancellationToken zrusenie = default)
+    public static async Task<List<MiestoPocasia>> HladajAsync(string nazov, CancellationToken zrusenie = default)
     {
         nazov = (nazov ?? "").Trim();
         if (nazov.Length < 2)
@@ -118,7 +118,7 @@ public sealed class PocasieService
     }
 
     /// <summary>Miesto podľa mesta v Údajoch o organizácii (na Slovensku prednostne slovenské) – kým si používateľ nevyberie iné.</summary>
-    public async Task<MiestoPocasia?> MiestoOrganizacieAsync(CancellationToken zrusenie = default)
+    public static async Task<MiestoPocasia?> MiestoOrganizacieAsync(CancellationToken zrusenie = default)
     {
         var udaje = UdajeOrganizacie.Nacitaj();
         var mesto = udaje.Mesto.Trim();
@@ -134,14 +134,14 @@ public sealed class PocasieService
     }
 
     /// <summary>Predpoveď z vyrovnávacej pamäte, ak patrí k uloženému miestu.</summary>
-    public Pocasie? ZVyrovnavacejPamate() =>
+    public static Pocasie? ZVyrovnavacejPamate() =>
         Databaza.CitajJson<Pocasie>(KlucData) is { } pocasie && NacitajMiesto() is { } miesto && pocasie.Miesto == miesto ? pocasie : null;
 
     /// <summary>Treba stiahnuť nové údaje? Najviac raz za 30 minút, po neúspešnom pokuse najskôr o 10 minút.</summary>
-    public bool TrebaObnovit(Pocasie? pocasie) =>
+    public static bool TrebaObnovit(Pocasie? pocasie) =>
         DateTime.Now - _poslednyPokus > PrestavkaPoPokuse && (pocasie is null || DateTime.Now - pocasie.Stiahnute > PlatnostPredpovede);
 
-    public async Task<Pocasie> StiahniAsync(MiestoPocasia miesto, CancellationToken zrusenie = default)
+    public static async Task<Pocasie> StiahniAsync(MiestoPocasia miesto, CancellationToken zrusenie = default)
     {
         _poslednyPokus = DateTime.Now;
         var adresa = string.Create(CultureInfo.InvariantCulture, $"https://api.open-meteo.com/v1/forecast?latitude={miesto.Sirka:0.####}&longitude={miesto.Dlzka:0.####}")

@@ -18,7 +18,6 @@ public sealed partial class DashboardViewModel
     public const string KlucCitat = "dashboard.citat";
 
     private static readonly CultureInfo Sk = CultureInfo.GetCultureInfo("sk-SK");
-    private readonly PocasieService _pocasieSluzba = new();
     private bool _panelyPripravene;
 
     /// <summary>Pri samoteste a v náhľade sa nič nesťahuje zo siete.</summary>
@@ -182,9 +181,9 @@ public sealed partial class DashboardViewModel
 
     private void PripravPocasie()
     {
-        var miesto = _pocasieSluzba.NacitajMiesto();
+        var miesto = PocasieService.NacitajMiesto();
         JeMiestoPocasia = miesto is not null;
-        Pocasie = miesto is null ? null : _pocasieSluzba.ZVyrovnavacejPamate();
+        Pocasie = miesto is null ? null : PocasieService.ZVyrovnavacejPamate();
         PocasieStav = miesto is null
             ? (UdajeOrganizacie.Nacitaj().Mesto.Trim().Length > 0
                 ? "Hľadám mesto z Údajov o organizácii…"
@@ -197,10 +196,10 @@ public sealed partial class DashboardViewModel
     {
         try
         {
-            var miesto = _pocasieSluzba.NacitajMiesto();
+            var miesto = PocasieService.NacitajMiesto();
             if (miesto is null)
             {
-                miesto = await _pocasieSluzba.MiestoOrganizacieAsync();
+                miesto = await PocasieService.MiestoOrganizacieAsync();
                 if (miesto is null)
                 {
                     PripravPocasie();
@@ -208,13 +207,13 @@ public sealed partial class DashboardViewModel
                     return;
                 }
 
-                _pocasieSluzba.UlozMiesto(miesto);
+                PocasieService.UlozMiesto(miesto);
                 JeMiestoPocasia = true;
             }
 
-            if (vynutit || _pocasieSluzba.TrebaObnovit(Pocasie))
+            if (vynutit || PocasieService.TrebaObnovit(Pocasie))
             {
-                Pocasie = await _pocasieSluzba.StiahniAsync(miesto);
+                Pocasie = await PocasieService.StiahniAsync(miesto);
             }
 
             PocasieStav = "";
@@ -235,7 +234,7 @@ public sealed partial class DashboardViewModel
     [RelayCommand]
     private void ZmenitMiesto()
     {
-        HladaneMiesto = _pocasieSluzba.NacitajMiesto()?.Nazov ?? UdajeOrganizacie.Nacitaj().Mesto;
+        HladaneMiesto = PocasieService.NacitajMiesto()?.Nazov ?? UdajeOrganizacie.Nacitaj().Mesto;
         NajdeneMiesta = new List<MiestoPocasia>();
         UpravaMiesta = true;
     }
@@ -249,7 +248,7 @@ public sealed partial class DashboardViewModel
         HladaSa = true;
         try
         {
-            NajdeneMiesta = await _pocasieSluzba.HladajAsync(HladaneMiesto);
+            NajdeneMiesta = await PocasieService.HladajAsync(HladaneMiesto);
             PocasieStav = NajdeneMiesta.Count == 0 ? $"Miesto „{HladaneMiesto.Trim()}“ sa nenašlo." : "";
         }
         catch (SkvpException ex)
@@ -270,7 +269,7 @@ public sealed partial class DashboardViewModel
             return;
         }
 
-        _pocasieSluzba.UlozMiesto(miesto);
+        PocasieService.UlozMiesto(miesto);
         UpravaMiesta = false;
         JeMiestoPocasia = true;
         Pocasie = null;

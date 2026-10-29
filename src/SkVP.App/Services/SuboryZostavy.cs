@@ -52,7 +52,7 @@ public static class SuboryZostavy
             return ObrazkyDokumentu.Vytvor(dokument, nazov, volby.Rozvrh, volby.Format);
         }
 
-        var pdf = volby.ZlozitStrany ? SkladaniePdf.Zloz(dokument, volby.Rozvrh) : Vykresli(dokument);
+        using var pdf = volby.ZlozitStrany ? SkladaniePdf.Zloz(dokument, volby.Rozvrh) : Vykresli(dokument);
         Popis(pdf, dokument, nazov);
         var data = volby.Format.JeNorma()
             ? PdfNorma.Uloz(pdf, volby.Format, nazov, volby.Format == FormatVystupu.PdfA3b ? priloha?.Invoke() : null)

@@ -79,7 +79,7 @@ public static class HlasovePisanie
         {
             // Win dole, H dole, H hore, Win hore
             Input[] vstupy = [Klaves(KlavesWin, false), Klaves(KlavesH, false), Klaves(KlavesH, true), Klaves(KlavesWin, true)];
-            SendInput((uint)vstupy.Length, vstupy, Marshal.SizeOf<Input>());
+            _ = SendInput((uint)vstupy.Length, vstupy, Marshal.SizeOf<Input>());
         }
 
         return slovencina is not null;

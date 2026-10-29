@@ -29,6 +29,9 @@ public static class CitaniePdf
     private const double DpiStrany = 300;
     private static readonly TimeSpan CasovyLimit = TimeSpan.FromMinutes(10);
 
+    /// <summary>Jazyky rozpoznávania v poradí: slovenčina, čeština (rovnaké znaky s diakritikou).</summary>
+    private static readonly string[] JazykyDokumentov = { "sk", "cs" };
+
     /// <summary>Výsledok pomocného procesu (súbor JSON).</summary>
     private sealed record VysledokOcr(string? Text, string? Jazyk, string? Chyba);
 
@@ -110,7 +113,7 @@ public static class CitaniePdf
         try
         {
             var dostupne = OcrEngine.AvailableRecognizerLanguages;
-            var vhodny = new[] { "sk", "cs" }
+            var vhodny = JazykyDokumentov
                 .Select(kod => dostupne.FirstOrDefault(l => l.LanguageTag.Equals(kod, StringComparison.OrdinalIgnoreCase)
                                                              || l.LanguageTag.StartsWith(kod + "-", StringComparison.OrdinalIgnoreCase)))
                 .FirstOrDefault(l => l is not null);

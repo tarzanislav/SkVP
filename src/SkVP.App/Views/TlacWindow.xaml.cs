@@ -461,7 +461,7 @@ public partial class TlacWindow : Window
         return true;
     }
 
-    private static Visual Kresba(ListyTlace listy, StranaUlohy strana) => strana.List switch
+    private static DrawingVisual Kresba(ListyTlace listy, StranaUlohy strana) => strana.List switch
     {
         null => listy.Prazdny(),
         int index when strana.Otocena => listy.Otoceny(index),
@@ -512,7 +512,7 @@ public partial class TlacWindow : Window
                 Dialogy.Info(Preklad.F($"Uložené obrázky: {subory.Count}\n{Path.GetDirectoryName(subory[0])}"));
             }
 
-            return subory.FirstOrDefault() ?? cesta;
+            return subory.Count > 0 ? subory[0] : cesta;
         }
         catch (SkvpException ex)
         {

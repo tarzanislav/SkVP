@@ -1601,17 +1601,16 @@ internal static class Samotest
         var predpoved = PocasieService.PrecitajPredpoved(VzorPocasia(), najdene[0], DateTime.Now);
         Over(predpoved.TeplotaText == "12 °C" && predpoved.Popis == "Polooblačno" && predpoved.Dni.Count == 5 && predpoved.Dni[0].Den == "dnes"
              && predpoved.Podrobnosti.Contains("vietor 14 km/h"), "počasie: aktuálny stav a predpoveď na 5 dní");
-        var sluzba = new PocasieService();
-        sluzba.UlozMiesto(najdene[0]);
+        PocasieService.UlozMiesto(najdene[0]);
         Databaza.Zapis(PocasieService.KlucData, System.Text.Json.JsonSerializer.Serialize(predpoved));
-        Over(sluzba.ZVyrovnavacejPamate()?.TeplotaText == "12 °C", "počasie z vyrovnávacej pamäte (bez siete)");
+        Over(PocasieService.ZVyrovnavacejPamate()?.TeplotaText == "12 °C", "počasie z vyrovnávacej pamäte (bez siete)");
 
         try
         {
             var uloha = Task.Run(async () =>
             {
-                var m = (await sluzba.HladajAsync("Banská Bystrica")).First(x => x.KodKrajiny == "SK");
-                return await new PocasieService().StiahniAsync(m);
+                var m = (await PocasieService.HladajAsync("Banská Bystrica")).First(x => x.KodKrajiny == "SK");
+                return await PocasieService.StiahniAsync(m);
             });
             if (uloha.Wait(TimeSpan.FromSeconds(40)))
             {
@@ -1624,7 +1623,7 @@ internal static class Samotest
         }
 
         // na snímky dashboardu vzorové počasie
-        sluzba.UlozMiesto(najdene[0]);
+        PocasieService.UlozMiesto(najdene[0]);
         Databaza.Zapis(PocasieService.KlucData, System.Text.Json.JsonSerializer.Serialize(predpoved with { Stiahnute = DateTime.Now }));
 
         var dashboard = new DashboardViewModel(new MainViewModel());

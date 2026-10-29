@@ -224,7 +224,7 @@ public sealed class Mikrofon : IDisposable
                 hlavicka.Flags &= ~WhdrDone;
                 hlavicka.BytesRecorded = 0;
                 Marshal.StructureToPtr(hlavicka, adresa, false);
-                waveInAddBuffer(_zariadenie, adresa, VelkostHlavicky);
+                _ = waveInAddBuffer(_zariadenie, adresa, VelkostHlavicky);
                 nasledujuci = (nasledujuci + 1) % Bufferov;
             }
         }
@@ -270,16 +270,16 @@ public sealed class Mikrofon : IDisposable
     {
         if (_zariadenie != IntPtr.Zero)
         {
-            waveInReset(_zariadenie);
+            _ = waveInReset(_zariadenie);
             if (_hlavicky != IntPtr.Zero)
             {
                 for (var i = 0; i < Bufferov; i++)
                 {
-                    waveInUnprepareHeader(_zariadenie, Hlavicka(i), VelkostHlavicky);
+                    _ = waveInUnprepareHeader(_zariadenie, Hlavicka(i), VelkostHlavicky);
                 }
             }
 
-            waveInClose(_zariadenie);
+            _ = waveInClose(_zariadenie);
             _zariadenie = IntPtr.Zero;
         }
 
