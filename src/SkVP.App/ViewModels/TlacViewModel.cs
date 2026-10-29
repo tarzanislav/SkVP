@@ -268,9 +268,8 @@ public sealed partial class TlacViewModel : ObservableObject
     }
 
     /// <summary>Príloha PDF/A-3b: tie isté osnovy ako dokument Word.</summary>
-    public static SuboryZostavy.Priloha PrilohaWord(CelyDokument dokument) => new(
-        ZostavaOsnov.NazovSuboru(dokument, ".docx"), DocxVystup.Data(dokument),
-        "/application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Učebné osnovy vo Worde");
+    public static PrilohaPdf PrilohaWord(CelyDokument dokument) =>
+        PrilohaPdf.Word(ZostavaOsnov.NazovSuboru(dokument, ".docx"), DocxVystup.Data(dokument), "Učebné osnovy vo Worde");
 
     [RelayCommand]
     private void UlozitWord()

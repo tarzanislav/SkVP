@@ -224,8 +224,7 @@ public sealed partial class ImportExportViewModel : ObservableObject
                         () => StrukturaOsnov.Dokument(plan), "Oblasti_a_predmety.pdf")
                     {
                         Owner = Dialogy.Vlastnik,
-                        Priloha = () => new SuboryZostavy.Priloha("Oblasti_a_predmety.docx", DocxVystup.Osnova(StrukturaOsnov.Bloky(plan)),
-                            "/application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Oblasti a predmety vo Worde"),
+                        Priloha = () => PrilohaPdf.Word("Oblasti_a_predmety.docx", DocxVystup.Osnova(StrukturaOsnov.Bloky(plan)), "Oblasti a predmety vo Worde"),
                     }.ShowDialog();
                     break;
                 }

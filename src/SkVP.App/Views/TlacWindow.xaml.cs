@@ -1,65 +1,74 @@
-using SkVP.Data;
 using System.Globalization;
+using System.IO;
 using System.Printing;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Document = MigraDoc.DocumentObjectModel.Document;
+using MigraDoc.Rendering;
+using SkVP.Data;
 using SkVP.Pomocne;
 using SkVP.Services;
-using MigraDoc.Rendering;
 
 namespace SkVP.Views;
 
-/// <summary>
-/// Okno tlače SkVP (prevzaté z EviTA): tlačiareň, kópie, obojstranne, 1/2/4/8 strán na list, opakovanie strán, brožúra,
-/// zväčšenie, orámovanie, odtiene sivej, zosvetlenie, bez pozadia a dierovač – s náhľadom listu. Voľby sa zapamätajú.
-/// V režime PDF ukladá aj PDF/A-2b, PDF/A-3b, PDF/X-4 a obrázky PNG, JPEG, TIFF.
-/// </summary>
-/// <summary>Na čo sa okno používa.</summary>
+/// <summary>Na čo sa okno tlače používa.</summary>
 public enum RezimOknaTlace
 {
     Tlac,
 
-    /// <summary>Uloženie zostavy do PDF (voľby ako pdfFactory: šifrovanie, heslo, zákazy …) s náhľadom.</summary>
+    /// <summary>Uloženie zostavy do súboru (PDF, PDF/A, PDF/X, obrázky) so zabezpečením PDF a náhľadom.</summary>
     Pdf,
 
-    /// <summary>Len nastavenia PDF (bez zostavy – napr. pre export v časti Import a export).</summary>
+    /// <summary>Len nastavenia PDF bez zostavy (napr. pre export v časti Import a export).</summary>
     NastaveniaPdf,
 }
 
+/// <summary>
+/// Okno tlače SkVP s náhľadom listu: tlačiareň, kópie, obojstranná tlač, 1/2/4/8 strán na list, opakovanie strán,
+/// brožúra, zväčšenie, rámik, odtiene sivej, zosvetlenie, bez pozadia a dierovač. V režime súboru ukladá PDF, PDF/A-2b,
+/// PDF/A-3b, PDF/X-4 a obrázky PNG, JPEG a TIFF. Voľby sa zapamätajú.
+/// </summary>
 public partial class TlacWindow : Window
 {
-    private readonly DocumentRenderer? _vykreslenie;
-    private readonly RezimOknaTlace _rezim;
-    private readonly Func<MigraDoc.DocumentObjectModel.Document>? _tvorba;
-    private readonly string? _nazovSuboru;
-    private readonly bool _naSirku;
-    private readonly string _nazovUlohy;
+    /// <summary>Kľúč nastavenia: priečinok, kam sa naposledy ukladalo.</summary>
+    private const string KlucPriecinok = "tlac.priecinok";
 
-    /// <summary>Príloha PDF/A-3b (dokument Word s rovnakým obsahom).</summary>
-    public Func<SuboryZostavy.Priloha?>? Priloha { get; init; }
+    /// <summary>Rozlíšenie strán v odtieňoch sivej v náhľade (stačí menšie – je rýchlejší).</summary>
+    private const double DpiNahladu = 110;
+
+    private readonly DocumentRenderer? _vykreslenie;
+    private readonly bool _stranyNaSirku;
+    private readonly string _nazovUlohy;
+    private readonly RezimOknaTlace _rezim;
+    private readonly Func<Document>? _tvorba;
+    private readonly string? _nazovSuboru;
+    private readonly (RadioButton Volba, Rozmiestnenie Hodnota)[] _rozmiestnenia;
     private readonly DispatcherTimer _oneskorenie = new() { Interval = TimeSpan.FromMilliseconds(200) };
-    private NahladDokumentu.StrankovacRozvrhu? _nahlad;
+    private DocumentRenderer? _vykreslenieBezPozadia;
+    private ListyTlace? _listy;
     private int _list;
     private bool _nacitavam = true;
 
-    public TlacWindow(DocumentRenderer vykreslenie, bool naSirku, string nazovUlohy)
-        : this(vykreslenie, naSirku, nazovUlohy, RezimOknaTlace.Tlac, null, null)
-    {
-    }
-
-    /// <summary>Okno v zvolenom režime (tlač, uloženie do PDF, len nastavenia PDF).</summary>
-    public TlacWindow(DocumentRenderer? vykreslenie, bool naSirku, string nazovUlohy, RezimOknaTlace rezim,
-        Func<MigraDoc.DocumentObjectModel.Document>? tvorba, string? nazovSuboru)
+    /// <param name="vykreslenie">pripravená zostava pre náhľad; null = len nastavenia PDF</param>
+    /// <param name="tvorba">nová zostava (na uloženie do súboru a pre voľbu Bez pozadia)</param>
+    public TlacWindow(DocumentRenderer? vykreslenie, bool naSirku, string nazovUlohy, RezimOknaTlace rezim, Func<Document>? tvorba, string? nazovSuboru)
     {
         _vykreslenie = vykreslenie;
-        _naSirku = naSirku;
+        _stranyNaSirku = naSirku;
         _nazovUlohy = nazovUlohy;
         _rezim = rezim;
         _tvorba = tvorba;
         _nazovSuboru = nazovSuboru;
         InitializeComponent();
+        _rozmiestnenia = new[]
+        {
+            (Jedna, Rozmiestnenie.Jedna), (Dve, Rozmiestnenie.Dve), (Styri, Rozmiestnenie.Styri), (Osem, Rozmiestnenie.Osem),
+            (Brozura, Rozmiestnenie.Brozura),
+        };
+
         Title = rezim switch
         {
             RezimOknaTlace.Pdf => Preklad.F($"Uložiť ako PDF – {nazovUlohy}"),
@@ -70,69 +79,120 @@ public partial class TlacWindow : Window
         {
             SekciaTlaciarne.Visibility = Visibility.Collapsed;
             SekciaPdf.Visibility = Visibility.Visible;
-            IkonaHlavneho.Text = "\uEA90";
+            IkonaHlavneho.Text = "";
             TextHlavneho.Text = rezim == RezimOknaTlace.Pdf ? Preklad.T("Uložiť PDF…") : Preklad.T("Uložiť nastavenia");
         }
 
         if (vykreslenie is null)
         {
-            // len nastavenia (bez náhľadu): užšie okno, voľby na celú šírku, súhrn nad tlačidlami
-            SekciaNahladu.Visibility = Visibility.Collapsed;
-            PanelVolieb.Width = double.NaN;
-            DockPanel.SetDock(PanelVolieb, Dock.Top);
-            DockPanel.SetDock(Tlacidla, Dock.Bottom);
-            Tlacidla.HorizontalAlignment = HorizontalAlignment.Right;
-            Suhrn.Margin = new Thickness(0, 0, 0, 10);
-            MinWidth = 360;
-            MinHeight = 420;
-            Width = 440;
-            Height = 760;
+            UsporiadajBezNahladu();
         }
 
         _oneskorenie.Tick += (_, _) =>
         {
             _oneskorenie.Stop();
-            Prekresli();
+            Obnov();
         };
+        NacitajVolby();
+        _nacitavam = false;
+        Obnov();
+    }
 
-        var pdf = rezim == RezimOknaTlace.Tlac ? null : VolbyPdf.Nacitaj();
-        var volby = pdf?.Rozvrh ?? VolbyTlace.Nacitaj();
-        if (pdf is not null)
+    /// <summary>Príloha PDF/A-3b (dokument Word s rovnakým obsahom).</summary>
+    public Func<PrilohaPdf?>? Priloha { get; init; }
+
+    /// <summary>Počet strán listov, ktoré sa vytlačia (aj pre samotest).</summary>
+    public int PocetListov => _listy?.Pocet ?? 0;
+
+    /// <summary>Nastavenie volieb z kódu (samotest).</summary>
+    public void NastavVolby(VolbyTlace volby)
+    {
+        _nacitavam = true;
+        ZobrazVolby(volby);
+        _nacitavam = false;
+        Obnov();
+    }
+
+    /// <summary>Strana listu ako obrázok (náhľad, samotest); null = taká strana nie je.</summary>
+    public DrawingImage? ObrazokListu(int index)
+    {
+        if (_listy is null || index < 0 || index >= _listy.Pocet)
         {
-            NastavFormat(pdf.Format);
+            return null;
+        }
+
+        var obrazok = new DrawingImage(_listy.List(index).Drawing);
+        obrazok.Freeze();
+        return obrazok;
+    }
+
+    // ---- voľby v okne ----
+
+    /// <summary>Voľby rozmiestnenia a tlače z okna (opravené do povoleného rozsahu).</summary>
+    private VolbyTlace Volby => new VolbyTlace
+    {
+        Tlaciaren = (Tlaciarne.SelectedItem as ComboBoxItem)?.Tag as string,
+        Kopie = int.TryParse(Kopie.Text.Trim(), out var kopie) ? kopie : 1,
+        Obojstranne = Zapnute(Obojstranne),
+        Rozmiestnenie = _rozmiestnenia.Where(r => Zapnute(r.Volba)).Select(r => r.Hodnota).DefaultIfEmpty(Rozmiestnenie.Jedna).First(),
+        OpakovatStranky = Zapnute(Opakovat),
+        Zvacsenie = Zvacsenie.Value / 100.0,
+        Ramcek = Zapnute(Ramcek),
+        OdtieneSivej = Zapnute(Siva),
+        Zosvetlit = Zapnute(Zosvetlit),
+        BezPozadia = Zapnute(BezPozadia),
+        Dierovac = Zapnute(Dierovac),
+        DierovacMm = double.TryParse(DierovacMm.Text.Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var mm) ? mm : 10,
+    }.Opravene();
+
+    /// <summary>Voľby súboru z okna (formát, zabezpečenie) s rozmiestnením strán bez tlačiarne a kópií.</summary>
+    private VolbyPdf VolbyPdfZOkna => new()
+    {
+        Format = (FormatSuboru.SelectedItem as ComboBoxItem)?.Tag is string tag && Enum.TryParse<FormatVystupu>(tag, out var format) ? format : FormatVystupu.Pdf,
+        Rozvrh = Volby with { Tlaciaren = null, Kopie = 1 },
+        Sifrovat = Zapnute(Sifrovat),
+        PouzitHeslo = Zapnute(PouzitHeslo),
+        ZakazTlace = Zapnute(ZakazTlace),
+        ZakazKopirovania = Zapnute(ZakazKopirovania),
+        ZakazUprav = Zapnute(ZakazUprav),
+        ZakazPoznamok = Zapnute(ZakazPoznamok),
+    };
+
+    private static bool Zapnute(ToggleButton prepinac) => prepinac.IsChecked == true;
+
+    private void NacitajVolby()
+    {
+        VolbyTlace volby;
+        if (_rezim == RezimOknaTlace.Tlac)
+        {
+            volby = VolbyTlace.Nacitaj();
+            NaplnTlaciarne(volby.Tlaciaren);
+        }
+        else
+        {
+            var pdf = VolbyPdf.Nacitaj();
+            FormatSuboru.SelectedItem = FormatSuboru.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == pdf.Format.ToString())
+                                        ?? FormatSuboru.Items[0];
             Sifrovat.IsChecked = pdf.Sifrovat;
             PouzitHeslo.IsChecked = pdf.PouzitHeslo;
-            HesloPole.Password = VolbyPdf.Heslo ?? "";
-            HesloVlastnikaPole.Password = VolbyPdf.HesloVlastnika ?? "";
             ZakazTlace.IsChecked = pdf.ZakazTlace;
             ZakazKopirovania.IsChecked = pdf.ZakazKopirovania;
             ZakazUprav.IsChecked = pdf.ZakazUprav;
             ZakazPoznamok.IsChecked = pdf.ZakazPoznamok;
-        }
-        else
-        {
-            NaplnTlaciarne(volby.Tlaciaren);
+            HesloPole.Password = VolbyPdf.Heslo ?? "";
+            HesloVlastnikaPole.Password = VolbyPdf.HesloVlastnika ?? "";
+            volby = pdf.Rozvrh;
         }
 
         Kopie.Text = volby.Kopie.ToString(CultureInfo.InvariantCulture);
         ZobrazVolby(volby);
-        _nacitavam = false;
-        Prekresli();
-        AktualizujProfil();
     }
 
-    /// <summary>Rozmiestnenie a úprava strán do volieb okna (pri otvorení aj z kódu).</summary>
+    /// <summary>Rozmiestnenie a úprava strán do ovládacích prvkov.</summary>
     private void ZobrazVolby(VolbyTlace volby)
     {
         Obojstranne.IsChecked = volby.Obojstranne;
-        (volby.Rozmiestnenie switch
-        {
-            Rozmiestnenie.Dve => Dve,
-            Rozmiestnenie.Styri => Styri,
-            Rozmiestnenie.Osem => Osem,
-            Rozmiestnenie.Brozura => Brozura,
-            _ => Jedna,
-        }).IsChecked = true;
+        (_rozmiestnenia.FirstOrDefault(r => r.Hodnota == volby.Rozmiestnenie).Volba ?? Jedna).IsChecked = true;
         Opakovat.IsChecked = volby.OpakovatStranky;
         Zvacsenie.Value = Math.Round(volby.Zvacsenie * 100);
         Ramcek.IsChecked = volby.Ramcek;
@@ -143,231 +203,37 @@ public partial class TlacWindow : Window
         DierovacMm.Text = volby.DierovacMm.ToString("0.#", CultureInfo.CurrentCulture);
     }
 
-    /// <summary>Voľby PDF z okna (rozmiestnenie strán + zabezpečenie).</summary>
-    public VolbyPdf VolbyPdfOkna => new()
-    {
-        Format = (FormatSuboru.SelectedItem as ComboBoxItem)?.Tag is string tag && Enum.TryParse<FormatVystupu>(tag, out var format)
-            ? format
-            : FormatVystupu.Pdf,
-        Rozvrh = Volby with { Tlaciaren = null, Kopie = 1 },
-        Sifrovat = Sifrovat.IsChecked == true,
-        PouzitHeslo = PouzitHeslo.IsChecked == true,
-        ZakazTlace = ZakazTlace.IsChecked == true,
-        ZakazKopirovania = ZakazKopirovania.IsChecked == true,
-        ZakazUprav = ZakazUprav.IsChecked == true,
-        ZakazPoznamok = ZakazPoznamok.IsChecked == true,
-    };
-
-    /// <summary>Pre automatický test: cesta k PDF bez okna Uložiť ako.</summary>
-    public string? CestaBezDialogu { get; set; }
-
-    /// <summary>Samotest: nastavenie zabezpečenia PDF a hesla.</summary>
-    public void NastavPdf(VolbyPdf volby, string? heslo)
-    {
-        _nacitavam = true;
-        NastavFormat(volby.Format);
-        Sifrovat.IsChecked = volby.Sifrovat;
-        PouzitHeslo.IsChecked = volby.PouzitHeslo;
-        HesloPole.Password = heslo ?? "";
-        ZakazTlace.IsChecked = volby.ZakazTlace;
-        ZakazKopirovania.IsChecked = volby.ZakazKopirovania;
-        ZakazUprav.IsChecked = volby.ZakazUprav;
-        ZakazPoznamok.IsChecked = volby.ZakazPoznamok;
-        _nacitavam = false;
-        NastavVolby(volby.Rozvrh);
-    }
-
-    private void NastavFormat(FormatVystupu format) =>
-        FormatSuboru.SelectedItem = FormatSuboru.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == format.ToString())
-                                    ?? FormatSuboru.Items[0];
-
-    /// <summary>Skontroluje heslo, uloží voľby PDF (heslá len do pamäte) a vráti ich (null = chýba heslo).</summary>
-    private VolbyPdf? PripravPdf()
-    {
-        var volby = VolbyPdfOkna;
-        if (volby.SHeslom && HesloPole.Password.Length == 0)
-        {
-            Dialogy.Upozornenie(Preklad.T("Zadajte heslo na otvorenie PDF."));
-            HesloPole.Focus();
-            return null;
-        }
-
-        VolbyPdf.Heslo = volby.SHeslom ? HesloPole.Password : null;
-        VolbyPdf.HesloVlastnika = HesloVlastnikaPole.Password.Length > 0 ? HesloVlastnikaPole.Password : null;
-        volby.Uloz();
-        return volby;
-    }
-
-    /// <summary>Súbory zostavy podľa volieb okna v pamäti (samotest).</summary>
-    public IReadOnlyList<SuborVystupu>? VytvorSubory()
-    {
-        if (_tvorba is null || PripravPdf() is not { } volby)
-        {
-            return null;
-        }
-
-        IReadOnlyList<SuborVystupu>? subory = null;
-        try
-        {
-            Dialogy.Cakaj(() => subory = SuboryZostavy.Vytvor(_tvorba(), System.IO.Path.GetFileNameWithoutExtension(_nazovSuboru ?? "SkVP"), volby, Priloha));
-        }
-        catch (SkvpException ex)
-        {
-            Dialogy.Upozornenie(ex.Message);
-        }
-
-        return subory;
-    }
-
-    /// <summary>Uloží voľby PDF (heslá len do pamäte) a pri zostave uloží PDF. Vráti cestu k PDF alebo null.</summary>
-    public string? UlozitPdf()
-    {
-        if (PripravPdf() is not { } volby)
-        {
-            return null;
-        }
-        if (_rezim == RezimOknaTlace.NastaveniaPdf || _tvorba is null)
-        {
-            return "";
-        }
-
-        return UlozSubory(_tvorba, _nazovSuboru ?? "SkVP.pdf", CestaBezDialogu, volby, Priloha);
-    }
-
-    /// <summary>Kľúč nastavenia: priečinok, kam sa naposledy ukladalo.</summary>
-    private const string KlucPriecinok = "tlac.priecinok";
-
-    /// <summary>Okno Uložiť ako podľa formátu, uloženie súborov a otvorenie výsledku. Vráti cestu (alebo null).</summary>
-    public static string? UlozSubory(Func<MigraDoc.DocumentObjectModel.Document> tvorba, string nazovSuboru, string? cestaBezDialogu,
-        VolbyPdf volbyPdf, Func<SuboryZostavy.Priloha?>? priloha)
-    {
-        var pripona = volbyPdf.Pripona;
-        nazovSuboru = System.IO.Path.ChangeExtension(nazovSuboru, pripona);
-        var cesta = cestaBezDialogu;
-        if (cesta is null)
-        {
-            var priecinok = Databaza.Citaj(KlucPriecinok);
-            var filter = pripona switch
-            {
-                ".png" => Preklad.T("Obrázky PNG") + " (*.png)|*.png",
-                ".jpg" => Preklad.T("Obrázky JPEG") + " (*.jpg;*.jpeg)|*.jpg;*.jpeg",
-                ".tif" => Preklad.T("Obrázok TIFF") + " (*.tif;*.tiff)|*.tif;*.tiff",
-                _ => "PDF (*.pdf)|*.pdf",
-            };
-            cesta = Dialogy.UlozitAko(volbyPdf.JePdf ? Preklad.T("Uložiť ako PDF") : Preklad.T("Uložiť ako obrázok"), filter, nazovSuboru,
-                string.IsNullOrEmpty(priecinok) || !System.IO.Directory.Exists(priecinok) ? null : priecinok);
-            if (cesta is null)
-            {
-                return null;
-            }
-        }
-
-        try
-        {
-            IReadOnlyList<string> subory = Array.Empty<string>();
-            Dialogy.Cakaj(() => subory = SuboryZostavy.Uloz(tvorba(), cesta, volbyPdf, priloha));
-            Databaza.Zapis(KlucPriecinok, System.IO.Path.GetDirectoryName(cesta));
-            if (subory.Count == 1)
-            {
-                Dialogy.OtvorVSysteme(subory[0]);
-            }
-            else if (subory.Count > 1)
-            {
-                Dialogy.Info(Preklad.F($"Uložené obrázky: {subory.Count}\n{System.IO.Path.GetDirectoryName(subory[0])}"));
-            }
-
-            return subory.FirstOrDefault() ?? cesta;
-        }
-        catch (SkvpException ex)
-        {
-            Dialogy.Upozornenie(ex.Message);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Dialogy.Chyba(Preklad.T("Súbor sa nepodarilo uložiť."), ex);
-            return null;
-        }
-    }
-
-    private DocumentRenderer? _vykreslenieBezPozadia;
-
-    /// <summary>Zostava na tlač: pri voľbe Bez pozadia sa pripraví znova bez farebných podkladov (ak je k dispozícii jej tvorba).</summary>
-    private DocumentRenderer Vykreslenie(VolbyTlace volby)
-    {
-        if (!volby.BezPozadia || _tvorba is null)
-        {
-            return _vykreslenie!;
-        }
-
-        return _vykreslenieBezPozadia ??= NahladDokumentu.Priprav(PozadieDokumentu.Odstran(_tvorba()));
-    }
-
-    /// <summary>Aktuálne voľby z okna.</summary>
-    public VolbyTlace Volby => new VolbyTlace
-    {
-        Tlaciaren = (Tlaciarne.SelectedItem as ComboBoxItem)?.Tag as string,
-        Kopie = int.TryParse(Kopie.Text.Trim(), out var kopie) ? kopie : 1,
-        Obojstranne = Obojstranne.IsChecked == true,
-        Rozmiestnenie = Dve.IsChecked == true ? Rozmiestnenie.Dve
-            : Styri.IsChecked == true ? Rozmiestnenie.Styri
-            : Osem.IsChecked == true ? Rozmiestnenie.Osem
-            : Brozura.IsChecked == true ? Rozmiestnenie.Brozura
-            : Rozmiestnenie.Jedna,
-        OpakovatStranky = Opakovat.IsChecked == true,
-        Zvacsenie = Zvacsenie.Value / 100.0,
-        Ramcek = Ramcek.IsChecked == true,
-        OdtieneSivej = Siva.IsChecked == true,
-        Zosvetlit = Zosvetlit.IsChecked == true,
-        BezPozadia = BezPozadia.IsChecked == true,
-        Dierovac = Dierovac.IsChecked == true,
-        DierovacMm = double.TryParse(DierovacMm.Text.Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var mm) ? mm : 10,
-    }.Opravene();
-
-    /// <summary>Počet strán listov, ktoré sa vytlačia (pre samotest a súhrn).</summary>
-    public int PocetListov => _nahlad?.PocetListov ?? 0;
-
-    /// <summary>Nastavenie volieb z kódu (samotest).</summary>
-    public void NastavVolby(VolbyTlace volby)
-    {
-        _nacitavam = true;
-        ZobrazVolby(volby);
-        _nacitavam = false;
-        Prekresli();
-    }
-
     private void NaplnTlaciarne(string? ulozena)
     {
-        try
+        var (nazvy, predvolena) = TlacoveFronty.Zoznam();
+        var polozky = nazvy.Select(nazov => new ComboBoxItem
         {
-            using var server = new LocalPrintServer();
-            var predvolena = LocalPrintServer.GetDefaultPrintQueue()?.FullName;
-            var fronty = server.GetPrintQueues(new[] { EnumeratedPrintQueueTypes.Local, EnumeratedPrintQueueTypes.Connections })
-                .Select(f => f.FullName).Distinct().OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase).ToList();
-            foreach (var nazov in fronty)
-            {
-                Tlaciarne.Items.Add(new ComboBoxItem { Content = nazov == predvolena ? Preklad.F($"{nazov} (predvolená)") : nazov, Tag = nazov });
-            }
+            Content = nazov == predvolena ? Preklad.F($"{nazov} (predvolená)") : nazov,
+            Tag = nazov,
+        }).ToList();
+        polozky.ForEach(polozka => Tlaciarne.Items.Add(polozka));
+        Tlaciarne.SelectedItem = polozky.Find(p => (string)p.Tag == ulozena) ?? polozky.Find(p => (string)p.Tag == predvolena) ?? polozky.FirstOrDefault();
+    }
 
-            Tlaciarne.SelectedItem = Tlaciarne.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == ulozena)
-                                     ?? Tlaciarne.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == predvolena)
-                                     ?? Tlaciarne.Items.OfType<ComboBoxItem>().FirstOrDefault();
-        }
-        catch (Exception)
-        {
-            // zoznam tlačiarní sa nedá zistiť (napr. vypnutá služba zaraďovača tlače)
-        }
+    /// <summary>Len nastavenia (bez náhľadu): užšie okno, voľby na celú šírku a súhrn nad tlačidlami.</summary>
+    private void UsporiadajBezNahladu()
+    {
+        SekciaNahladu.Visibility = Visibility.Collapsed;
+        PanelVolieb.Width = double.NaN;
+        DockPanel.SetDock(PanelVolieb, Dock.Top);
+        DockPanel.SetDock(Tlacidla, Dock.Bottom);
+        Tlacidla.HorizontalAlignment = HorizontalAlignment.Right;
+        Suhrn.Margin = new Thickness(0, 0, 0, 10);
+        (MinWidth, MinHeight, Width, Height) = (360, 420, 440, 760);
     }
 
     private void Volba_Changed(object sender, RoutedEventArgs e)
     {
-        if (_nacitavam)
+        if (!_nacitavam)
         {
-            return;
+            _oneskorenie.Stop();
+            _oneskorenie.Start();
         }
-
-        _oneskorenie.Stop();
-        _oneskorenie.Start();
     }
 
     private void Zvacsenie_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -380,30 +246,35 @@ public partial class TlacWindow : Window
         Volba_Changed(sender, e);
     }
 
-    private void Prekresli()
+    // ---- náhľad a súhrn ----
+
+    /// <summary>Prispôsobí okno zmeneným voľbám: dostupné voľby, popisy, náhľad listu a súhrn.</summary>
+    private void Obnov()
     {
         var volby = Volby;
-        Opakovat.IsEnabled = volby.Rozmiestnenie is not (Rozmiestnenie.Jedna or Rozmiestnenie.Brozura);
+        var mriezka = volby.Rozmiestnenie is not (Rozmiestnenie.Jedna or Rozmiestnenie.Brozura);
+        var brozura = volby.Rozmiestnenie == Rozmiestnenie.Brozura;
+        Opakovat.IsEnabled = mriezka;
+        Obojstranne.IsEnabled = !brozura;
+        Dierovac.IsEnabled = !brozura;
+        DierovacMm.IsEnabled = !brozura && Zapnute(Dierovac);
         BezPozadia.IsEnabled = _tvorba is not null || _vykreslenie is null;
-        Dierovac.IsEnabled = volby.Rozmiestnenie != Rozmiestnenie.Brozura;
-        DierovacMm.IsEnabled = Dierovac.IsEnabled && Dierovac.IsChecked == true;
-        Obojstranne.IsEnabled = volby.Rozmiestnenie != Rozmiestnenie.Brozura;
-        HesloPole.IsEnabled = PouzitHeslo.IsChecked == true;
-        if (_rezim != RezimOknaTlace.Tlac)
+        HesloPole.IsEnabled = Zapnute(PouzitHeslo);
+
+        var subor = _rezim == RezimOknaTlace.Tlac ? null : VolbyPdfZOkna;
+        if (subor is null)
         {
-            var format = VolbyPdfOkna;
-            Zabezpecenie.Visibility = format.MozeZabezpecit ? Visibility.Visible : Visibility.Collapsed;
-            InfoPisma.Visibility = format.JePdf ? Visibility.Visible : Visibility.Collapsed;
-            PopisFormatu.Text = PopisFormatuText(format.Format);
+            ZobrazProfil();
+        }
+        else
+        {
+            Zabezpecenie.Visibility = subor.MozeZabezpecit ? Visibility.Visible : Visibility.Collapsed;
+            InfoPisma.Visibility = subor.JePdf ? Visibility.Visible : Visibility.Collapsed;
+            PopisFormatu.Text = subor.Format.Popis();
             if (_rezim == RezimOknaTlace.Pdf)
             {
-                TextHlavneho.Text = format.JePdf ? Preklad.T("Uložiť PDF…") : Preklad.T("Uložiť obrázky…");
+                TextHlavneho.Text = subor.JePdf ? Preklad.T("Uložiť PDF…") : Preklad.T("Uložiť obrázky…");
             }
-        }
-
-        if (_rezim == RezimOknaTlace.Tlac && ProfilText is not null)
-        {
-            AktualizujProfil();
         }
 
         if (_vykreslenie is null)
@@ -412,88 +283,77 @@ public partial class TlacWindow : Window
             return;
         }
 
-        _nahlad = new NahladDokumentu.StrankovacRozvrhu(Vykreslenie(volby), _naSirku, volby) { NahladDpi = 110 };
-        _list = Math.Clamp(_list, 0, Math.Max(0, _nahlad.PocetListov - 1));
+        _listy = new ListyTlace(Vykreslenie(volby), _stranyNaSirku, volby, DpiNahladu);
+        _list = Math.Clamp(_list, 0, Math.Max(0, _listy.Pocet - 1));
         UkazList();
-
-        var stran = NahladDokumentu.PocetStran(_vykreslenie);
-        if (_rezim != RezimOknaTlace.Tlac)
-        {
-            var pdf = VolbyPdfOkna;
-            Suhrn.Text = Preklad.Pocet(stran, "{0} strana zostavy", "{0} strany zostavy", "{0} strán zostavy") + " → "
-                         + (pdf.JePdf
-                             ? Preklad.Pocet(_nahlad.PocetListov, "{0} strana PDF", "{0} strany PDF", "{0} strán PDF")
-                             : Preklad.Pocet(_nahlad.PocetListov, "{0} obrázok", "{0} obrázky", "{0} obrázkov"))
-                         + (pdf.Format != FormatVystupu.Pdf ? " · " + NazovFormatu(pdf.Format) : "")
-                         + (pdf.Zasifrovat ? " · " + Preklad.T("zašifrované") : "")
-                         + (pdf.SHeslom ? " · " + Preklad.T("s heslom") : "");
-            return;
-        }
-
-        var listov = volby.TlacitObojstranne ? (_nahlad.PocetListov + 1) / 2 : _nahlad.PocetListov;
-        Suhrn.Text = Preklad.Pocet(stran, "{0} strana zostavy", "{0} strany zostavy", "{0} strán zostavy") + " → "
-                     + Preklad.Pocet(listov, "{0} list papiera", "{0} listy papiera", "{0} listov papiera")
-                     + (volby.Kopie > 1 ? $" × {volby.Kopie}" : "")
-                     + (volby.TlacitObojstranne ? " · " + Preklad.T("obojstranne") : "")
-                     + " · A4 " + (_nahlad.ListNaSirku ? Preklad.T("na šírku") : Preklad.T("na výšku"));
+        Suhrn.Text = TextSuhrnu(_listy, volby, subor);
     }
 
-    public static string NazovFormatu(FormatVystupu format) => format switch
+    /// <summary>Napr. „12 strán zostavy → 6 listov papiera × 2 · obojstranne · A4 na šírku“.</summary>
+    private static string TextSuhrnu(ListyTlace listy, VolbyTlace volby, VolbyPdf? subor)
     {
-        FormatVystupu.PdfA2b => "PDF/A-2b",
-        FormatVystupu.PdfA3b => "PDF/A-3b",
-        FormatVystupu.PdfX4 => "PDF/X-4",
-        FormatVystupu.Png => "PNG",
-        FormatVystupu.Jpeg => "JPEG",
-        FormatVystupu.Tiff => "TIFF",
-        _ => "PDF",
-    };
+        var text = Preklad.Pocet(listy.Impozicia.PocetStran, "{0} strana zostavy", "{0} strany zostavy", "{0} strán zostavy") + " → ";
+        if (subor is not null)
+        {
+            return text
+                   + (subor.JePdf
+                       ? Preklad.Pocet(listy.Pocet, "{0} strana PDF", "{0} strany PDF", "{0} strán PDF")
+                       : Preklad.Pocet(listy.Pocet, "{0} obrázok", "{0} obrázky", "{0} obrázkov"))
+                   + (subor.Format != FormatVystupu.Pdf ? " · " + subor.Format.Nazov() : "")
+                   + (subor.Zasifrovat ? " · " + Preklad.T("zašifrované") : "")
+                   + (subor.SHeslom ? " · " + Preklad.T("s heslom") : "");
+        }
 
-    private static string PopisFormatuText(FormatVystupu format) => format switch
-    {
-        FormatVystupu.PdfA2b => Preklad.T("Archívne PDF podľa normy ISO 19005-2 – písma aj farby sú v súbore, otvorí sa rovnako aj o desiatky rokov. Šifrovanie a heslo norma nepovoľuje."),
-        FormatVystupu.PdfA3b => Preklad.T("Archívne PDF s prílohou – v PDF je vložený aj dokument Word s rovnakým obsahom na ďalšie úpravy. Šifrovanie a heslo norma nepovoľuje."),
-        FormatVystupu.PdfX4 => Preklad.T("PDF pre tlačiareň a reklamné štúdio (ISO 15930-7) s farebným profilom pre ofsetovú tlač. Šifrovanie a heslo norma nepovoľuje."),
-        FormatVystupu.Png => Preklad.T("Každá strana ako samostatný obrázok PNG (300 dpi), napr. na vloženie do Wordu. Text sa z obrázka nedá kopírovať."),
-        FormatVystupu.Jpeg => Preklad.T("Každá strana ako samostatný obrázok JPEG (300 dpi) – menšie súbory, napr. na web alebo do e-mailu. Text sa z obrázka nedá kopírovať."),
-        FormatVystupu.Tiff => Preklad.T("Všetky strany v jednom obrázku TIFF (300 dpi), napr. pre registratúru alebo archívny systém. Text sa z obrázka nedá kopírovať."),
-        _ => Preklad.T("Bežné PDF – dá sa zašifrovať, chrániť heslom a obmedziť tlač či kopírovanie."),
-    };
+        var obojstranne = volby.TlacitObojstranne;
+        return text
+               + Preklad.Pocet(obojstranne ? (listy.Pocet + 1) / 2 : listy.Pocet, "{0} list papiera", "{0} listy papiera", "{0} listov papiera")
+               + (volby.Kopie > 1 ? $" × {volby.Kopie}" : "")
+               + (obojstranne ? " · " + Preklad.T("obojstranne") : "")
+               + " · A4 " + (listy.NaSirku ? Preklad.T("na šírku") : Preklad.T("na výšku"));
+    }
+
+    /// <summary>Zostava na tlač; pri voľbe Bez pozadia sa (ak sa dá) pripraví znova bez farebných podkladov.</summary>
+    private DocumentRenderer Vykreslenie(VolbyTlace volby) =>
+        volby.BezPozadia && _tvorba is not null
+            ? _vykreslenieBezPozadia ??= NahladDokumentu.Priprav(PozadieDokumentu.Odstran(_tvorba()))
+            : _vykreslenie!;
 
     private void UkazList()
     {
-        if (_nahlad is null || _nahlad.PocetListov == 0)
+        var obrazok = ObrazokListu(_list);
+        Nahlad.Source = obrazok;
+        if (_listy is null || obrazok is null)
         {
-            Nahlad.Source = null;
             CisloListu.Text = "";
+            Predosly.IsEnabled = Dalsi.IsEnabled = false;
             return;
         }
 
-        var vizual = _nahlad.List(_list);
-        var obrazok = new DrawingImage(vizual.Drawing);
-        obrazok.Freeze();
-        Nahlad.Source = obrazok;
-        Nahlad.Width = _nahlad.PageSize.Width;
-        Nahlad.Height = _nahlad.PageSize.Height;
-        var volby = Volby;
-        CisloListu.Text = volby.TlacitObojstranne
-            ? Preklad.F($"list {_list / 2 + 1} z {(_nahlad.PocetListov + 1) / 2}, {(_list % 2 == 0 ? Preklad.T("predná strana") : Preklad.T("zadná strana"))}")
-            : Preklad.F($"list {_list + 1} z {_nahlad.PocetListov}");
+        Nahlad.Width = _listy.Velkost.Width;
+        Nahlad.Height = _listy.Velkost.Height;
+        CisloListu.Text = _listy.Impozicia.Volby.TlacitObojstranne
+            ? Preklad.F($"list {_list / 2 + 1} z {(_listy.Pocet + 1) / 2}, {(_list % 2 == 0 ? Preklad.T("predná strana") : Preklad.T("zadná strana"))}")
+            : Preklad.F($"list {_list + 1} z {_listy.Pocet}");
         Predosly.IsEnabled = _list > 0;
-        Dalsi.IsEnabled = _list < _nahlad.PocetListov - 1;
+        Dalsi.IsEnabled = _list < _listy.Pocet - 1;
     }
 
-    private void Predosly_Click(object sender, RoutedEventArgs e)
+    private void Predosly_Click(object sender, RoutedEventArgs e) => Listuj(-1);
+
+    private void Dalsi_Click(object sender, RoutedEventArgs e) => Listuj(+1);
+
+    private void Listuj(int smer)
     {
-        _list = Math.Max(0, _list - 1);
+        _list = Math.Clamp(_list + smer, 0, Math.Max(0, PocetListov - 1));
         UkazList();
     }
 
-    private void Dalsi_Click(object sender, RoutedEventArgs e)
-    {
-        _list = Math.Min((_nahlad?.PocetListov ?? 1) - 1, _list + 1);
-        UkazList();
-    }
+    // ---- obojstranná tlač ----
+
+    private void ZobrazProfil() =>
+        ProfilText.Text = ProfilObojstrannej.Pre(Volby.Tlaciaren) is { } profil
+            ? Preklad.F($"Obojstranne: {profil.Popis}")
+            : Preklad.T("Obojstranná tlač na tejto tlačiarni ešte nie je nastavená.");
 
     private void NastavitObojstranne_Click(object sender, RoutedEventArgs e)
     {
@@ -504,22 +364,45 @@ public partial class TlacWindow : Window
         }
 
         new ObojstrannaWindow(tlaciaren) { Owner = this }.ShowDialog();
-        AktualizujProfil();
+        ZobrazProfil();
     }
 
-    private void AktualizujProfil()
+    /// <summary>
+    /// Profil obojstrannej tlače (jednostranne null). Pri prvom použití tlačiarne ponúkne sprievodcu so skúšobnými
+    /// listami; false = sprievodca sa nedokončil a tlačiť sa nemá.
+    /// </summary>
+    private bool ZistiProfil(VolbyTlace volby, out ProfilObojstrannej? profil)
     {
-        var profil = ProfilObojstrannej.Pre(Volby.Tlaciaren);
-        ProfilText.Text = profil is null
-            ? Preklad.T("Obojstranná tlač na tejto tlačiarni ešte nie je nastavená.")
-            : Preklad.F($"Obojstranne: {profil.Popis}");
+        profil = volby.TlacitObojstranne ? ProfilObojstrannej.Pre(volby.Tlaciaren) : null;
+        if (!volby.TlacitObojstranne || profil is not null)
+        {
+            return true;
+        }
+
+        if (Dialogy.Potvrd(Preklad.F($"Obojstranná tlač na tlačiarni „{volby.Tlaciaren}“ ešte nie je nastavená. Každá tlačiareň otáča list inak a zadná strana by mohla vyjsť hore nohami.\n\nSpustiť sprievodcu? Vytlačí 2 skúšobné listy a opýta sa, ako vyšli.\n\n(Nie = tlačiť s predvoleným nastavením.)")))
+        {
+            var sprievodca = new ObojstrannaWindow(volby.Tlaciaren!) { Owner = this };
+            sprievodca.ShowDialog();
+            ZobrazProfil();
+            if (sprievodca.Profil is null)
+            {
+                return false;
+            }
+
+            profil = sprievodca.Profil;
+        }
+
+        profil ??= new ProfilObojstrannej();
+        return true;
     }
+
+    // ---- hlavné tlačidlo ----
 
     private void Vytlacit_Click(object sender, RoutedEventArgs e)
     {
         if (_rezim != RezimOknaTlace.Tlac)
         {
-            if (UlozitPdf() is not null)
+            if (PotvrdVolbyPdf() is { } pdf && (_rezim == RezimOknaTlace.NastaveniaPdf || _tvorba is null || UlozSubor(pdf) is not null))
             {
                 DialogResult = true;
             }
@@ -536,31 +419,11 @@ public partial class TlacWindow : Window
 
         try
         {
-            // obojstranná tlač: pri prvom použití tlačiarne sprievodca so skúšobnými listami
-            var profil = volby.TlacitObojstranne ? ProfilObojstrannej.Pre(volby.Tlaciaren) : null;
-            if (volby.TlacitObojstranne && profil is null)
+            if (ZistiProfil(volby, out var profil) && Vytlac(volby, profil))
             {
-                if (Dialogy.Potvrd(Preklad.F($"Obojstranná tlač na tlačiarni „{volby.Tlaciaren}“ ešte nie je nastavená. Každá tlačiareň otáča list inak a zadná strana by mohla vyjsť hore nohami.\n\nSpustiť sprievodcu? Vytlačí 2 skúšobné listy a opýta sa, ako vyšli.\n\n(Nie = tlačiť s predvoleným nastavením.)")))
-                {
-                    var sprievodca = new ObojstrannaWindow(volby.Tlaciaren) { Owner = this };
-                    sprievodca.ShowDialog();
-                    AktualizujProfil();
-                    if (sprievodca.Profil is null)
-                    {
-                        return;
-                    }
-                }
-
-                profil = ProfilObojstrannej.Pre(volby.Tlaciaren) ?? new ProfilObojstrannej();
+                volby.Uloz();
+                DialogResult = true;
             }
-
-            if (!Vytlac(volby, profil, potvrdenie: Dialogy.Potvrd))
-            {
-                return;
-            }
-
-            volby.Uloz();
-            DialogResult = true;
         }
         catch (SkvpException ex)
         {
@@ -573,83 +436,93 @@ public partial class TlacWindow : Window
     }
 
     /// <summary>
-    /// Strany na tlač podľa volieb a profilu obojstrannej tlače: pri obojstrannej tlači sa doplní prázdna strana na párny
-    /// počet (ďalšia kópia nezačne na zadnej strane), zadné strany sa podľa profilu otočia o 180°. Pri ručnom otáčaní sú to
-    /// dve úlohy – predné strany a po vložení listov zadné strany (podľa profilu v obrátenom poradí).
+    /// Pošle listy na tlačiareň podľa plánu tlačových úloh. Pri ručnom otáčaní sa pred zadnými stranami počká na vloženie
+    /// listov; false = používateľ tlač zadných strán zrušil.
     /// </summary>
-    public static List<(List<DrawingVisual> Strany, bool Duplex, int Kopie)> Ulohy(NahladDokumentu.StrankovacRozvrhu rozvrh, VolbyTlace volby, ProfilObojstrannej? profil)
+    private bool Vytlac(VolbyTlace volby, ProfilObojstrannej? profil)
     {
-        var velkost = rozvrh.PageSize;
-        var pocet = rozvrh.PocetListov;
-        if (!volby.TlacitObojstranne)
-        {
-            return new() { (Enumerable.Range(0, pocet).Select(rozvrh.List).ToList(), false, volby.Kopie) };
-        }
-
-        profil ??= new ProfilObojstrannej();
-        var parny = (pocet + 1) / 2 * 2;
-        DrawingVisual Strana(int i) => i < pocet ? rozvrh.List(i) : ObojstrannaKresba.Prazdna(velkost);
-        DrawingVisual Zadna(int i) => profil.Otocit(rozvrh.ListNaSirku) ? ObojstrannaKresba.Otocena(Strana(i), velkost) : Strana(i);
-
-        if (profil.Rezim == RezimObojstrannej.Automaticky)
-        {
-            return new() { (Enumerable.Range(0, parny).Select(i => i % 2 == 0 ? Strana(i) : Zadna(i)).ToList(), true, volby.Kopie) };
-        }
-
-        var predne = new List<DrawingVisual>();
-        var zadne = new List<DrawingVisual>();
-        for (var kopia = 0; kopia < volby.Kopie; kopia++)
-        {
-            for (var i = 0; i < parny; i += 2)
-            {
-                predne.Add(Strana(i));
-                zadne.Add(Zadna(i + 1));
-            }
-        }
-
-        if (profil.ObratitPoradie)
-        {
-            zadne.Reverse();
-        }
-
-        return new() { (predne, false, 1), (zadne, false, 1) };
-    }
-
-    private bool Vytlac(VolbyTlace volby, ProfilObojstrannej? profil, Func<string, bool> potvrdenie)
-    {
+        var listy = new ListyTlace(Vykreslenie(volby), _stranyNaSirku, volby);
+        var ulohy = PlanTlace.Ulohy(listy.Pocet, volby.Kopie, volby.TlacitObojstranne, listy.NaSirku, profil);
         using var server = new LocalPrintServer();
-        using var fronta = ObojstrannaKresba.NajdiTlaciaren(server, volby.Tlaciaren!);
-        var rozvrh = new NahladDokumentu.StrankovacRozvrhu(Vykreslenie(volby), _naSirku, volby);
-        var ulohy = Ulohy(rozvrh, volby, profil);
-        for (var u = 0; u < ulohy.Count; u++)
+        using var fronta = TlacoveFronty.Otvor(server, volby.Tlaciaren!);
+        foreach (var (uloha, poradie) in ulohy.Select((uloha, i) => (uloha, i)))
         {
-            var (strany, duplex, kopie) = ulohy[u];
-            if (u == 1 && !potvrdenie(Preklad.F($"Predné strany ({strany.Count} listov) sa tlačia.\n\nKeď sú vytlačené, vezmite listy z tlačiarne, nemeňte ich poradie a vložte ich do zásobníka tak, ako pri skúšobných listoch (čistou stranou na tlač). Potom pokračujte – vytlačia sa zadné strany.")))
+            if (poradie > 0 && !Dialogy.Potvrd(Preklad.F($"Predné strany ({uloha.Strany.Count} listov) sa tlačia.\n\nKeď sú vytlačené, vezmite listy z tlačiarne, nemeňte ich poradie a vložte ich do zásobníka tak, ako pri skúšobných listoch (čistou stranou na tlač). Potom pokračujte – vytlačia sa zadné strany.")))
             {
                 return false;
             }
 
-            var tiket = NahladDokumentu.Tiket(fronta, volby with { Kopie = kopie }, rozvrh.ListNaSirku, duplex);
-            Dialogy.Cakaj(() => ObojstrannaKresba.Posli(fronta, tiket, new ZoznamStran(strany.Count, rozvrh.PageSize, i => strany[i]),
-                u == 0 ? _nazovUlohy : _nazovUlohy + " – " + Preklad.T("zadné strany")));
+            var strany = uloha.Strany.Select(strana => (Func<Visual>)(() => Kresba(listy, strana))).ToArray();
+            var tiket = TlacoveFronty.Tiket(fronta, listy.NaSirku, uloha.Duplex, uloha.Kopie, volby.OdtieneSivej);
+            var nazov = poradie == 0 ? _nazovUlohy : _nazovUlohy + " – " + Preklad.T("zadné strany");
+            Dialogy.Cakaj(() => TlacoveFronty.Posli(fronta, tiket, listy.Velkost, strany, nazov));
         }
 
         return true;
     }
 
-    /// <summary>Strana listu ako obrázok (samotest – snímka náhľadu tlače).</summary>
-    public DrawingImage? ObrazokListu(int index)
+    private static Visual Kresba(ListyTlace listy, StranaUlohy strana) => strana.List switch
     {
-        if (_nahlad is null || index >= _nahlad.PocetListov)
+        null => listy.Prazdny(),
+        int index when strana.Otocena => listy.Otoceny(index),
+        int index => listy.List(index),
+    };
+
+    // ---- uloženie do súboru ----
+
+    /// <summary>Overí heslo, zapamätá heslá (len v pamäti) a uloží voľby súboru. Null = chýba heslo.</summary>
+    private VolbyPdf? PotvrdVolbyPdf()
+    {
+        var volby = VolbyPdfZOkna;
+        if (volby.SHeslom && HesloPole.Password.Length == 0)
+        {
+            Dialogy.Upozornenie(Preklad.T("Zadajte heslo na otvorenie PDF."));
+            HesloPole.Focus();
+            return null;
+        }
+
+        VolbyPdf.Heslo = volby.SHeslom ? HesloPole.Password : null;
+        VolbyPdf.HesloVlastnika = HesloVlastnikaPole.Password.Length > 0 ? HesloVlastnikaPole.Password : null;
+        volby.Uloz();
+        return volby;
+    }
+
+    /// <summary>Okno Uložiť ako, uloženie súborov a otvorenie výsledku. Vráti cestu k (prvému) súboru alebo null.</summary>
+    private string? UlozSubor(VolbyPdf volby)
+    {
+        var priecinok = Databaza.Citaj(KlucPriecinok);
+        var cesta = Dialogy.UlozitAko(volby.JePdf ? Preklad.T("Uložiť ako PDF") : Preklad.T("Uložiť ako obrázok"), volby.Format.Filter(),
+            Path.ChangeExtension(_nazovSuboru ?? "SkVP.pdf", volby.Pripona), Directory.Exists(priecinok) ? priecinok : null);
+        if (cesta is null)
         {
             return null;
         }
 
-        var obrazok = new DrawingImage(_nahlad.List(index).Drawing);
-        obrazok.Freeze();
-        return obrazok;
-    }
+        try
+        {
+            IReadOnlyList<string> subory = Array.Empty<string>();
+            Dialogy.Cakaj(() => subory = SuboryZostavy.Uloz(_tvorba!(), cesta, volby, Priloha));
+            Databaza.Zapis(KlucPriecinok, Path.GetDirectoryName(cesta));
+            if (subory.Count == 1)
+            {
+                Dialogy.OtvorVSysteme(subory[0]);
+            }
+            else if (subory.Count > 1)
+            {
+                Dialogy.Info(Preklad.F($"Uložené obrázky: {subory.Count}\n{Path.GetDirectoryName(subory[0])}"));
+            }
 
-    /// <summary>Uloženie volieb (aj bez tlače – samotest).</summary>
-    public void UlozVolby() => Volby.Uloz();
+            return subory.FirstOrDefault() ?? cesta;
+        }
+        catch (SkvpException ex)
+        {
+            Dialogy.Upozornenie(ex.Message);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Dialogy.Chyba(Preklad.T("Súbor sa nepodarilo uložiť."), ex);
+            return null;
+        }
+    }
 }

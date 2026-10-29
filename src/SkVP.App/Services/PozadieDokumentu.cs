@@ -5,8 +5,8 @@ using MigraDoc.DocumentObjectModel.Tables;
 namespace SkVP.Services;
 
 /// <summary>
-/// Voľba „Bez pozadia“ pri tlači a PDF: z dokumentu sa odstránia farebné podklady (hlavička tabuľky, striedanie riadkov,
-/// zvýraznené dni v kalendári, výplne rámčekov). Zostane biely papier – text, čiary, obrázky a logo sa nemenia.
+/// Voľba „Bez pozadia“ pri tlači a PDF: z dokumentu zmiznú farebné podklady (hlavička tabuľky, striedanie riadkov,
+/// zvýraznené dni kalendára, výplne rámčekov). Zostane biely papier – text, čiary, obrázky a logo sa nemenia.
 /// </summary>
 public static class PozadieDokumentu
 {
@@ -15,88 +15,109 @@ public static class PozadieDokumentu
     {
         foreach (var styl in dokument.Styles.OfType<Style>())
         {
-            Format(styl.Values.ParagraphFormat);
+            Skry(styl.Values.ParagraphFormat);
         }
 
         foreach (var sekcia in dokument.Sections.OfType<Section>())
         {
-            Prvky(sekcia.Values.Elements);
-            if (sekcia.Values.Headers is { } hlavicky)
+            var obsah = new List<DocumentElements?> { sekcia.Values.Elements };
+            foreach (var cast in HlavickyAPaty(sekcia))
             {
-                HlavickaPata(hlavicky.Values.Primary);
-                HlavickaPata(hlavicky.Values.FirstPage);
-                HlavickaPata(hlavicky.Values.EvenPage);
+                Skry(cast.Values.Format);
+                obsah.Add(cast.Values.Elements);
             }
 
-            if (sekcia.Values.Footers is { } paty)
+            foreach (var prvok in obsah.SelectMany(VsetkyPrvky))
             {
-                HlavickaPata(paty.Values.Primary);
-                HlavickaPata(paty.Values.FirstPage);
-                HlavickaPata(paty.Values.EvenPage);
+                BezPodkladu(prvok);
             }
         }
 
         return dokument;
     }
 
-    private static void HlavickaPata(HeaderFooter? cast)
+    private static IEnumerable<HeaderFooter> HlavickyAPaty(Section sekcia)
     {
-        if (cast is not null)
+        foreach (var skupina in new[] { sekcia.Values.Headers, sekcia.Values.Footers })
         {
-            Format(cast.Values.Format);
-            Prvky(cast.Values.Elements);
+            if (skupina is null)
+            {
+                continue;
+            }
+
+            foreach (var cast in new[] { skupina.Values.Primary, skupina.Values.FirstPage, skupina.Values.EvenPage })
+            {
+                if (cast is not null)
+                {
+                    yield return cast;
+                }
+            }
         }
     }
 
-    private static void Prvky(DocumentElements? prvky)
+    /// <summary>Prvky vrátane vnorených – obsah buniek tabuliek a textových rámcov.</summary>
+    private static IEnumerable<DocumentObject> VsetkyPrvky(DocumentElements? prvky)
     {
         if (prvky is null)
         {
-            return;
+            yield break;
         }
 
         foreach (var prvok in prvky.OfType<DocumentObject>())
         {
-            switch (prvok)
+            yield return prvok;
+            var vnorene = prvok switch
             {
-                case Paragraph odsek:
-                    Format(odsek.Values.Format);
-                    break;
-                case Table tabulka:
-                    Tabulka(tabulka);
-                    break;
-                case TextFrame ramec:
-                    ramec.FillFormat.Visible = false;
-                    Prvky(ramec.Elements);
-                    break;
+                Table tabulka => tabulka.Rows.OfType<Row>().SelectMany(r => r.Cells.OfType<Cell>()).SelectMany(b => VsetkyPrvky(b.Values.Elements)),
+                TextFrame ramec => VsetkyPrvky(ramec.Elements),
+                _ => Enumerable.Empty<DocumentObject>(),
+            };
+            foreach (var vnoreny in vnorene)
+            {
+                yield return vnoreny;
             }
         }
     }
 
-    private static void Tabulka(Table tabulka)
+    private static void BezPodkladu(DocumentObject prvok)
     {
-        Skry(tabulka.Values.Shading);
-        Format(tabulka.Values.Format);
-        foreach (var stlpec in tabulka.Columns.OfType<Column>())
+        switch (prvok)
         {
-            Skry(stlpec.Values.Shading);
-            Format(stlpec.Values.Format);
-        }
+            case Paragraph odsek:
+                Skry(odsek.Values.Format);
+                break;
 
-        foreach (var riadok in tabulka.Rows.OfType<Row>())
-        {
-            Skry(riadok.Values.Shading);
-            Format(riadok.Values.Format);
-            foreach (var bunka in riadok.Cells.OfType<Cell>())
-            {
-                Skry(bunka.Values.Shading);
-                Format(bunka.Values.Format);
-                Prvky(bunka.Values.Elements);
-            }
+            case TextFrame ramec:
+                ramec.FillFormat.Visible = false;
+                break;
+
+            case Table tabulka:
+                Skry(tabulka.Values.Shading, tabulka.Values.Format);
+                foreach (var stlpec in tabulka.Columns.OfType<Column>())
+                {
+                    Skry(stlpec.Values.Shading, stlpec.Values.Format);
+                }
+
+                foreach (var riadok in tabulka.Rows.OfType<Row>())
+                {
+                    Skry(riadok.Values.Shading, riadok.Values.Format);
+                    foreach (var bunka in riadok.Cells.OfType<Cell>())
+                    {
+                        Skry(bunka.Values.Shading, bunka.Values.Format);
+                    }
+                }
+
+                break;
         }
     }
 
-    private static void Format(ParagraphFormat? format) => Skry(format?.Values.Shading);
+    private static void Skry(Shading? podklad, ParagraphFormat? format)
+    {
+        Skry(podklad);
+        Skry(format);
+    }
+
+    private static void Skry(ParagraphFormat? format) => Skry(format?.Values.Shading);
 
     private static void Skry(Shading? podklad)
     {

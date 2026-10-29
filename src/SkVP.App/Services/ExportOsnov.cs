@@ -35,23 +35,10 @@ public static class ExportOsnov
         _ => format.ToString(),
     };
 
-    public static string Pripona(FormatExportu format) => format switch
-    {
-        FormatExportu.Word => ".docx",
-        FormatExportu.Jpeg => ".jpg",
-        FormatExportu.Png => ".png",
-        FormatExportu.Tiff => ".tif",
-        _ => ".pdf",
-    };
+    public static string Pripona(FormatExportu format) => format == FormatExportu.Word ? ".docx" : FormatPdf(format).Pripona();
 
-    public static string Filter(FormatExportu format) => format switch
-    {
-        FormatExportu.Word => "Dokument Word (*.docx)|*.docx",
-        FormatExportu.Jpeg => "Obrázky JPEG (*.jpg)|*.jpg",
-        FormatExportu.Png => "Obrázky PNG (*.png)|*.png",
-        FormatExportu.Tiff => "Obrázok TIFF (*.tif)|*.tif",
-        _ => "PDF (*.pdf)|*.pdf",
-    };
+    public static string Filter(FormatExportu format) =>
+        format == FormatExportu.Word ? "Dokument Word (*.docx)|*.docx" : FormatPdf(format).Filter();
 
     private static FormatVystupu FormatPdf(FormatExportu format) => format switch
     {
@@ -81,8 +68,7 @@ public static class ExportOsnov
 
         var volby = VolbyPdf.Nacitaj() with { Format = FormatPdf(format) };
         return SuboryZostavy.Uloz(PdfVystup.Vytvor(dokument), cesta, volby,
-            () => new SuboryZostavy.Priloha(Path.GetFileNameWithoutExtension(cesta) + ".docx", DocxVystup.Data(dokument),
-                "/application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Učebné osnovy vo Worde"));
+            () => PrilohaPdf.Word(Path.GetFileNameWithoutExtension(cesta) + ".docx", DocxVystup.Data(dokument), "Učebné osnovy vo Worde"));
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using System.Text.Json;
 using Microsoft.Data.Sqlite;
 
 namespace SkVP.Data;
@@ -282,6 +283,21 @@ public static class Databaza
     }
 
     public static string Citaj(string kluc, string predvolene) => Citaj(kluc) ?? predvolene;
+
+    /// <summary>Nastavenie uložené ako JSON. Chýbajúca, poškodená alebo nečitateľná hodnota = null (platia predvolené).</summary>
+    public static T? CitajJson<T>(string kluc) where T : class
+    {
+        try
+        {
+            return Citaj(kluc) is { Length: > 0 } json ? JsonSerializer.Deserialize<T>(json) : null;
+        }
+        catch (Exception ex) when (ex is JsonException or NotSupportedException or SqliteException)
+        {
+            return null;
+        }
+    }
+
+    public static void ZapisJson<T>(string kluc, T hodnota) => Zapis(kluc, JsonSerializer.Serialize(hodnota));
 
     public static void Zapis(string kluc, string? hodnota)
     {

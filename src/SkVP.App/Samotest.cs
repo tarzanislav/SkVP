@@ -70,6 +70,7 @@ internal static class Samotest
             TestZostav();
             TestLogaAHlavicky();
             TestPremenovania();
+            TestImpozicie();
             TestVystupov();
             TestImportuAExportu();
             TestServisu();
@@ -1136,6 +1137,69 @@ internal static class Samotest
         UdajeOrganizacie.Vymaz();
         povodne.Uloz();
         Krok("údaje o organizácii v poriadku");
+    }
+
+    /// <summary>Rozmiestnenie strán na listy, plán tlačových úloh a profil obojstrannej tlače – výpočet bez tlačiarne.</summary>
+    private static void TestImpozicie()
+    {
+        static string Strany(Impozicia impozicia) => string.Join(" | ", Enumerable.Range(0, impozicia.PocetStranListov)
+            .Select(l => string.Join(",", impozicia.StranyNaListe(l).Select(s => s?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-"))));
+
+        var brozura = new Impozicia(6, new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Brozura }, false);
+        Over(Strany(brozura) == "-,1 | 2,- | 6,3 | 4,5" && brozura.ListNaSirku && brozura.Stlpce == 2 && brozura.JeZadna(1),
+            $"brožúra 6 strán ({Strany(brozura)})");
+        var dve = new Impozicia(5, new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Dve }, false);
+        Over(Strany(dve) == "1,2 | 3,4 | 5,-" && dve.ListNaSirku && !dve.JeZadna(1), $"2 strany na list ({Strany(dve)})");
+        var osemNaSirku = new Impozicia(3, new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Osem }, true);
+        Over(!osemNaSirku.ListNaSirku && osemNaSirku.Stlpce == 2 && osemNaSirku.Riadky == 4 && osemNaSirku.PocetStranListov == 1,
+            "8 strán na šírku na list na výšku");
+        var opakovane = new Impozicia(2, new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Styri, OpakovatStranky = true }, false);
+        Over(Strany(opakovane) == "1,1,1,1 | 2,2,2,2" && !opakovane.ListNaSirku, "opakovanie strán");
+        Over(new Impozicia(0, new VolbyTlace(), false).PocetStranListov == 0, "prázdna zostava bez listov");
+
+        var dierovac = new Impozicia(4, new VolbyTlace { Rozmiestnenie = Rozmiestnenie.Dve, Obojstranne = true, Dierovac = true, DierovacMm = 10 }, false);
+        var predna = dierovac.Bunky(0, 1);
+        var zadna = dierovac.Bunky(1, 1);
+        Over(predna[0].X == 10 && zadna[0].X == 0 && Math.Abs(predna[1].Right - 297) < 1e-9 && Math.Abs(zadna[1].Right - 287) < 1e-9,
+            "okraj na dierovanie vľavo, na zadnej strane vpravo");
+
+        var bunka = new Rect(0, 0, 50, 100);
+        var obsah = new Rect(10, 10, 80, 180);
+        var (bez, posunBez) = Impozicia.Umiestnenie(new Size(100, 200), obsah, bunka, 1);
+        var (so, posunSo) = Impozicia.Umiestnenie(new Size(100, 200), obsah, bunka, 1.6);
+        Over(Math.Abs(bez - 0.5) < 1e-9 && posunBez.Length < 1e-9, "strana bez zväčšenia vyplní bunku");
+        Over(so > bez && obsah.X * so + posunSo.X >= -1e-9 && obsah.Right * so + posunSo.X <= 50 + 1e-9
+                      && obsah.Y * so + posunSo.Y >= -1e-9 && obsah.Bottom * so + posunSo.Y <= 100 + 1e-9,
+            "zväčšenie neoreže obsah strany");
+
+        static string Ulohy(IReadOnlyList<TlacovaUloha> ulohy) => string.Join(" | ", ulohy.Select(u =>
+            string.Join(",", u.Strany.Select(s => (s.List?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-") + (s.Otocena ? "o" : "")))
+            + (u.Duplex ? " D" : "") + $" ×{u.Kopie}"));
+
+        var rucne = new ProfilObojstrannej { Rezim = RezimObojstrannej.Rucne, OtocitNaVysku = true, ObratitPoradie = true };
+        Over(Ulohy(PlanTlace.Ulohy(3, 2, true, false, rucne)) == "0,2,0,2 ×1 | -o,1o,-o,1o ×1", $"ručné otáčanie ({Ulohy(PlanTlace.Ulohy(3, 2, true, false, rucne))})");
+        var duplex = new ProfilObojstrannej { OtocitNaSirku = true };
+        Over(Ulohy(PlanTlace.Ulohy(3, 2, true, true, duplex)) == "0,1o,2,-o D ×2", $"duplex ({Ulohy(PlanTlace.Ulohy(3, 2, true, true, duplex))})");
+        Over(Ulohy(PlanTlace.Ulohy(2, 3, false, false, rucne)) == "0,1 ×3" && PlanTlace.Ulohy(0, 1, true, false, null).Count == 0, "jednostranná tlač");
+
+        Over(ProfilObojstrannej.ZDuplexu(0, 1) is { Rezim: RezimObojstrannej.Automaticky, OtocitNaVysku: false, OtocitNaSirku: true }
+             && ProfilObojstrannej.ZDuplexu(2, 0) is null
+             && ProfilObojstrannej.ZRucneho(3) is { Rezim: RezimObojstrannej.Rucne, OtocitNaVysku: true, ObratitPoradie: true }
+             && ProfilObojstrannej.ZRucneho(4) is null,
+            "odpovede sprievodcu obojstrannej tlače");
+        ProfilObojstrannej.Uloz("Skúšobná tlačiareň", rucne);
+        Over(ProfilObojstrannej.Pre("SKÚŠOBNÁ TLAČIAREŇ") == rucne && ProfilObojstrannej.Pre("iná") is null, "profil tlačiarne sa zapamätá");
+
+        // nastavenia uložené staršou verziou (aj s vypočítanými vlastnosťami) sa načítajú a opravia
+        var ulozene = Databaza.Citaj(VolbyTlace.KlucNastavenia);
+        Databaza.Zapis(VolbyTlace.KlucNastavenia, "{\"Kopie\":3,\"Rozmiestnenie\":4,\"TlacitObojstranne\":true,\"Zvacsenie\":9,\"OpakovatStranky\":true}");
+        var nacitane = VolbyTlace.Nacitaj();
+        Databaza.Zapis(VolbyTlace.KlucNastavenia, "{poškodené");
+        var poskodene = VolbyTlace.Nacitaj();
+        Databaza.Zapis(VolbyTlace.KlucNastavenia, ulozene);
+        Over(nacitane is { Kopie: 3, Rozmiestnenie: Rozmiestnenie.Styri, Zvacsenie: 1.6, OpakovatStranky: true, Obojstranne: false } && poskodene == new VolbyTlace(),
+            "uložené voľby tlače");
+        Krok("rozmiestnenie strán a plán tlače v poriadku");
     }
 
     /// <summary>Uloženie zostavy do PDF, PDF/A-2b, PDF/A-3b, PDF/X-4, PNG, JPEG, TIFF a zašifrovaného PDF.</summary>
