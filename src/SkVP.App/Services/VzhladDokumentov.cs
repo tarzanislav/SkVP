@@ -184,7 +184,7 @@ public static class VzhladDokumentov
     public static IReadOnlyList<SablonaVzhladu> Vsetky { get; } = new SablonaVzhladu[]
     {
         new(IdPredvolenej, "Pastelový", "Pôvodný vzhľad programu – pätkové písmo textu, nadpisy vo farbe oblasti, jemné tabuľky.",
-            new[] { "Constantia", "Georgia", "Cambria" }, new[] { "Segoe UI" },
+            new[] { "Constantia", "Georgia" }, new[] { "Segoe UI" },
             11, 14, 12, 11, 1.18, 6, false, FarbaNadpisov.Oblast, OzdobaNadpisu.Ziadna, RamTabulky.Jemny, HlavickaTabulky.Siva, false,
             CitatelnaFarba: false),
         new("moderny", "Moderný", "Bezpätkové písmo, farebný pásik pri nadpisoch, vzdušné tabuľky s pruhmi vo farbe oblasti.",
@@ -200,11 +200,11 @@ public static class VzhladDokumentov
             11.5, 16, 13, 11.5, 1.25, 7, false, FarbaNadpisov.Oblast, OzdobaNadpisu.Ciara, RamTabulky.Vodorovny, HlavickaTabulky.Odtien, false,
             FarebnyNadpis2: true),
         new("elegantny", "Elegantný", "Klasické knižné písma, tmavomodré nadpisy s tenkou čiarou, text do bloku.",
-            new[] { "Georgia", "Cambria" }, new[] { "Palatino Linotype", "Georgia" },
+            new[] { "Georgia" }, new[] { "Palatino Linotype", "Georgia" },
             10.5, 15, 12.5, 11, 1.28, 6, true, FarbaNadpisov.Akcent, OzdobaNadpisu.Ciara, RamTabulky.Vodorovny, HlavickaTabulky.Odtien, false,
             Akcent: "#24406E", FarebnyNadpis2: true),
-        new("klasicky", "Klasický", "Tradičný vzhľad školských dokumentov – Cambria, čierne nadpisy, mriežka, text do bloku.",
-            new[] { "Cambria", "Times New Roman" }, new[] { "Cambria", "Times New Roman" },
+        new("klasicky", "Klasický", "Tradičný vzhľad školských dokumentov – Times New Roman, čierne nadpisy, mriežka, text do bloku.",
+            new[] { "Times New Roman" }, new[] { "Times New Roman" },
             11.5, 14, 12, 11.5, 1.15, 6, true, FarbaNadpisov.Tmava, OzdobaNadpisu.Ciara, RamTabulky.Mriezka, HlavickaTabulky.Siva, false),
         new("uradny", "Úradný", "Strohý vzhľad na úradné účely – Arial, bez farieb a ozdôb, výrazná mriežka, text do bloku.",
             new[] { "Arial" }, new[] { "Arial" },
@@ -275,18 +275,36 @@ public static class VzhladDokumentov
         }
     }
 
-    /// <summary>Prvé nainštalované písmo zo zoznamu (inak posledné – Windows ho nahradí podobným).</summary>
+    /// <summary>
+    /// Prvé písmo zo zoznamu, ktoré je nainštalované a dá sa vložiť do PDF (písma v kolekcii .ttc, napr. Cambria,
+    /// PDFsharp nevie použiť); inak Arial.
+    /// </summary>
     public static string Najdi(IReadOnlyList<string> mena)
     {
+        HashSet<string> systemove;
         try
         {
-            var systemove = Fonts.SystemFontFamilies.Select(f => f.Source).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            return mena.FirstOrDefault(systemove.Contains) ?? mena[^1];
+            systemove = Fonts.SystemFontFamilies.Select(f => f.Source).ToHashSet(StringComparer.OrdinalIgnoreCase);
         }
         catch (Exception)
         {
-            return mena[^1];
+            return mena[0];
         }
+
+        foreach (var meno in mena.Where(systemove.Contains))
+        {
+            try
+            {
+                _ = new PdfSharp.Drawing.XFont(meno, 10);
+                return meno;
+            }
+            catch (Exception ex)
+            {
+                Zaznam.Upozornenie($"Písmo {meno} sa nedá použiť v PDF – {ex.Message}");
+            }
+        }
+
+        return "Arial";
     }
 
     // ---- farby ----
