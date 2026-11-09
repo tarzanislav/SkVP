@@ -596,35 +596,60 @@ public sealed class DocxCitac
         }
 
         var hlavicka = t.Elements<TableRow>().FirstOrDefault()?.TableRowProperties?.GetFirstChild<TableHeader>() is not null;
+
+        // políčka pokryté zvislým zlúčením zhora; bunky sa zapíšu na svoje miesto v mriežke – vynechané stĺpce
+        // (gridBefore, chýbajúce bunky) sa doplnia prázdnymi bunkami, aby sa ďalšie bunky neposunuli
+        var pokryte = new HashSet<(int Riadok, int Stlpec)>();
         var vysledok = new List<IReadOnlyList<Bunka>>();
         for (var r = 0; r < riadky.Count; r++)
         {
             var bunky = new List<Bunka>();
+            var pozicia = 0;
             foreach (var (stlpec, sirka, zvislo, bunka) in riadky[r])
             {
-                if (zvislo == "pokracuje")
+                if (zvislo == "pokracuje" && pokryte.Contains((r, stlpec)))
                 {
                     continue;
+                }
+
+                // voľné políčka pred bunkou
+                while (pozicia < stlpec)
+                {
+                    if (pokryte.Contains((r, pozicia)))
+                    {
+                        pozicia++;
+                        continue;
+                    }
+
+                    var od = pozicia;
+                    while (pozicia < stlpec && !pokryte.Contains((r, pozicia)))
+                    {
+                        pozicia++;
+                    }
+
+                    bunky.Add(new Bunka(new List<Blok>(), pozicia - od));
                 }
 
                 var vyska = 1;
                 if (zvislo == "zaciatok")
                 {
-                    for (var d = r + 1; d < riadky.Count; d++)
+                    while (r + vyska < riadky.Count && riadky[r + vyska].Any(b => b.Stlpec == stlpec && b.Zvislo == "pokracuje"))
                     {
-                        if (riadky[d].Any(b => b.Stlpec == stlpec && b.Zvislo == "pokracuje"))
-                        {
-                            vyska++;
-                        }
-                        else
-                        {
-                            break;
-                        }
+                        vyska++;
+                    }
+                }
+
+                for (var d = 1; d < vyska; d++)
+                {
+                    for (var s = 0; s < sirka; s++)
+                    {
+                        pokryte.Add((r + d, stlpec + s));
                     }
                 }
 
                 var tienovana = bunka.TableCellProperties?.Shading?.Fill?.Value is { } fill && fill is not ("auto" or "FFFFFF" or "ffffff");
                 bunky.Add(new Bunka(Bloky(bunka.ChildElements), sirka, vyska, r == 0 && (hlavicka || tienovana)));
+                pozicia = Math.Max(pozicia, stlpec + sirka);
             }
 
             vysledok.Add(bunky);
@@ -633,7 +658,7 @@ public sealed class DocxCitac
         // šírka tabuľky voči šírke textu (úzka tabuľka zostane úzka); takmer celá šírka = celá šírka
         var podiel = vnorena || siet.Sum() <= 0 ? 1 : siet.Sum() / sirkaTextu;
         return new Tabulka(vysledok, pocetStlpcov, siet.Count == pocetStlpcov && siet.Sum() > 0 ? siet : null,
-            podiel >= 0.93 ? 1 : Math.Max(0.2, podiel));
+            podiel >= 0.93 ? 1 : Math.Max(0.2, podiel)).Pravidelna();
     }
 
     private static bool Zapnute(OnOffType? prvok) => prvok is not null && (prvok.Val is null || prvok.Val.Value);

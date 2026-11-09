@@ -707,6 +707,7 @@ public static class DocxVystup
 
     private static Table Tabulka(Tabulka t, string farba, Stav stav)
     {
+        t = t.Pravidelna();
         var tabulka = new Table(new TableProperties(
             new TableWidth { Type = TableWidthUnitValues.Pct, Width = ((int)Math.Round(5000 * t.SirkaVTexte)).ToString(CultureInfo.InvariantCulture) },
             new TableBorders(

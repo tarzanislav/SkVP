@@ -181,6 +181,7 @@ public sealed partial class TlacViewModel : ObservableObject
     [RelayCommand]
     public void Obnovit()
     {
+        _dokument = null;
         try
         {
             Dialogy.Cakaj(() =>
@@ -191,7 +192,7 @@ public sealed partial class TlacViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Dialogy.Chyba("Dokument sa nepodarilo zostaviť.", ex);
+            Dialogy.Chyba(PopisChyby(), ex);
             return;
         }
 
@@ -208,6 +209,28 @@ public sealed partial class TlacViewModel : ObservableObject
     }
 
     public int PocetStran => Strany.Count;
+
+    /// <summary>Hlásenie, keď sa dokument nedá zostaviť – s osnovami, v ktorých je problém (každá sa skúsi samostatne).</summary>
+    private string PopisChyby()
+    {
+        if (_dokument is null)
+        {
+            return "Dokument sa nepodarilo zostaviť.";
+        }
+
+        List<(string Nazov, Exception Chyba)> chybne = new();
+        Dialogy.Cakaj(() => chybne = PdfVystup.ChybneCasti(_dokument));
+        foreach (var (nazov, chyba) in chybne)
+        {
+            Zaznam.Chyba($"Zostava: nedá sa vysádzať {nazov}", chyba);
+        }
+
+        return chybne.Count == 0
+            ? "Dokument sa nepodarilo zostaviť."
+            : "Dokument sa nepodarilo zostaviť. Problém je v týchto dokumentoch:\n\n" + string.Join("\n", chybne.Take(8).Select(c => "•  " + c.Nazov))
+              + (chybne.Count > 8 ? $"\n… a ďalšie ({chybne.Count - 8})" : "")
+              + "\n\nOtvorte ich a skúste Jednotný vzhľad alebo úpravu vo Worde.";
+    }
 
     private string NazovUlohy => $"{_dokument?.Titul.Podnadpis ?? Services.TitulnaStrana.PredvolenyPodnadpis} – SkVP";
 

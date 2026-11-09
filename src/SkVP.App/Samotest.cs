@@ -493,6 +493,81 @@ internal static class Samotest
         var listy = new ListyTlace(vykreslenie, false, new VolbyTlace());
         Over(listy.Pocet == orientacie.Count && !listy.NaSirku, "tlač zmiešanej zostavy na listy na výšku");
         Krok("rozloženie strán a jednotný vzhľad v poriadku");
+        TestNepravidelnychTabuliek(zmiesana);
+    }
+
+    /// <summary>
+    /// Tabuľky z reálnych dokumentov Word: zlúčené bunky, ktoré sa krížia, a riadky s vynechanými stĺpcami
+    /// (MigraDoc by zlyhal s „GetMinMergedCell“); záznam činnosti.
+    /// </summary>
+    private static void TestNepravidelnychTabuliek(CelyDokument zostava)
+    {
+        Bunka B(string text, int stlpce = 1, int riadky = 1) => new(new Blok[] { new Odsek(new[] { new Usek(text) }) }, stlpce, riadky);
+        var krizova = new Tabulka(new IReadOnlyList<Bunka>[]
+        {
+            new[] { B("A"), B("B – zlúčené zvislo", riadky: 3), B("C") },
+            new[] { B("D – zlúčené cez B", stlpce: 2), B("E"), B("F – navyše") },
+            new[] { B("G", stlpce: 3, riadky: 4) },
+        }, 3);
+        var pravidelna = krizova.Pravidelna();
+        Over(pravidelna.Riadky[1][0].Stlpce == 1 && pravidelna.Riadky[2][0].Stlpce == 1 && pravidelna.Riadky[2][0].Riadky == 1
+             && DokumentOsnovy.Text(new[] { pravidelna }).Contains("F – navyše", StringComparison.Ordinal),
+            "nepravidelná tabuľka: zlúčenia sa neprekrývajú, text sa nestratí");
+
+        var oblast = zostava.Oblasti[0];
+        var predmety = oblast.Predmety.ToList();
+        predmety[1] = predmety[1] with { Obsah = new List<Blok> { new Nadpis(1, "Časový rozsah výučby"), krizova } };
+        var sKrizovou = zostava with { Oblasti = new List<KapitolaOblasti> { oblast with { Predmety = predmety } } };
+        string? chyba = null;
+        try
+        {
+            NahladDokumentu.Priprav(PdfVystup.Vytvor(sKrizovou));
+            OverDocx(DocxVystup.Data(sKrizovou), "zostava s nepravidelnou tabuľkou");
+        }
+        catch (Exception ex)
+        {
+            chyba = ex.GetBaseException().Message;
+        }
+
+        Over(chyba is null && PdfVystup.ChybneCasti(sKrizovou).Count == 0, $"zostava s krížovými zlúčenými bunkami sa vysádza ({chyba ?? "bez chyby"})");
+
+        // Word: riadok s vynechaným prvým stĺpcom (gridBefore) a pokračovanie zlúčenia bez začiatku
+        using var pamat = new MemoryStream();
+        using (var word = WordprocessingDocument.Create(pamat, DocumentFormat.OpenXml.WordprocessingDocumentType.Document))
+        {
+            W.TableCell WBunka(string text, W.VerticalMerge? zvislo = null) =>
+                new(new W.TableCellProperties(zvislo is null ? Array.Empty<DocumentFormat.OpenXml.OpenXmlElement>() : new DocumentFormat.OpenXml.OpenXmlElement[] { zvislo }),
+                    new W.Paragraph(new W.Run(new W.Text(text))));
+            var tabulka = new W.Table(
+                new W.TableGrid(new W.GridColumn { Width = "3000" }, new W.GridColumn { Width = "3000" }, new W.GridColumn { Width = "3000" }),
+                new W.TableRow(WBunka("a1"), WBunka("b1"), WBunka("c1")),
+                new W.TableRow(new W.TableRowProperties(new W.GridBefore { Val = 1 }), WBunka("b2"), WBunka("c2")),
+                new W.TableRow(WBunka("a3"), WBunka("b3", new W.VerticalMerge { Val = W.MergedCellValues.Continue }), WBunka("c3")));
+            word.AddMainDocumentPart().Document = new W.Document(new W.Body(tabulka, new W.Paragraph()));
+        }
+
+        var nacitana = DocxCitac.Nacitaj(new MemoryStream(pamat.ToArray())).Bloky.OfType<Tabulka>().Single();
+        string TextBunky(Bunka b) => DokumentOsnovy.Text(b.Bloky).Trim();
+        Over(nacitana.Riadky[1].Count == 3 && TextBunky(nacitana.Riadky[1][0]) == "" && TextBunky(nacitana.Riadky[1][1]) == "b2"
+             && nacitana.Riadky[2].Count == 3 && TextBunky(nacitana.Riadky[2][2]) == "c3",
+            "tabuľka z Wordu: bunky zostanú vo svojich stĺpcoch");
+
+        // záznam činnosti
+        Zaznam.Info("samotest – skúšobný záznam");
+        Zaznam.Chyba("samotest – skúšobná chyba", new InvalidOperationException("skúška"));
+        var balik = Path.Combine(Path.GetTempPath(), $"skvp_zaznamy_{Guid.NewGuid():N}.zip");
+        Zaznam.UlozBalik(balik);
+        using (var zip = System.IO.Compression.ZipFile.OpenRead(balik))
+        {
+            var log = zip.Entries.First(e => e.Name.StartsWith("skvp-", StringComparison.Ordinal));
+            using var citac = new StreamReader(log.Open());
+            var obsah = citac.ReadToEnd();
+            Over(obsah.Contains("skúšobná chyba", StringComparison.Ordinal) && obsah.Contains("InvalidOperationException", StringComparison.Ordinal)
+                 && zip.Entries.Any(e => e.Name == "o-programe.txt"),
+                "záznam činnosti s technickými podrobnosťami chyby a balík ZIP");
+        }
+
+        File.Delete(balik);
     }
 
     private static void TestZostav()

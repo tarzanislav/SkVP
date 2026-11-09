@@ -389,6 +389,39 @@ public sealed partial class ServisViewModel : ObservableObject
     [RelayCommand]
     private void VymazatProtokol() => Protokol = "";
 
+    /// <summary>Záznamy činnosti (log) do jedného súboru ZIP na odoslanie.</summary>
+    [RelayCommand]
+    private void UlozitZaznamy()
+    {
+        var cesta = Dialogy.UlozitAko("Uložiť záznamy činnosti", "Archív ZIP (*.zip)|*.zip", $"SkVP_zaznamy_{DateTime.Now:yyyy-MM-dd_HH-mm}.zip");
+        if (cesta is null)
+        {
+            return;
+        }
+
+        try
+        {
+            if (File.Exists(cesta))
+            {
+                File.Delete(cesta);
+            }
+
+            Zaznam.UlozBalik(cesta);
+            Dialogy.OtvorVSysteme(Path.GetDirectoryName(cesta)!);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Dialogy.Chyba("Záznamy sa nepodarilo uložiť.", ex);
+        }
+    }
+
+    [RelayCommand]
+    private void OtvoritZaznamy()
+    {
+        Directory.CreateDirectory(Zaznam.Priecinok);
+        Dialogy.OtvorVSysteme(Zaznam.Priecinok);
+    }
+
     /// <summary>Spustí nástroj, zapíše výsledok do protokolu a obnoví údaje o databáze.</summary>
     public VysledokKontroly? Spusti(Func<VysledokKontroly> nastroj)
     {

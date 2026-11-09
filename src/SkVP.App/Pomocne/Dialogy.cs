@@ -37,10 +37,19 @@ public static class Dialogy
 
     public static void Info(string sprava) => Ukaz(sprava, MessageBoxButton.OK, MessageBoxImage.Information);
 
-    public static void Upozornenie(string sprava) => Ukaz(sprava, MessageBoxButton.OK, MessageBoxImage.Warning);
+    public static void Upozornenie(string sprava)
+    {
+        Zaznam.Upozornenie(sprava);
+        Ukaz(sprava, MessageBoxButton.OK, MessageBoxImage.Warning);
+    }
 
-    public static void Chyba(string sprava, Exception? ex = null) =>
-        Ukaz(ex is null ? sprava : $"{sprava}\n\nPodrobnosti: {ex.GetBaseException().Message}", MessageBoxButton.OK, MessageBoxImage.Error);
+    /// <summary>Chybové hlásenie; podrobnosti (celá výnimka) sa zapíšu do záznamu činnosti.</summary>
+    public static void Chyba(string sprava, Exception? ex = null)
+    {
+        Zaznam.Chyba(sprava, ex);
+        Ukaz(ex is null ? sprava : $"{sprava}\n\nPodrobnosti: {ex.GetBaseException().Message}\n\n"
+                                   + "Technické podrobnosti sú v záznamoch (Servis → Záznamy činnosti).", MessageBoxButton.OK, MessageBoxImage.Error);
+    }
 
     /// <summary>Otázka Áno/Nie (v tichom režime vždy áno).</summary>
     public static bool Potvrd(string otazka) => Ukaz(otazka, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;

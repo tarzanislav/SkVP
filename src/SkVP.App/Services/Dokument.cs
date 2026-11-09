@@ -38,6 +38,79 @@ public sealed record Tabulka(IReadOnlyList<IReadOnlyList<Bunka>> Riadky, int Poc
     /// <summary>Šírka tabuľky ako časť šírky textu (0,2 – 1).</summary>
     public double SirkaVTexte => double.IsFinite(Podiel) ? Math.Clamp(Podiel, 0.2, 1) : 1;
 
+    /// <summary>
+    /// Tabuľka s pravidelnou mriežkou: bunky sa kladú zľava do voľných políčok a zlúčenie (vodorovné aj zvislé) sa skráti
+    /// tak, aby nezasahovalo do políčok obsadených inou bunkou. Tabuľky z Wordu bývajú nepravidelné (zlúčenia
+    /// sa krížia, chýbajú alebo prebývajú bunky) – sadzba PDF by na nich zlyhala. Text sa nestratí: bunka, pre ktorú
+    /// v riadku nezostalo miesto, sa pripojí k predchádzajúcej bunke riadka.
+    /// </summary>
+    public Tabulka Pravidelna()
+    {
+        var stlpcov = Math.Max(1, PocetStlpcov);
+        var obsadene = new HashSet<(int Riadok, int Stlpec)>();
+        var riadky = new List<IReadOnlyList<Bunka>>(Riadky.Count);
+        var zmena = false;
+        for (var r = 0; r < Riadky.Count; r++)
+        {
+            var riadok = new List<Bunka>(Riadky[r].Count);
+            var stlpec = 0;
+            foreach (var bunka in Riadky[r])
+            {
+                while (stlpec < stlpcov && obsadene.Contains((r, stlpec)))
+                {
+                    stlpec++;
+                }
+
+                if (stlpec >= stlpcov)
+                {
+                    zmena = true;
+                    if (riadok.Count > 0)
+                    {
+                        riadok[^1] = riadok[^1] with { Bloky = riadok[^1].Bloky.Concat(bunka.Bloky).ToList() };
+                    }
+                    else if (riadky.Count > 0 && riadky[^1].Count > 0)
+                    {
+                        // celý riadok je pokrytý zlúčenými bunkami – text patrí do bunky nad ním
+                        var predosly = riadky[^1].ToList();
+                        predosly[^1] = predosly[^1] with { Bloky = predosly[^1].Bloky.Concat(bunka.Bloky).ToList() };
+                        riadky[^1] = predosly;
+                    }
+
+                    continue;
+                }
+
+                var sirka = 1;
+                while (sirka < bunka.Stlpce && stlpec + sirka < stlpcov && !obsadene.Contains((r, stlpec + sirka)))
+                {
+                    sirka++;
+                }
+
+                var vyska = 1;
+                while (vyska < bunka.Riadky && r + vyska < Riadky.Count
+                       && Enumerable.Range(stlpec, sirka).All(s => !obsadene.Contains((r + vyska, s))))
+                {
+                    vyska++;
+                }
+
+                for (var d = 0; d < vyska; d++)
+                {
+                    for (var s = 0; s < sirka; s++)
+                    {
+                        obsadene.Add((r + d, stlpec + s));
+                    }
+                }
+
+                zmena |= sirka != bunka.Stlpce || vyska != bunka.Riadky;
+                riadok.Add(sirka == bunka.Stlpce && vyska == bunka.Riadky ? bunka : bunka with { Stlpce = sirka, Riadky = vyska });
+                stlpec += sirka;
+            }
+
+            riadky.Add(riadok);
+        }
+
+        return zmena || PocetStlpcov < 1 ? this with { Riadky = riadky, PocetStlpcov = stlpcov } : this;
+    }
+
     /// <summary>Pomerné šírky stĺpcov (súčet 1).</summary>
     public IReadOnlyList<double> PomerneSirky
     {
@@ -360,6 +433,7 @@ public static class DokumentOsnovy
 
     private static Table Tabulka(Tabulka t)
     {
+        t = t.Pravidelna();
         var tabulka = new Table { CellSpacing = 0, BorderBrush = Linka, BorderThickness = new Thickness(0.5), Margin = new Thickness(0, 6, 0, 10) };
         var podiel = t.SirkaVTexte;
         foreach (var sirka in t.PomerneSirky)

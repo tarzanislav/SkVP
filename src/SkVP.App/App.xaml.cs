@@ -47,12 +47,20 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
+            Zaznam.Chyba($"Databázu sa nepodarilo otvoriť ({Databaza.Cesta})", ex);
             MessageBox.Show($"Databázu sa nepodarilo otvoriť.\n\n{Databaza.Cesta}\n\n{ex.GetBaseException().Message}\n\n" +
                             "Zálohy nájdete v priečinku Dokumenty\\SkVP\\Zálohy.", "SkVP", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(1);
             return;
         }
 
+        Zaznam.Spustenie();
+        AppDomain.CurrentDomain.UnhandledException += (_, a) => Zaznam.Chyba("Neošetrená chyba – program sa ukončí", a.ExceptionObject as Exception);
+        TaskScheduler.UnobservedTaskException += (_, a) =>
+        {
+            Zaznam.Chyba("Chyba úlohy na pozadí", a.Exception);
+            a.SetObserved();
+        };
         NastavTemu(Databaza.Citaj(NastaveniaSkoly.KlucTema, NastaveniaSkoly.TemaSystem));
         PripravKalendarium();
 

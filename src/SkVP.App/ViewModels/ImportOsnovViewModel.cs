@@ -170,11 +170,13 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
             {
                 polozka.Zahrnut = false;
                 polozka.Stav = ex.Message;
+                Zaznam.Upozornenie($"Import osnov – {cesta}: {ex.Message}");
             }
             catch (Exception ex)
             {
                 polozka.Zahrnut = false;
                 polozka.Stav = "Súbor sa nepodarilo prečítať: " + ex.GetBaseException().Message;
+                Zaznam.Chyba($"Import osnov – súbor sa nepodarilo prečítať: {cesta}", ex);
             }
 
             Polozky.Add(polozka);
@@ -392,14 +394,17 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                     : vysledok.Archivovane ? "Naimportované, doterajšia osnova je v archíve" : "Naimportované";
                 p.Zahrnut = false;
                 pocet++;
+                Zaznam.Info($"Import osnov – {p.Subor!.Cesta} → predmet {id}: {p.Stav}");
             }
             catch (SkvpException ex)
             {
                 p.Stav = ex.Message;
+                Zaznam.Upozornenie($"Import osnov – {p.Subor?.Cesta}: {ex.Message}");
             }
             catch (Exception ex)
             {
                 p.Stav = "Import sa nepodaril: " + ex.GetBaseException().Message;
+                Zaznam.Chyba($"Import osnov – import sa nepodaril: {p.Subor?.Cesta}", ex);
             }
         }
 

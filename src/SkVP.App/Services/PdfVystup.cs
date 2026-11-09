@@ -85,6 +85,43 @@ public static class PdfVystup
         vykreslenie.PdfDocument.Save(cesta);
     }
 
+    /// <summary>
+    /// Ktoré osnovy a charakteristiky sa nedajú vysádzať (keď zlyhá celý dokument): každá sa skúsi vysádzať samostatne.
+    /// Vráti napr. „02 Jazykom k maturite (Jazyk a komunikácia)“ a technickú príčinu.
+    /// </summary>
+    public static List<(string Nazov, Exception Chyba)> ChybneCasti(CelyDokument dokument)
+    {
+        var chybne = new List<(string, Exception)>();
+        var volby = dokument.Volby with { TitulnaStrana = false, Obsah = false };
+        void Skus(string nazov, KapitolaOblasti oblast)
+        {
+            try
+            {
+                new MigraDoc.Rendering.DocumentRenderer(Vytvor(dokument with { Volby = volby, Oblasti = new List<KapitolaOblasti> { oblast } })).PrepareDocument();
+            }
+            catch (Exception ex)
+            {
+                chybne.Add((nazov, ex));
+            }
+        }
+
+        foreach (var oblast in dokument.Oblasti)
+        {
+            if (oblast.Charakteristika.Count > 0)
+            {
+                Skus($"charakteristika – {oblast.Nazov}", oblast with { Predmety = new List<KapitolaPredmetu>() });
+            }
+
+            foreach (var predmet in oblast.Predmety)
+            {
+                Skus($"{predmet.Cislo} {predmet.Nazov} ({oblast.Nazov})",
+                    oblast with { Charakteristika = new List<Blok>(), Predmety = new List<KapitolaPredmetu> { predmet } });
+            }
+        }
+
+        return chybne;
+    }
+
     public static Document Vytvor(CelyDokument dokument)
     {
         var doc = new Document();
@@ -895,6 +932,8 @@ public static class PdfVystup
 
     private static void Tabulka(Table tabulka, Tabulka t, MdColor farba, double sirkaTextu)
     {
+        // zlúčené bunky, ktoré sa krížia, by MigraDoc nevysádzal („GetMinMergedCell“) – mriežka sa najprv upraví
+        t = t.Pravidelna();
         tabulka.Borders.Width = Unit.FromPoint(0.5);
         tabulka.Borders.Color = Linka;
         tabulka.LeftPadding = Unit.FromPoint(4);
