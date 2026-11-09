@@ -553,10 +553,10 @@ internal static class Samotest
             "tabuľka z Wordu: bunky zostanú vo svojich stĺpcoch");
 
         // záznam činnosti
-        Zaznam.Info("samotest – skúšobný záznam");
-        Zaznam.Chyba("samotest – skúšobná chyba", new InvalidOperationException("skúška"));
+        Pomocne.Zaznam.Info("samotest – skúšobný záznam");
+        Pomocne.Zaznam.Chyba("samotest – skúšobná chyba", new InvalidOperationException("skúška"));
         var balik = Path.Combine(Path.GetTempPath(), $"skvp_zaznamy_{Guid.NewGuid():N}.zip");
-        Zaznam.UlozBalik(balik);
+        Pomocne.Zaznam.UlozBalik(balik);
         using (var zip = System.IO.Compression.ZipFile.OpenRead(balik))
         {
             var log = zip.Entries.First(e => e.Name.StartsWith("skvp-", StringComparison.Ordinal));
