@@ -383,7 +383,28 @@ Podnet: po importe osnov (Word aj PDF) zostava padala s „GetMinMergedCell: Une
   tabuľke, ak v niektorom riadku nezačína žiadna bunka bez zvislého zlúčenia (všetky bunky riadka zlúčené nadol alebo
   riadok celý pokrytý zlúčeniami) – jeho `GetMinMergedCell` hľadá len bunky s `MergeDown == 0`. `PdfVystup.Mriezka`
   v takom riadku rozdelí zvislé zlúčenie na časti bez čiar medzi nimi. Samotest: schodovité zlúčenia a 300 náhodných
-  tabuliek (na vetve vyvoj/etapa1, nevydané).
+  tabuliek (vydané vo v0.1.119).
+
+## Šablóny vzhľadu osnov (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+Podnet: „Jednotný vzhľad“ pri importovanej osnove nič nezmenil (program zobrazuje osnovy vo svojom štýle už od importu)
+a používateľ chcel viac vzhľadov – centrálne pre všetky dokumenty, farebné a moderné.
+- **`Services/VzhladDokumentov`**: `SablonaVzhladu` (písma, veľkosti v bodoch, riadkovanie, medzera za odsekom, text do
+  bloku, farba nadpisov – oblasť / akcent / tmavá, ozdoba nadpisu 1 – čiara / pásik / farebný pás, tabuľky – jemná
+  mriežka / výrazná mriežka / vodorovné čiary, hlavička sivá / odtieň / plná farba, pruhy). Katalóg 9 šablón:
+  Pastelový (pôvodný, predvolený), Moderný, Farebný, Svieži, Elegantný, Klasický, Úradný, Úsporný, Čitateľný.
+  Zvolená šablóna v nastavení `dokumenty.sablona` (prenáša sa v exporte nastavení), `Docasne` pre náhľad a samotest.
+  Písma len také, ktoré PDFsharp vie vložiť (Cambria v .ttc nie – `Najdi` overí cez XFont).
+- **Editor** (`DokumentOsnovy.KDokumentu/NastavNadpis/StylBunky/NovaTabulka`), **PDF** (`PdfVystup.Styly`, nadpisy,
+  `Ozdob`, tabuľky, hlavička predmetu) a **Word** (`DocxVystup.Styly`, nadpisy, `Ozdob`, tabuľky) podľa šablóny.
+  Zarovnanie do bloku je zo šablóny (v modeli sa ukladá len odsek zarovnaný inak ako vľavo); pruhy tabuliek sú len
+  vzhľad (hlavička sa v editore rozpozná len v prvom riadku). Otvorené editory sa po zmene šablóny prekreslia;
+  Enter na konci nadpisu vytvorí bežný odsek. Rám tabuľky v PDF je zarovno s okrajmi textu.
+- **Okno Vzhľad osnov** (`Views/VzhladOsnovWindow`, tlačidlo na stránke Osnovy aj „Vzhľad…“ pri dokumente – nahradilo
+  okno Jednotný vzhľad): galéria s miniatúrami vo farbe oblasti, náhľad na vybranom dokumente (alebo ukážkovej osnove),
+  voliteľné upratanie textu všetkých dokumentov alebo len otvoreného (`JednotnyVzhlad.Uprac` – archivácia „Pred
+  upratovaním textu“, dokumenty s obrázkami a otvorené vo Worde sa vynechajú).
+- Samotest: každá šablóna – PDF (obrázky `sablona_N_id.png`), Word (OpenXML), editor a Word bez zmeny textu, zarovnania,
+  hlavičiek a tučného písma; snímky `13l_vzhlad_osnov.png`, `13m_vzhlad_N_id.png`.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
