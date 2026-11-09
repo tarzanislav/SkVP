@@ -300,7 +300,7 @@ Kód je napísaný nanovo pre SkVP (z EviTA prevzatý len princíp funkcií).
   patriK)`; názvy stavu, opakovania a pripomienky len v `KalendarService`; skloňovanie cez `Preklad.Pocet`; zapnutie
   návrhov `NavrhyUloh.Zapnute`; odstránený nepoužívaný kód (presun udalosti, `NastavTermin`, `NazovPriority` …).
 
-## Hĺbková revízia celého kódu (29. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Hĺbková revízia celého kódu (29. 10. 2026, vydané vo v0.1.115)
 Nástroje: všetky analyzátory .NET (AnalysisMode=All, vybrané IDE pravidlá) a kontrola balíkov v GitHub Actions
 (`.github/workflows/analyza.yml` na vetve `analyza/kod`, výsledky na vetve `analyza-vystupy`), duplicity (jscpd),
 zložitosť (lizard), porovnanie s EviTA (jscpd medzi projektmi), chyby väzieb XAML v samoteste.
@@ -321,7 +321,7 @@ zložitosť (lizard), porovnanie s EviTA (jscpd medzi projektmi), chyby väzieb 
 - **Samotest**: chyby väzieb XAML sú chybou testu (výnimka: prechodné hlásenie šablóny DatePicker v téme Fluent).
 - **Originalita**: pôvodne približne 3 800 riadkov (13 % kódu SkVP) takmer zhodných s EviTA – prepísané, pozri nižšie.
 
-## Vlastné riešenia namiesto kódu z EviTA (29. 10. 2026, na vetve vyvoj/etapa1, nevydané)
+## Vlastné riešenia namiesto kódu z EviTA (29. 10. 2026, vydané vo v0.1.115)
 Moduly prevzaté z EviTA sú nanovo navrhnuté a napísané; správanie, uložené nastavenia (`tlac.volby`, `tlac.pdf`,
 `tlac.obojstranne`, `pocasie.*`, `diktovanie.*`) a rozhrania pre ostatný kód zostali. Zhoda s EviTA (jscpd, 50 tokenov,
 6 riadkov): **3 797 → 364 riadkov (12,8 % → 1,2 %)**; zvyšok sú najmä rovnaké dátové tvary (enumy, kľúče PDF podľa normy,
@@ -344,7 +344,7 @@ zoznam modelov Whisper) a nastavovanie ovládacích prvkov.
 - **Samotest** doplnený: rozmiestnenie strán (brožúra, 2 a 8 na list, opakovanie, dierovač, zväčšenie), plán tlačových
   úloh, odpovede sprievodcu a profil tlačiarne, staršie a poškodené uložené voľby tlače.
 
-## Rozloženie strany z dokumentu a jednotný vzhľad (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+## Rozloženie strany z dokumentu a jednotný vzhľad (9. 11. 2026, vydané vo v0.1.115)
 Podnet z testovania na reálnych osnovách: osnova vo Worde na šírku sa v programe zobrazovala na výšku s hluchými miestami.
 - **Model**: `Sekcia(RozlozenieStrany)` – od tohto miesta iná veľkosť/orientácia strany (ako prvý blok = celý dokument;
   A4 na výšku blok nemá), `ZlomStrany`, `Tabulka.Podiel` (šírka tabuľky voči textu – úzka tabuľka zostane úzka).
@@ -365,7 +365,7 @@ Podnet z testovania na reálnych osnovách: osnova vo Worde na šírku sa v prog
 - Samotest: osnova na šírku Word → program → Word, zostava so zmiešanými stranami (PDF „VVSSVV…“, Word 3 časti s pätou),
   snímky `13l_jednotny_vzhlad.png`, `13m_…povodny.png`, `osnova_na_sirku.png`.
 
-## Nepravidelné tabuľky z Wordu a záznamy činnosti (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+## Nepravidelné tabuľky z Wordu a záznamy činnosti (9. 11. 2026, vydané vo v0.1.115)
 Podnet: po importe osnov (Word aj PDF) zostava padala s „GetMinMergedCell: Unexpected problem #1“ (MigraDoc).
 - **Príčina**: tabuľky Wordu s krížovými/neúplnými zlúčeniami (`gridBefore`, chýbajúce bunky, pokračovanie `vMerge`
   bez začiatku) – čítanie posúvalo bunky do iných stĺpcov a sadzba orezávala zlúčenia len na počet stĺpcov, takže sa
