@@ -46,8 +46,13 @@
             </DockPanel>
         </Border>
 
-        <!-- galéria šablón -->
-        <ListBox x:Name="Sablony" DockPanel.Dock="Left" Width="362" Background="Transparent" BorderThickness="0" Padding="16,14,6,6"
+        <!-- galéria šablón so skupinami -->
+        <DockPanel DockPanel.Dock="Left" Width="362">
+        <StackPanel DockPanel.Dock="Top" Margin="18,12,12,2">
+            <TextBlock x:Name="PocetSablon" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,0,0,6" />
+            <WrapPanel x:Name="Filtre" />
+        </StackPanel>
+        <ListBox x:Name="Sablony" Background="Transparent" BorderThickness="0" Padding="16,8,6,6"
                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="Sablony_SelectionChanged">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
@@ -85,19 +90,20 @@
                                         <TextBlock Text="Ciele predmetu" FontFamily="{Binding PismoNadpisov}" FontSize="15" FontWeight="Bold"
                                                    Foreground="{Binding FarbaNadpisu}" />
                                     </Border>
-                                    <TextBlock Margin="0,6,0,7" FontFamily="{Binding PismoTextu}" FontSize="10.5" Foreground="{StaticResource AtramentStetec}"
+                                    <TextBlock Margin="0,6,0,7" FontFamily="{Binding PismoTextu}" FontSize="10.5" Foreground="{Binding FarbaTextu}"
                                                TextWrapping="Wrap" MaxHeight="30" TextAlignment="{Binding Zarovnanie}"
                                                Text="Žiak rozvíja čitateľskú gramotnosť, argumentuje, vyhľadáva a overuje informácie z rôznych zdrojov." />
+                                    <Border BorderBrush="{Binding Linka}" BorderThickness="{Binding RamMiniTabulky}">
                                     <UniformGrid Columns="3" TextElement.FontFamily="{Binding PismoTextu}" TextElement.FontSize="9.5"
-                                                 TextElement.Foreground="{StaticResource AtramentStetec}">
+                                                 TextElement.Foreground="{Binding FarbaTextu}">
                                         <Border Background="{Binding PodkladHlavicky}" BorderBrush="{Binding Linka}" BorderThickness="{Binding HlavickaBunky}" Padding="5,2">
-                                            <TextBlock Text="Téma" />
+                                            <TextBlock Text="Téma" Foreground="{Binding TextHlavicky}" />
                                         </Border>
                                         <Border Background="{Binding PodkladHlavicky}" BorderBrush="{Binding Linka}" BorderThickness="{Binding HlavickaBunky}" Padding="5,2">
-                                            <TextBlock Text="Výstupy" />
+                                            <TextBlock Text="Výstupy" Foreground="{Binding TextHlavicky}" />
                                         </Border>
                                         <Border Background="{Binding PodkladHlavicky}" BorderBrush="{Binding Linka}" BorderThickness="{Binding HlavickaBunky}" Padding="5,2">
-                                            <TextBlock Text="Hodiny" />
+                                            <TextBlock Text="Hodiny" Foreground="{Binding TextHlavicky}" />
                                         </Border>
                                         <Border BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
                                             <TextBlock Text="Čítanie" />
@@ -118,6 +124,7 @@
                                             <TextBlock Text="8" />
                                         </Border>
                                     </UniformGrid>
+                                    </Border>
                                 </StackPanel>
                             </Border>
                             <StackPanel Margin="16,10,14,13">
@@ -137,6 +144,7 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        </DockPanel>
 
         <!-- náhľad na skutočnom dokumente -->
         <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
@@ -146,6 +154,82 @@
                     <ComboBox x:Name="Ukazky" MinWidth="360" MaxWidth="620" HorizontalAlignment="Left" SelectionChanged="Ukazky_SelectionChanged"
                               ToolTip="Šablóna sa ukáže na vybranom dokumente – nič sa neukladá, kým nepotvrdíte Použiť" />
                 </DockPanel>
+                <!-- prispôsobenie vybranej šablóny: farba, písma, veľkosť, zarovnanie -->
+                <Expander x:Name="Prisposobenie" DockPanel.Dock="Top" Margin="24,6,28,4" Padding="0" HorizontalAlignment="Stretch">
+                    <Expander.Header>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Ikona}" Text="&#xE771;" FontSize="14" Margin="0,0,8,0" />
+                            <TextBlock Text="Prispôsobiť šablónu – vlastná farba, písma a veľkosť" FontWeight="SemiBold" />
+                            <Border x:Name="StitokVlastnej" CornerRadius="9" Padding="9,1,9,2" Margin="12,0,0,0" Visibility="Collapsed"
+                                    Background="{DynamicResource SystemFillColorAttentionBackgroundBrush}">
+                                <TextBlock Text="upravené – použije sa ako Vlastná šablóna" FontSize="11.5" />
+                            </Border>
+                        </StackPanel>
+                    </Expander.Header>
+                    <Border Style="{StaticResource Karta}" Padding="18,12" Margin="0,8,0,0">
+                        <StackPanel>
+                            <DockPanel>
+                                <TextBlock Text="Farba" Width="112" VerticalAlignment="Center" Style="{StaticResource Popis}" FontSize="13" />
+                                <ItemsControl x:Name="Farby" Focusable="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <WrapPanel />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type v:FarbaVolba}">
+                                            <RadioButton GroupName="FarbaSablony" Margin="0,2,6,2" Cursor="Hand" ToolTip="{Binding Nazov}"
+                                                         IsChecked="{Binding Vybrana, Mode=TwoWay}">
+                                                <RadioButton.Template>
+                                                    <ControlTemplate TargetType="RadioButton">
+                                                        <Border x:Name="Kruh" Width="28" Height="28" CornerRadius="14" BorderThickness="2" BorderBrush="Transparent"
+                                                                Padding="2" Background="Transparent">
+                                                            <Border CornerRadius="10" Background="{Binding Stetec}" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="Kruh" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsChecked" Value="True">
+                                                                <Setter TargetName="Kruh" Property="BorderBrush" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </RadioButton.Template>
+                                            </RadioButton>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DockPanel>
+                            <WrapPanel Margin="0,8,0,0">
+                                <TextBlock Text="Písmo nadpisov" Width="112" VerticalAlignment="Center" Style="{StaticResource Popis}" FontSize="13" />
+                                <ComboBox x:Name="PismoNadpisov" Width="210" Margin="0,0,20,6" SelectionChanged="Prisposob_Zmena">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" FontFamily="{Binding}" FontSize="14" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                <TextBlock Text="Písmo textu" Width="92" VerticalAlignment="Center" Style="{StaticResource Popis}" FontSize="13" />
+                                <ComboBox x:Name="PismoTextu" Width="210" Margin="0,0,20,6" SelectionChanged="Prisposob_Zmena">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}" FontFamily="{Binding}" FontSize="14" />
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </WrapPanel>
+                            <WrapPanel Margin="0,2,0,0">
+                                <TextBlock Text="Veľkosť textu" Width="112" VerticalAlignment="Center" Style="{StaticResource Popis}" FontSize="13" />
+                                <ComboBox x:Name="Velkost" Width="110" Margin="0,0,20,6" SelectionChanged="Prisposob_Zmena" />
+                                <CheckBox x:Name="DoBloku" Content="Text zarovnaný do bloku" Margin="0,0,20,6" VerticalAlignment="Center"
+                                          Checked="Prisposob_Zmena" Unchecked="Prisposob_Zmena" />
+                                <Button x:Name="Povodna" Content="Pôvodná šablóna" Padding="12,4" Margin="0,0,0,6" Click="Povodna_Click"
+                                        ToolTip="Zruší úpravy – zostane vybraná šablóna bez zmien" />
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </Expander>
                 <v:EditorDokumentu x:Name="Editor" JeUprava="False" Margin="8,0,12,0" TextPrazdneho="Dokument nemá text." />
             </DockPanel>
         </Border>

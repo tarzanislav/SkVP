@@ -229,6 +229,7 @@ public static class DokumentOsnovy
         dokument.LineStackingStrategy = LineStackingStrategy.MaxHeight;
         dokument.PagePadding = new Thickness(0);
         dokument.TextAlignment = s.DoBloku ? TextAlignment.Justify : TextAlignment.Left;
+        dokument.Foreground = VzhladDokumentov.Stetec(s.FarbaTextu);
     }
 
     /// <summary>Prázdny odsek bežného textu s medzerou podľa šablóny.</summary>
@@ -277,19 +278,27 @@ public static class DokumentOsnovy
             odsek.Foreground = VzhladDokumentov.Stetec(text);
         }
 
+        var ozdoba = VzhladDokumentov.Stetec(s.FarbaOzdoby(farba));
+        if (uroven == 2 && s.Nadpis2Pasik)
+        {
+            odsek.BorderBrush = ozdoba;
+            odsek.BorderThickness = new Thickness(3, 0, 0, 0);
+            odsek.Padding = new Thickness(9, 0, 0, 1);
+        }
+
         if (uroven > 1)
         {
             return;
         }
 
-        var ozdoba = VzhladDokumentov.Stetec(s.FarbaOzdoby(farba));
+        var odstup = new Thickness(0, velkost * 1.15, 0, 10);
         switch (s.Ozdoba)
         {
             case OzdobaNadpisu.Ciara:
                 odsek.BorderBrush = ozdoba;
                 odsek.BorderThickness = new Thickness(0, 0, 0, 1.5);
                 odsek.Padding = new Thickness(0, 0, 0, 5);
-                odsek.Margin = new Thickness(0, velkost * 1.15, 0, 10);
+                odsek.Margin = odstup;
                 break;
 
             case OzdobaNadpisu.Pasik:
@@ -298,12 +307,26 @@ public static class DokumentOsnovy
                 odsek.Padding = new Thickness(12, 1, 0, 2);
                 break;
 
-            case OzdobaNadpisu.Pas:
-                odsek.Background = VzhladDokumentov.Stetec(s.PodkladNadpisu(farba));
+            case OzdobaNadpisu.Pas or OzdobaNadpisu.Karta:
+                odsek.Background = VzhladDokumentov.Stetec(s.PodkladNadpisu(farba)!);
                 odsek.BorderBrush = ozdoba;
                 odsek.BorderThickness = new Thickness(5, 0, 0, 0);
                 odsek.Padding = new Thickness(12, 6, 10, 7);
-                odsek.Margin = new Thickness(0, velkost * 1.15, 0, 10);
+                odsek.Margin = odstup;
+                break;
+
+            case OzdobaNadpisu.Nadciarka:
+                odsek.BorderBrush = ozdoba;
+                odsek.BorderThickness = new Thickness(0, 3, 0, 0);
+                odsek.Padding = new Thickness(0, 7, 0, 0);
+                odsek.Margin = odstup;
+                break;
+
+            case OzdobaNadpisu.Ramik:
+                odsek.BorderBrush = ozdoba;
+                odsek.BorderThickness = new Thickness(1.5);
+                odsek.Padding = new Thickness(11, 5, 10, 6);
+                odsek.Margin = odstup;
                 break;
         }
     }
@@ -529,7 +552,12 @@ public static class DokumentOsnovy
         {
             CellSpacing = 0,
             BorderBrush = VzhladDokumentov.Stetec(s.Linka(farba)),
-            BorderThickness = s.Ram == RamTabulky.Vodorovny ? new Thickness(0, hrubka, 0, 0) : new Thickness(hrubka),
+            BorderThickness = s.Ram switch
+            {
+                RamTabulky.Vodorovny => new Thickness(0, hrubka, 0, 0),
+                RamTabulky.Akademicky => new Thickness(0, hrubka, 0, hrubka),
+                _ => new Thickness(hrubka),
+            },
             Margin = new Thickness(0, 6, 0, 12),
             TextAlignment = TextAlignment.Left,
         };
@@ -545,13 +573,21 @@ public static class DokumentOsnovy
         var s = sablona ?? VzhladDokumentov.Aktivna;
         var hrubka = s.HrubkaLinky;
         bunka.BorderBrush = VzhladDokumentov.Stetec(s.Linka(farba));
-        bunka.BorderThickness = s.Ram == RamTabulky.Vodorovny
-            ? new Thickness(0, 0, 0, jeHlavicka ? s.HrubkaPodHlavickou : hrubka)
-            : new Thickness(hrubka);
-        bunka.Padding = s.Ram == RamTabulky.Vodorovny ? new Thickness(8, 5, 8, 5) : new Thickness(7, 4, 7, 4);
+        bunka.BorderThickness = s.Ram switch
+        {
+            RamTabulky.Vodorovny => new Thickness(0, 0, 0, jeHlavicka ? s.HrubkaPodHlavickou : hrubka),
+            RamTabulky.Akademicky => new Thickness(0, 0, 0, jeHlavicka ? s.HrubkaPodHlavickou : 0),
+            _ => new Thickness(hrubka),
+        };
+        bunka.Padding = s.CiaraPodHlavickou ? new Thickness(8, 5, 8, 5) : new Thickness(7, 4, 7, 4);
         if (jeHlavicka)
         {
             bunka.Background = VzhladDokumentov.Stetec(s.PodkladHlavicky(farba));
+            if (s.TextHlavicky is { } text)
+            {
+                // len farba – tučné písmo by sa pri uložení prenieslo do textu
+                bunka.Foreground = VzhladDokumentov.Stetec(text);
+            }
         }
         else if (riadok > 0 && (riadok - (sHlavickou ? 1 : 0)) % 2 == 1 && s.PodkladPruhu(farba) is { } pruh)
         {

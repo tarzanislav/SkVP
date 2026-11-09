@@ -24,6 +24,7 @@ public static class PdfVystup
     private const string StylObsah2 = "SkvpObsah2";
     private const string StylPoznamka = "SkvpPoznamka";
     private const string StylTabulka = "SkvpTabulka";
+    private const string StylTabulkaSvetla = "SkvpTabulkaSvetla";
 
     private static readonly MdColor Atrament = Farba("#1F2933");
     private static readonly MdColor Siva = Farba("#6B7280");
@@ -185,7 +186,7 @@ public static class PdfVystup
         var normal = doc.Styles[StyleNames.Normal]!;
         normal.Font.Name = sablona.PismoTextu;
         normal.Font.Size = sablona.VelkostTextu;
-        normal.Font.Color = Atrament;
+        normal.Font.Color = Farba(sablona.FarbaTextu);
         normal.ParagraphFormat.SpaceAfter = Unit.FromPoint(sablona.MedzeraZaOdsekom);
         normal.ParagraphFormat.LineSpacingRule = LineSpacingRule.Multiple;
         normal.ParagraphFormat.LineSpacing = sablona.Riadkovanie;
@@ -269,6 +270,10 @@ public static class PdfVystup
         tabulka.ParagraphFormat.SpaceAfter = Unit.FromPoint(2);
         tabulka.ParagraphFormat.LineSpacing = Math.Max(1.05, sablona.Riadkovanie - 0.08);
         tabulka.ParagraphFormat.Alignment = ParagraphAlignment.Left;
+
+        // text v tmavej hlavičke tabuľky
+        var svetla = doc.Styles.AddStyle(StylTabulkaSvetla, StylTabulka);
+        svetla.Font.Color = Farba(sablona.TextHlavicky ?? sablona.FarbaTextu);
 
         var hlavicka = doc.Styles[StyleNames.Header]!;
         hlavicka.Font.Name = PismaDokumentu.Nadpis;
@@ -821,14 +826,14 @@ public static class PdfVystup
         public Table NovaTabulka() => sekcia.AddTable();
     }
 
-    private sealed class CielBunka(Cell bunka) : ICiel
+    private sealed class CielBunka(Cell bunka, string styl = StylTabulka) : ICiel
     {
         public double SirkaTextu => bunka.Column.Width.Point;
 
         public Paragraph NovyOdsek()
         {
             var p = bunka.AddParagraph();
-            p.Style = StylTabulka;
+            p.Style = styl;
             return p;
         }
 
@@ -856,6 +861,13 @@ public static class PdfVystup
                     if (n.Uroven == 1 && !vBunke)
                     {
                         Ozdob(p.Format, sablona, Hex(farba));
+                    }
+                    else if (n.Uroven == 2 && !vBunke && sablona.Nadpis2Pasik)
+                    {
+                        p.Format.Borders.Left.Width = Unit.FromPoint(2.5);
+                        p.Format.Borders.Left.Color = Farba(sablona.FarbaOzdoby(Hex(farba)));
+                        p.Format.Borders.DistanceFromLeft = Unit.FromPoint(7);
+                        p.Format.LeftIndent = Unit.FromPoint(3);
                     }
 
                     p.AddText(n.Text);
@@ -955,8 +967,11 @@ public static class PdfVystup
         var sablona = VzhladDokumentov.Aktivna;
         var oblast = Hex(farba);
         var vodorovne = sablona.Ram == RamTabulky.Vodorovny;
-        tabulka.Borders.Width = Unit.FromPoint(sablona.HrubkaLinky);
-        tabulka.Borders.Color = Farba(sablona.Linka(oblast));
+        var akademicky = sablona.Ram == RamTabulky.Akademicky;
+        var linka = Farba(sablona.Linka(oblast));
+        // akademická tabuľka: čiary len nad prvým a pod posledným riadkom a pod hlavičkou (pri bunkách)
+        tabulka.Borders.Width = Unit.FromPoint(akademicky ? 0 : sablona.HrubkaLinky);
+        tabulka.Borders.Color = linka;
         if (vodorovne)
         {
             // len vodorovné čiary – zvislé sa skryjú pri všetkých bunkách
@@ -1015,13 +1030,28 @@ public static class PdfVystup
                 bunka.Borders.Bottom.Width = 0;
             }
 
+            if (akademicky)
+            {
+                if (p.Riadok == 0 && !p.BezHorneho)
+                {
+                    bunka.Borders.Top.Width = Unit.FromPoint(sablona.HrubkaLinky);
+                    bunka.Borders.Top.Color = linka;
+                }
+
+                if (p.Riadok + p.Vyska == t.Riadky.Count && !p.BezDolneho)
+                {
+                    bunka.Borders.Bottom.Width = Unit.FromPoint(sablona.HrubkaLinky);
+                    bunka.Borders.Bottom.Color = linka;
+                }
+            }
+
             if (p.Bunka.Hlavicka)
             {
                 bunka.Shading.Color = Farba(sablona.PodkladHlavicky(oblast));
-                if (vodorovne && !p.BezDolneho)
+                if (sablona.CiaraPodHlavickou && !p.BezDolneho)
                 {
                     bunka.Borders.Bottom.Width = Unit.FromPoint(sablona.HrubkaPodHlavickou);
-                    bunka.Borders.Bottom.Color = Farba(sablona.FarbaOzdoby(oblast));
+                    bunka.Borders.Bottom.Color = akademicky ? linka : Farba(sablona.FarbaOzdoby(oblast));
                 }
             }
             else if (pruh is not null && p.Riadok > 0 && (p.Riadok - (sHlavickou ? 1 : 0)) % 2 == 1)
@@ -1029,7 +1059,8 @@ public static class PdfVystup
                 bunka.Shading.Color = Farba(pruh);
             }
 
-            Bloky(new CielBunka(bunka), p.Bunka.Bloky, farba, 0, true);
+            Bloky(new CielBunka(bunka, p.Bunka.Hlavicka && sablona.TextHlavicky is not null ? StylTabulkaSvetla : StylTabulka),
+                p.Bunka.Bloky, farba, 0, true);
         }
     }
 
@@ -1191,14 +1222,32 @@ public static class PdfVystup
                 format.LeftIndent = Unit.FromPoint(4);
                 break;
 
-            case OzdobaNadpisu.Pas:
-                format.Shading.Color = Farba(sablona.PodkladNadpisu(oblast));
+            case OzdobaNadpisu.Pas or OzdobaNadpisu.Karta:
+                // karta: pásik vľavo v rovnakej farbe ako podklad – súvislá farebná plocha
+                format.Shading.Color = Farba(sablona.PodkladNadpisu(oblast)!);
                 format.Borders.Left.Width = Unit.FromPoint(4);
                 format.Borders.Left.Color = farba;
                 format.Borders.DistanceFromLeft = Unit.FromPoint(9);
                 format.Borders.DistanceFromTop = Unit.FromPoint(4);
                 format.Borders.DistanceFromBottom = Unit.FromPoint(4);
                 format.LeftIndent = Unit.FromPoint(4);
+                format.SpaceAfter = Unit.FromPoint(10);
+                break;
+
+            case OzdobaNadpisu.Nadciarka:
+                format.Borders.Top.Width = Unit.FromPoint(2.5);
+                format.Borders.Top.Color = farba;
+                format.Borders.DistanceFromTop = Unit.FromPoint(6);
+                format.SpaceBefore = Unit.FromPoint(sablona.Nadpis1 * 1.25);
+                format.SpaceAfter = Unit.FromPoint(8);
+                break;
+
+            case OzdobaNadpisu.Ramik:
+                format.Borders.Width = Unit.FromPoint(1);
+                format.Borders.Color = farba;
+                format.Borders.Distance = Unit.FromPoint(5);
+                format.LeftIndent = Unit.FromPoint(6);
+                format.RightIndent = Unit.FromPoint(6);
                 format.SpaceAfter = Unit.FromPoint(10);
                 break;
         }

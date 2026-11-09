@@ -521,7 +521,13 @@ internal static class Samotest
         };
         var nadpisy = ukazka.OfType<Nadpis>().Select(n => n.Text).ToList();
         var chyby = new List<string>();
-        foreach (var (sablona, poradie) in VzhladDokumentov.Vsetky.Select((s, i) => (s, i + 1)))
+        var vlastna = VzhladDokumentov.Prisposob(VzhladDokumentov.Podla("farebny"), "#A23B72", "Trebuchet MS", "Georgia", 11.5, true);
+        var json = System.Text.Json.JsonSerializer.Serialize(vlastna);
+        var spat = System.Text.Json.JsonSerializer.Deserialize<SablonaVzhladu>(json)!;
+        Over(spat.Id == VzhladDokumentov.IdVlastnej && spat.Akcent == "#A23B72" && spat.PismaNadpisov.SequenceEqual(new[] { "Trebuchet MS" })
+             && spat.Nadpis1 > VzhladDokumentov.Podla("farebny").Nadpis1 && spat.DoBloku && spat.Ozdoba == OzdobaNadpisu.Pas,
+            "vlastná šablóna: farba, písma, väčšie písmo aj nadpisy, uloženie ako JSON");
+        foreach (var (sablona, poradie) in VzhladDokumentov.Vsetky.Append(vlastna).Select((s, i) => (s, i + 1)))
         {
             using var docasna = VzhladDokumentov.Docasne(sablona);
             try
@@ -557,7 +563,11 @@ internal static class Samotest
             }
         }
 
-        Over(chyby.Count == 0, $"šablóny vzhľadu ({VzhladDokumentov.Vsetky.Count}): PDF, Word a editor bez zmeny textu" +
+        Over(VzhladDokumentov.Vsetky.Select(s => s.Id).Distinct().Count() == VzhladDokumentov.Vsetky.Count
+             && VzhladDokumentov.Vsetky.All(s => VzhladDokumentov.Skupiny.Contains(s.Skupina))
+             && VzhladDokumentov.Skupiny.All(g => VzhladDokumentov.Vsetky.Count(s => s.Skupina == g) >= 4),
+            $"šablóny vzhľadu: {VzhladDokumentov.Vsetky.Count} šablón v {VzhladDokumentov.Skupiny.Count} skupinách");
+        Over(chyby.Count == 0, $"šablóny vzhľadu ({VzhladDokumentov.Vsetky.Count} + vlastná): PDF, Word a editor bez zmeny textu" +
                                (chyby.Count == 0 ? "" : $" – chyby: {string.Join("; ", chyby)}"));
         Over(VzhladDokumentov.Aktivna.Id == VzhladDokumentov.IdPredvolenej, "po ukážkach platí zvolená šablóna");
         Krok("šablóny vzhľadu v poriadku");
@@ -2513,6 +2523,34 @@ internal static class Samotest
             Pumpuj();
             Snimka(vzhladOkno, $"13m_vzhlad_{poradie + 1}_{sablona.Id}");
         }
+
+        // skupiny šablón
+        var klasicke = vzhladOkno.Filtre.Children.OfType<System.Windows.Controls.RadioButton>().First(r => Equals(r.Content, VzhladDokumentov.SkupinaKlasicke));
+        klasicke.IsChecked = true;
+        Pumpuj();
+        Over(vzhladOkno.Sablony.Items.Count == VzhladDokumentov.Vsetky.Count(s => s.Skupina == VzhladDokumentov.SkupinaKlasicke),
+            $"okno Vzhľad osnov: skupina Klasické ({vzhladOkno.Sablony.Items.Count} šablón)");
+        Snimka(vzhladOkno, "13n_vzhlad_skupina_klasicke");
+        vzhladOkno.Filtre.Children.OfType<System.Windows.Controls.RadioButton>().First().IsChecked = true;
+        Pumpuj();
+
+        // prispôsobenie: farba, väčšie písmo → vlastná šablóna, uloženie a návrat k predvolenej
+        vzhladOkno.Sablony.SelectedItem = vzhladOkno.Sablony.Items.Cast<SablonaVM>().First(v => v.Sablona.Id == "pestry");
+        vzhladOkno.Prisposobenie.IsExpanded = true;
+        Pumpuj();
+        ((IEnumerable<FarbaVolba>)vzhladOkno.Farby.ItemsSource).First(f => f.Hex == "#A23B72").Vybrana = true;
+        vzhladOkno.Velkost.SelectedIndex = vzhladOkno.Velkost.Items.Count - 2;
+        Pumpuj();
+        var upravena = vzhladOkno.Vysledna;
+        Over(upravena.Id == VzhladDokumentov.IdVlastnej && upravena.Akcent == "#A23B72" && upravena.VelkostTextu >= 12
+             && upravena.Ozdoba == OzdobaNadpisu.Karta && vzhladOkno.StitokVlastnej.Visibility == Visibility.Visible,
+            $"okno Vzhľad osnov: prispôsobená šablóna ({upravena.Popis} {upravena.VelkostTextu} b)");
+        Snimka(vzhladOkno, "13o_vzhlad_prisposobenie");
+        VzhladDokumentov.Nastav(upravena);
+        Over(VzhladDokumentov.Podla(VzhladDokumentov.IdVlastnej).Akcent == "#A23B72" && VzhladDokumentov.VGalerii[0].Id == VzhladDokumentov.IdVlastnej,
+            "vlastná šablóna sa uloží a je v galérii");
+        VzhladDokumentov.Nastav(VzhladDokumentov.Vsetky[0]);
+        Databaza.Zapis(VzhladDokumentov.KlucVlastnej, null);
 
         vzhladOkno.Upratat.IsChecked = true;
         Pumpuj();
