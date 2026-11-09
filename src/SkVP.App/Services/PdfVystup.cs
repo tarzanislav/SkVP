@@ -964,8 +964,8 @@ public static class PdfVystup
             tabulka.Borders.Right.Visible = false;
         }
 
-        // rám tabuľky zarovno s okrajmi textu (MigraDoc inak posunie tabuľku doľava o vnútorný okraj bunky)
-        tabulka.Rows.LeftIndent = Unit.FromPoint(vodorovne ? 5 : 4);
+        // rám tabuľky zarovno s okrajmi textu (bez nastaveného odsadenia MigraDoc posunie tabuľku doľava o vnútorný okraj bunky)
+        tabulka.Rows.LeftIndent = Unit.FromPoint(0);
         tabulka.LeftPadding = Unit.FromPoint(vodorovne ? 5 : 4);
         tabulka.RightPadding = Unit.FromPoint(vodorovne ? 5 : 4);
         tabulka.TopPadding = Unit.FromPoint(vodorovne ? 4 : 3);
