@@ -531,6 +531,50 @@ internal static class Samotest
 
         Over(chyba is null && PdfVystup.ChybneCasti(sKrizovou).Count == 0, $"zostava s krížovými zlúčenými bunkami sa vysádza ({chyba ?? "bez chyby"})");
 
+        // riadky, v ktorých sú všetky bunky zlúčené nadol (MigraDoc 6 na nich zlyhá) a náhodné tabuľky
+        var schodovita = new Tabulka(new IReadOnlyList<Bunka>[]
+        {
+            new[] { B("Téma", riadky: 2), B("Hodiny") },
+            new[] { B("Výstupy", riadky: 2) },
+            new[] { B("Ročník") },
+            new[] { B("Celý riadok", riadky: 2), B("vpravo", riadky: 2) },
+            Array.Empty<Bunka>(),
+        }, 2);
+        var nahoda = new Random(20261109);
+        var tabulky = new List<Tabulka> { schodovita };
+        for (var i = 0; i < 300; i++)
+        {
+            var stlpcov = nahoda.Next(1, 6);
+            var riadkov = nahoda.Next(1, 9);
+            tabulky.Add(new Tabulka(Enumerable.Range(0, riadkov).Select(r => (IReadOnlyList<Bunka>)Enumerable.Range(0, nahoda.Next(0, stlpcov + 2))
+                .Select(c => B($"{i}/{r}/{c}", nahoda.Next(1, 4), nahoda.Next(1, 4))).ToList()).ToList(), stlpcov));
+        }
+
+        var zlaMriezka = tabulky.Count(tab =>
+        {
+            var p = tab.Pravidelna();
+            var mriezka = PdfVystup.Mriezka(p);
+            return Enumerable.Range(0, p.Riadky.Count).Any(r =>
+            {
+                var vRiadku = mriezka.Where(x => x.Riadok <= r && r < x.Riadok + x.Vyska).ToList();
+                return vRiadku.Sum(x => x.Sirka) >= p.PocetStlpcov && !vRiadku.Any(x => x.Riadok == r && x.Vyska == 1);
+            }) || mriezka.Sum(x => x.Bunka.Bloky.Count) != tab.Riadky.Sum(rr => rr.Sum(x => x.Bloky.Count));
+        });
+        predmety[1] = predmety[1] with { Obsah = new List<Blok> { new Nadpis(1, "Náhodné tabuľky") }.Concat(tabulky).ToList() };
+        var sNahodnymi = zostava with { Oblasti = new List<KapitolaOblasti> { oblast with { Predmety = predmety } } };
+        chyba = null;
+        try
+        {
+            NahladDokumentu.Priprav(PdfVystup.Vytvor(sNahodnymi));
+        }
+        catch (Exception ex)
+        {
+            chyba = ex.GetBaseException().Message;
+        }
+
+        Over(zlaMriezka == 0 && chyba is null && PdfVystup.ChybneCasti(sNahodnymi).Count == 0,
+            $"zvislé zlúčenia v celom riadku a {tabulky.Count - 1} náhodných tabuliek sa vysádza (zlá mriežka {zlaMriezka}, {chyba ?? "bez chyby"})");
+
         // Word: riadok s vynechaným prvým stĺpcom (gridBefore) a pokračovanie zlúčenia bez začiatku
         using var pamat = new MemoryStream();
         using (var word = WordprocessingDocument.Create(pamat, DocumentFormat.OpenXml.WordprocessingDocumentType.Document))

@@ -951,59 +951,125 @@ public static class PdfVystup
             riadky.Add(tabulka.AddRow());
         }
 
-        // obsadené políčka mriežky (zlúčené bunky z predchádzajúcich riadkov)
-        var obsadene = new HashSet<(int, int)>();
-        for (var r = 0; r < t.Riadky.Count; r++)
+        if (t.Riadky.Count > 0 && t.Riadky[0].Any(b => b.Hlavicka))
         {
-            var riadok = riadky[r];
-            if (r == 0 && t.Riadky[0].Any(b => b.Hlavicka))
+            riadky[0].HeadingFormat = t.Riadky.Count > 2;
+        }
+
+        foreach (var p in Mriezka(t))
+        {
+            var bunka = riadky[p.Riadok].Cells[p.Stlpec];
+            if (p.Sirka > 1)
             {
-                riadok.HeadingFormat = t.Riadky.Count > 2;
+                bunka.MergeRight = p.Sirka - 1;
             }
 
+            if (p.Vyska > 1)
+            {
+                bunka.MergeDown = p.Vyska - 1;
+            }
+
+            // rozdelená zlúčená bunka – medzi jej časťami nie je čiara
+            if (p.BezHorneho)
+            {
+                bunka.Borders.Top.Visible = false;
+                bunka.Borders.Top.Width = 0;
+            }
+
+            if (p.BezDolneho)
+            {
+                bunka.Borders.Bottom.Visible = false;
+                bunka.Borders.Bottom.Width = 0;
+            }
+
+            if (p.Bunka.Hlavicka)
+            {
+                bunka.Shading.Color = Podklad;
+            }
+
+            Bloky(new CielBunka(bunka), p.Bunka.Bloky, farba, 0, true);
+        }
+    }
+
+    /// <summary>Bunka tabuľky na svojom mieste v mriežke; bez horného/dolného okraja = časť rozdelenej zlúčenej bunky.</summary>
+    internal sealed record Policko(int Riadok, int Stlpec, int Sirka, int Vyska, Bunka Bunka, bool BezHorneho = false, bool BezDolneho = false);
+
+    /// <summary>
+    /// Bunky pravidelnej tabuľky (<see cref="SkVP.Services.Tabulka.Pravidelna"/>) v mriežke pre MigraDoc. MigraDoc 6 vysádza
+    /// tabuľku, len ak v každom riadku začína bunka bez zvislého zlúčenia alebo je v ňom voľné políčko – inak zlyhá
+    /// („GetMinMergedCell: Unexpected problem #1“). Napr. riadok, v ktorom sú všetky bunky zlúčené nadol, alebo riadok
+    /// celý pokrytý zlúčenými bunkami. Zvislé zlúčenie sa v takom riadku rozdelí na časti bez čiar medzi nimi –
+    /// tabuľka vyzerá rovnako, text zostane v hornej časti.
+    /// </summary>
+    internal static List<Policko> Mriezka(Tabulka t)
+    {
+        var policka = new List<Policko>();
+        var obsadene = new HashSet<(int, int)>();
+        var stlpcov = Math.Max(1, t.PocetStlpcov);
+        for (var r = 0; r < t.Riadky.Count; r++)
+        {
             var stlpec = 0;
             foreach (var b in t.Riadky[r])
             {
-                while (stlpec < t.PocetStlpcov && obsadene.Contains((r, stlpec)))
+                while (stlpec < stlpcov && obsadene.Contains((r, stlpec)))
                 {
                     stlpec++;
                 }
 
-                if (stlpec >= t.PocetStlpcov)
+                if (stlpec >= stlpcov)
                 {
                     break;
                 }
 
-                var stlpce = Math.Clamp(b.Stlpce, 1, t.PocetStlpcov - stlpec);
+                var sirka = Math.Clamp(b.Stlpce, 1, stlpcov - stlpec);
                 var vyska = Math.Clamp(b.Riadky, 1, t.Riadky.Count - r);
-                var bunka = riadok.Cells[stlpec];
-                if (stlpce > 1)
-                {
-                    bunka.MergeRight = stlpce - 1;
-                }
-
-                if (vyska > 1)
-                {
-                    bunka.MergeDown = vyska - 1;
-                }
-
                 for (var d = 0; d < vyska; d++)
                 {
-                    for (var s = 0; s < stlpce; s++)
+                    for (var s = 0; s < sirka; s++)
                     {
                         obsadene.Add((r + d, stlpec + s));
                     }
                 }
 
-                if (b.Hlavicka)
-                {
-                    bunka.Shading.Color = Podklad;
-                }
-
-                Bloky(new CielBunka(bunka), b.Bloky, farba, 0, true);
-                stlpec += stlpce;
+                policka.Add(new Policko(r, stlpec, sirka, vyska, b));
+                stlpec += sirka;
             }
         }
+
+        for (var r = 0; r < t.Riadky.Count; r++)
+        {
+            var vRiadku = policka.Where(p => p.Riadok <= r && r < p.Riadok + p.Vyska).ToList();
+            if (vRiadku.Sum(p => p.Sirka) < stlpcov || vRiadku.Any(p => p.Riadok == r && p.Vyska == 1))
+            {
+                continue;
+            }
+
+            // prvé zlúčenie zľava sa rozdelí: časť nad riadkom, jeden riadok, časť pod ním
+            var zlucena = vRiadku.MinBy(p => p.Stlpec)!;
+            policka.Remove(zlucena);
+            var nad = r > zlucena.Riadok;
+            var pod = r + 1 < zlucena.Riadok + zlucena.Vyska;
+            var prazdna = zlucena.Bunka with { Bloky = Array.Empty<Blok>(), Riadky = 1 };
+            if (nad)
+            {
+                policka.Add(zlucena with { Vyska = r - zlucena.Riadok, BezDolneho = true });
+            }
+
+            policka.Add(zlucena with
+            {
+                Riadok = r, Vyska = 1, Bunka = nad ? prazdna : zlucena.Bunka,
+                BezHorneho = nad || zlucena.BezHorneho, BezDolneho = pod || zlucena.BezDolneho,
+            });
+            if (pod)
+            {
+                policka.Add(zlucena with
+                {
+                    Riadok = r + 1, Vyska = zlucena.Riadok + zlucena.Vyska - r - 1, Bunka = prazdna, BezHorneho = true,
+                });
+            }
+        }
+
+        return policka;
     }
 
     private static void Text(Paragraph odsek, IReadOnlyList<Usek> useky)

@@ -68,12 +68,12 @@ public sealed record Tabulka(IReadOnlyList<IReadOnlyList<Bunka>> Riadky, int Poc
                     {
                         riadok[^1] = riadok[^1] with { Bloky = riadok[^1].Bloky.Concat(bunka.Bloky).ToList() };
                     }
-                    else if (riadky.Count > 0 && riadky[^1].Count > 0)
+                    else if (riadky.FindLastIndex(x => x.Count > 0) is var nad and >= 0)
                     {
-                        // celý riadok je pokrytý zlúčenými bunkami – text patrí do bunky nad ním
-                        var predosly = riadky[^1].ToList();
+                        // celý riadok je pokrytý zlúčenými bunkami – text patrí do poslednej bunky nad ním
+                        var predosly = riadky[nad].ToList();
                         predosly[^1] = predosly[^1] with { Bloky = predosly[^1].Bloky.Concat(bunka.Bloky).ToList() };
-                        riadky[^1] = predosly;
+                        riadky[nad] = predosly;
                     }
 
                     continue;
