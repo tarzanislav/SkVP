@@ -1,7 +1,7 @@
 # SkVP – stav projektu a pokyny pre ďalšiu session
 
-Aktualizované: 29. 10. 2026 · posledné vydanie **v0.1.98**; na vetve `vyvoj/etapa1` je nevydaná hĺbková revízia
-a vlastné riešenia namiesto kódu z EviTA (pozri posledné dve časti)
+Aktualizované: 9. 11. 2026 · posledné vydanie **v0.1.98**; na vetve `vyvoj/etapa1` je nevydaná hĺbková revízia,
+vlastné riešenia namiesto kódu z EviTA a rozloženie strany / jednotný vzhľad (pozri posledné tri časti)
 
 ## Spolupráca (dohodnuté s používateľom)
 - Používateľ zadáva úlohy postupne; všetky zmeny v repozitári robí Claude, používateľ potvrdzuje len nevyhnutné veci:
@@ -343,6 +343,27 @@ zoznam modelov Whisper) a nastavovanie ovládacích prvkov.
   režim samotestu na jednom mieste; `Prevodniky` – spoločné predky; `Databaza.CitajJson/ZapisJson`; `Preklad.VelkePrve`.
 - **Samotest** doplnený: rozmiestnenie strán (brožúra, 2 a 8 na list, opakovanie, dierovač, zväčšenie), plán tlačových
   úloh, odpovede sprievodcu a profil tlačiarne, staršie a poškodené uložené voľby tlače.
+
+## Rozloženie strany z dokumentu a jednotný vzhľad (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+Podnet z testovania na reálnych osnovách: osnova vo Worde na šírku sa v programe zobrazovala na výšku s hluchými miestami.
+- **Model**: `Sekcia(RozlozenieStrany)` – od tohto miesta iná veľkosť/orientácia strany (ako prvý blok = celý dokument;
+  A4 na výšku blok nemá), `ZlomStrany`, `Tabulka.Podiel` (šírka tabuľky voči textu – úzka tabuľka zostane úzka).
+- **Čítanie Wordu** (`DocxCitac.Telo`): časti (sekcie) s veľkosťou a orientáciou strany, zlomy strán (aj „zlom pred odsekom“),
+  šírka tabuliek podľa šírky textu časti.
+- **Náhľad a editor**: list na šírku pre osnovu na šírku, sivá značka „nová strana“, `DokumentOsnovy.Upratane` zlúči
+  prázdne riadky a vynechá zbytočné zlomy; rozloženie strany sa pri úprave v programe zachová (`DocxVystup.Osnova`
+  zapisuje časti so `sectPr`).
+- **Zostavy**: PDF (`PdfVystup.Sadzba`) a Word (`DocxVystup.CastiZostavy`) – predmet s osnovou na šírku má strany na šírku
+  (aj oddeľujúca strana), hlavička a päta pre šírku strany; oblasti a charakteristiky sú na výšku. Tlač: strana inej
+  orientácie ako list sa otočí o 90° (`Impozicia.Transformacia`), každá strana sa vykresľuje vo svojej orientácii
+  (`NahladDokumentu.StranaNaSirku` podľa orientácie MigraDoc).
+- **Jednotný vzhľad…** (tlačidlo pri osnove aj charakteristike, `Services/JednotnyVzhlad`, `Views/JednotnyVzhladWindow`):
+  dokument v štýle osnov programu (testovacia sada) – nadpisy častí z tučného/veľkého textu alebo jednopoložkového
+  číslovaného zoznamu („1. CHARAKTERISTIKA PREDMETU“ → nadpis 1), zvýraznené krátke riadky → nadpis 2, hlavička tabuliek
+  (nie pri tabuľke popis – hodnota), bez hluchých miest, rozloženie strany zostane. Náhľad nový/pôvodný, upozornenie na
+  obrázky a textové polia, pôvodná verzia do archívu („Pred jednotným vzhľadom“).
+- Samotest: osnova na šírku Word → program → Word, zostava so zmiešanými stranami (PDF „VVSSVV…“, Word 3 časti s pätou),
+  snímky `13l_jednotny_vzhlad.png`, `13m_…povodny.png`, `osnova_na_sirku.png`.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
