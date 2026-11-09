@@ -365,6 +365,21 @@ Podnet z testovania na reálnych osnovách: osnova vo Worde na šírku sa v prog
 - Samotest: osnova na šírku Word → program → Word, zostava so zmiešanými stranami (PDF „VVSSVV…“, Word 3 časti s pätou),
   snímky `13l_jednotny_vzhlad.png`, `13m_…povodny.png`, `osnova_na_sirku.png`.
 
+## Nepravidelné tabuľky z Wordu a záznamy činnosti (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+Podnet: po importe osnov (Word aj PDF) zostava padala s „GetMinMergedCell: Unexpected problem #1“ (MigraDoc).
+- **Príčina**: tabuľky Wordu s krížovými/neúplnými zlúčeniami (`gridBefore`, chýbajúce bunky, pokračovanie `vMerge`
+  bez začiatku) – čítanie posúvalo bunky do iných stĺpcov a sadzba orezávala zlúčenia len na počet stĺpcov, takže sa
+  prekrývali so zvislými zlúčeniami.
+- **Oprava**: `Tabulka.Pravidelna()` – bunky do voľných políčok, zlúčenia orezané tak, aby sa neprekrývali, nadbytočný
+  text sa pripojí k susednej bunke (nič sa nestratí); volá sa pri čítaní Wordu, v PDF, vo Worde aj v editore.
+  `DocxCitac.NacitajTabulku` číta bunky na ich stĺpcoch (medzery = prázdne bunky).
+- **Diagnostika**: keď zostava zlyhá, `PdfVystup.ChybneCasti` vysádza každú osnovu zvlášť a hlásenie vymenuje tie, ktoré
+  sa nedajú vysádzať.
+- **Záznamy činnosti** (`Pomocne/Zaznam`): denné súbory `Záznamy/skvp-RRRR-MM-DD.log` pri dátach (30 dní) – spustenie
+  (verzia, systém), chyby s technickými podrobnosťami (aj neošetrené), import osnov; Servis → Záznamy činnosti →
+  „Uložiť záznamy (ZIP)…“ (záznamy + o-programe.txt) a „Otvoriť priečinok“.
+- Samotest: krížové zlúčenia v zostave PDF aj Word, `gridBefore` a osamotené pokračovanie zlúčenia, záznam a balík ZIP.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
