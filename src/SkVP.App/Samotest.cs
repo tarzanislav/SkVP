@@ -2536,7 +2536,7 @@ internal static class Samotest
 
         // prispôsobenie: farba, väčšie písmo → vlastná šablóna, uloženie a návrat k predvolenej
         vzhladOkno.Sablony.SelectedItem = vzhladOkno.Sablony.Items.Cast<SablonaVM>().First(v => v.Sablona.Id == "pestry");
-        vzhladOkno.Prisposobenie.IsExpanded = true;
+        vzhladOkno.Prisposobenie.IsChecked = true;
         Pumpuj();
         ((IEnumerable<FarbaVolba>)vzhladOkno.Farby.ItemsSource).First(f => f.Hex == "#A23B72").Vybrana = true;
         vzhladOkno.Velkost.SelectedIndex = vzhladOkno.Velkost.Items.Count - 2;

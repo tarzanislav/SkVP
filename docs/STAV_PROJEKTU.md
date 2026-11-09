@@ -406,6 +406,25 @@ a používateľ chcel viac vzhľadov – centrálne pre všetky dokumenty, fareb
 - Samotest: každá šablóna – PDF (obrázky `sablona_N_id.png`), Word (OpenXML), editor a Word bez zmeny textu, zarovnania,
   hlavičiek a tučného písma; snímky `13l_vzhlad_osnov.png`, `13m_vzhlad_N_id.png`.
 
+## Ďalšie šablóny, skupiny a vlastná šablóna (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+Podnet: „vytvor lepšie šablóny, tie tam ponechaj… prehľadaj internet pre inšpiráciu a vytvor niečo veľké“.
+- Inšpirácia: odporúčania typografie správ (text 11 b, nadpisy 14–20 b, riadkovanie 1,15–1,3, viac miesta nad nadpisom,
+  tmavomodré nadpisy, hlavičky tabuliek tmavomodré s bielym textom alebo svetlosivé, pruhy, akademické tabuľky s tromi
+  čiarami), schémy písiem Office (nadpisy / text), zásady tabuliek (len vodorovné čiary, pruhy, výrazná hlavička).
+- **26 šablón v 4 skupinách** (`SablonaVzhladu.Skupina`): Farebné (Pastelový, Farebný, Pestrý, Tyrkysový, Korálový,
+  Levanduľový, Smaragdový, Oceán), Moderné (Moderný, Svieži, Minimalistický, Indigo, Grafitový, Časopis, Firemný),
+  Klasické (Elegantný, Klasický, Akademický, Knižný, Archívny, Úradný), Praktické (Úsporný, Kompaktný, Čitateľný,
+  Prezentačný, Na tlač).
+- Nové prvky: ozdoby nadpisu `Karta` (sýta farba, biely text), `Nadciarka`, `Ramik`; `Nadpis2Pasik`; tabuľky
+  `RamTabulky.Akademicky` a `HlavickaTabulky.Tmava` (biely text – štýl `SkvpTabulkaSvetla` v PDF aj Worde, v editore
+  len farba bunky, aby sa tučné písmo nepreniesla do textu); `FarbaTextu`.
+- **Vlastná šablóna**: v okne „Prispôsobiť šablónu…“ – farba (14 sýtych farieb alebo farby oblastí), písma nadpisov a
+  textu (len písma, ktoré sa dajú vložiť do PDF), veľkosť textu (nadpisy v rovnakom pomere), text do bloku.
+  `VzhladDokumentov.Prisposob` → Id `vlastna`, uložená ako JSON v `dokumenty.sablona_vlastna`, v galérii prvá.
+- Galéria so skupinami (prepínače nad zoznamom) a počtom šablón.
+- Samotest: 26 šablón + vlastná (PDF, Word, editor), JSON vlastnej šablóny, skupiny, prispôsobenie v okne,
+  snímky `13n_vzhlad_skupina_klasicke.png`, `13o_vzhlad_prisposobenie.png`.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
