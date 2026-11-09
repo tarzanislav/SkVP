@@ -385,7 +385,7 @@ Podnet: po importe osnov (Word aj PDF) zostava padala s „GetMinMergedCell: Une
   v takom riadku rozdelí zvislé zlúčenie na časti bez čiar medzi nimi. Samotest: schodovité zlúčenia a 300 náhodných
   tabuliek (vydané vo v0.1.119).
 
-## Šablóny vzhľadu osnov (9. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+## Šablóny vzhľadu osnov (9. 11. 2026, vydané vo v0.1.125)
 Podnet: „Jednotný vzhľad“ pri importovanej osnove nič nezmenil (program zobrazuje osnovy vo svojom štýle už od importu)
 a používateľ chcel viac vzhľadov – centrálne pre všetky dokumenty, farebné a moderné.
 - **`Services/VzhladDokumentov`**: `SablonaVzhladu` (písma, veľkosti v bodoch, riadkovanie, medzera za odsekom, text do
