@@ -379,6 +379,11 @@ Podnet: po importe osnov (Word aj PDF) zostava padala s „GetMinMergedCell: Une
   (verzia, systém), chyby s technickými podrobnosťami (aj neošetrené), import osnov; Servis → Záznamy činnosti →
   „Uložiť záznamy (ZIP)…“ (záznamy + o-programe.txt) a „Otvoriť priečinok“.
 - Samotest: krížové zlúčenia v zostave PDF aj Word, `gridBefore` a osamotené pokračovanie zlúčenia, záznam a balík ZIP.
+- **Druhá príčina (z logu používateľa, v0.1.115: Nemecký a Ruský jazyk B1)**: MigraDoc 6.1 zlyhá aj na pravidelnej
+  tabuľke, ak v niektorom riadku nezačína žiadna bunka bez zvislého zlúčenia (všetky bunky riadka zlúčené nadol alebo
+  riadok celý pokrytý zlúčeniami) – jeho `GetMinMergedCell` hľadá len bunky s `MergeDown == 0`. `PdfVystup.Mriezka`
+  v takom riadku rozdelí zvislé zlúčenie na časti bez čiar medzi nimi. Samotest: schodovité zlúčenia a 300 náhodných
+  tabuliek (na vetve vyvoj/etapa1, nevydané).
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
