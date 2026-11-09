@@ -46,7 +46,7 @@ public sealed class DocxCitac
             citac.PripravStyly(docx.MainDocumentPart?.StyleDefinitionsPart?.Styles);
             citac.PripravCislovanie(docx.MainDocumentPart?.NumberingDefinitionsPart?.Numbering);
             var telo = docx.MainDocumentPart?.Document?.Body;
-            var bloky = telo is null ? new List<Blok>() : citac.Bloky(telo.ChildElements);
+            var bloky = telo is null ? new List<Blok>() : citac.Telo(telo);
             while (bloky.Count > 0 && bloky[^1] is Odsek { JePrazdny: true })
             {
                 bloky.RemoveAt(bloky.Count - 1);
@@ -155,6 +155,81 @@ public sealed class DocxCitac
 
     private sealed record PolozkaZoznamu(int NumId, int Uroven, Odsek Text);
 
+    /// <summary>Šírka textu aktuálnej časti dokumentu v twipoch (na šírku tabuliek); A4 na výšku s okrajmi 2,5 cm.</summary>
+    private double _sirkaTextu = 9070;
+
+    /// <summary>Hĺbka vnorenia v tabuľkách – zlomy strán a šírka tabuľky platia len mimo tabuliek.</summary>
+    private int _vTabulke;
+
+    /// <summary>
+    /// Telo dokumentu po častiach (sekciách Wordu). Vlastnosti časti sú na jej konci – v poslednom odseku časti,
+    /// pri poslednej časti priamo v tele. Iné rozloženie strany ako A4 na výšku sa zapíše blokom <see cref="Sekcia"/>.
+    /// </summary>
+    private List<Blok> Telo(Body telo)
+    {
+        var casti = new List<(List<OpenXmlElement> Prvky, SectionProperties? Vlastnosti)> { (new List<OpenXmlElement>(), null) };
+        foreach (var prvok in telo.ChildElements)
+        {
+            if (prvok is SectionProperties koniec)
+            {
+                casti[^1] = (casti[^1].Prvky, koniec);
+                continue;
+            }
+
+            casti[^1].Prvky.Add(prvok);
+            if (prvok is Paragraph { ParagraphProperties.SectionProperties: { } vlastnosti })
+            {
+                casti[^1] = (casti[^1].Prvky, vlastnosti);
+                casti.Add((new List<OpenXmlElement>(), null));
+            }
+        }
+
+        var bloky = new List<Blok>();
+        RozlozenieStrany? predchadzajuce = null;
+        foreach (var (prvky, vlastnosti) in casti)
+        {
+            if (prvky.Count == 0 && predchadzajuce is not null)
+            {
+                continue;
+            }
+
+            var rozlozenie = Rozlozenie(vlastnosti);
+            if (predchadzajuce is null ? !rozlozenie.JeA4NaVysku : !rozlozenie.Zhodne(predchadzajuce))
+            {
+                bloky.Add(new Sekcia(rozlozenie));
+            }
+
+            predchadzajuce = rozlozenie;
+            bloky.AddRange(Bloky(prvky));
+        }
+
+        return bloky;
+    }
+
+    /// <summary>Veľkosť strany časti (a šírka jej textu); bez údajov A4 na výšku.</summary>
+    private RozlozenieStrany Rozlozenie(SectionProperties? vlastnosti)
+    {
+        var velkost = vlastnosti?.GetFirstChild<PageSize>();
+        double sirka = velkost?.Width?.Value ?? 11906;
+        double vyska = velkost?.Height?.Value ?? 16838;
+        if (sirka <= 0 || vyska <= 0)
+        {
+            (sirka, vyska) = (11906, 16838);
+        }
+
+        // orientácia „na šírku“ s rozmermi na výšku (staršie programy) – rozmery sa vymenia
+        if (velkost?.Orient?.Value == PageOrientationValues.Landscape && sirka < vyska)
+        {
+            (sirka, vyska) = (vyska, sirka);
+        }
+
+        var okraje = vlastnosti?.GetFirstChild<PageMargin>();
+        var vlavo = (double?)okraje?.Left?.Value ?? 1418;
+        var vpravo = (double?)okraje?.Right?.Value ?? 1418;
+        _sirkaTextu = Math.Max(1000, sirka - vlavo - vpravo);
+        return RozlozenieStrany.ZTwipov(sirka, vyska);
+    }
+
     private List<Blok> Bloky(IEnumerable<OpenXmlElement> prvky)
     {
         var vysledok = new List<Blok>();
@@ -184,6 +259,23 @@ public sealed class DocxCitac
                     }
 
                     UzavriZoznam();
+                    var zlom = _vTabulke == 0 ? ZlomVOdseku(p) : MiestoZlomu.Ziadny;
+                    if (zlom == MiestoZlomu.Pred)
+                    {
+                        vysledok.Add(new ZlomStrany());
+                    }
+
+                    if (zlom != MiestoZlomu.Ziadny && Odsek(p).JePrazdny)
+                    {
+                        // odsek len so zlomom strany
+                        if (zlom == MiestoZlomu.Za)
+                        {
+                            vysledok.Add(new ZlomStrany());
+                        }
+
+                        break;
+                    }
+
                     if (uroven > 0)
                     {
                         var text = string.Concat(Useky(p).Where(u => !u.NovyRiadok).Select(u => u.Text)).Trim();
@@ -200,6 +292,11 @@ public sealed class DocxCitac
                         {
                             vysledok.Add(odsek);
                         }
+                    }
+
+                    if (zlom == MiestoZlomu.Za)
+                    {
+                        vysledok.Add(new ZlomStrany());
                     }
 
                     break;
@@ -238,6 +335,37 @@ public sealed class DocxCitac
 
         UzavriZoznam();
         return vysledok;
+    }
+
+    private enum MiestoZlomu
+    {
+        Ziadny,
+        Pred,
+        Za,
+    }
+
+    /// <summary>Zlom strany v odseku: pred odsekom (vlastnosť odseku alebo zlom pred prvým textom), inak za odsekom.</summary>
+    private static MiestoZlomu ZlomVOdseku(Paragraph p)
+    {
+        if (Zapnute(p.ParagraphProperties?.PageBreakBefore))
+        {
+            return MiestoZlomu.Pred;
+        }
+
+        var predZlomom = false;
+        foreach (var prvok in p.Descendants())
+        {
+            switch (prvok)
+            {
+                case Break { Type.Value: var druh } when druh == BreakValues.Page:
+                    return predZlomom ? MiestoZlomu.Za : MiestoZlomu.Pred;
+                case Text t when t.Text.Trim().Length > 0:
+                    predZlomom = true;
+                    break;
+            }
+        }
+
+        return MiestoZlomu.Ziadny;
     }
 
     /// <summary>Z po sebe idúcich položiek zoznamu (s úrovňami) postaví vnorené zoznamy.</summary>
@@ -415,6 +543,21 @@ public sealed class DocxCitac
 
     private Tabulka? Tabulka(Table t)
     {
+        _vTabulke++;
+        try
+        {
+            return NacitajTabulku(t);
+        }
+        finally
+        {
+            _vTabulke--;
+        }
+    }
+
+    private Tabulka? NacitajTabulku(Table t)
+    {
+        var sirkaTextu = _sirkaTextu;
+        var vnorena = _vTabulke > 1;
         var siet = t.GetFirstChild<TableGrid>()?.Elements<GridColumn>()
             .Select(g => double.TryParse(g.Width?.Value, NumberStyles.Float, CultureInfo.InvariantCulture, out var w) ? w : 0).ToList() ?? new List<double>();
 
@@ -487,7 +630,10 @@ public sealed class DocxCitac
             vysledok.Add(bunky);
         }
 
-        return new Tabulka(vysledok, pocetStlpcov, siet.Count == pocetStlpcov && siet.Sum() > 0 ? siet : null);
+        // šírka tabuľky voči šírke textu (úzka tabuľka zostane úzka); takmer celá šírka = celá šírka
+        var podiel = vnorena || siet.Sum() <= 0 ? 1 : siet.Sum() / sirkaTextu;
+        return new Tabulka(vysledok, pocetStlpcov, siet.Count == pocetStlpcov && siet.Sum() > 0 ? siet : null,
+            podiel >= 0.93 ? 1 : Math.Max(0.2, podiel));
     }
 
     private static bool Zapnute(OnOffType? prvok) => prvok is not null && (prvok.Val is null || prvok.Val.Value);

@@ -26,6 +26,96 @@ public static class DocxVystup
 
         /// <summary>O koľko úrovní sa posunú nadpisy textu osnovy (v celom dokumente sú pod oblasťou a predmetom).</summary>
         public int PosunNadpisov = 2;
+
+        /// <summary>Šírka textu aktuálnej strany v twipoch (podľa rozloženia strany a okrajov).</summary>
+        public int SirkaTextu = SirkaTextuZostavy(RozlozenieStrany.A4NaVysku);
+    }
+
+    // okraje strán zostavy a samostatnej osnovy (twipy)
+    private const int OkrajZostavyVlavo = 1361;
+    private const int OkrajZostavyVpravo = 1247;
+    private const int OkrajOsnovy = 1418;
+
+    private static int Twipy(double mm) => (int)Math.Round(mm * 56.6929);
+
+    private static int SirkaTextuZostavy(RozlozenieStrany r) => Twipy(r.SirkaMm) - OkrajZostavyVlavo - OkrajZostavyVpravo;
+
+    /// <summary>Veľkosť strany pre vlastnosti časti dokumentu Word (pri strane na šírku aj s orientáciou).</summary>
+    private static PageSize VelkostStrany(RozlozenieStrany r)
+    {
+        var velkost = new PageSize { Width = (UInt32Value)(uint)Twipy(r.SirkaMm), Height = (UInt32Value)(uint)Twipy(r.VyskaMm) };
+        if (r.NaSirku)
+        {
+            velkost.Orient = PageOrientationValues.Landscape;
+        }
+
+        return velkost;
+    }
+
+    /// <summary>
+    /// Časti celého dokumentu s rôznym rozložením strany (napr. osnova na šírku medzi osnovami na výšku). Každá časť
+    /// má hlavičku a pätu pre svoju šírku; prepnutie ukončí doterajšiu časť a ďalší text začne na novej strane.
+    /// </summary>
+    private sealed class CastiZostavy(MainDocumentPart hlavna, CelyDokument dokument, Body telo, Stav stav)
+    {
+        private readonly Dictionary<string, (string? Hlavicka, string Pata)> _odkazy = new();
+        private bool _prva = true;
+
+        public RozlozenieStrany Rozlozenie { get; private set; } = RozlozenieStrany.A4NaVysku;
+
+        /// <summary>Prepne rozloženie strany. True = začala sa nová časť (a tým aj nová strana).</summary>
+        public bool Prepni(RozlozenieStrany nove)
+        {
+            if (nove.Zhodne(Rozlozenie))
+            {
+                return false;
+            }
+
+            telo.Append(new Paragraph(new ParagraphProperties(Vlastnosti())));
+            Rozlozenie = nove;
+            stav.SirkaTextu = SirkaTextuZostavy(nove);
+            return true;
+        }
+
+        /// <summary>Vlastnosti aktuálnej časti: hlavička, päta, veľkosť strany a okraje.</summary>
+        public SectionProperties Vlastnosti()
+        {
+            var kluc = $"{Twipy(Rozlozenie.SirkaMm)}x{Twipy(Rozlozenie.VyskaMm)}";
+            if (!_odkazy.TryGetValue(kluc, out var odkazy))
+            {
+                var sirka = SirkaTextuZostavy(Rozlozenie);
+                string? hlavicka = null;
+                if (dokument.Titul.MaHlavicku(dokument.Udaje.Logo))
+                {
+                    var cast = hlavna.AddNewPart<HeaderPart>();
+                    cast.Header = Hlavicka(cast, dokument.Titul, dokument.Udaje.Logo, sirka, (uint)(2 + _odkazy.Count));
+                    hlavicka = hlavna.GetIdOfPart(cast);
+                }
+
+                var pata = hlavna.AddNewPart<FooterPart>();
+                pata.Footer = Pata(dokument.Titul, sirka);
+                odkazy = (hlavicka, hlavna.GetIdOfPart(pata));
+                _odkazy[kluc] = odkazy;
+            }
+
+            var vlastnosti = new SectionProperties();
+            if (odkazy.Hlavicka is not null)
+            {
+                vlastnosti.Append(new HeaderReference { Type = HeaderFooterValues.Default, Id = odkazy.Hlavicka });
+            }
+
+            vlastnosti.Append(
+                new FooterReference { Type = HeaderFooterValues.Default, Id = odkazy.Pata },
+                VelkostStrany(Rozlozenie),
+                new PageMargin { Top = 1474, Bottom = 1361, Left = OkrajZostavyVlavo, Right = OkrajZostavyVpravo, Header = 680, Footer = 624, Gutter = 0 });
+            if (_prva && dokument.Volby.TitulnaStrana)
+            {
+                vlastnosti.Append(new TitlePage());
+            }
+
+            _prva = false;
+            return vlastnosti;
+        }
     }
 
     /// <summary>Celý dokument ako obsah súboru Word (napr. príloha PDF/A-3b) – priamo v pamäti, bez dočasného súboru.</summary>
@@ -96,69 +186,56 @@ public static class DocxVystup
         }
 
         var volby = dokument.Volby;
+        var casti = new CastiZostavy(hlavna, dokument, telo, stav);
         foreach (var oblast in dokument.Oblasti)
         {
-            Oblast(telo, oblast, !prvy, volby.OddelovacOblasti, stav);
+            // oblasť je vždy na výšku; nová časť sama začína novou stranou
+            var prepnute = casti.Prepni(RozlozenieStrany.A4NaVysku);
+            Oblast(telo, oblast, !prvy && !prepnute, volby.OddelovacOblasti, stav);
             prvy = false;
             for (var i = 0; i < oblast.Predmety.Count; i++)
             {
                 var predmet = oblast.Predmety[i];
+                var obsah = DokumentOsnovy.Upratane(predmet.Obsah);
+                var castiPredmetu = DokumentOsnovy.Casti(obsah);
+                prepnute = casti.Prepni(castiPredmetu[0].Rozlozenie);
                 if (volby.OddelovacPredmetu)
                 {
-                    OddelovacPredmetu(telo, oblast, predmet);
+                    OddelovacPredmetu(telo, oblast, predmet, !prepnute);
+                    prepnute = false;
                 }
 
-                var novaStrana = volby.OddelovacPredmetu || volby.OddelovacOblasti || i > 0 || oblast.Charakteristika.Count > 0;
-                Predmet(telo, oblast, predmet, novaStrana, stav);
+                var novaStrana = !prepnute && (volby.OddelovacPredmetu || volby.OddelovacOblasti || i > 0 || oblast.Charakteristika.Count > 0);
+                Predmet(telo, oblast, predmet, novaStrana, castiPredmetu, casti, stav);
             }
         }
 
-        // hlavička (ak má zapnutú aspoň jednu časť) a päta – nie na titulnej strane
-        HeaderPart? hlavicka = null;
-        if (dokument.Titul.MaHlavicku(dokument.Udaje.Logo))
-        {
-            hlavicka = hlavna.AddNewPart<HeaderPart>();
-            hlavicka.Header = Hlavicka(hlavicka, dokument.Titul, dokument.Udaje.Logo);
-        }
+        // hlavička (ak má zapnutú aspoň jednu časť) a päta – nie na titulnej strane; vlastnosti poslednej časti sú v tele
+        telo.Append(casti.Vlastnosti());
+        hlavna.Document.Save();
+    }
 
-        var pata = hlavna.AddNewPart<FooterPart>();
-        Paragraph odsekPaty;
-        if (dokument.Titul.TextVPate is { } textPaty)
+    /// <summary>Päta strán: vľavo škola a kontakt (ak sú zapnuté), vpravo číslo strany „Strana X z Y“.</summary>
+    private static Footer Pata(SkVP.Services.TitulnaStrana titul, int sirkaTextu)
+    {
+        Paragraph odsek;
+        if (titul.TextVPate is { } textPaty)
         {
-            // vľavo škola / kontakt, vpravo číslo strany (šírka textu 11906 − 1361 − 1247)
-            odsekPaty = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" },
-                new Tabs(new TabStop { Val = TabStopValues.Right, Position = 9298 }), new Justification { Val = JustificationValues.Left }));
-            odsekPaty.Append(Beh(textPaty));
-            odsekPaty.Append(new Run(new TabChar()));
+            odsek = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" },
+                new Tabs(new TabStop { Val = TabStopValues.Right, Position = sirkaTextu }), new Justification { Val = JustificationValues.Left }));
+            odsek.Append(Beh(textPaty));
+            odsek.Append(new Run(new TabChar()));
         }
         else
         {
-            odsekPaty = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" }, new Justification { Val = JustificationValues.Center }));
+            odsek = new Paragraph(new ParagraphProperties(new ParagraphStyleId { Val = "Footer" }, new Justification { Val = JustificationValues.Center }));
         }
 
-        odsekPaty.Append(Beh("Strana "));
-        odsekPaty.Append(Pole("PAGE", "1"));
-        odsekPaty.Append(Beh(" z "));
-        odsekPaty.Append(Pole("NUMPAGES", "1"));
-        pata.Footer = new Footer(odsekPaty);
-
-        var sekcia = new SectionProperties();
-        if (hlavicka is not null)
-        {
-            sekcia.Append(new HeaderReference { Type = HeaderFooterValues.Default, Id = hlavna.GetIdOfPart(hlavicka) });
-        }
-
-        sekcia.Append(
-            new FooterReference { Type = HeaderFooterValues.Default, Id = hlavna.GetIdOfPart(pata) },
-            new PageSize { Width = 11906, Height = 16838 },
-            new PageMargin { Top = 1474, Bottom = 1361, Left = 1361, Right = 1247, Header = 680, Footer = 624, Gutter = 0 });
-        if (dokument.Volby.TitulnaStrana)
-        {
-            sekcia.Append(new TitlePage());
-        }
-
-        telo.Append(sekcia);
-        hlavna.Document.Save();
+        odsek.Append(Beh("Strana "));
+        odsek.Append(Pole("PAGE", "1"));
+        odsek.Append(Beh(" z "));
+        odsek.Append(Pole("NUMPAGES", "1"));
+        return new Footer(odsek);
     }
 
     // ---- časti dokumentu ----
@@ -339,18 +416,22 @@ public static class DocxVystup
             }
 
             telo.Append(c);
-            foreach (var prvok in Bloky(oblast.Charakteristika, farba, stav))
+            foreach (var prvok in Bloky(DokumentOsnovy.Upratane(oblast.Charakteristika).Where(b => b is not Sekcia).ToList(), farba, stav))
             {
                 telo.Append(prvok);
             }
         }
     }
 
-    private static void OddelovacPredmetu(Body telo, KapitolaOblasti oblast, KapitolaPredmetu predmet)
+    private static void OddelovacPredmetu(Body telo, KapitolaOblasti oblast, KapitolaPredmetu predmet, bool novaStrana)
     {
         var farba = Hex(oblast.Farba);
         var cislo = Odsek(predmet.Cislo, "SkvpOddelovacCislo", farba);
-        cislo.ParagraphProperties!.PageBreakBefore = new PageBreakBefore();
+        if (novaStrana)
+        {
+            cislo.ParagraphProperties!.PageBreakBefore = new PageBreakBefore();
+        }
+
         telo.Append(cislo);
         var nazov = new Paragraph(new ParagraphProperties(
             new ParagraphStyleId { Val = "SkvpOddelovacNazov" },
@@ -360,7 +441,8 @@ public static class DocxVystup
         telo.Append(Odsek(oblast.Nazov, "SkvpTitulUdaj", Siva));
     }
 
-    private static void Predmet(Body telo, KapitolaOblasti oblast, KapitolaPredmetu predmet, bool novaStrana, Stav stav)
+    private static void Predmet(Body telo, KapitolaOblasti oblast, KapitolaPredmetu predmet, bool novaStrana,
+        List<(RozlozenieStrany Rozlozenie, List<Blok> Bloky)> obsah, CastiZostavy casti, Stav stav)
     {
         var farba = Hex(oblast.Farba);
         var oblastText = Odsek($"{oblast.Nazov}  •  {predmet.Cislo}", "SkvpOblastMala", farba);
@@ -377,24 +459,27 @@ public static class DocxVystup
         nadpis.Append(Beh(predmet.Nazov));
         telo.Append(nadpis);
 
-        if (predmet.Obsah.Count == 0)
+        if (obsah.All(c => c.Bloky.Count == 0))
         {
             telo.Append(Odsek("Učebná osnova predmetu zatiaľ nie je spracovaná.", "SkvpPoznamka"));
             return;
         }
 
-        foreach (var prvok in Bloky(predmet.Obsah, farba, stav))
+        foreach (var (rozlozenie, bloky) in obsah)
         {
-            telo.Append(prvok);
+            casti.Prepni(rozlozenie);
+            foreach (var prvok in Bloky(bloky, farba, stav))
+            {
+                telo.Append(prvok);
+            }
         }
     }
 
     /// <summary>
     /// Hlavička strán: tabuľka bez okrajov s čiarou dole – vľavo text, vpravo názov školy a logo. Vypnuté časti sa vynechajú.
     /// </summary>
-    private static Header Hlavicka(HeaderPart cast, SkVP.Services.TitulnaStrana t, string? cestaLoga)
+    private static Header Hlavicka(HeaderPart cast, SkVP.Services.TitulnaStrana t, string? cestaLoga, int sirkaTextu, uint idObrazka)
     {
-        const int sirkaTextu = 9298; // šírka textu strany v twipoch (A4 bez okrajov)
         const double twipovNaCm = 566.93;
         var text = t.TextVHlavicke;
         var skola = t.SkolaVHlavicke;
@@ -421,7 +506,7 @@ public static class DocxVystup
 
         if (logo is not null)
         {
-            var beh = Obrazok(cast, logo, sirkaLoga, vyskaLoga, 2U, "Logo školy v hlavičke");
+            var beh = Obrazok(cast, logo, sirkaLoga, vyskaLoga, idObrazka, "Logo školy v hlavičke");
             bunky.Add((stlpecLoga, beh is null ? OdsekHlavicky(JustificationValues.Right) : OdsekHlavicky(JustificationValues.Right, beh)));
         }
 
@@ -601,6 +686,10 @@ public static class DocxVystup
 
                     break;
 
+                case ZlomStrany:
+                    vysledok.Add(new Paragraph(new Run(new Break { Type = BreakValues.Page })));
+                    break;
+
                 case Tabulka t:
                     vysledok.Add(Tabulka(t, farba, stav));
                     if (stav.PosunNadpisov > 0)
@@ -616,12 +705,10 @@ public static class DocxVystup
         return vysledok;
     }
 
-    private const int SirkaTextuTwip = 9298;
-
     private static Table Tabulka(Tabulka t, string farba, Stav stav)
     {
         var tabulka = new Table(new TableProperties(
-            new TableWidth { Type = TableWidthUnitValues.Pct, Width = "5000" },
+            new TableWidth { Type = TableWidthUnitValues.Pct, Width = ((int)Math.Round(5000 * t.SirkaVTexte)).ToString(CultureInfo.InvariantCulture) },
             new TableBorders(
                 new TopBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
                 new LeftBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
@@ -636,7 +723,7 @@ public static class DocxVystup
                 new BottomMargin { Width = "30", Type = TableWidthUnitValues.Dxa },
                 new TableCellRightMargin { Width = 85, Type = TableWidthValues.Dxa })));
 
-        var sirky = t.PomerneSirky.Select(x => (int)Math.Round(x * SirkaTextuTwip)).ToList();
+        var sirky = t.PomerneSirky.Select(x => (int)Math.Round(x * stav.SirkaTextu * t.SirkaVTexte)).ToList();
         var siet = new TableGrid();
         foreach (var sirka in sirky)
         {
@@ -758,20 +845,34 @@ public static class DocxVystup
                     Uri = "http://schemas.microsoft.com/office/word",
                     Val = "15",
                 }));
-            foreach (var prvok in Bloky(bloky, "3B5BDB", stav))
+            // každá časť s vlastným rozložením strany (osnova na šírku) – vlastnosti časti sú na jej konci
+            var casti = DokumentOsnovy.Casti(bloky);
+            for (var i = 0; i < casti.Count; i++)
             {
-                telo.Append(prvok);
-            }
+                var (rozlozenie, blokyCasti) = casti[i];
+                stav.SirkaTextu = Twipy(rozlozenie.SirkaMm) - 2 * OkrajOsnovy;
+                foreach (var prvok in Bloky(blokyCasti, "3B5BDB", stav))
+                {
+                    telo.Append(prvok);
+                }
 
-            if (!telo.HasChildren || telo.LastChild is Table)
-            {
-                // Word chce za tabuľkou na konci dokumentu ešte odsek
-                telo.Append(new Paragraph());
-            }
+                var vlastnosti = new SectionProperties(
+                    VelkostStrany(rozlozenie),
+                    new PageMargin { Top = OkrajOsnovy, Bottom = OkrajOsnovy, Left = (uint)OkrajOsnovy, Right = (uint)OkrajOsnovy, Header = 709, Footer = 709, Gutter = 0 });
+                if (i < casti.Count - 1)
+                {
+                    telo.Append(new Paragraph(new ParagraphProperties(vlastnosti)));
+                    continue;
+                }
 
-            telo.Append(new SectionProperties(
-                new PageSize { Width = 11906, Height = 16838 },
-                new PageMargin { Top = 1418, Bottom = 1418, Left = 1418, Right = 1418, Header = 709, Footer = 709, Gutter = 0 }));
+                if (!telo.HasChildren || telo.LastChild is Table)
+                {
+                    // Word chce za tabuľkou na konci dokumentu ešte odsek
+                    telo.Append(new Paragraph());
+                }
+
+                telo.Append(vlastnosti);
+            }
             hlavna.Document.Save();
         }
 

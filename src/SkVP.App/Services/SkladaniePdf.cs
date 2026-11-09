@@ -1,5 +1,6 @@
 using System.Text;
 using System.Windows;
+using System.Windows.Media;
 using MigraDoc.DocumentObjectModel;
 using MigraDoc.Rendering;
 using PdfSharp.Drawing;
@@ -67,8 +68,7 @@ internal static class SkladaniePdf
     /// <summary>Veľkosť strany v bodoch a voliteľne časť s obsahom (zistená z kresby strany).</summary>
     private static (Size, Rect) RozmerStrany(DocumentRenderer vykreslenie, int cislo, bool zistitObsah)
     {
-        var info = vykreslenie.FormattedDocument!.GetPageInfo(cislo);
-        var velkost = new Size(info.Width, info.Height);
+        var velkost = NahladDokumentu.VelkostVBodoch(vykreslenie, cislo);
         if (!zistitObsah)
         {
             return (velkost, Rect.Empty);
@@ -113,12 +113,12 @@ internal static class SkladaniePdf
     /// <summary>Kreslenie strany listu do PDF.</summary>
     private sealed class Platno(XGraphics gfx, DocumentRenderer vykreslenie) : IPlatnoListu
     {
-        public void Strana(int cislo, Rect bunka, double mierka, Vector posun)
+        public void Strana(int cislo, Rect bunka, Matrix transformacia)
         {
             var stav = gfx.Save();
             gfx.IntersectClip(Na(bunka));
-            gfx.TranslateTransform(posun.X, posun.Y);
-            gfx.ScaleTransform(mierka);
+            var m = transformacia;
+            gfx.MultiplyTransform(new XMatrix(m.M11, m.M12, m.M21, m.M22, m.OffsetX, m.OffsetY));
             vykreslenie.RenderPage(gfx, cislo);
             gfx.Restore(stav);
         }

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Media;
 
 namespace SkVP.Pomocne;
 
@@ -8,8 +9,8 @@ namespace SkVP.Pomocne;
 /// </summary>
 public interface IPlatnoListu
 {
-    /// <summary>Strana zostavy orezaná na bunku: najprv zmenšená mierkou, potom posunutá.</summary>
-    void Strana(int cislo, Rect bunka, double mierka, Vector posun);
+    /// <summary>Strana zostavy orezaná na bunku, umiestnená transformáciou (súradnice strany → súradnice listu).</summary>
+    void Strana(int cislo, Rect bunka, Matrix transformacia);
 
     /// <summary>Tenký čierny rám.</summary>
     void Ramcek(Rect obdlznik);
@@ -143,6 +144,26 @@ public sealed class Impozicia
         return (mierka, new Vector(stredBunky.X - stred.X * mierka, stredBunky.Y - stred.Y * mierka));
     }
 
+    /// <summary>
+    /// Transformácia strany do bunky. Strana s inou orientáciou ako bunka (osnova na šírku na liste na výšku) sa otočí
+    /// o 90° proti smeru hodinových ručičiek – horný okraj strany je pri ľavom okraji, list sa číta po otočení doprava.
+    /// </summary>
+    public static Matrix Transformacia(Size strana, Rect obsah, Rect bunka, double zvacsenie)
+    {
+        var otocenie = Matrix.Identity;
+        if (strana.Width > 0 && strana.Height > 0 && strana.Width != strana.Height && bunka.Width != bunka.Height
+            && strana.Width > strana.Height != bunka.Width > bunka.Height)
+        {
+            // (x, y) → (y, šírka − x): strana otočená, rozmery vymenené
+            otocenie = new Matrix(0, -1, 1, 0, 0, strana.Width);
+            obsah = obsah.IsEmpty ? obsah : Rect.Transform(obsah, otocenie);
+            strana = new Size(strana.Height, strana.Width);
+        }
+
+        var (mierka, posun) = Umiestnenie(strana, obsah, bunka, zvacsenie);
+        return otocenie * new Matrix(mierka, 0, 0, mierka, posun.X, posun.Y);
+    }
+
     /// <summary>Nakreslí stranu listu na plátno.</summary>
     /// <param name="rozmerStrany">veľkosť strany zostavy a jej obsah (v jednotkách cieľa)</param>
     public void Nakresli(int index, double jednotiekNaMm, IPlatnoListu platno, Func<int, (Size Velkost, Rect Obsah)> rozmerStrany)
@@ -156,8 +177,7 @@ public sealed class Impozicia
             if (strany[i] is int cislo)
             {
                 var (velkost, obsah) = rozmerStrany(cislo);
-                var (mierka, posun) = Umiestnenie(velkost, obsah, bunka, Volby.Zvacsenie);
-                platno.Strana(cislo, bunka, mierka, posun);
+                platno.Strana(cislo, bunka, Transformacia(velkost, obsah, bunka, Volby.Zvacsenie));
             }
 
             // pri jednej strane na liste sa prázdny list neorámuje

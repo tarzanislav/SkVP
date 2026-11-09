@@ -14,15 +14,14 @@ namespace SkVP.Services;
 public sealed class ListyTlace
 {
     private readonly DocumentRenderer _vykreslenie;
-    private readonly bool _stranyNaSirku;
     private readonly double _dpiSivej;
     private readonly Dictionary<int, StranaZostavy> _strany = new();
 
+    /// <param name="stranyNaSirku">orientácia strán zostavy – podľa nej je list (strana s inou orientáciou sa otočí)</param>
     /// <param name="dpiSivej">rozlíšenie strán v odtieňoch sivej (náhľad menej, tlač a obrázky viac)</param>
     public ListyTlace(DocumentRenderer vykreslenie, bool stranyNaSirku, VolbyTlace volby, double dpiSivej = 250)
     {
         _vykreslenie = vykreslenie;
-        _stranyNaSirku = stranyNaSirku;
         _dpiSivej = dpiSivej;
         Impozicia = new Impozicia(NahladDokumentu.PocetStran(vykreslenie), volby, stranyNaSirku);
         Velkost = Impozicia.List(NahladDokumentu.JednotiekNaMm);
@@ -84,7 +83,8 @@ public sealed class ListyTlace
     {
         if (!_strany.TryGetValue(cislo, out var strana))
         {
-            var kresba = NahladDokumentu.Strana(_vykreslenie, cislo, _stranyNaSirku, out var velkost).Drawing;
+            // každá strana v svojej orientácii (zostava môže mať osnovy na výšku aj na šírku)
+            var kresba = NahladDokumentu.Strana(_vykreslenie, cislo, out var velkost).Drawing;
             var obsah = NahladDokumentu.Obsah(kresba, velkost);
             Drawing hotova = Impozicia.Volby.OdtieneSivej ? Sivo(kresba, velkost, _dpiSivej) : kresba;
             if (hotova.CanFreeze)
@@ -125,10 +125,10 @@ public sealed class ListyTlace
         private static readonly Pen PeroRamceka = Zmrazene(new Pen(Brushes.Black, 0.6));
         private static readonly Pen PeroPrelozenia = Zmrazene(new Pen(Brushes.Gray, 0.4) { DashStyle = DashStyles.Dash });
 
-        public void Strana(int cislo, Rect bunka, double mierka, Vector posun)
+        public void Strana(int cislo, Rect bunka, Matrix transformacia)
         {
             dc.PushClip(new RectangleGeometry(bunka));
-            dc.PushTransform(new MatrixTransform(mierka, 0, 0, mierka, posun.X, posun.Y));
+            dc.PushTransform(new MatrixTransform(transformacia));
             dc.DrawDrawing(listy.Strana(cislo).Kresba);
             dc.Pop();
             dc.Pop();

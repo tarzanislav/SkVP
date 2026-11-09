@@ -28,9 +28,16 @@ public sealed record Zoznam(bool Cislovany, IReadOnlyList<IReadOnlyList<Blok>> P
 /// <summary>Bunka tabuľky – môže zaberať viac stĺpcov alebo riadkov (zlúčené bunky).</summary>
 public sealed record Bunka(IReadOnlyList<Blok> Bloky, int Stlpce = 1, int Riadky = 1, bool Hlavicka = false);
 
-/// <summary>Tabuľka; bunky pokryté zlúčenou bunkou z predchádzajúceho riadka sa v riadkoch neuvádzajú.</summary>
-public sealed record Tabulka(IReadOnlyList<IReadOnlyList<Bunka>> Riadky, int PocetStlpcov, IReadOnlyList<double>? Sirky = null) : Blok
+/// <summary>
+/// Tabuľka; bunky pokryté zlúčenou bunkou z predchádzajúceho riadka sa v riadkoch neuvádzajú.
+/// <paramref name="Podiel"/> = šírka tabuľky ako časť šírky textu (úzka tabuľka z Wordu zostane úzka).
+/// </summary>
+public sealed record Tabulka(IReadOnlyList<IReadOnlyList<Bunka>> Riadky, int PocetStlpcov, IReadOnlyList<double>? Sirky = null, double Podiel = 1)
+    : Blok
 {
+    /// <summary>Šírka tabuľky ako časť šírky textu (0,2 – 1).</summary>
+    public double SirkaVTexte => double.IsFinite(Podiel) ? Math.Clamp(Podiel, 0.2, 1) : 1;
+
     /// <summary>Pomerné šírky stĺpcov (súčet 1).</summary>
     public IReadOnlyList<double> PomerneSirky
     {
@@ -46,6 +53,42 @@ public sealed record Tabulka(IReadOnlyList<IReadOnlyList<Bunka>> Riadky, int Poc
         }
     }
 }
+
+/// <summary>Veľkosť strany papiera v mm (šírka × výška – strana na šírku má väčšiu šírku).</summary>
+public sealed record RozlozenieStrany(double SirkaMm, double VyskaMm)
+{
+    /// <summary>Tolerancia porovnania veľkostí papiera (mm) – Word zaokrúhľuje rozmery na twipy.</summary>
+    private const double Tolerancia = 3;
+
+    public static RozlozenieStrany A4NaVysku { get; } = new(210, 297);
+
+    public static RozlozenieStrany A4NaSirku { get; } = new(297, 210);
+
+    public bool NaSirku => SirkaMm > VyskaMm;
+
+    public bool JeA4NaVysku => Zhodne(A4NaVysku);
+
+    public bool Zhodne(RozlozenieStrany ine) =>
+        Math.Abs(SirkaMm - ine.SirkaMm) < Tolerancia && Math.Abs(VyskaMm - ine.VyskaMm) < Tolerancia;
+
+    /// <summary>Napr. „A4 na šírku“ alebo „216 × 279 mm“.</summary>
+    public string Popis =>
+        Zhodne(A4NaVysku) ? "A4 na výšku"
+        : Zhodne(A4NaSirku) ? "A4 na šírku"
+        : string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{SirkaMm:0} × {VyskaMm:0} mm");
+
+    /// <summary>Rozloženie z rozmerov v twipoch (1/1440 palca) – ako ich zapisuje Word.</summary>
+    public static RozlozenieStrany ZTwipov(double sirka, double vyska) => new(Math.Round(sirka / 56.6929, 1), Math.Round(vyska / 56.6929, 1));
+}
+
+/// <summary>
+/// Od tohto miesta platí iné rozloženie strany a začína nová strana. Ako prvý blok dokumentu určuje rozloženie celého
+/// dokumentu (napr. osnova na šírku). Dokument A4 na výšku tento blok na začiatku nemá.
+/// </summary>
+public sealed record Sekcia(RozlozenieStrany Rozlozenie) : Blok;
+
+/// <summary>Nová strana (zlom strany z Wordu).</summary>
+public sealed record ZlomStrany : Blok;
 
 /// <summary>Písma a veľkosti textu osnov – rovnaké v editore, v PDF aj vo Worde.</summary>
 public static class PismaDokumentu
@@ -84,9 +127,13 @@ public static class PismaDokumentu
 public static class DokumentOsnovy
 {
     private const string ZnackaNadpisu = "H";
+    private const string ZnackaZlomu = "ZLOM";
+    private const string ZnackaVolnehoStlpca = "VOLNY";
+    private const string ZnackaSekcie = "SEKCIA:";
 
     private static readonly SolidColorBrush Linka = Zmrazeny(Color.FromRgb(0xC5, 0xCC, 0xD6));
     private static readonly SolidColorBrush PodkladHlavicky = Zmrazeny(Color.FromRgb(0xF3, 0xF4, 0xF6));
+    private static readonly SolidColorBrush ZnackaText = Zmrazeny(Color.FromRgb(0x8A, 0x94, 0xA3));
 
     /// <summary>Nadpisy novej osnovy predmetu (podľa bežnej štruktúry učebných osnov ŠkVP).</summary>
     public static readonly string[] CastiOsnovy =
@@ -218,8 +265,54 @@ public static class DokumentOsnovy
                 case Tabulka t:
                     ciel.Add(Tabulka(t));
                     break;
+
+                case ZlomStrany:
+                    ciel.Add(Znacka(ZnackaZlomu, "nová strana"));
+                    break;
+
+                case Sekcia sekcia:
+                    ciel.Add(Znacka(ZnackaSekcie + Kod(sekcia.Rozlozenie), $"nová strana – {sekcia.Rozlozenie.Popis}"));
+                    break;
             }
         }
+    }
+
+    /// <summary>Úzka tabuľka bude na celú šírku (pred pridaním alebo odstránením stĺpca v editore).</summary>
+    public static void ZrusVolnyStlpec(Table tabulka)
+    {
+        foreach (var stlpec in tabulka.Columns.Where(c => Equals(c.Tag, ZnackaVolnehoStlpca)).ToList())
+        {
+            tabulka.Columns.Remove(stlpec);
+            tabulka.BorderThickness = new Thickness(0.5);
+        }
+    }
+
+    /// <summary>Značka zlomu strany alebo novej časti dokumentu v editore (sivý riadok s čiarou).</summary>
+    private static Paragraph Znacka(string tag, string text) => new(new Run(text))
+    {
+        Tag = tag,
+        FontFamily = new FontFamily(PismaDokumentu.Nadpis),
+        FontSize = 11,
+        Foreground = ZnackaText,
+        TextAlignment = TextAlignment.Center,
+        BorderBrush = Linka,
+        BorderThickness = new Thickness(0, 1, 0, 0),
+        Padding = new Thickness(0, 3, 0, 0),
+        Margin = new Thickness(0, 14, 0, 14),
+    };
+
+    private static string Kod(RozlozenieStrany r) =>
+        string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{r.SirkaMm:0.#}x{r.VyskaMm:0.#}");
+
+    private static RozlozenieStrany? ZKodu(string kod)
+    {
+        var casti = kod.Split('x');
+        return casti.Length == 2
+               && double.TryParse(casti[0], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var sirka)
+               && double.TryParse(casti[1], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var vyska)
+               && sirka > 0 && vyska > 0
+            ? new RozlozenieStrany(sirka, vyska)
+            : null;
     }
 
     private static Paragraph Odsek(Odsek o)
@@ -268,9 +361,17 @@ public static class DokumentOsnovy
     private static Table Tabulka(Tabulka t)
     {
         var tabulka = new Table { CellSpacing = 0, BorderBrush = Linka, BorderThickness = new Thickness(0.5), Margin = new Thickness(0, 6, 0, 10) };
+        var podiel = t.SirkaVTexte;
         foreach (var sirka in t.PomerneSirky)
         {
-            tabulka.Columns.Add(new TableColumn { Width = new GridLength(Math.Max(0.02, sirka), GridUnitType.Star) });
+            tabulka.Columns.Add(new TableColumn { Width = new GridLength(Math.Max(0.02, sirka * podiel), GridUnitType.Star) });
+        }
+
+        if (podiel < 0.97)
+        {
+            // úzka tabuľka: zvyšok šírky je prázdny stĺpec bez buniek, rámik majú len bunky
+            tabulka.Columns.Add(new TableColumn { Width = new GridLength(1 - podiel, GridUnitType.Star), Tag = ZnackaVolnehoStlpca });
+            tabulka.BorderThickness = new Thickness(0);
         }
 
         var skupina = new TableRowGroup();
@@ -332,6 +433,18 @@ public static class DokumentOsnovy
         {
             switch (blok)
             {
+                case Paragraph { Tag: ZnackaZlomu }:
+                    vysledok.Add(new ZlomStrany());
+                    break;
+
+                case Paragraph { Tag: string znacka } when znacka.StartsWith(ZnackaSekcie, StringComparison.Ordinal):
+                    if (ZKodu(znacka[ZnackaSekcie.Length..]) is { } rozlozenie)
+                    {
+                        vysledok.Add(new Sekcia(rozlozenie));
+                    }
+
+                    break;
+
                 case Paragraph odsek:
                     var uroven = UrovenNadpisu(odsek);
                     if (uroven > 0)
@@ -376,16 +489,19 @@ public static class DokumentOsnovy
                         }
                     }
 
-                    var stlpce = Math.Max(tabulka.Columns.Count, riadky.Count == 0 ? 0 : riadky.Max(r => r.Sum(b => b.Stlpce)));
+                    var stlpceTabulky = tabulka.Columns.Where(c => !Equals(c.Tag, ZnackaVolnehoStlpca)).ToList();
+                    var volne = tabulka.Columns.Where(c => Equals(c.Tag, ZnackaVolnehoStlpca) && c.Width.IsStar).Sum(c => c.Width.Value);
+                    var stlpce = Math.Max(stlpceTabulky.Count, riadky.Count == 0 ? 0 : riadky.Max(r => r.Sum(b => b.Stlpce)));
                     List<double>? sirky = null;
-                    if (tabulka.Columns.Count == stlpce && tabulka.Columns.All(c => c.Width.IsStar || c.Width.IsAbsolute))
+                    if (stlpceTabulky.Count == stlpce && stlpceTabulky.All(c => c.Width.IsStar || c.Width.IsAbsolute))
                     {
-                        sirky = tabulka.Columns.Select(c => c.Width.Value).ToList();
+                        sirky = stlpceTabulky.Select(c => c.Width.Value).ToList();
                     }
 
+                    var podiel = sirky is { Count: > 0 } && volne > 0 && stlpceTabulky.All(c => c.Width.IsStar) ? sirky.Sum() / (sirky.Sum() + volne) : 1;
                     if (riadky.Count > 0 && stlpce > 0)
                     {
-                        vysledok.Add(new Tabulka(riadky, stlpce, sirky));
+                        vysledok.Add(new Tabulka(riadky, stlpce, sirky, podiel));
                     }
 
                     break;
@@ -433,6 +549,128 @@ public static class DokumentOsnovy
             }
         }
     }
+
+    // ---- rozloženie strán a prázdne miesta ----
+
+    /// <summary>Rozloženie strany na začiatku dokumentu (bez bloku <see cref="Sekcia"/> A4 na výšku).</summary>
+    public static RozlozenieStrany Rozlozenie(IReadOnlyList<Blok> bloky) =>
+        bloky.Count > 0 && bloky[0] is Sekcia sekcia ? sekcia.Rozlozenie : RozlozenieStrany.A4NaVysku;
+
+    /// <summary>Najširšia strana dokumentu – podľa nej sa nastaví šírka listu v náhľade.</summary>
+    public static RozlozenieStrany NajsirsiaStrana(IReadOnlyList<Blok> bloky) =>
+        bloky.OfType<Sekcia>().Select(s => s.Rozlozenie).Append(Rozlozenie(bloky)).MaxBy(r => r.SirkaMm)!;
+
+    /// <summary>Časti dokumentu s jedným rozložením strany (rozdelené blokmi <see cref="Sekcia"/>, tie sa vynechajú).</summary>
+    public static List<(RozlozenieStrany Rozlozenie, List<Blok> Bloky)> Casti(IReadOnlyList<Blok> bloky)
+    {
+        var casti = new List<(RozlozenieStrany, List<Blok>)> { (Rozlozenie(bloky), new List<Blok>()) };
+        foreach (var blok in bloky)
+        {
+            if (blok is Sekcia sekcia)
+            {
+                if (casti[^1].Item2.Count == 0)
+                {
+                    casti[^1] = (sekcia.Rozlozenie, casti[^1].Item2);
+                }
+                else
+                {
+                    casti.Add((sekcia.Rozlozenie, new List<Blok>()));
+                }
+            }
+            else
+            {
+                casti[^1].Item2.Add(blok);
+            }
+        }
+
+        return casti;
+    }
+
+    /// <summary>
+    /// Bez hluchých miest: viac prázdnych odsekov za sebou sa zlúči do jedného, prázdne odseky na začiatku, na konci,
+    /// pri nadpise a pri novej strane sa vynechajú, opakované alebo zbytočné zlomy strany tiež (napr. zlom hneď na začiatku).
+    /// Text, tabuľky ani rozloženie strán sa nemenia.
+    /// </summary>
+    public static List<Blok> Upratane(IReadOnlyList<Blok> bloky)
+    {
+        static bool Prazdny(Blok b) => b is Odsek o && o.Useky.All(u => u.Text.Trim().Length == 0);
+        static bool Hranica(Blok b) => b is ZlomStrany or Sekcia or Nadpis;
+
+        var vysledok = new List<Blok>();
+        void OdstranPrazdneNaKonci()
+        {
+            while (vysledok.Count > 0 && Prazdny(vysledok[^1]))
+            {
+                vysledok.RemoveAt(vysledok.Count - 1);
+            }
+        }
+
+        foreach (var blok in bloky)
+        {
+            if (Prazdny(blok))
+            {
+                if (vysledok.Count > 0 && !Prazdny(vysledok[^1]) && !Hranica(vysledok[^1]))
+                {
+                    vysledok.Add(blok);
+                }
+
+                continue;
+            }
+
+            if (Hranica(blok))
+            {
+                OdstranPrazdneNaKonci();
+            }
+
+            switch (blok)
+            {
+                // zlom na začiatku, za iným zlomom alebo za novou časťou (tá sama začína stranou) nič nerobí
+                case ZlomStrany when vysledok.Count == 0 || vysledok[^1] is ZlomStrany or Sekcia:
+                    continue;
+
+                case Sekcia sekcia when vysledok.Count == 0:
+                    if (!sekcia.Rozlozenie.JeA4NaVysku)
+                    {
+                        vysledok.Add(sekcia);
+                    }
+
+                    continue;
+
+                case Sekcia sekcia when sekcia.Rozlozenie.Zhodne(AktualneRozlozenie(vysledok)):
+                    // rovnaké rozloženie ako doteraz = len nová strana
+                    if (vysledok[^1] is not (ZlomStrany or Sekcia))
+                    {
+                        vysledok.Add(new ZlomStrany());
+                    }
+
+                    continue;
+
+                case Sekcia sekcia when vysledok[^1] is ZlomStrany:
+                    vysledok[^1] = sekcia;
+                    continue;
+            }
+
+            vysledok.Add(blok);
+        }
+
+        // na konci nemajú význam prázdne odseky ani zlomy strán
+        OdstranPrazdneNaKonci();
+        while (vysledok.Count > 1 && vysledok[^1] is ZlomStrany or Sekcia)
+        {
+            vysledok.RemoveAt(vysledok.Count - 1);
+            OdstranPrazdneNaKonci();
+        }
+
+        if (vysledok.Count == 1 && vysledok[0] is ZlomStrany)
+        {
+            vysledok.Clear();
+        }
+
+        return vysledok;
+    }
+
+    private static RozlozenieStrany AktualneRozlozenie(List<Blok> bloky) =>
+        bloky.OfType<Sekcia>().LastOrDefault()?.Rozlozenie ?? RozlozenieStrany.A4NaVysku;
 
     // ---- pomocné ----
 

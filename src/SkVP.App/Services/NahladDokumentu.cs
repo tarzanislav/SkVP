@@ -31,10 +31,25 @@ public static class NahladDokumentu
     public static int PocetStran(DocumentRenderer vykreslenie) => vykreslenie.FormattedDocument!.PageCount;
 
     /// <summary>Strany zostavy sú na šírku (podľa prvej strany).</summary>
-    public static bool NaSirku(DocumentRenderer vykreslenie)
+    public static bool NaSirku(DocumentRenderer vykreslenie) => StranaNaSirku(vykreslenie, 1);
+
+    /// <summary>
+    /// Strana je na šírku. MigraDoc uvádza rozmery strany na výšku a orientáciu zvlášť – rozhoduje orientácia,
+    /// prípadne rozmery.
+    /// </summary>
+    public static bool StranaNaSirku(DocumentRenderer vykreslenie, int strana)
     {
-        var prva = vykreslenie.FormattedDocument!.GetPageInfo(1);
-        return prva.Width > prva.Height;
+        var info = vykreslenie.FormattedDocument!.GetPageInfo(strana);
+        return info.Orientation == PdfSharp.PageOrientation.Landscape || info.Width > info.Height;
+    }
+
+    /// <summary>Veľkosť strany v bodoch v jej orientácii.</summary>
+    public static Size VelkostVBodoch(DocumentRenderer vykreslenie, int strana)
+    {
+        var info = vykreslenie.FormattedDocument!.GetPageInfo(strana);
+        double sirka = info.Width, vyska = info.Height;
+        var (kratsia, dlhsia) = (Math.Min(sirka, vyska), Math.Max(sirka, vyska));
+        return StranaNaSirku(vykreslenie, strana) ? new Size(dlhsia, kratsia) : new Size(kratsia, dlhsia);
     }
 
     /// <summary>Jedna strana ako vektorový obrázok (ostrý pri každom zväčšení).</summary>
@@ -48,8 +63,7 @@ public static class NahladDokumentu
     /// <summary>Strana (od 1) v jej vlastnej orientácii.</summary>
     public static DrawingVisual Strana(DocumentRenderer vykreslenie, int strana, out Size velkost)
     {
-        var info = vykreslenie.FormattedDocument!.GetPageInfo(strana);
-        return Strana(vykreslenie, strana, info.Width > info.Height, out velkost);
+        return Strana(vykreslenie, strana, StranaNaSirku(vykreslenie, strana), out velkost);
     }
 
     /// <summary>Strana (od 1) v zadanej orientácii, na bielom podklade, vo veľkosti v jednotkách WPF.</summary>

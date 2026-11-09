@@ -113,7 +113,7 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
         Hlavny = hlavny;
         Oblast = oblast;
         _nazov = oblast.Nazov;
-        Dokument = new DokumentStrankyVM(hlavny, oblast.Id, () => $"Charakteristika – {Oblast.Nazov}", sablonaOsnovy: false);
+        Dokument = new DokumentStrankyVM(hlavny, oblast.Id, () => $"Charakteristika – {Oblast.Nazov}", sablonaOsnovy: false) { Farba = () => Oblast.Farba };
         // úlohy a poznámky oblasti aj jej predmetov
         PanelPlanovania = new PanelPlanovaniaVM(hlavny, oblast.Id, () => Oblast.Predmety.Select(p => p.Id).Append(Oblast.Id).ToList());
         foreach (var predmet in oblast.Predmety)
@@ -341,7 +341,10 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         _zobrazitPlanovanie = !_zobrazitSuvislosti && PanelPlanovania.Pocet > 0;
         // úvodné a záverečné časti nemajú šablónu osnovy predmetu (úvodnú tabuľku)
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id,
-            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast);
+            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast)
+        {
+            Farba = () => Predmet.Oblast.Farba,
+        };
         NacitajInfo();
         predmet.NacitajUdajeOsnovy();
     }

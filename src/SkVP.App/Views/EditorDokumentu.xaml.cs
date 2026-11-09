@@ -30,6 +30,9 @@ public partial class EditorDokumentu : UserControl
     private static readonly SolidColorBrush Linka = Zmrazeny(Color.FromRgb(0xC5, 0xCC, 0xD6));
     private static readonly SolidColorBrush Hlavicka = Zmrazeny(Color.FromRgb(0xF3, 0xF4, 0xF6));
 
+    /// <summary>Rozloženie strany celého dokumentu (napr. na šírku); null = A4 na výšku.</summary>
+    private Sekcia? _uvodnaSekcia;
+
     private bool _nacitavam;
     private bool _menimStyl;
 
@@ -89,13 +92,20 @@ public partial class EditorDokumentu : UserControl
 
     public FlowDocument Dokument => Text.Document;
 
-    /// <summary>Zobrazí text (model načítaný z dokumentu Word).</summary>
+    /// <summary>
+    /// Zobrazí text (model načítaný z dokumentu Word) bez hluchých miest. List má veľkosť podľa rozloženia strany
+    /// dokumentu (osnova na šírku = list na šírku); rozloženie sa pri uložení zachová.
+    /// </summary>
     public void Nacitaj(IReadOnlyList<Blok> bloky)
     {
         _nacitavam = true;
         try
         {
-            var dokument = DokumentOsnovy.KDokumentu(bloky);
+            // krátke texty v dialógoch (napr. text dole na úvodnej strane) sa zobrazia presne, osnovy bez hluchých miest
+            IReadOnlyList<Blok> upratane = Kompaktny ? bloky : DokumentOsnovy.Upratane(bloky);
+            _uvodnaSekcia = upratane.FirstOrDefault() as Sekcia;
+            NastavList(DokumentOsnovy.NajsirsiaStrana(upratane));
+            var dokument = DokumentOsnovy.KDokumentu(_uvodnaSekcia is null ? upratane : upratane.Skip(1).ToList());
             Text.Document = dokument;
             JeZmeneny = false;
             Text.CaretPosition = dokument.ContentStart;
@@ -111,7 +121,26 @@ public partial class EditorDokumentu : UserControl
     public List<Blok> Uloz()
     {
         JeZmeneny = false;
-        return DokumentOsnovy.Rozober(Text.Document);
+        var bloky = DokumentOsnovy.Rozober(Text.Document);
+        if (_uvodnaSekcia is { } sekcia)
+        {
+            bloky.Insert(0, sekcia);
+        }
+
+        return bloky;
+    }
+
+    /// <summary>Šírka a výška listu podľa veľkosti strany (najviac; na užšej obrazovke sa list zúži).</summary>
+    private void NastavList(RozlozenieStrany rozlozenie)
+    {
+        if (Kompaktny)
+        {
+            return;
+        }
+
+        const double jednotiekNaMm = 96 / 25.4;
+        Papier.MaxWidth = Math.Round(rozlozenie.SirkaMm * jednotiekNaMm);
+        Papier.MinHeight = Math.Min(1000, Math.Round(rozlozenie.VyskaMm * jednotiekNaMm));
     }
 
     private bool JePrazdny =>
@@ -433,6 +462,7 @@ public partial class EditorDokumentu : UserControl
         }
 
         var index = riadok.Cells.IndexOf(bunka) + 1;
+        DokumentOsnovy.ZrusVolnyStlpec(tabulka);
         tabulka.Columns.Add(new TableColumn());
         foreach (var skupina in tabulka.RowGroups)
         {
@@ -466,6 +496,7 @@ public partial class EditorDokumentu : UserControl
         }
 
         var index = riadok.Cells.IndexOf(bunka);
+        DokumentOsnovy.ZrusVolnyStlpec(tabulka);
         foreach (var skupina in tabulka.RowGroups)
         {
             foreach (var r in skupina.Rows)

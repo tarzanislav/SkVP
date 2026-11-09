@@ -30,7 +30,47 @@ public static class PdfVystup
     private static readonly MdColor Linka = Farba("#CBD2D9");
     private static readonly MdColor Podklad = Farba("#F3F4F6");
 
-    private static readonly Unit SirkaTextu = Unit.FromCentimeter(21.0 - 2.4 - 2.2);
+    // okraje strán zostavy (cm)
+    private const double OkrajVlavoCm = 2.4;
+    private const double OkrajVpravoCm = 2.2;
+
+    /// <summary>Šírka textu strany A4 na výšku (úvodná strana, obsah, oblasti).</summary>
+    private static readonly Unit SirkaTextu = SirkaTextuStrany(RozlozenieStrany.A4NaVysku);
+
+    private static Unit SirkaTextuStrany(RozlozenieStrany r) => Unit.FromCentimeter(r.SirkaMm / 10 - OkrajVlavoCm - OkrajVpravoCm);
+
+    /// <summary>
+    /// Sadzba celého dokumentu po častiach (sekciách MigraDoc) s rôznym rozložením strany – napr. osnova na šírku medzi
+    /// osnovami na výšku. Nová časť má vlastnú hlavičku a pätu pre svoju šírku a začína novou stranou.
+    /// </summary>
+    private sealed class Sadzba(Document doc, CelyDokument dokument)
+    {
+        public Section Sekcia { get; private set; } = null!;
+
+        public RozlozenieStrany Rozlozenie { get; private set; } = RozlozenieStrany.A4NaVysku;
+
+        public Unit SirkaTextu => SirkaTextuStrany(Rozlozenie);
+
+        public void Zacni(RozlozenieStrany rozlozenie)
+        {
+            Rozlozenie = rozlozenie;
+            Sekcia = doc.AddSection();
+            NastavStranu(Sekcia, rozlozenie);
+            HlavickaAPata(Sekcia, dokument, SirkaTextu);
+        }
+
+        /// <summary>Prepne rozloženie strany. True = začala sa nová časť (a tým aj nová strana).</summary>
+        public bool Prepni(RozlozenieStrany rozlozenie)
+        {
+            if (rozlozenie.Zhodne(Rozlozenie))
+            {
+                return false;
+            }
+
+            Zacni(rozlozenie);
+            return true;
+        }
+    }
 
     public static void UlozPdf(CelyDokument dokument, string cesta)
     {
@@ -58,39 +98,45 @@ public static class PdfVystup
             TitulnaStrana(doc, dokument, StupenZhustenia(dokument));
         }
 
-        var sekcia = doc.AddSection();
-        NastavStranu(sekcia);
-        HlavickaAPata(sekcia, dokument);
+        var sadzba = new Sadzba(doc, dokument);
+        sadzba.Zacni(RozlozenieStrany.A4NaVysku);
 
         var prvy = true;
         if (dokument.Volby.Obsah)
         {
-            ObsahDokumentu(sekcia, dokument);
+            ObsahDokumentu(sadzba.Sekcia, dokument);
             prvy = false;
         }
 
         var volby = dokument.Volby;
         foreach (var oblast in dokument.Oblasti)
         {
-            Oblast(sekcia, oblast, !prvy, volby.OddelovacOblasti);
+            // oblasť je vždy na výšku; nová časť sama začína novou stranou
+            var prepnute = sadzba.Prepni(RozlozenieStrany.A4NaVysku);
+            Oblast(sadzba, oblast, !prvy && !prepnute, volby.OddelovacOblasti);
             prvy = false;
             for (var i = 0; i < oblast.Predmety.Count; i++)
             {
                 var predmet = oblast.Predmety[i];
+                var obsah = DokumentOsnovy.Upratane(predmet.Obsah);
+
+                // predmet (aj s oddeľujúcou stranou) má rozloženie strany svojej osnovy
+                prepnute = sadzba.Prepni(DokumentOsnovy.Rozlozenie(obsah));
                 if (volby.OddelovacPredmetu)
                 {
-                    OddelovacPredmetu(sekcia, oblast, predmet);
+                    OddelovacPredmetu(sadzba.Sekcia, oblast, predmet, !prepnute);
+                    prepnute = false;
                 }
 
                 // bez oddeľujúcej strany oblasti prvý predmet pokračuje hneď pod nadpisom oblasti
-                var novaStrana = volby.OddelovacPredmetu || volby.OddelovacOblasti || i > 0 || oblast.Charakteristika.Count > 0;
-                Predmet(sekcia, oblast, predmet, novaStrana);
+                var novaStrana = !prepnute && (volby.OddelovacPredmetu || volby.OddelovacOblasti || i > 0 || oblast.Charakteristika.Count > 0);
+                Predmet(sadzba, oblast, predmet, obsah, novaStrana);
             }
         }
 
         if (dokument.Oblasti.Count == 0)
         {
-            var p = sekcia.AddParagraph("Dokument zatiaľ neobsahuje žiadne vzdelávacie oblasti.");
+            var p = sadzba.Sekcia.AddParagraph("Dokument zatiaľ neobsahuje žiadne vzdelávacie oblasti.");
             p.Style = StylPoznamka;
         }
 
@@ -191,14 +237,17 @@ public static class PdfVystup
         pata.ParagraphFormat.Alignment = ParagraphAlignment.Center;
     }
 
-    private static void NastavStranu(Section sekcia)
+    private static void NastavStranu(Section sekcia, RozlozenieStrany? rozlozenie = null)
     {
-        sekcia.PageSetup.PageFormat = PageFormat.A4;
-        sekcia.PageSetup.Orientation = Orientation.Portrait;
+        // MigraDoc má rozmery strany vždy na výšku, strana na šírku je orientácia
+        var r = rozlozenie ?? RozlozenieStrany.A4NaVysku;
+        sekcia.PageSetup.PageWidth = Unit.FromMillimeter(Math.Min(r.SirkaMm, r.VyskaMm));
+        sekcia.PageSetup.PageHeight = Unit.FromMillimeter(Math.Max(r.SirkaMm, r.VyskaMm));
+        sekcia.PageSetup.Orientation = r.NaSirku ? Orientation.Landscape : Orientation.Portrait;
         sekcia.PageSetup.TopMargin = Unit.FromCentimeter(2.6);
         sekcia.PageSetup.BottomMargin = Unit.FromCentimeter(2.4);
-        sekcia.PageSetup.LeftMargin = Unit.FromCentimeter(2.4);
-        sekcia.PageSetup.RightMargin = Unit.FromCentimeter(2.2);
+        sekcia.PageSetup.LeftMargin = Unit.FromCentimeter(OkrajVlavoCm);
+        sekcia.PageSetup.RightMargin = Unit.FromCentimeter(OkrajVpravoCm);
         sekcia.PageSetup.HeaderDistance = Unit.FromCentimeter(1.2);
         sekcia.PageSetup.FooterDistance = Unit.FromCentimeter(1.1);
     }
@@ -408,7 +457,7 @@ public static class PdfVystup
         var medzera = sekcia.AddParagraph();
         medzera.Format.SpaceBefore = Unit.FromCentimeter(new[] { 1.6, 1.0, 0.6, 0.4 }[z]);
         medzera.Format.SpaceAfter = 0;
-        Bloky(sekcia, bloky, Farba("#3B5BDB"), 0);
+        Bloky(new CielSekcia(sekcia), bloky, Farba("#3B5BDB"), 0, false);
     }
 
     /// <summary>Výška loga v hlavičke strán a jeho najväčšia šírka (pri širokom logu).</summary>
@@ -430,7 +479,7 @@ public static class PdfVystup
         return (sirka, vyska);
     }
 
-    private static void HlavickaAPata(Section sekcia, CelyDokument dokument)
+    private static void HlavickaAPata(Section sekcia, CelyDokument dokument, Unit sirkaTextu)
     {
         var t = dokument.Titul;
         var text = t.TextVHlavicke;
@@ -438,7 +487,7 @@ public static class PdfVystup
         var logo = t.LogoVHlavicke(dokument.Udaje.Logo);
         if (text is not null || skola is not null || logo is not null)
         {
-            Hlavicka(sekcia.Headers.Primary, text, skola, logo);
+            Hlavicka(sekcia.Headers.Primary, text, skola, logo, sirkaTextu);
         }
 
         var pata = sekcia.Footers.Primary.AddParagraph();
@@ -447,7 +496,7 @@ public static class PdfVystup
             // vľavo škola / kontakt, vpravo číslo strany
             pata.Format.Alignment = ParagraphAlignment.Left;
             pata.Format.TabStops.ClearAll();
-            pata.Format.TabStops.AddTabStop(SirkaTextu, TabAlignment.Right);
+            pata.Format.TabStops.AddTabStop(sirkaTextu, TabAlignment.Right);
             pata.AddText(textPaty);
             pata.AddTab();
         }
@@ -459,11 +508,11 @@ public static class PdfVystup
     }
 
     /// <summary>Hlavička strany: vľavo text, vpravo názov školy a logo, pod tým tenká čiara. Vypnuté časti sa vynechajú.</summary>
-    private static void Hlavicka(HeaderFooter hlavicka, string? text, string? skola, string? logo)
+    private static void Hlavicka(HeaderFooter hlavicka, string? text, string? skola, string? logo, Unit sirkaTextu)
     {
         var (sirkaLoga, vyskaLoga) = logo is null ? (0.0, 0.0) : RozmerLogaHlavicky(logo);
         var stlpecLoga = logo is null ? 0 : Unit.FromCentimeter(sirkaLoga + (skola is null ? 0 : 0.3)).Point;
-        var zvysok = SirkaTextu.Point - stlpecLoga;
+        var zvysok = sirkaTextu.Point - stlpecLoga;
 
         var tabulka = hlavicka.AddTable();
         tabulka.LeftPadding = 0;
@@ -554,8 +603,9 @@ public static class PdfVystup
         }
     }
 
-    private static void Oblast(Section sekcia, KapitolaOblasti oblast, bool novaStrana, bool oddelovac)
+    private static void Oblast(Sadzba sadzba, KapitolaOblasti oblast, bool novaStrana, bool oddelovac)
     {
+        var sekcia = sadzba.Sekcia;
         var farba = Farba(oblast.Farba);
         if (oddelovac)
         {
@@ -629,15 +679,17 @@ public static class PdfVystup
             c.Style = StylN1;
             c.Format.Font.Color = farba;
             c.Format.PageBreakBefore = oddelovac && oblast.Predmety.Count > 0;
-            Bloky(sekcia, oblast.Charakteristika, farba, 0);
+
+            // charakteristika zostáva pod nadpisom oblasti na výšku – rozloženie strany jej dokumentu sa nepoužije
+            Bloky(sadzba, DokumentOsnovy.Upratane(oblast.Charakteristika).Where(b => b is not Sekcia).ToList(), farba);
         }
     }
 
     /// <summary>Oddeľujúca strana pred predmetom: veľké číslo poradia a názov predmetu.</summary>
-    private static void OddelovacPredmetu(Section sekcia, KapitolaOblasti oblast, KapitolaPredmetu predmet)
+    private static void OddelovacPredmetu(Section sekcia, KapitolaOblasti oblast, KapitolaPredmetu predmet, bool novaStrana)
     {
         var farba = Farba(oblast.Farba);
-        Medzera(sekcia, 7, novaStrana: true);
+        Medzera(sekcia, 7, novaStrana);
         var cislo = sekcia.AddParagraph(predmet.Cislo);
         cislo.Format.Font.Name = PismaDokumentu.Nadpis;
         cislo.Format.Font.Size = 72;
@@ -664,8 +716,9 @@ public static class PdfVystup
         o.Format.SpaceBefore = Unit.FromPoint(8);
     }
 
-    private static void Predmet(Section sekcia, KapitolaOblasti oblast, KapitolaPredmetu predmet, bool novaStrana)
+    private static void Predmet(Sadzba sadzba, KapitolaOblasti oblast, KapitolaPredmetu predmet, IReadOnlyList<Blok> obsah, bool novaStrana)
     {
+        var sekcia = sadzba.Sekcia;
         var farba = Farba(oblast.Farba);
         var oblastText = sekcia.AddParagraph($"{oblast.Nazov}  •  {predmet.Cislo}");
         oblastText.Style = StylOblastMala;
@@ -680,32 +733,49 @@ public static class PdfVystup
         nadpis.AddBookmark(Zalozka(predmet.Id));
         nadpis.AddText(predmet.Nazov);
 
-        if (predmet.Obsah.Count == 0)
+        if (!obsah.Any(b => b is not Sekcia))
         {
             var p = sekcia.AddParagraph("Učebná osnova predmetu zatiaľ nie je spracovaná.");
             p.Style = StylPoznamka;
             return;
         }
 
-        Bloky(sekcia, predmet.Obsah, farba, 0);
+        // úvodná časť už je nastavená (Prepni pred predmetom), ďalšie časti prepnú rozloženie v texte
+        Bloky(sadzba, obsah.Count > 0 && obsah[0] is Sekcia ? obsah.Skip(1).ToList() : obsah, farba);
     }
 
     // ---- bloky textu ----
 
     private interface ICiel
     {
+        /// <summary>Šírka textu, do ktorého sa sádza (body).</summary>
+        double SirkaTextu { get; }
+
         Paragraph NovyOdsek();
         Table NovaTabulka();
     }
 
+    /// <summary>Text strany – vždy do aktuálnej časti sadzby (blok <see cref="SkVP.Services.Sekcia"/> ju prepne).</summary>
+    private sealed class CielSadzba(Sadzba sadzba) : ICiel
+    {
+        public Sadzba Sadzba => sadzba;
+        public double SirkaTextu => sadzba.SirkaTextu.Point;
+        public Paragraph NovyOdsek() => sadzba.Sekcia.AddParagraph();
+        public Table NovaTabulka() => sadzba.Sekcia.AddTable();
+    }
+
+    /// <summary>Text do pevnej časti A4 na výšku (úvodná strana).</summary>
     private sealed class CielSekcia(Section sekcia) : ICiel
     {
+        public double SirkaTextu => PdfVystup.SirkaTextu.Point;
         public Paragraph NovyOdsek() => sekcia.AddParagraph();
         public Table NovaTabulka() => sekcia.AddTable();
     }
 
     private sealed class CielBunka(Cell bunka) : ICiel
     {
+        public double SirkaTextu => bunka.Column.Width.Point;
+
         public Paragraph NovyOdsek()
         {
             var p = bunka.AddParagraph();
@@ -716,8 +786,8 @@ public static class PdfVystup
         public Table NovaTabulka() => throw new NotSupportedException();
     }
 
-    private static void Bloky(Section sekcia, IReadOnlyList<Blok> bloky, MdColor farba, int uroven) =>
-        Bloky(new CielSekcia(sekcia), bloky, farba, uroven, false);
+    private static void Bloky(Sadzba sadzba, IReadOnlyList<Blok> bloky, MdColor farba) =>
+        Bloky(new CielSadzba(sadzba), bloky, farba, 0, false);
 
     private static void Bloky(ICiel ciel, IReadOnlyList<Blok> bloky, MdColor farba, int uroven, bool vBunke)
     {
@@ -804,14 +874,26 @@ public static class PdfVystup
                     break;
 
                 case Tabulka t when !vBunke:
-                    Tabulka(ciel.NovaTabulka(), t, farba);
+                    Tabulka(ciel.NovaTabulka(), t, farba, ciel.SirkaTextu);
                     ciel.NovyOdsek().Format.SpaceAfter = Unit.FromPoint(2);
+                    break;
+
+                case ZlomStrany when ciel is CielSadzba strana:
+                    strana.Sadzba.Sekcia.AddPageBreak();
+                    break;
+
+                case Sekcia novaCast when ciel is CielSadzba strana:
+                    if (!strana.Sadzba.Prepni(novaCast.Rozlozenie))
+                    {
+                        strana.Sadzba.Sekcia.AddPageBreak();
+                    }
+
                     break;
             }
         }
     }
 
-    private static void Tabulka(Table tabulka, Tabulka t, MdColor farba)
+    private static void Tabulka(Table tabulka, Tabulka t, MdColor farba, double sirkaTextu)
     {
         tabulka.Borders.Width = Unit.FromPoint(0.5);
         tabulka.Borders.Color = Linka;
@@ -821,7 +903,7 @@ public static class PdfVystup
         tabulka.BottomPadding = Unit.FromPoint(2);
         foreach (var sirka in t.PomerneSirky)
         {
-            tabulka.AddColumn(Unit.FromPoint(SirkaTextu.Point * sirka));
+            tabulka.AddColumn(Unit.FromPoint(sirkaTextu * t.SirkaVTexte * sirka));
         }
 
         var riadky = new List<Row>();

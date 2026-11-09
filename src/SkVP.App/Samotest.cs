@@ -68,6 +68,7 @@ internal static class Samotest
             TestDokumentov();
             TestVlozeniaZWordu();
             TestZostav();
+            TestRozlozeniaAVzhladu();
             TestLogaAHlavicky();
             TestPremenovania();
             TestImpozicie();
@@ -382,6 +383,116 @@ internal static class Samotest
             "farba vloženého textu sa zrušila");
         var pisma = string.Join(", ", behy.Select(r => r.FontFamily.Source).Distinct());
         Over(behy.All(r => r.FontFamily.Source is not ("Arial" or "Comic Sans MS")), $"cudzie písmo vloženého textu sa zrušilo ({pisma})");
+    }
+
+    /// <summary>Osnova vo Worde na šírku, úzka tabuľka, hluché miesta a zlom strany; jednotný vzhľad dokumentu.</summary>
+    private static List<Blok> OsnovaNaSirku()
+    {
+        Bunka Popis(string text) => new(new Blok[] { new Odsek(new[] { new Usek(text, Tucne: true) }) });
+        Bunka Hodnota(string text) => new(new Blok[] { new Odsek(new[] { new Usek(text) }) });
+        var prazdny = new Odsek(new[] { new Usek("") });
+        return new List<Blok>
+        {
+            new Sekcia(RozlozenieStrany.A4NaSirku),
+            new Tabulka(new IReadOnlyList<Bunka>[]
+            {
+                new[] { Popis("Názov predmetu"), Popis("JAZYKOM K MATURITE") },
+                new[] { Popis("Profilácia"), Hodnota("anglický jazyk") },
+                new[] { Popis("Platnosť"), Hodnota("od 1.9.2022") },
+            }, 2, new[] { 3.0, 7.0 }, 0.55),
+            new Odsek(new[] { new Usek("* PDH – použité disponibilné hodiny") }),
+            prazdny, prazdny, prazdny, prazdny, prazdny, prazdny,
+            new ZlomStrany(),
+            prazdny, prazdny,
+            new Zoznam(true, new IReadOnlyList<Blok>[] { new Blok[] { new Odsek(new[] { new Usek("CHARAKTERISTIKA PREDMETU", Tucne: true) }) } }),
+            new Odsek(new[] { new Usek("Predmet Jazykom k maturite je zameraný na rozvoj receptívnych a produktívnych zručností.") },
+                Zarovnanie: TextAlignment.Justify),
+            new Odsek(new[] { new Usek("3. ročník", Tucne: true) }),
+            new Odsek(new[] { new Usek("Žiak vie:", Tucne: true) }),
+            new Odsek(new[] { new Usek("Opísať obrázok a porovnať dve situácie.") }),
+            new Tabulka(new IReadOnlyList<Bunka>[]
+            {
+                new[] { Popis("Tematický celok"), Popis("Obsahový štandard"), Popis("Výkonový štandard") },
+                new[] { Hodnota("Rodina"), Hodnota("slovná zásoba"), Hodnota("žiak opíše rodinu") },
+            }, 3),
+        };
+    }
+
+    private static void TestRozlozeniaAVzhladu()
+    {
+        // Word → program: strana na šírku, šírka tabuľky, zlom strany
+        var data = DocxVystup.Osnova(OsnovaNaSirku());
+        OverDocx(data, "osnova na šírku");
+        var nacitany = DocxCitac.Nacitaj(new MemoryStream(data));
+        var bloky = nacitany.Bloky;
+        Over(bloky.FirstOrDefault() is Sekcia { Rozlozenie.NaSirku: true } && DokumentOsnovy.Rozlozenie(bloky).Zhodne(RozlozenieStrany.A4NaSirku),
+            "osnova na šírku sa načíta so stranou na šírku");
+        Over(bloky.OfType<Tabulka>().First().SirkaVTexte is > 0.5 and < 0.6 && bloky.OfType<Tabulka>().Last().SirkaVTexte == 1,
+            $"úzka tabuľka zostane úzka ({bloky.OfType<Tabulka>().First().SirkaVTexte:0.00})");
+        Over(bloky.OfType<ZlomStrany>().Count() == 1, "zlom strany z Wordu");
+        Over(DokumentOsnovy.Rozlozenie(DocxCitac.Nacitaj(new MemoryStream(DocxVystup.Osnova(UkazkovaOsnova()))).Bloky).JeA4NaVysku
+             && DocxCitac.Nacitaj(new MemoryStream(DocxVystup.Osnova(UkazkovaOsnova()))).Bloky.FirstOrDefault() is not Sekcia,
+            "osnova A4 na výšku nemá blok rozloženia");
+
+        // bez hluchých miest
+        var upratane = DokumentOsnovy.Upratane(bloky);
+        static bool Prazdny(Blok b) => b is Odsek o && o.Useky.All(u => u.Text.Trim().Length == 0);
+        Over(!upratane.Zip(upratane.Skip(1)).Any(d => Prazdny(d.First) && Prazdny(d.Second)) && upratane[0] is Sekcia
+             && upratane.IndexOf(upratane.OfType<ZlomStrany>().Single()) is var z && !Prazdny(upratane[z - 1]) && !Prazdny(upratane[z + 1]),
+            $"hluché miesta zlúčené ({bloky.Count} → {upratane.Count} blokov)");
+        Over(DokumentOsnovy.Upratane(new Blok[] { new ZlomStrany(), new Odsek(new[] { new Usek("Text") }), new ZlomStrany() }) is [Odsek],
+            "zbytočné zlomy strán na začiatku a na konci sa vynechajú");
+
+        // editor programu zachová rozloženie strany aj zlom strany
+        var vEditore = DokumentOsnovy.Rozober(DokumentOsnovy.KDokumentu(upratane.Skip(1).ToList()));
+        Over(vEditore.OfType<ZlomStrany>().Count() == 1 && vEditore.OfType<Tabulka>().First().SirkaVTexte is > 0.5 and < 0.6,
+            "editor zachová zlom strany a šírku tabuľky");
+
+        // jednotný vzhľad
+        var vzhlad = JednotnyVzhlad.Priprav(nacitany);
+        var nadpisy = vzhlad.Bloky.OfType<Nadpis>().Select(n => (n.Uroven, n.Text)).ToList();
+        Over(nadpisy.Contains((1, "Charakteristika predmetu")) && nadpisy.Contains((2, "3. ročník")) && !nadpisy.Any(n => n.Text.StartsWith("Žiak", StringComparison.Ordinal)),
+            $"jednotný vzhľad rozpozná nadpisy ({string.Join(", ", nadpisy.Select(n => $"{n.Uroven}: {n.Text}"))})");
+        Over(vzhlad.Rozlozenie.NaSirku && vzhlad.HluchychMiest >= 6 && vzhlad.Straty.Count == 0,
+            $"jednotný vzhľad zachová stranu na šírku ({vzhlad.HluchychMiest} hluchých miest)");
+        Over(vzhlad.Bloky.OfType<Tabulka>().Last().Riadky[0].All(b => b.Hlavicka) && !vzhlad.Bloky.OfType<Tabulka>().First().Riadky[0].Any(b => b.Hlavicka),
+            "hlavička tabuľky (nie pri tabuľke popis – hodnota)");
+        var ulozeny = DocxCitac.Nacitaj(new MemoryStream(DocxVystup.Osnova(vzhlad.Bloky))).Bloky;
+        Over(DokumentOsnovy.Rozlozenie(ulozeny).NaSirku && ulozeny.OfType<Nadpis>().Count() == nadpisy.Count,
+            "jednotný vzhľad uložený do Wordu");
+
+        // zostava: predmet na šírku medzi predmetmi na výšku (PDF aj Word)
+        var zostava = ZostavaOsnov.Zostav(new VolbyZostavy { Oblasti = new[] { ZostavaOsnov.Zostav(new VolbyZostavy()).Oblasti[0].Id }, TitulnaStrana = false, Obsah = false });
+        var oblast = zostava.Oblasti[0];
+        var predmety = oblast.Predmety.ToList();
+        predmety[0] = predmety[0] with { Obsah = OsnovaNaSirku() };
+        var zmiesana = zostava with { Oblasti = new List<KapitolaOblasti> { oblast with { Predmety = predmety } } };
+        var vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(zmiesana));
+        var orientacie = Enumerable.Range(1, NahladDokumentu.PocetStran(vykreslenie)).Select(c => NahladDokumentu.StranaNaSirku(vykreslenie, c)).ToList();
+        Over(!orientacie[0] && orientacie.Count(o => o) is >= 1 and <= 3 && !orientacie[^1],
+            $"zostava: osnova na šírku medzi stranami na výšku ({string.Concat(orientacie.Select(o => o ? 'S' : 'V'))})");
+        var export = Databaza.PriecinokDokumentov;
+        PdfVystup.UlozPdf(zmiesana, Path.Combine(export, "samotest_osnova_na_sirku.pdf"));
+        UlozObrazokStrany(vykreslenie, orientacie.IndexOf(true) + 1, Path.Combine(export, "osnova_na_sirku.png"));
+        var docx = DocxVystup.Data(zmiesana);
+        OverDocx(docx, "zostava s osnovou na šírku");
+        using (var word = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(new MemoryStream(docx), false))
+        {
+            var casti = word.MainDocumentPart!.Document.Body!.Descendants<DocumentFormat.OpenXml.Wordprocessing.SectionProperties>().ToList();
+            Over(casti.Count >= 3 && casti.Any(c => c.GetFirstChild<DocumentFormat.OpenXml.Wordprocessing.PageSize>()?.Orient?.Value
+                                                    == DocumentFormat.OpenXml.Wordprocessing.PageOrientationValues.Landscape)
+                 && casti.All(c => c.Elements<DocumentFormat.OpenXml.Wordprocessing.FooterReference>().Any()),
+                $"Word: časti na výšku a na šírku, každá s pätou ({casti.Count} častí)");
+        }
+
+        // tlač: strana na šírku sa na list na výšku otočí
+        var otocenie = Impozicia.Transformacia(new Size(297, 210), Rect.Empty, new Rect(0, 0, 210, 297), 1);
+        var roh = otocenie.Transform(new Point(0, 0));
+        Over(Math.Abs(otocenie.M12 + otocenie.M21) < 1e-9 && Math.Abs(otocenie.M11) < 1e-9 && roh.X >= -1e-9 && roh.Y <= 297 + 1e-9,
+            "strana na šírku sa pri tlači na list na výšku otočí");
+        var listy = new ListyTlace(vykreslenie, false, new VolbyTlace());
+        Over(listy.Pocet == orientacie.Count && !listy.NaSirku, "tlač zmiešanej zostavy na listy na výšku");
+        Krok("rozloženie strán a jednotný vzhľad v poriadku");
     }
 
     private static void TestZostav()
@@ -2203,6 +2314,18 @@ internal static class Samotest
         Over(archivOkno.PocetVerzii > 0, "archív osnovy s verziami");
         Snimka(archivOkno, "13i_okno_archiv");
         archivOkno.Close();
+        var vzhladOkno = new JednotnyVzhladWindow(DocxCitac.Nacitaj(new MemoryStream(DocxVystup.Osnova(OsnovaNaSirku()))), "02 Jazykom k maturite", "#3B5BDB")
+        {
+            Owner = okno,
+        };
+        vzhladOkno.Show();
+        Pumpuj();
+        Over(vzhladOkno.Prepracovany.Nadpisov >= 2, "okno jednotného vzhľadu s náhľadom");
+        Snimka(vzhladOkno, "13l_jednotny_vzhlad");
+        vzhladOkno.ZobrazitPovodny.IsChecked = true;
+        Pumpuj();
+        Snimka(vzhladOkno, "13m_jednotny_vzhlad_povodny");
+        vzhladOkno.Close();
         model.OtvorServis();
         Pumpuj();
         Snimka(okno, "13j_servis");
