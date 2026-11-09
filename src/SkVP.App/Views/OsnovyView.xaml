@@ -60,11 +60,19 @@
         <StackPanel Margin="44,34,44,40" MaxWidth="1240">
             <TextBlock Text="Osnovy" Style="{StaticResource Nadpis}" />
             <DockPanel Margin="0,4,0,24">
-                <Button DockPanel.Dock="Right" Padding="12,5" Margin="16,0,0,0" VerticalAlignment="Top" Command="{Binding CharakteristikyZoSvpCommand}"
+                <Button DockPanel.Dock="Right" Padding="12,5" Margin="8,0,0,0" VerticalAlignment="Top" Command="{Binding CharakteristikyZoSvpCommand}"
                         ToolTip="Charakteristiky všetkých oblastí podľa Štátneho vzdelávacieho programu pre gymnáziá (doterajšie texty sa zarchivujú)">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource Ikona}" Text="&#xE8A5;" FontSize="13" Margin="0,0,8,0" />
                         <TextBlock Text="Charakteristiky zo ŠVP…" />
+                    </StackPanel>
+                </Button>
+                <Button DockPanel.Dock="Right" Padding="12,5" Margin="16,0,0,0" VerticalAlignment="Top" Command="{Binding VzhladOsnovCommand}"
+                        Style="{DynamicResource AccentButtonStyle}"
+                        ToolTip="Šablóny vzhľadu všetkých osnov – písma, farby, nadpisy a tabuľky v programe, v PDF, vo Worde aj v tlači">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE790;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock Text="Vzhľad osnov…" />
                     </StackPanel>
                 </Button>
                 <TextBlock Style="{StaticResource Popis}" FontSize="14" TextWrapping="Wrap"

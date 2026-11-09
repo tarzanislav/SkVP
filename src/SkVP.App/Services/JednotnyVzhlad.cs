@@ -1,14 +1,46 @@
+using SkVP.Pomocne;
 using System.Text.RegularExpressions;
 
 namespace SkVP.Services;
 
-/// <summary>Dokument prepracovaný do jednotného vzhľadu a čo sa pri tom zmenilo.</summary>
+/// <summary>Dokument s upratanou štruktúrou textu a čo sa pri tom zmenilo.</summary>
 /// <param name="Nadpisov">koľko odsekov sa rozpoznalo ako nadpis časti osnovy</param>
 /// <param name="HluchychMiest">koľko nadbytočných prázdnych riadkov a zlomov strán sa vynechalo</param>
-/// <param name="Straty">prvky dokumentu, ktoré jednotný vzhľad nemá (obrázky, textové polia …) a stratili by sa</param>
-public sealed record PrepracovanyDokument(List<Blok> Bloky, int Nadpisov, int HluchychMiest, IReadOnlyList<string> Straty)
+/// <param name="Hlaviciek">koľko tabuliek dostalo hlavičku</param>
+/// <param name="Straty">prvky dokumentu, ktoré program nezobrazí (obrázky, textové polia …) a stratili by sa</param>
+public sealed record PrepracovanyDokument(List<Blok> Bloky, int Nadpisov, int HluchychMiest, int Hlaviciek, IReadOnlyList<string> Straty)
 {
     public RozlozenieStrany Rozlozenie => DokumentOsnovy.Rozlozenie(Bloky);
+
+    /// <summary>Upratanie niečo zmení.</summary>
+    public bool JeZmena => Nadpisov + HluchychMiest + Hlaviciek > 0;
+}
+
+/// <summary>Výsledok upratania viacerých dokumentov.</summary>
+/// <param name="Upratanych">uložené dokumenty (pôvodné verzie sú v archíve)</param>
+/// <param name="BezZmeny">dokumenty, ktoré už boli upratané alebo nemajú text</param>
+/// <param name="SObrazkami">dokumenty s obrázkami alebo inými prvkami, ktoré by sa stratili – ponechané bez zmeny</param>
+/// <param name="VoWorde">dokumenty práve otvorené vo Worde – ponechané bez zmeny</param>
+public sealed record VysledokUpratania(int Upratanych, int BezZmeny, int SObrazkami, int VoWorde)
+{
+    public string Text
+    {
+        get
+        {
+            var casti = new List<string> { Preklad.Pocet(Upratanych, "uprataný {0} dokument", "upratané {0} dokumenty", "uprataných {0} dokumentov") };
+            if (SObrazkami > 0)
+            {
+                casti.Add(Preklad.Pocet(SObrazkami, "{0} s obrázkami ponechaný", "{0} s obrázkami ponechané", "{0} s obrázkami ponechaných"));
+            }
+
+            if (VoWorde > 0)
+            {
+                casti.Add(Preklad.Pocet(VoWorde, "{0} otvorený vo Worde ponechaný", "{0} otvorené vo Worde ponechané", "{0} otvorených vo Worde ponechaných"));
+            }
+
+            return string.Join(", ", casti);
+        }
+    }
 }
 
 /// <summary>
@@ -36,6 +68,7 @@ public static partial class JednotnyVzhlad
     {
         var upratane = DokumentOsnovy.Upratane(povodny.Bloky);
         var nadpisov = 0;
+        var hlaviciek = 0;
         var bloky = new List<Blok>(upratane.Count);
         foreach (var blok in upratane)
         {
@@ -47,7 +80,9 @@ public static partial class JednotnyVzhlad
                     break;
 
                 case Tabulka tabulka:
-                    bloky.Add(SHlavickou(tabulka));
+                    var sHlavickou = SHlavickou(tabulka);
+                    hlaviciek += ReferenceEquals(sHlavickou, tabulka) ? 0 : 1;
+                    bloky.Add(sHlavickou);
                     break;
 
                 default:
@@ -58,8 +93,54 @@ public static partial class JednotnyVzhlad
 
         // pri nových nadpisoch netreba prázdne riadky
         var vysledok = DokumentOsnovy.Upratane(bloky);
-        return new PrepracovanyDokument(vysledok, nadpisov, Math.Max(0, Hluche(povodny.Bloky) - Hluche(vysledok)), povodny.Varovania);
+        return new PrepracovanyDokument(vysledok, nadpisov, Math.Max(0, Hluche(povodny.Bloky) - Hluche(vysledok)), hlaviciek, povodny.Varovania);
     }
+
+    /// <summary>
+    /// Uprace text dokumentov (nadpisy, hluché miesta, hlavičky tabuliek) a uloží ich – pôvodné verzie sa zarchivujú.
+    /// Dokumenty s prvkami, ktoré by sa stratili (obrázky …), a dokumenty otvorené vo Worde zostanú bez zmeny.
+    /// </summary>
+    /// <param name="voWorde">dokument je práve otvorený vo Worde</param>
+    /// <param name="ulozeny">volá sa po uložení dokumentu (obnovenie zobrazenia)</param>
+    public static VysledokUpratania Uprac(IEnumerable<long> dokumenty, Func<long, bool> voWorde, Action<long> ulozeny)
+    {
+        var sluzba = new Data.DokumentService();
+        int upratanych = 0, bezZmeny = 0, sObrazkami = 0, wordom = 0;
+        foreach (var id in dokumenty.Distinct())
+        {
+            if (voWorde(id))
+            {
+                wordom++;
+                continue;
+            }
+
+            var povodny = sluzba.Nacitaj(id);
+            if (DokumentOsnovy.DlzkaTextu(povodny.Bloky) == 0 || Priprav(povodny) is not { JeZmena: true } upratany)
+            {
+                bezZmeny++;
+                continue;
+            }
+
+            if (upratany.Straty.Count > 0)
+            {
+                sObrazkami++;
+                continue;
+            }
+
+            if (sluzba.UlozBloky(id, upratany.Bloky, DovodArchivacie))
+            {
+                ulozeny(id);
+            }
+
+            upratanych++;
+        }
+
+        Zaznam.Info($"Upratanie dokumentov: {upratanych} uprataných, {bezZmeny} bez zmeny, {sObrazkami} s obrázkami, {wordom} vo Worde");
+        return new VysledokUpratania(upratanych, bezZmeny, sObrazkami, wordom);
+    }
+
+    /// <summary>Dôvod archivácie pôvodnej verzie pri upratovaní.</summary>
+    public const string DovodArchivacie = "Pred upratovaním textu";
 
     /// <summary>Prázdne riadky a zlomy strán (na súhrn, koľko hluchých miest zmizlo).</summary>
     private static int Hluche(IEnumerable<Blok> bloky) =>

@@ -7,11 +7,11 @@
             <DockPanel>
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                     <TextBlock Text="{Binding StavUlozenia}" Style="{StaticResource Popis}" VerticalAlignment="Center" Margin="0,0,14,0" />
-                    <Button Padding="14,6" Margin="0,0,8,0" Command="{Binding JednotnyVzhladCommand}"
-                            ToolTip="Prepracuje vzhľad dokumentu jednotným štýlom ako osnovy programu (najprv ukáže náhľad, pôvodná verzia sa zarchivuje).">
+                    <Button Padding="14,6" Margin="0,0,8,0" Command="{Binding VzhladCommand}"
+                            ToolTip="Šablóny vzhľadu osnov s náhľadom na tomto dokumente – platia pre všetky dokumenty; text sa dá aj upratať (pôvodná verzia sa zarchivuje).">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Style="{StaticResource Ikona}" Text="&#xE790;" FontSize="14" Margin="0,0,8,0" />
-                            <TextBlock Text="Jednotný vzhľad…" />
+                            <TextBlock Text="Vzhľad…" />
                         </StackPanel>
                     </Button>
                     <Button Padding="14,6" Margin="0,0,8,0" Command="{Binding UpravitVoWordeCommand}"

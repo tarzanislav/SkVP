@@ -163,37 +163,14 @@ public sealed record Sekcia(RozlozenieStrany Rozlozenie) : Blok;
 /// <summary>Nová strana (zlom strany z Wordu).</summary>
 public sealed record ZlomStrany : Blok;
 
-/// <summary>Písma a veľkosti textu osnov – rovnaké v editore, v PDF aj vo Worde.</summary>
+/// <summary>Písma a veľkosti textu osnov podľa zvolenej šablóny vzhľadu – rovnaké v editore, v PDF aj vo Worde.</summary>
 public static class PismaDokumentu
 {
-    private static string? _text;
+    /// <summary>Písmo textu (podľa šablóny, napr. Constantia).</summary>
+    public static string Text => VzhladDokumentov.Aktivna.PismoTextu;
 
-    /// <summary>Písmo textu: Constantia (Windows), ak chýba, tak Georgia.</summary>
-    public static string Text => _text ??= Najdi("Constantia", "Georgia", "Cambria", "Times New Roman");
-
-    public const string Nadpis = "Segoe UI";
-
-    public const double VelkostTextuDip = 15;
-
-    public static double VelkostNadpisuDip(int uroven) => uroven switch
-    {
-        1 => 22,
-        2 => 17.5,
-        _ => 15,
-    };
-
-    private static string Najdi(params string[] mena)
-    {
-        try
-        {
-            var systemove = Fonts.SystemFontFamilies.Select(f => f.Source).ToHashSet(StringComparer.OrdinalIgnoreCase);
-            return mena.FirstOrDefault(systemove.Contains) ?? mena[^1];
-        }
-        catch (Exception)
-        {
-            return mena[^1];
-        }
-    }
+    /// <summary>Písmo nadpisov (podľa šablóny, napr. Segoe UI).</summary>
+    public static string Nadpis => VzhladDokumentov.Aktivna.PismoNadpisov;
 }
 
 /// <summary>Prevod medzi modelom textu a dokumentom editora (FlowDocument).</summary>
@@ -205,7 +182,6 @@ public static class DokumentOsnovy
     private const string ZnackaSekcie = "SEKCIA:";
 
     private static readonly SolidColorBrush Linka = Zmrazeny(Color.FromRgb(0xC5, 0xCC, 0xD6));
-    private static readonly SolidColorBrush PodkladHlavicky = Zmrazeny(Color.FromRgb(0xF3, 0xF4, 0xF6));
     private static readonly SolidColorBrush ZnackaText = Zmrazeny(Color.FromRgb(0x8A, 0x94, 0xA3));
 
     /// <summary>Nadpisy novej osnovy predmetu (podľa bežnej štruktúry učebných osnov ŠkVP).</summary>
@@ -233,67 +209,124 @@ public static class DokumentOsnovy
         return bloky;
     }
 
-    public static FlowDocument Novy()
+    public static FlowDocument Novy(SablonaVzhladu? sablona = null)
     {
         var dokument = new FlowDocument();
-        Uprav(dokument);
-        dokument.Blocks.Add(new Paragraph());
+        Uprav(dokument, sablona);
+        dokument.Blocks.Add(NovyOdsek(sablona));
         return dokument;
     }
 
-    /// <summary>Jednotné písmo a rozmery dokumentu v editore.</summary>
-    public static void Uprav(FlowDocument dokument)
+    /// <summary>Písmo, veľkosť, riadkovanie a zarovnanie dokumentu v editore podľa šablóny vzhľadu.</summary>
+    public static void Uprav(FlowDocument dokument, SablonaVzhladu? sablona = null)
     {
-        dokument.FontFamily = new FontFamily(PismaDokumentu.Text);
-        dokument.FontSize = PismaDokumentu.VelkostTextuDip;
-        dokument.LineHeight = double.NaN;
+        var s = sablona ?? VzhladDokumentov.Aktivna;
+        var velkost = SablonaVzhladu.NaDip(s.VelkostTextu);
+        dokument.FontFamily = new FontFamily(s.PismoTextu);
+        dokument.FontSize = velkost;
+        // riadkovanie ako v PDF a vo Worde (násobok bežného riadka); väčšie písmo (nadpis) riadok zväčší
+        dokument.LineHeight = Math.Round(velkost * 1.2 * s.Riadkovanie, 1);
+        dokument.LineStackingStrategy = LineStackingStrategy.MaxHeight;
         dokument.PagePadding = new Thickness(0);
-        dokument.TextAlignment = TextAlignment.Left;
+        dokument.TextAlignment = s.DoBloku ? TextAlignment.Justify : TextAlignment.Left;
     }
+
+    /// <summary>Prázdny odsek bežného textu s medzerou podľa šablóny.</summary>
+    public static Paragraph NovyOdsek(SablonaVzhladu? sablona = null) =>
+        new() { Margin = new Thickness(0, 0, 0, SablonaVzhladu.NaDip((sablona ?? VzhladDokumentov.Aktivna).MedzeraZaOdsekom)) };
 
     /// <summary>Úroveň nadpisu odseku (0 = bežný text).</summary>
     public static int UrovenNadpisu(Paragraph odsek) =>
         odsek.Tag is string znacka && znacka.Length == 2 && znacka[0] == 'H' && char.IsDigit(znacka[1]) ? znacka[1] - '0' : 0;
 
-    public static void NastavNadpis(Paragraph odsek, int uroven)
+    /// <summary>
+    /// Nastaví odsek ako nadpis danej úrovne (0 = bežný text) – písmo, veľkosť, farba a ozdoba podľa šablóny vzhľadu.
+    /// </summary>
+    /// <param name="farba">farba oblasti dokumentu (pre šablóny s nadpismi vo farbe oblasti)</param>
+    public static void NastavNadpis(Paragraph odsek, int uroven, string? farba = null, SablonaVzhladu? sablona = null)
     {
+        foreach (var vlastnost in new DependencyProperty[]
+                 {
+                     TextElement.FontSizeProperty, TextElement.FontWeightProperty, TextElement.FontStyleProperty, TextElement.FontFamilyProperty,
+                     TextElement.ForegroundProperty, TextElement.BackgroundProperty, Block.MarginProperty, Block.PaddingProperty,
+                     Block.BorderBrushProperty, Block.BorderThicknessProperty, Block.TextAlignmentProperty,
+                 })
+        {
+            odsek.ClearValue(vlastnost);
+        }
+
+        var s = sablona ?? VzhladDokumentov.Aktivna;
         if (uroven <= 0)
         {
             odsek.Tag = null;
-            odsek.ClearValue(TextElement.FontSizeProperty);
-            odsek.ClearValue(TextElement.FontWeightProperty);
-            odsek.ClearValue(TextElement.FontStyleProperty);
-            odsek.ClearValue(TextElement.FontFamilyProperty);
-            odsek.ClearValue(TextElement.ForegroundProperty);
-            odsek.ClearValue(Block.MarginProperty);
+            odsek.Margin = new Thickness(0, 0, 0, SablonaVzhladu.NaDip(s.MedzeraZaOdsekom));
             return;
         }
 
         uroven = Math.Clamp(uroven, 1, 3);
         odsek.Tag = ZnackaNadpisu + uroven;
-        odsek.FontFamily = new FontFamily(PismaDokumentu.Nadpis);
-        odsek.FontSize = PismaDokumentu.VelkostNadpisuDip(uroven);
+        var velkost = SablonaVzhladu.NaDip(s.VelkostNadpisu(uroven));
+        odsek.FontFamily = new FontFamily(s.PismoNadpisov);
+        odsek.FontSize = velkost;
         odsek.FontWeight = uroven == 3 ? FontWeights.SemiBold : FontWeights.Bold;
         odsek.FontStyle = uroven == 3 ? FontStyles.Italic : FontStyles.Normal;
-        odsek.Margin = new Thickness(0, uroven == 1 ? 22 : 16, 0, 6);
+        odsek.TextAlignment = TextAlignment.Left;
+        odsek.Margin = new Thickness(0, uroven == 1 ? velkost * 1.15 : velkost, 0, uroven == 1 ? 8 : 5);
+        if (s.FarbaNadpisu(uroven, farba) is { } text)
+        {
+            odsek.Foreground = VzhladDokumentov.Stetec(text);
+        }
+
+        if (uroven > 1)
+        {
+            return;
+        }
+
+        var ozdoba = VzhladDokumentov.Stetec(s.FarbaOzdoby(farba));
+        switch (s.Ozdoba)
+        {
+            case OzdobaNadpisu.Ciara:
+                odsek.BorderBrush = ozdoba;
+                odsek.BorderThickness = new Thickness(0, 0, 0, 1.5);
+                odsek.Padding = new Thickness(0, 0, 0, 5);
+                odsek.Margin = new Thickness(0, velkost * 1.15, 0, 10);
+                break;
+
+            case OzdobaNadpisu.Pasik:
+                odsek.BorderBrush = ozdoba;
+                odsek.BorderThickness = new Thickness(5, 0, 0, 0);
+                odsek.Padding = new Thickness(12, 1, 0, 2);
+                break;
+
+            case OzdobaNadpisu.Pas:
+                odsek.Background = VzhladDokumentov.Stetec(s.PodkladNadpisu(farba));
+                odsek.BorderBrush = ozdoba;
+                odsek.BorderThickness = new Thickness(5, 0, 0, 0);
+                odsek.Padding = new Thickness(12, 6, 10, 7);
+                odsek.Margin = new Thickness(0, velkost * 1.15, 0, 10);
+                break;
+        }
     }
 
     // ---- model → editor ----
 
-    public static FlowDocument KDokumentu(IReadOnlyList<Blok> bloky)
+    /// <param name="farba">farba oblasti dokumentu (nadpisy a tabuľky podľa šablóny)</param>
+    /// <param name="sablona">šablóna vzhľadu (null = zvolená v programe)</param>
+    public static FlowDocument KDokumentu(IReadOnlyList<Blok> bloky, string? farba = null, SablonaVzhladu? sablona = null)
     {
+        var s = sablona ?? VzhladDokumentov.Aktivna;
         var dokument = new FlowDocument();
-        Uprav(dokument);
-        PridajBloky(dokument.Blocks, bloky);
+        Uprav(dokument, s);
+        PridajBloky(dokument.Blocks, bloky, farba, s);
         if (dokument.Blocks.Count == 0)
         {
-            dokument.Blocks.Add(new Paragraph());
+            dokument.Blocks.Add(NovyOdsek(s));
         }
 
         return dokument;
     }
 
-    private static void PridajBloky(BlockCollection ciel, IReadOnlyList<Blok> bloky)
+    private static void PridajBloky(BlockCollection ciel, IReadOnlyList<Blok> bloky, string? farba, SablonaVzhladu s)
     {
         foreach (var blok in bloky)
         {
@@ -301,24 +334,24 @@ public static class DokumentOsnovy
             {
                 case Nadpis n:
                     var nadpis = new Paragraph(new Run(n.Text));
-                    NastavNadpis(nadpis, n.Uroven);
+                    NastavNadpis(nadpis, n.Uroven, farba, s);
                     ciel.Add(nadpis);
                     break;
 
                 case Odsek o:
-                    ciel.Add(Odsek(o));
+                    ciel.Add(Odsek(o, s));
                     break;
 
                 case Zoznam z:
                     var zoznam = new List
                     {
                         MarkerStyle = z.Cislovany ? TextMarkerStyle.Decimal : TextMarkerStyle.Disc,
-                        Margin = new Thickness(0, 0, 0, 8),
+                        Margin = new Thickness(0, 0, 0, SablonaVzhladu.NaDip(s.MedzeraZaOdsekom)),
                     };
                     foreach (var polozka in z.Polozky)
                     {
                         var li = new ListItem();
-                        PridajBloky(li.Blocks, polozka);
+                        PridajBloky(li.Blocks, polozka, farba, s);
                         if (li.Blocks.Count == 0)
                         {
                             li.Blocks.Add(new Paragraph());
@@ -336,7 +369,7 @@ public static class DokumentOsnovy
                     break;
 
                 case Tabulka t:
-                    ciel.Add(Tabulka(t));
+                    ciel.Add(Tabulka(t, farba, s));
                     break;
 
                 case ZlomStrany:
@@ -388,9 +421,15 @@ public static class DokumentOsnovy
             : null;
     }
 
-    private static Paragraph Odsek(Odsek o)
+    private static Paragraph Odsek(Odsek o, SablonaVzhladu s)
     {
-        var odsek = new Paragraph { TextAlignment = o.Zarovnanie };
+        // zarovnanie vľavo sa nenastavuje – platí zarovnanie dokumentu podľa šablóny (vľavo alebo do bloku)
+        var odsek = NovyOdsek(s);
+        if (o.Zarovnanie != TextAlignment.Left)
+        {
+            odsek.TextAlignment = o.Zarovnanie;
+        }
+
         if (o.Odsadenie > 0)
         {
             odsek.Margin = new Thickness(20 * o.Odsadenie, 0, 0, odsek.Margin.Bottom);
@@ -431,10 +470,10 @@ public static class DokumentOsnovy
         return odsek;
     }
 
-    private static Table Tabulka(Tabulka t)
+    private static Table Tabulka(Tabulka t, string? farba, SablonaVzhladu s)
     {
         t = t.Pravidelna();
-        var tabulka = new Table { CellSpacing = 0, BorderBrush = Linka, BorderThickness = new Thickness(0.5), Margin = new Thickness(0, 6, 0, 10) };
+        var tabulka = NovaTabulka(farba, s);
         var podiel = t.SirkaVTexte;
         foreach (var sirka in t.PomerneSirky)
         {
@@ -449,25 +488,15 @@ public static class DokumentOsnovy
         }
 
         var skupina = new TableRowGroup();
-        foreach (var r in t.Riadky)
+        var hlavicka = t.Riadky.Count > 0 && t.Riadky[0].Any(b => b.Hlavicka);
+        for (var r = 0; r < t.Riadky.Count; r++)
         {
             var riadok = new TableRow();
-            foreach (var b in r)
+            foreach (var b in t.Riadky[r])
             {
-                var bunka = new TableCell
-                {
-                    BorderBrush = Linka,
-                    BorderThickness = new Thickness(0.5),
-                    Padding = new Thickness(7, 4, 7, 4),
-                    ColumnSpan = Math.Max(1, b.Stlpce),
-                    RowSpan = Math.Max(1, b.Riadky),
-                };
-                if (b.Hlavicka)
-                {
-                    bunka.Background = PodkladHlavicky;
-                }
-
-                PridajBloky(bunka.Blocks, b.Bloky);
+                var bunka = new TableCell { ColumnSpan = Math.Max(1, b.Stlpce), RowSpan = Math.Max(1, b.Riadky) };
+                StylBunky(bunka, b.Hlavicka, r, hlavicka, farba, s);
+                PridajBloky(bunka.Blocks, b.Bloky, farba, s);
                 if (bunka.Blocks.Count == 0)
                 {
                     bunka.Blocks.Add(new Paragraph());
@@ -489,6 +518,45 @@ public static class DokumentOsnovy
 
         tabulka.RowGroups.Add(skupina);
         return tabulka;
+    }
+
+    /// <summary>Prázdna tabuľka editora s čiarami podľa šablóny (text v bunkách vždy vľavo).</summary>
+    public static Table NovaTabulka(string? farba = null, SablonaVzhladu? sablona = null)
+    {
+        var s = sablona ?? VzhladDokumentov.Aktivna;
+        var hrubka = s.HrubkaLinky;
+        return new Table
+        {
+            CellSpacing = 0,
+            BorderBrush = VzhladDokumentov.Stetec(s.Linka(farba)),
+            BorderThickness = s.Ram == RamTabulky.Vodorovny ? new Thickness(0, hrubka, 0, 0) : new Thickness(hrubka),
+            Margin = new Thickness(0, 6, 0, 12),
+            TextAlignment = TextAlignment.Left,
+        };
+    }
+
+    /// <summary>
+    /// Čiary a podklad bunky podľa šablóny: hlavička (prvý riadok), pruhy (každý druhý riadok pod hlavičkou).
+    /// Podklad má v modeli význam len v prvom riadku (hlavička) – pruhy začínajú až druhým riadkom.
+    /// </summary>
+    /// <param name="sHlavickou">tabuľka má hlavičku (pruhy sa počítajú od riadka pod ňou)</param>
+    public static void StylBunky(TableCell bunka, bool jeHlavicka, int riadok, bool sHlavickou, string? farba = null, SablonaVzhladu? sablona = null)
+    {
+        var s = sablona ?? VzhladDokumentov.Aktivna;
+        var hrubka = s.HrubkaLinky;
+        bunka.BorderBrush = VzhladDokumentov.Stetec(s.Linka(farba));
+        bunka.BorderThickness = s.Ram == RamTabulky.Vodorovny
+            ? new Thickness(0, 0, 0, jeHlavicka ? s.HrubkaPodHlavickou : hrubka)
+            : new Thickness(hrubka);
+        bunka.Padding = s.Ram == RamTabulky.Vodorovny ? new Thickness(8, 5, 8, 5) : new Thickness(7, 4, 7, 4);
+        if (jeHlavicka)
+        {
+            bunka.Background = VzhladDokumentov.Stetec(s.PodkladHlavicky(farba));
+        }
+        else if (riadok > 0 && (riadok - (sHlavickou ? 1 : 0)) % 2 == 1 && s.PodkladPruhu(farba) is { } pruh)
+        {
+            bunka.Background = VzhladDokumentov.Stetec(pruh);
+        }
     }
 
     // ---- editor → model ----
@@ -534,7 +602,9 @@ public static class DokumentOsnovy
                         var useky = new List<Usek>();
                         Inlines(odsek.Inlines, useky, false);
                         var odsadenie = double.IsNaN(odsek.Margin.Left) ? 0 : (int)Math.Round(Math.Max(0, odsek.Margin.Left) / 20);
-                        vysledok.Add(new Odsek(useky, odsadenie, odsek.TextAlignment));
+                        // zarovnanie len nastavené pri odseku (zarovnanie celého dokumentu je zo šablóny)
+                        var zarovnanie = odsek.ReadLocalValue(Block.TextAlignmentProperty) is TextAlignment z ? z : TextAlignment.Left;
+                        vysledok.Add(new Odsek(useky, odsadenie, zarovnanie));
                     }
 
                     break;

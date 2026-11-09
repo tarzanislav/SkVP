@@ -27,14 +27,13 @@ public partial class EditorDokumentu : UserControl
     public static readonly DependencyProperty KompaktnyProperty = DependencyProperty.Register(
         nameof(Kompaktny), typeof(bool), typeof(EditorDokumentu), new PropertyMetadata(false, (d, _) => ((EditorDokumentu)d).NastavKompaktny()));
 
-    private static readonly SolidColorBrush Linka = Zmrazeny(Color.FromRgb(0xC5, 0xCC, 0xD6));
-    private static readonly SolidColorBrush Hlavicka = Zmrazeny(Color.FromRgb(0xF3, 0xF4, 0xF6));
-
     /// <summary>Rozloženie strany celého dokumentu (napr. na šírku); null = A4 na výšku.</summary>
     private Sekcia? _uvodnaSekcia;
 
     private bool _nacitavam;
     private bool _menimStyl;
+    private bool _nacitany;
+    private SablonaVzhladu? _sablona;
 
     public EditorDokumentu()
     {
@@ -42,6 +41,51 @@ public partial class EditorDokumentu : UserControl
         DataObject.AddPastingHandler(Text, Vkladanie);
         Text.Document = DokumentOsnovy.Novy();
         NastavFarbu();
+        // zmena šablóny vzhľadu v programe – otvorený dokument sa prekreslí
+        Loaded += (_, _) =>
+        {
+            VzhladDokumentov.Zmenena -= PriZmeneVzhladu;
+            VzhladDokumentov.Zmenena += PriZmeneVzhladu;
+        };
+        Unloaded += (_, _) => VzhladDokumentov.Zmenena -= PriZmeneVzhladu;
+    }
+
+    /// <summary>Šablóna vzhľadu len pre tento editor (náhľad šablóny); null = šablóna zvolená v programe.</summary>
+    public SablonaVzhladu? Sablona
+    {
+        get => _sablona;
+        set
+        {
+            _sablona = value;
+            Prekresli();
+        }
+    }
+
+    private void PriZmeneVzhladu()
+    {
+        if (_sablona is null)
+        {
+            Prekresli();
+        }
+    }
+
+    /// <summary>Text sa zobrazí znova v aktuálnom vzhľade (šablóna, farba oblasti) – rozpracované zmeny zostanú.</summary>
+    private void Prekresli()
+    {
+        if (!_nacitany)
+        {
+            return;
+        }
+
+        var zmeneny = JeZmeneny;
+        var bloky = DokumentOsnovy.Rozober(Text.Document);
+        if (_uvodnaSekcia is { } sekcia)
+        {
+            bloky.Insert(0, sekcia);
+        }
+
+        Nacitaj(bloky);
+        JeZmeneny = zmeneny;
     }
 
     public bool JeUprava
@@ -105,9 +149,10 @@ public partial class EditorDokumentu : UserControl
             IReadOnlyList<Blok> upratane = Kompaktny ? bloky : DokumentOsnovy.Upratane(bloky);
             _uvodnaSekcia = upratane.FirstOrDefault() as Sekcia;
             NastavList(DokumentOsnovy.NajsirsiaStrana(upratane));
-            var dokument = DokumentOsnovy.KDokumentu(_uvodnaSekcia is null ? upratane : upratane.Skip(1).ToList());
+            var dokument = DokumentOsnovy.KDokumentu(_uvodnaSekcia is null ? upratane : upratane.Skip(1).ToList(), Farba, Sablona);
             Text.Document = dokument;
             JeZmeneny = false;
+            _nacitany = true;
             Text.CaretPosition = dokument.ContentStart;
             AktualizujPrazdne();
         }
@@ -154,7 +199,7 @@ public partial class EditorDokumentu : UserControl
         if (uprava && SablonaOsnovy && JePrazdny)
         {
             _nacitavam = true;
-            Text.Document = DokumentOsnovy.KDokumentu(DokumentOsnovy.SablonaOsnovy());
+            Text.Document = DokumentOsnovy.KDokumentu(DokumentOsnovy.SablonaOsnovy(), Farba, Sablona);
             _nacitavam = false;
             JeZmeneny = false;
             if (Text.Document.Blocks.ElementAtOrDefault(1) is Paragraph prvy)
@@ -191,6 +236,7 @@ public partial class EditorDokumentu : UserControl
     {
         PruhPapiera.Background = FarbaNaStetec.Stetec(Farba);
         Text.SelectionBrush = FarbaNaStetec.Stetec(Farba, 0x55);
+        Prekresli(); // nadpisy a tabuľky vo farbe oblasti
     }
 
     private void AktualizujPrazdne()
@@ -265,7 +311,7 @@ public partial class EditorDokumentu : UserControl
         {
             foreach (var odsek in VybraneOdseky())
             {
-                DokumentOsnovy.NastavNadpis(odsek, uroven);
+                DokumentOsnovy.NastavNadpis(odsek, uroven, Farba, Sablona);
                 if (uroven > 0)
                 {
                     // nadpis má jednotný vzhľad – formát jednotlivých slov sa zruší
@@ -283,7 +329,18 @@ public partial class EditorDokumentu : UserControl
 
     private void Text_PreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (Text.IsReadOnly || Keyboard.Modifiers != ModifierKeys.Control)
+        if (Text.IsReadOnly)
+        {
+            return;
+        }
+
+        if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.None && ZaNadpisom())
+        {
+            e.Handled = true;
+            return;
+        }
+
+        if (Keyboard.Modifiers != ModifierKeys.Control)
         {
             return;
         }
@@ -301,6 +358,30 @@ public partial class EditorDokumentu : UserControl
             NastavStyl(uroven);
             e.Handled = true;
         }
+    }
+
+    /// <summary>Enter na konci nadpisu: nový odsek bežného textu (nie ďalší nadpis s pásom a farbou).</summary>
+    private bool ZaNadpisom()
+    {
+        if (!Text.Selection.IsEmpty || Text.CaretPosition.Paragraph is not { } nadpis || DokumentOsnovy.UrovenNadpisu(nadpis) == 0
+            || Text.CaretPosition.GetOffsetToPosition(nadpis.ContentEnd) != 0 || nadpis.Parent is not FlowDocument)
+        {
+            return false;
+        }
+
+        var novy = DokumentOsnovy.NovyOdsek(Sablona);
+        Text.BeginChange();
+        try
+        {
+            Text.Document.Blocks.InsertAfter(nadpis, novy);
+        }
+        finally
+        {
+            Text.EndChange();
+        }
+
+        Text.CaretPosition = novy.ContentStart;
+        return true;
     }
 
     // ---- formát ----
@@ -352,7 +433,7 @@ public partial class EditorDokumentu : UserControl
 
     public void VlozTabulku(int riadky, int stlpce)
     {
-        var tabulka = new Table { CellSpacing = 0, BorderBrush = Linka, BorderThickness = new Thickness(0.5), Margin = new Thickness(0, 6, 0, 10) };
+        var tabulka = DokumentOsnovy.NovaTabulka(Farba, Sablona);
         for (var s = 0; s < stlpce; s++)
         {
             tabulka.Columns.Add(new TableColumn());
@@ -361,7 +442,7 @@ public partial class EditorDokumentu : UserControl
         var skupina = new TableRowGroup();
         for (var r = 0; r < riadky; r++)
         {
-            skupina.Rows.Add(NovyRiadok(stlpce, r == 0));
+            skupina.Rows.Add(NovyRiadok(stlpce, r));
         }
 
         tabulka.RowGroups.Add(skupina);
@@ -385,30 +466,22 @@ public partial class EditorDokumentu : UserControl
         Text.Focus();
     }
 
-    private static TableRow NovyRiadok(int stlpce, bool hlavicka)
+    /// <summary>Nový riadok tabuľky (riadok 0 = hlavička).</summary>
+    private TableRow NovyRiadok(int stlpce, int index)
     {
         var riadok = new TableRow();
         for (var s = 0; s < stlpce; s++)
         {
-            riadok.Cells.Add(NovaBunka(hlavicka));
+            riadok.Cells.Add(NovaBunka(index));
         }
 
         return riadok;
     }
 
-    private static TableCell NovaBunka(bool hlavicka)
+    private TableCell NovaBunka(int riadok)
     {
-        var bunka = new TableCell(new Paragraph { Margin = new Thickness(0) })
-        {
-            BorderBrush = Linka,
-            BorderThickness = new Thickness(0.5),
-            Padding = new Thickness(7, 4, 7, 4),
-        };
-        if (hlavicka)
-        {
-            bunka.Background = Hlavicka;
-        }
-
+        var bunka = new TableCell(new Paragraph { Margin = new Thickness(0) });
+        DokumentOsnovy.StylBunky(bunka, riadok == 0, riadok, true, Farba, Sablona);
         return bunka;
     }
 
@@ -450,7 +523,8 @@ public partial class EditorDokumentu : UserControl
     {
         if (AktualnaBunka() is { Parent: TableRow riadok } && riadok.Parent is TableRowGroup skupina)
         {
-            skupina.Rows.Insert(skupina.Rows.IndexOf(riadok) + 1, NovyRiadok(riadok.Cells.Count, false));
+            var index = skupina.Rows.IndexOf(riadok) + 1;
+            skupina.Rows.Insert(index, NovyRiadok(riadok.Cells.Count, Math.Max(1, index)));
         }
     }
 
@@ -469,7 +543,7 @@ public partial class EditorDokumentu : UserControl
             for (var i = 0; i < skupina.Rows.Count; i++)
             {
                 var r = skupina.Rows[i];
-                r.Cells.Insert(Math.Min(index, r.Cells.Count), NovaBunka(i == 0 && skupina == tabulka.RowGroups[0]));
+                r.Cells.Insert(Math.Min(index, r.Cells.Count), NovaBunka(skupina == tabulka.RowGroups[0] ? i : Math.Max(1, i)));
             }
         }
     }
@@ -564,12 +638,5 @@ public partial class EditorDokumentu : UserControl
                 e.FormatToApply = DataFormats.UnicodeText;
             }
         }
-    }
-
-    private static SolidColorBrush Zmrazeny(Color farba)
-    {
-        var stetec = new SolidColorBrush(farba);
-        stetec.Freeze();
-        return stetec;
     }
 }

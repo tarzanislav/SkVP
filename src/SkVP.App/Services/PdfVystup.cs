@@ -28,7 +28,6 @@ public static class PdfVystup
     private static readonly MdColor Atrament = Farba("#1F2933");
     private static readonly MdColor Siva = Farba("#6B7280");
     private static readonly MdColor Linka = Farba("#CBD2D9");
-    private static readonly MdColor Podklad = Farba("#F3F4F6");
 
     // okraje strán zostavy (cm)
     private const double OkrajVlavoCm = 2.4;
@@ -182,13 +181,15 @@ public static class PdfVystup
 
     private static void Styly(Document doc)
     {
+        var sablona = VzhladDokumentov.Aktivna;
         var normal = doc.Styles[StyleNames.Normal]!;
-        normal.Font.Name = PismaDokumentu.Text;
-        normal.Font.Size = 11;
+        normal.Font.Name = sablona.PismoTextu;
+        normal.Font.Size = sablona.VelkostTextu;
         normal.Font.Color = Atrament;
-        normal.ParagraphFormat.SpaceAfter = Unit.FromPoint(5);
+        normal.ParagraphFormat.SpaceAfter = Unit.FromPoint(sablona.MedzeraZaOdsekom);
         normal.ParagraphFormat.LineSpacingRule = LineSpacingRule.Multiple;
-        normal.ParagraphFormat.LineSpacing = 1.18;
+        normal.ParagraphFormat.LineSpacing = sablona.Riadkovanie;
+        normal.ParagraphFormat.Alignment = sablona.DoBloku ? ParagraphAlignment.Justify : ParagraphAlignment.Left;
 
         var oblast = doc.Styles[StyleNames.Heading1]!;
         oblast.Font.Name = PismaDokumentu.Nadpis;
@@ -197,6 +198,7 @@ public static class PdfVystup
         oblast.ParagraphFormat.SpaceBefore = Unit.FromCentimeter(5);
         oblast.ParagraphFormat.SpaceAfter = Unit.FromPoint(10);
         oblast.ParagraphFormat.LineSpacingRule = LineSpacingRule.Single;
+        oblast.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         oblast.ParagraphFormat.KeepWithNext = true;
         oblast.ParagraphFormat.OutlineLevel = OutlineLevel.Level1;
 
@@ -206,6 +208,7 @@ public static class PdfVystup
         predmet.Font.Bold = true;
         predmet.ParagraphFormat.SpaceAfter = Unit.FromPoint(14);
         predmet.ParagraphFormat.LineSpacingRule = LineSpacingRule.Single;
+        predmet.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         predmet.ParagraphFormat.KeepWithNext = true;
         predmet.ParagraphFormat.OutlineLevel = OutlineLevel.Level2;
 
@@ -214,24 +217,28 @@ public static class PdfVystup
         oblastMala.Font.Size = 9.5;
         oblastMala.Font.Bold = true;
         oblastMala.ParagraphFormat.SpaceAfter = Unit.FromPoint(2);
+        oblastMala.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         oblastMala.ParagraphFormat.KeepWithNext = true;
 
         var n1 = doc.Styles.AddStyle(StylN1, StyleNames.Normal);
-        n1.Font.Name = PismaDokumentu.Nadpis;
-        n1.Font.Size = 13;
+        n1.Font.Name = sablona.PismoNadpisov;
+        n1.Font.Size = sablona.Nadpis1;
         n1.Font.Bold = true;
-        n1.ParagraphFormat.SpaceBefore = Unit.FromPoint(14);
-        n1.ParagraphFormat.SpaceAfter = Unit.FromPoint(5);
+        n1.ParagraphFormat.SpaceBefore = Unit.FromPoint(sablona.Nadpis1 * 1.05);
+        n1.ParagraphFormat.SpaceAfter = Unit.FromPoint(6);
+        n1.ParagraphFormat.LineSpacingRule = LineSpacingRule.Single;
+        n1.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         n1.ParagraphFormat.KeepWithNext = true;
         n1.ParagraphFormat.OutlineLevel = OutlineLevel.Level3;
 
         var n2 = doc.Styles.AddStyle(StylN2, StylN1);
-        n2.Font.Size = 11.5;
-        n2.ParagraphFormat.SpaceBefore = Unit.FromPoint(10);
+        n2.Font.Size = sablona.Nadpis2;
+        n2.ParagraphFormat.SpaceBefore = Unit.FromPoint(sablona.Nadpis2 * 0.85);
+        n2.ParagraphFormat.SpaceAfter = Unit.FromPoint(4);
         n2.ParagraphFormat.OutlineLevel = OutlineLevel.Level4;
 
         var n3 = doc.Styles.AddStyle(StylN3, StylN1);
-        n3.Font.Size = 11;
+        n3.Font.Size = sablona.Nadpis3;
         n3.Font.Bold = false;
         n3.Font.Italic = true;
         n3.ParagraphFormat.SpaceBefore = Unit.FromPoint(8);
@@ -243,12 +250,14 @@ public static class PdfVystup
         obsah1.Font.Bold = true;
         obsah1.ParagraphFormat.SpaceBefore = Unit.FromPoint(9);
         obsah1.ParagraphFormat.SpaceAfter = Unit.FromPoint(2);
+        obsah1.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         obsah1.ParagraphFormat.TabStops.AddTabStop(SirkaTextu, TabAlignment.Right, TabLeader.Dots);
 
         var obsah2 = doc.Styles.AddStyle(StylObsah2, StyleNames.Normal);
         obsah2.Font.Size = 10.5;
         obsah2.ParagraphFormat.LeftIndent = Unit.FromCentimeter(0.7);
         obsah2.ParagraphFormat.SpaceAfter = Unit.FromPoint(1.5);
+        obsah2.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         obsah2.ParagraphFormat.TabStops.AddTabStop(SirkaTextu, TabAlignment.Right, TabLeader.Dots);
 
         var poznamka = doc.Styles.AddStyle(StylPoznamka, StyleNames.Normal);
@@ -256,14 +265,16 @@ public static class PdfVystup
         poznamka.Font.Color = Siva;
 
         var tabulka = doc.Styles.AddStyle(StylTabulka, StyleNames.Normal);
-        tabulka.Font.Size = 10;
+        tabulka.Font.Size = Math.Round(sablona.VelkostTextu * 0.91, 1);
         tabulka.ParagraphFormat.SpaceAfter = Unit.FromPoint(2);
-        tabulka.ParagraphFormat.LineSpacing = 1.1;
+        tabulka.ParagraphFormat.LineSpacing = Math.Max(1.05, sablona.Riadkovanie - 0.08);
+        tabulka.ParagraphFormat.Alignment = ParagraphAlignment.Left;
 
         var hlavicka = doc.Styles[StyleNames.Header]!;
         hlavicka.Font.Name = PismaDokumentu.Nadpis;
         hlavicka.Font.Size = 8.5;
         hlavicka.Font.Color = Siva;
+        hlavicka.ParagraphFormat.Alignment = ParagraphAlignment.Left;
         hlavicka.ParagraphFormat.TabStops.ClearAll();
         hlavicka.ParagraphFormat.TabStops.AddTabStop(SirkaTextu, TabAlignment.Right);
 
@@ -835,9 +846,15 @@ public static class PdfVystup
                 case Nadpis n:
                     var p = ciel.NovyOdsek();
                     p.Style = n.Uroven switch { 1 => StylN1, 2 => StylN2, _ => StylN3 };
-                    if (n.Uroven == 1)
+                    var sablona = VzhladDokumentov.Aktivna;
+                    if (sablona.FarbaNadpisu(n.Uroven, Hex(farba)) is { } farbaNadpisu)
                     {
-                        p.Format.Font.Color = farba;
+                        p.Format.Font.Color = Farba(farbaNadpisu);
+                    }
+
+                    if (n.Uroven == 1 && !vBunke)
+                    {
+                        Ozdob(p.Format, sablona, Hex(farba));
                     }
 
                     p.AddText(n.Text);
@@ -856,7 +873,7 @@ public static class PdfVystup
                         WinAlign.Center => ParagraphAlignment.Center,
                         WinAlign.Right => ParagraphAlignment.Right,
                         WinAlign.Justify => ParagraphAlignment.Justify,
-                        _ => ParagraphAlignment.Left,
+                        _ => VzhladDokumentov.Aktivna.DoBloku && !vBunke ? ParagraphAlignment.Justify : ParagraphAlignment.Left,
                     };
                     break;
 
@@ -934,12 +951,22 @@ public static class PdfVystup
     {
         // zlúčené bunky, ktoré sa krížia, by MigraDoc nevysádzal („GetMinMergedCell“) – mriežka sa najprv upraví
         t = t.Pravidelna();
-        tabulka.Borders.Width = Unit.FromPoint(0.5);
-        tabulka.Borders.Color = Linka;
-        tabulka.LeftPadding = Unit.FromPoint(4);
-        tabulka.RightPadding = Unit.FromPoint(4);
-        tabulka.TopPadding = Unit.FromPoint(3);
-        tabulka.BottomPadding = Unit.FromPoint(2);
+        var sablona = VzhladDokumentov.Aktivna;
+        var oblast = Hex(farba);
+        var vodorovne = sablona.Ram == RamTabulky.Vodorovny;
+        tabulka.Borders.Width = Unit.FromPoint(sablona.HrubkaLinky);
+        tabulka.Borders.Color = Farba(sablona.Linka(oblast));
+        if (vodorovne)
+        {
+            // len vodorovné čiary – zvislé sa skryjú pri všetkých bunkách
+            tabulka.Borders.Left.Visible = false;
+            tabulka.Borders.Right.Visible = false;
+        }
+
+        tabulka.LeftPadding = Unit.FromPoint(vodorovne ? 5 : 4);
+        tabulka.RightPadding = Unit.FromPoint(vodorovne ? 5 : 4);
+        tabulka.TopPadding = Unit.FromPoint(vodorovne ? 4 : 3);
+        tabulka.BottomPadding = Unit.FromPoint(vodorovne ? 3 : 2);
         foreach (var sirka in t.PomerneSirky)
         {
             tabulka.AddColumn(Unit.FromPoint(sirkaTextu * t.SirkaVTexte * sirka));
@@ -951,10 +978,13 @@ public static class PdfVystup
             riadky.Add(tabulka.AddRow());
         }
 
-        if (t.Riadky.Count > 0 && t.Riadky[0].Any(b => b.Hlavicka))
+        var sHlavickou = t.Riadky.Count > 0 && t.Riadky[0].Any(b => b.Hlavicka);
+        if (sHlavickou)
         {
             riadky[0].HeadingFormat = t.Riadky.Count > 2;
         }
+
+        var pruh = sablona.PodkladPruhu(oblast);
 
         foreach (var p in Mriezka(t))
         {
@@ -984,7 +1014,16 @@ public static class PdfVystup
 
             if (p.Bunka.Hlavicka)
             {
-                bunka.Shading.Color = Podklad;
+                bunka.Shading.Color = Farba(sablona.PodkladHlavicky(oblast));
+                if (vodorovne && !p.BezDolneho)
+                {
+                    bunka.Borders.Bottom.Width = Unit.FromPoint(sablona.HrubkaPodHlavickou);
+                    bunka.Borders.Bottom.Color = Farba(sablona.FarbaOzdoby(oblast));
+                }
+            }
+            else if (pruh is not null && p.Riadok > 0 && (p.Riadok - (sHlavickou ? 1 : 0)) % 2 == 1)
+            {
+                bunka.Shading.Color = Farba(pruh);
             }
 
             Bloky(new CielBunka(bunka), p.Bunka.Bloky, farba, 0, true);
@@ -1125,6 +1164,42 @@ public static class PdfVystup
     public static string PocetPredmetov(int pocet) => Preklad.Pocet(pocet, "{0} predmet", "{0} predmety", "{0} predmetov");
 
     private static string Zalozka(long id) => "obj" + id.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>Farba MigraDoc → #RRGGBB.</summary>
+    private static string Hex(MdColor c) => string.Create(CultureInfo.InvariantCulture, $"#{c.R:X2}{c.G:X2}{c.B:X2}");
+
+    /// <summary>Ozdoba nadpisu časti osnovy podľa šablóny vzhľadu (čiara, pásik vľavo, farebný pás).</summary>
+    private static void Ozdob(ParagraphFormat format, SablonaVzhladu sablona, string oblast)
+    {
+        var farba = Farba(sablona.FarbaOzdoby(oblast));
+        switch (sablona.Ozdoba)
+        {
+            case OzdobaNadpisu.Ciara:
+                format.Borders.Bottom.Width = Unit.FromPoint(1.2);
+                format.Borders.Bottom.Color = farba;
+                format.Borders.DistanceFromBottom = Unit.FromPoint(4);
+                format.SpaceAfter = Unit.FromPoint(9);
+                break;
+
+            case OzdobaNadpisu.Pasik:
+                format.Borders.Left.Width = Unit.FromPoint(4);
+                format.Borders.Left.Color = farba;
+                format.Borders.DistanceFromLeft = Unit.FromPoint(9);
+                format.LeftIndent = Unit.FromPoint(4);
+                break;
+
+            case OzdobaNadpisu.Pas:
+                format.Shading.Color = Farba(sablona.PodkladNadpisu(oblast));
+                format.Borders.Left.Width = Unit.FromPoint(4);
+                format.Borders.Left.Color = farba;
+                format.Borders.DistanceFromLeft = Unit.FromPoint(9);
+                format.Borders.DistanceFromTop = Unit.FromPoint(4);
+                format.Borders.DistanceFromBottom = Unit.FromPoint(4);
+                format.LeftIndent = Unit.FromPoint(4);
+                format.SpaceAfter = Unit.FromPoint(10);
+                break;
+        }
+    }
 
     public static MdColor Farba(string hex)
     {

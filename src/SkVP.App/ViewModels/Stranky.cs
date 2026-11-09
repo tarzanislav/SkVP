@@ -84,6 +84,10 @@ public sealed partial class OsnovyViewModel : ObservableObject
         }
     }
 
+    /// <summary>Vzhľad osnov – šablóna vzhľadu všetkých dokumentov a upratanie ich textu.</summary>
+    [RelayCommand]
+    private void VzhladOsnov() => new Views.VzhladOsnovWindow(Hlavny) { Owner = Dialogy.Vlastnik }.ShowDialog();
+
     /// <summary>Charakteristiky všetkých oblastí podľa Štátneho vzdelávacieho programu (doterajšie texty sa zarchivujú).</summary>
     [RelayCommand]
     private void CharakteristikyZoSvp()
@@ -113,7 +117,7 @@ public sealed partial class OblastViewModel : ObservableObject, IUkladaPredOdcho
         Hlavny = hlavny;
         Oblast = oblast;
         _nazov = oblast.Nazov;
-        Dokument = new DokumentStrankyVM(hlavny, oblast.Id, () => $"Charakteristika – {Oblast.Nazov}", sablonaOsnovy: false) { Farba = () => Oblast.Farba };
+        Dokument = new DokumentStrankyVM(hlavny, oblast.Id, () => $"Charakteristika – {Oblast.Nazov}", sablonaOsnovy: false);
         // úlohy a poznámky oblasti aj jej predmetov
         PanelPlanovania = new PanelPlanovaniaVM(hlavny, oblast.Id, () => Oblast.Predmety.Select(p => p.Id).Append(Oblast.Id).ToList());
         foreach (var predmet in oblast.Predmety)
@@ -341,10 +345,7 @@ public sealed partial class PredmetViewModel : ObservableObject, IUkladaPredOdch
         _zobrazitPlanovanie = !_zobrazitSuvislosti && PanelPlanovania.Pocet > 0;
         // úvodné a záverečné časti nemajú šablónu osnovy predmetu (úvodnú tabuľku)
         Dokument = new DokumentStrankyVM(hlavny, predmet.Id,
-            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast)
-        {
-            Farba = () => Predmet.Oblast.Farba,
-        };
+            () => InfoOsnovyService.NazovDokumentu(Predmet.Cislo, Predmet.Nazov, InfoOsnovyService.Nacitaj(Predmet.Id).Rok), sablonaOsnovy: predmet.Oblast.JeOblast);
         NacitajInfo();
         predmet.NacitajUdajeOsnovy();
     }

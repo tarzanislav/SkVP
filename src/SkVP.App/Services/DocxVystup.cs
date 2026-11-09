@@ -17,7 +17,6 @@ public static class DocxVystup
     private const string Atrament = "1F2933";
     private const string Siva = "6B7280";
     private const string Linka = "CBD2D9";
-    private const string Podklad = "F3F4F6";
 
     private sealed class Stav
     {
@@ -622,7 +621,14 @@ public static class DocxVystup
             {
                 case Nadpis n:
                     var stylNadpisu = "Heading" + Math.Min(9, n.Uroven + stav.PosunNadpisov).ToString(CultureInfo.InvariantCulture);
-                    vysledok.Add(Odsek(n.Text, stylNadpisu, n.Uroven == 1 && stav.PosunNadpisov > 0 ? farba : null));
+                    var sablona = VzhladDokumentov.Aktivna;
+                    var nadpis = Odsek(n.Text, stylNadpisu, sablona.FarbaNadpisu(n.Uroven, "#" + farba) is { } farbaNadpisu ? Bez(farbaNadpisu) : null);
+                    if (n.Uroven == 1)
+                    {
+                        Ozdob(nadpis.ParagraphProperties!, sablona, "#" + farba);
+                    }
+
+                    vysledok.Add(nadpis);
                     break;
 
                 case Odsek o:
@@ -708,15 +714,20 @@ public static class DocxVystup
     private static Table Tabulka(Tabulka t, string farba, Stav stav)
     {
         t = t.Pravidelna();
+        var sablona = VzhladDokumentov.Aktivna;
+        var oblast = "#" + farba;
+        var linka = Bez(sablona.Linka(oblast));
+        var hrubka = (uint)Math.Round(sablona.HrubkaLinky * 8);
+        var zvisle = sablona.Ram == RamTabulky.Vodorovny ? BorderValues.Nil : BorderValues.Single;
         var tabulka = new Table(new TableProperties(
             new TableWidth { Type = TableWidthUnitValues.Pct, Width = ((int)Math.Round(5000 * t.SirkaVTexte)).ToString(CultureInfo.InvariantCulture) },
             new TableBorders(
-                new TopBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
-                new LeftBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
-                new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
-                new RightBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
-                new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4, Color = Linka },
-                new InsideVerticalBorder { Val = BorderValues.Single, Size = 4, Color = Linka }),
+                new TopBorder { Val = BorderValues.Single, Size = hrubka, Color = linka },
+                new LeftBorder { Val = zvisle, Size = hrubka, Color = linka },
+                new BottomBorder { Val = BorderValues.Single, Size = hrubka, Color = linka },
+                new RightBorder { Val = zvisle, Size = hrubka, Color = linka },
+                new InsideHorizontalBorder { Val = BorderValues.Single, Size = hrubka, Color = linka },
+                new InsideVerticalBorder { Val = zvisle, Size = hrubka, Color = linka }),
             new TableLayout { Type = TableLayoutValues.Fixed },
             new TableCellMarginDefault(
                 new TopMargin { Width = "50", Type = TableWidthUnitValues.Dxa },
@@ -735,8 +746,14 @@ public static class DocxVystup
 
         // obsadenosť mriežky – kvôli bunkám zlúčeným zvislo (vMerge) treba vedieť, kde pokračujú
         var pokracovanie = new Dictionary<(int Riadok, int Stlpec), int>();
+        var sHlavickou = t.Riadky.Count > 0 && t.Riadky[0].Any(b => b.Hlavicka);
+        var pruh = sablona.PodkladPruhu(oblast) is { } farbaPruhu ? Bez(farbaPruhu) : null;
+        var podHlavickou = sablona.Ram == RamTabulky.Vodorovny
+            ? new BottomBorder { Val = BorderValues.Single, Size = (uint)Math.Round(sablona.HrubkaPodHlavickou * 8), Color = Bez(sablona.FarbaOzdoby(oblast)) }
+            : null;
         for (var r = 0; r < t.Riadky.Count; r++)
         {
+            var podklad = r > 0 && (r - (sHlavickou ? 1 : 0)) % 2 == 1 ? pruh : null;
             var riadok = new TableRow();
             if (r == 0 && t.Riadky[0].Any(b => b.Hlavicka) && t.Riadky.Count > 2)
             {
@@ -749,14 +766,14 @@ public static class DocxVystup
             {
                 if (pokracovanie.TryGetValue((r, stlpec), out var rozpatie))
                 {
-                    riadok.Append(Bunka(new List<OpenXmlElement>(), Sucet(sirky, stlpec, rozpatie), rozpatie, MergedCellValues.Continue, false));
+                    riadok.Append(Bunka(new List<OpenXmlElement>(), Sucet(sirky, stlpec, rozpatie), rozpatie, MergedCellValues.Continue, null));
                     stlpec += rozpatie;
                     continue;
                 }
 
                 if (index >= t.Riadky[r].Count)
                 {
-                    riadok.Append(Bunka(new List<OpenXmlElement>(), sirky[stlpec], 1, null, false));
+                    riadok.Append(Bunka(new List<OpenXmlElement>(), sirky[stlpec], 1, null, podklad));
                     stlpec++;
                     continue;
                 }
@@ -774,7 +791,23 @@ public static class DocxVystup
                 }
 
                 var obsah = Bloky(b.Bloky.Where(x => x is not SkVP.Services.Tabulka).ToList(), farba, stav);
-                riadok.Append(Bunka(obsah, Sucet(sirky, stlpec, stlpce), stlpce, zvislo, b.Hlavicka));
+                var bunka = Bunka(obsah, Sucet(sirky, stlpec, stlpce), stlpce, zvislo, b.Hlavicka ? Bez(sablona.PodkladHlavicky(oblast)) : podklad);
+                if (b.Hlavicka && podHlavickou is not null)
+                {
+                    // okraje bunky musia byť pred podkladom (poradie prvkov Wordu)
+                    var vlastnosti = bunka.TableCellProperties!;
+                    var okraje = new TableCellBorders((BottomBorder)podHlavickou.CloneNode(true));
+                    if (vlastnosti.GetFirstChild<Shading>() is { } tien)
+                    {
+                        vlastnosti.InsertBefore(okraje, tien);
+                    }
+                    else
+                    {
+                        vlastnosti.Append(okraje);
+                    }
+                }
+
+                riadok.Append(bunka);
                 stlpec += stlpce;
             }
 
@@ -786,7 +819,8 @@ public static class DocxVystup
 
     private static int Sucet(List<int> sirky, int od, int pocet) => sirky.Skip(od).Take(pocet).Sum();
 
-    private static TableCell Bunka(List<OpenXmlElement> obsah, int sirka, int stlpce, MergedCellValues? zvislo, bool hlavicka)
+    /// <param name="podklad">farba podkladu bunky (hlavička, pruh) bez # alebo null</param>
+    private static TableCell Bunka(List<OpenXmlElement> obsah, int sirka, int stlpce, MergedCellValues? zvislo, string? podklad)
     {
         var vlastnosti = new TableCellProperties(new TableCellWidth { Type = TableWidthUnitValues.Dxa, Width = sirka.ToString(CultureInfo.InvariantCulture) });
         if (stlpce > 1)
@@ -799,9 +833,9 @@ public static class DocxVystup
             vlastnosti.Append(new VerticalMerge { Val = zvislo.Value });
         }
 
-        if (hlavicka)
+        if (podklad is not null)
         {
-            vlastnosti.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = Podklad, Color = "auto" });
+            vlastnosti.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = podklad, Color = "auto" });
         }
 
         var bunka = new TableCell(vlastnosti);
@@ -1007,8 +1041,12 @@ public static class DocxVystup
 
     private static Styles Styly(bool osnova)
     {
-        var text = PismaDokumentu.Text;
-        var nadpis = PismaDokumentu.Nadpis;
+        var sablona = VzhladDokumentov.Aktivna;
+        var text = sablona.PismoTextu;
+        var nadpis = sablona.PismoNadpisov;
+        int Pol(double body) => (int)Math.Round(body * 2);
+        string Twip(double body) => ((int)Math.Round(body * 20)).ToString(CultureInfo.InvariantCulture);
+        var velkost = Pol(sablona.VelkostTextu);
 
         Style Styl(string id, string meno, string? zaklad, StyleRunProperties beh, StyleParagraphProperties? odsek = null, int? uroven = null)
         {
@@ -1051,35 +1089,46 @@ public static class DocxVystup
             return b;
         }
 
+        // nadpisy a údaje vľavo aj v šablóne s textom do bloku
         StyleParagraphProperties Medzery(int pred, int po) =>
-            new(new SpacingBetweenLines { Before = pred.ToString(CultureInfo.InvariantCulture), After = po.ToString(CultureInfo.InvariantCulture) });
+            new(new SpacingBetweenLines { Before = pred.ToString(CultureInfo.InvariantCulture), After = po.ToString(CultureInfo.InvariantCulture) },
+                new Justification { Val = JustificationValues.Left });
+
+        var normalOdsek = new StyleParagraphProperties(new SpacingBetweenLines
+        {
+            After = Twip(sablona.MedzeraZaOdsekom),
+            Line = ((int)Math.Round(240 * sablona.Riadkovanie)).ToString(CultureInfo.InvariantCulture),
+            LineRule = LineSpacingRuleValues.Auto,
+        });
+        if (sablona.DoBloku)
+        {
+            normalOdsek.Append(new Justification { Val = JustificationValues.Both });
+        }
 
         var normal = new Style { Type = StyleValues.Paragraph, StyleId = "Normal", Default = true };
-        normal.Append(new StyleName { Val = "Normal" }, new PrimaryStyle(),
-            new StyleParagraphProperties(new SpacingBetweenLines { After = "100", Line = "283", LineRule = LineSpacingRuleValues.Auto }),
-            Pismo(text, 22));
+        normal.Append(new StyleName { Val = "Normal" }, new PrimaryStyle(), normalOdsek, Pismo(text, velkost));
 
         var styly = new Styles(
             new DocDefaults(
                 new RunPropertiesDefault(new RunPropertiesBaseStyle(
                     new RunFonts { Ascii = text, HighAnsi = text, ComplexScript = text, EastAsia = text },
-                    new FontSize { Val = "22" }, new Languages { Val = "sk-SK" })),
-                new ParagraphPropertiesDefault(new ParagraphPropertiesBaseStyle(new SpacingBetweenLines { After = "100" }))),
+                    new FontSize { Val = velkost.ToString(CultureInfo.InvariantCulture) }, new Languages { Val = "sk-SK" })),
+                new ParagraphPropertiesDefault(new ParagraphPropertiesBaseStyle(new SpacingBetweenLines { After = Twip(sablona.MedzeraZaOdsekom) }))),
             normal,
             Styl("Title", "Title", "Normal", Pismo(nadpis, 68, true), Medzery(3400, 200)),
             Styl("Subtitle", "Subtitle", "Normal", Pismo(text, 48, kurziva: true, farba: "3B5BDB"), Medzery(0, 520)),
             osnova
-                ? Styl("Heading1", "heading 1", "Normal", Pismo(nadpis, 28, true), Medzery(360, 120), 0)
+                ? Styl("Heading1", "heading 1", "Normal", Pismo(nadpis, Pol(sablona.Nadpis1), true), Medzery(Pol(sablona.Nadpis1) * 11, 120), 0)
                 : Styl("Heading1", "heading 1", "Normal", Pismo(nadpis, 52, true), Medzery(2800, 200), 0),
             osnova
-                ? Styl("Heading2", "heading 2", "Normal", Pismo(nadpis, 24, true), Medzery(240, 100), 1)
+                ? Styl("Heading2", "heading 2", "Normal", Pismo(nadpis, Pol(sablona.Nadpis2), true), Medzery(Pol(sablona.Nadpis2) * 9, 80), 1)
                 : Styl("Heading2", "heading 2", "Normal", Pismo(nadpis, 38, true), Medzery(0, 280), 1),
             osnova
-                ? Styl("Heading3", "heading 3", "Normal", Pismo(nadpis, 22, true, kurziva: true), Medzery(200, 80), 2)
-                : Styl("Heading3", "heading 3", "Normal", Pismo(nadpis, 26, true), Medzery(280, 100), 2),
-            Styl("Heading4", "heading 4", "Normal", Pismo(nadpis, 23, true), Medzery(200, 80), 3),
-            Styl("Heading5", "heading 5", "Normal", Pismo(nadpis, 22, kurziva: true), Medzery(160, 60), 4),
-            Styl("ListParagraph", "List Paragraph", "Normal", Pismo(text, 22), Medzery(0, 50)),
+                ? Styl("Heading3", "heading 3", "Normal", Pismo(nadpis, Pol(sablona.Nadpis3), true, kurziva: true), Medzery(200, 80), 2)
+                : Styl("Heading3", "heading 3", "Normal", Pismo(nadpis, Pol(sablona.Nadpis1), true), Medzery(Pol(sablona.Nadpis1) * 11, 120), 2),
+            Styl("Heading4", "heading 4", "Normal", Pismo(nadpis, Pol(sablona.Nadpis2), true), Medzery(Pol(sablona.Nadpis2) * 9, 80), 3),
+            Styl("Heading5", "heading 5", "Normal", Pismo(nadpis, Pol(sablona.Nadpis3), true, kurziva: true), Medzery(160, 60), 4),
+            Styl("ListParagraph", "List Paragraph", "Normal", Pismo(text, velkost), new StyleParagraphProperties(new SpacingBetweenLines { After = "50" })),
             Styl("Header", "header", "Normal", Pismo(nadpis, 17, farba: Siva), Medzery(0, 0)),
             Styl("Footer", "footer", "Normal", Pismo(nadpis, 17, farba: Siva), Medzery(0, 0)),
             Styl("SkvpSkola", "SkVP – škola", "Normal", Pismo(nadpis, 26, true), Medzery(360, 20)),
@@ -1089,8 +1138,8 @@ public static class DocxVystup
             Styl("SkvpNadpisObsahu", "SkVP – nadpis obsahu", "Normal", Pismo(nadpis, 48, true), Medzery(0, 280)),
             Styl("SkvpPodnadpisOblasti", "SkVP – podnadpis oblasti", "Normal", Pismo(nadpis, 20, farba: Siva), Medzery(0, 440)),
             Styl("SkvpOblastMala", "SkVP – oblasť nad predmetom", "Normal", Pismo(nadpis, 19, true), Medzery(0, 40)),
-            Styl("SkvpPoznamka", "SkVP – poznámka", "Normal", Pismo(text, 22, kurziva: true, farba: Siva)),
-            Styl("SkvpTabulka", "SkVP – text v tabuľke", "Normal", Pismo(text, 20), Medzery(0, 40)),
+            Styl("SkvpPoznamka", "SkVP – poznámka", "Normal", Pismo(text, velkost, kurziva: true, farba: Siva)),
+            Styl("SkvpTabulka", "SkVP – text v tabuľke", "Normal", Pismo(text, (int)Math.Round(velkost * 0.91)), Medzery(0, 40)),
             Styl("SkvpZoznamPredmetov", "SkVP – predmet v zozname oblasti", "Normal", Pismo(text, 25),
                 new StyleParagraphProperties(new Tabs(new TabStop { Val = TabStopValues.Left, Position = 851 }),
                     new SpacingBetweenLines { Before = "80", After = "80" })),
@@ -1103,4 +1152,33 @@ public static class DocxVystup
     }
 
     private static string Hex(string farba) => (farba ?? "3B5BDB").TrimStart('#').ToUpperInvariant();
+
+    /// <summary>Farba #RRGGBB → RRGGBB (formát Wordu).</summary>
+    private static string Bez(string farba) => farba.TrimStart('#').ToUpperInvariant();
+
+    /// <summary>Ozdoba nadpisu časti osnovy podľa šablóny vzhľadu (čiara, pásik vľavo, farebný pás).</summary>
+    private static void Ozdob(ParagraphProperties vlastnosti, SablonaVzhladu sablona, string oblast)
+    {
+        var farba = Bez(sablona.FarbaOzdoby(oblast));
+        switch (sablona.Ozdoba)
+        {
+            case OzdobaNadpisu.Ciara:
+                vlastnosti.Append(new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 10, Color = farba, Space = 4 }));
+                break;
+
+            case OzdobaNadpisu.Pasik:
+                vlastnosti.Append(new ParagraphBorders(new LeftBorder { Val = BorderValues.Single, Size = 32, Color = farba, Space = 8 }));
+                vlastnosti.Append(new Indentation { Left = "120" });
+                break;
+
+            case OzdobaNadpisu.Pas:
+                vlastnosti.Append(new ParagraphBorders(
+                    new TopBorder { Val = BorderValues.Single, Size = 4, Color = Bez(sablona.PodkladNadpisu(oblast)), Space = 3 },
+                    new LeftBorder { Val = BorderValues.Single, Size = 32, Color = farba, Space = 8 },
+                    new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Bez(sablona.PodkladNadpisu(oblast)), Space = 3 }));
+                vlastnosti.Append(new Shading { Val = ShadingPatternValues.Clear, Fill = Bez(sablona.PodkladNadpisu(oblast)), Color = "auto" });
+                vlastnosti.Append(new Indentation { Left = "120" });
+                break;
+        }
+    }
 }

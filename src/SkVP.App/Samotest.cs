@@ -494,6 +494,73 @@ internal static class Samotest
         Over(listy.Pocet == orientacie.Count && !listy.NaSirku, "tlač zmiešanej zostavy na listy na výšku");
         Krok("rozloženie strán a jednotný vzhľad v poriadku");
         TestNepravidelnychTabuliek(zmiesana);
+        TestSablonVzhladu();
+    }
+
+    /// <summary>
+    /// Šablóny vzhľadu osnov: každá sa vysádza do PDF (obrázok strany na kontrolu vzhľadu), vytvorí platný Word
+    /// a editor programu z nej uloží rovnaký text – bez zmeny zarovnania, hlavičiek tabuliek a tučného písma.
+    /// </summary>
+    private static void TestSablonVzhladu()
+    {
+        var export = Databaza.PriecinokDokumentov;
+        var ukazka = VzhladOsnovWindow.UkazkovaOsnova();
+        var zaklad = ZostavaOsnov.Zostav(new VolbyZostavy());
+        var volby = new VolbyZostavy
+        {
+            Oblasti = new[] { zaklad.Oblasti.First(o => o.JeOblast && o.Predmety.Count > 0).Id }, TitulnaStrana = false, Obsah = false, OddelovacOblasti = false,
+        };
+        var zostava = ZostavaOsnov.Zostav(volby);
+        var oblast = zostava.Oblasti[0];
+        zostava = zostava with
+        {
+            Oblasti = new List<KapitolaOblasti>
+            {
+                oblast with { Predmety = new List<KapitolaPredmetu> { oblast.Predmety[0] with { Obsah = ukazka } } },
+            },
+        };
+        var nadpisy = ukazka.OfType<Nadpis>().Select(n => n.Text).ToList();
+        var chyby = new List<string>();
+        foreach (var (sablona, poradie) in VzhladDokumentov.Vsetky.Select((s, i) => (s, i + 1)))
+        {
+            using var docasna = VzhladDokumentov.Docasne(sablona);
+            try
+            {
+                var vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(zostava));
+                var strany = NahladDokumentu.PocetStran(vykreslenie);
+                UlozObrazokStrany(vykreslenie, strany, Path.Combine(export, $"sablona_{poradie}_{sablona.Id}.png"));
+                if (poradie == 1)
+                {
+                    UlozObrazokStrany(vykreslenie, 1, Path.Combine(export, $"sablona_{poradie}_{sablona.Id}_oblast.png"));
+                }
+
+                OverDocx(DocxVystup.Data(zostava), $"šablóna {sablona.Nazov}: zostava vo Worde");
+                OverDocx(DocxVystup.Osnova(ukazka), $"šablóna {sablona.Nazov}: osnova vo Worde");
+                var word = DocxCitac.Nacitaj(new MemoryStream(DocxVystup.Osnova(ukazka))).Bloky;
+                var editor = DokumentOsnovy.Rozober(DokumentOsnovy.KDokumentu(ukazka, oblast.Farba, sablona));
+                foreach (var (popis, bloky) in new[] { ("Word", word), ("editor", editor) })
+                {
+                    var tabulka = bloky.OfType<Tabulka>().SingleOrDefault();
+                    if (!bloky.OfType<Nadpis>().Select(n => n.Text).SequenceEqual(nadpisy)
+                        || DokumentOsnovy.DlzkaTextu(bloky) != DokumentOsnovy.DlzkaTextu(ukazka)
+                        || bloky.OfType<Odsek>().Any(o => o.Zarovnanie != TextAlignment.Left)
+                        || tabulka is null || !tabulka.Riadky[0].All(b => b.Hlavicka) || tabulka.Riadky.Skip(1).Any(r => r.Any(b => b.Hlavicka))
+                        || tabulka.Riadky.SelectMany(r => r).SelectMany(b => b.Bloky.OfType<Odsek>()).SelectMany(o => o.Useky).Any(u => u.Tucne))
+                    {
+                        chyby.Add($"{sablona.Nazov} ({popis})");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                chyby.Add($"{sablona.Nazov}: {ex.GetBaseException().Message}");
+            }
+        }
+
+        Over(chyby.Count == 0, $"šablóny vzhľadu ({VzhladDokumentov.Vsetky.Count}): PDF, Word a editor bez zmeny textu" +
+                               (chyby.Count == 0 ? "" : $" – chyby: {string.Join("; ", chyby)}"));
+        Over(VzhladDokumentov.Aktivna.Id == VzhladDokumentov.IdPredvolenej, "po ukážkach platí zvolená šablóna");
+        Krok("šablóny vzhľadu v poriadku");
     }
 
     /// <summary>
@@ -2433,17 +2500,23 @@ internal static class Samotest
         Over(archivOkno.PocetVerzii > 0, "archív osnovy s verziami");
         Snimka(archivOkno, "13i_okno_archiv");
         archivOkno.Close();
-        var vzhladOkno = new JednotnyVzhladWindow(DocxCitac.Nacitaj(new MemoryStream(DocxVystup.Osnova(OsnovaNaSirku()))), "02 Jazykom k maturite", "#3B5BDB")
-        {
-            Owner = okno,
-        };
+        // vzhľad osnov: galéria šablón s náhľadom na osnove, potom každá šablóna v galérii
+        var vzhladOkno = new VzhladOsnovWindow(model, sjl.Id) { Owner = okno };
         vzhladOkno.Show();
         Pumpuj();
-        Over(vzhladOkno.Prepracovany.Nadpisov >= 2, "okno jednotného vzhľadu s náhľadom");
-        Snimka(vzhladOkno, "13l_jednotny_vzhlad");
-        vzhladOkno.ZobrazitPovodny.IsChecked = true;
+        Over(vzhladOkno.Sablony.Items.Count == VzhladDokumentov.Vsetky.Count && vzhladOkno.Editor.Dokument.Blocks.Count > 0,
+            $"okno Vzhľad osnov: {vzhladOkno.Sablony.Items.Count} šablón a náhľad dokumentu");
+        Snimka(vzhladOkno, "13l_vzhlad_osnov");
+        foreach (var (sablona, poradie) in VzhladDokumentov.Vsetky.Select((s, i) => (s, i)))
+        {
+            vzhladOkno.Sablony.SelectedIndex = poradie;
+            Pumpuj();
+            Snimka(vzhladOkno, $"13m_vzhlad_{poradie + 1}_{sablona.Id}");
+        }
+
+        vzhladOkno.Upratat.IsChecked = true;
         Pumpuj();
-        Snimka(vzhladOkno, "13m_jednotny_vzhlad_povodny");
+        Over(vzhladOkno.PanelRozsahu.Visibility == Visibility.Visible, "okno Vzhľad osnov: upratanie tohto alebo všetkých dokumentov");
         vzhladOkno.Close();
         model.OtvorServis();
         Pumpuj();

@@ -1,0 +1,153 @@
+<Window x:Class="SkVP.Views.VzhladOsnovWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="clr-namespace:SkVP.Views"
+        Title="Vzhľad osnov" Width="1300" Height="880" MinWidth="900" MinHeight="560"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <DockPanel>
+        <!-- hlavička okna -->
+        <Border DockPanel.Dock="Top" Padding="28,18,28,14" BorderThickness="0,0,0,1"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Style="{StaticResource Ikona}" Text="&#xE790;" FontSize="26" Margin="0,2,16,0"
+                           VerticalAlignment="Top" Foreground="{DynamicResource AccentFillColorDefaultBrush}" />
+                <StackPanel>
+                    <TextBlock Text="Vzhľad osnov" Style="{StaticResource Podnadpis}" FontSize="22" Margin="0,0,0,2" />
+                    <TextBlock Style="{StaticResource Popis}" FontSize="13.5"
+                               Text="Vyberte šablónu – platí pre všetky osnovy, charakteristiky oblastí aj úvodné časti: v programe, v PDF, vo Worde aj v tlačových zostavách. Text dokumentov zostane rovnaký." />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- upratanie textu a potvrdenie -->
+        <Border DockPanel.Dock="Bottom" Padding="28,12,28,14" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <DockPanel>
+                <Button DockPanel.Dock="Right" Content="Zrušiť" Padding="16,7" IsCancel="True" Margin="8,0,0,0" VerticalAlignment="Center" />
+                <Button DockPanel.Dock="Right" x:Name="Pouzit" Padding="16,7" Style="{DynamicResource AccentButtonStyle}" Click="Pouzit_Click"
+                        VerticalAlignment="Center" IsDefault="True">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Ikona}" Text="&#xE73E;" FontSize="13" Margin="0,0,8,0" />
+                        <TextBlock x:Name="PouzitText" Text="Použiť pre všetky dokumenty" />
+                    </StackPanel>
+                </Button>
+                <StackPanel Margin="0,0,24,0" VerticalAlignment="Center">
+                    <CheckBox x:Name="Upratat" Checked="Upratat_Zmena" Unchecked="Upratat_Zmena">
+                        <TextBlock TextWrapping="Wrap"
+                                   Text="Zároveň upratať text – nadpisy písané tučne alebo veľkými písmenami, prázdne riadky a zbytočné zlomy strán, hlavičky tabuliek" />
+                    </CheckBox>
+                    <StackPanel x:Name="PanelRozsahu" Orientation="Horizontal" Margin="28,4,0,0" Visibility="Collapsed">
+                        <RadioButton x:Name="RozsahVsetky" Content="všetkých dokumentov" IsChecked="True" GroupName="Rozsah" Checked="Upratat_Zmena" />
+                        <RadioButton x:Name="RozsahTento" Content="len tohto dokumentu" GroupName="Rozsah" Margin="16,0,0,0" Checked="Upratat_Zmena" />
+                    </StackPanel>
+                    <TextBlock x:Name="InfoUpratania" Style="{StaticResource Popis}" Margin="28,3,0,0" Visibility="Collapsed"
+                               Text="Pôvodné verzie sa uložia do archívu dokumentov. Dokumenty s obrázkami a dokumenty otvorené vo Worde zostanú bez zmeny." />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- galéria šablón -->
+        <ListBox x:Name="Sablony" DockPanel.Dock="Left" Width="362" Background="Transparent" BorderThickness="0" Padding="16,14,6,6"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="Sablony_SelectionChanged">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <Setter Property="Margin" Value="0,0,0,12" />
+                    <Setter Property="Cursor" Value="Hand" />
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListBoxItem">
+                                <Border x:Name="Ram" CornerRadius="12" BorderThickness="2" BorderBrush="Transparent" Padding="1">
+                                    <ContentPresenter />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Ram" Property="BorderBrush" Value="{DynamicResource ControlStrokeColorDefaultBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter TargetName="Ram" Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type v:SablonaVM}">
+                    <Border Width="316" CornerRadius="10" BorderThickness="1"
+                            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+                        <StackPanel>
+                            <!-- miniatúra listu v šablóne -->
+                            <Border Background="{StaticResource PapierStetec}" CornerRadius="9,9,0,0" Padding="18,14,18,12" Height="150" ClipToBounds="True">
+                                <StackPanel>
+                                    <Border BorderBrush="{Binding Ozdoba}" BorderThickness="{Binding HrubkaOzdoby}" Background="{Binding PodkladNadpisu}"
+                                            Padding="{Binding OdsadenieNadpisu}" HorizontalAlignment="Stretch">
+                                        <TextBlock Text="Ciele predmetu" FontFamily="{Binding PismoNadpisov}" FontSize="15" FontWeight="Bold"
+                                                   Foreground="{Binding FarbaNadpisu}" />
+                                    </Border>
+                                    <TextBlock Margin="0,6,0,7" FontFamily="{Binding PismoTextu}" FontSize="10.5" Foreground="{StaticResource AtramentStetec}"
+                                               TextWrapping="Wrap" MaxHeight="30" TextAlignment="{Binding Zarovnanie}"
+                                               Text="Žiak rozvíja čitateľskú gramotnosť, argumentuje, vyhľadáva a overuje informácie z rôznych zdrojov." />
+                                    <UniformGrid Columns="3" TextElement.FontFamily="{Binding PismoTextu}" TextElement.FontSize="9.5"
+                                                 TextElement.Foreground="{StaticResource AtramentStetec}">
+                                        <Border Background="{Binding PodkladHlavicky}" BorderBrush="{Binding Linka}" BorderThickness="{Binding HlavickaBunky}" Padding="5,2">
+                                            <TextBlock Text="Téma" />
+                                        </Border>
+                                        <Border Background="{Binding PodkladHlavicky}" BorderBrush="{Binding Linka}" BorderThickness="{Binding HlavickaBunky}" Padding="5,2">
+                                            <TextBlock Text="Výstupy" />
+                                        </Border>
+                                        <Border Background="{Binding PodkladHlavicky}" BorderBrush="{Binding Linka}" BorderThickness="{Binding HlavickaBunky}" Padding="5,2">
+                                            <TextBlock Text="Hodiny" />
+                                        </Border>
+                                        <Border BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
+                                            <TextBlock Text="Čítanie" />
+                                        </Border>
+                                        <Border BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
+                                            <TextBlock Text="Rozbor textu" />
+                                        </Border>
+                                        <Border BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
+                                            <TextBlock Text="12" />
+                                        </Border>
+                                        <Border Background="{Binding PodkladPruhu}" BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
+                                            <TextBlock Text="Sloh" />
+                                        </Border>
+                                        <Border Background="{Binding PodkladPruhu}" BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
+                                            <TextBlock Text="Úvaha" />
+                                        </Border>
+                                        <Border Background="{Binding PodkladPruhu}" BorderBrush="{Binding Linka}" BorderThickness="{Binding LinkaBunky}" Padding="5,2">
+                                            <TextBlock Text="8" />
+                                        </Border>
+                                    </UniformGrid>
+                                </StackPanel>
+                            </Border>
+                            <StackPanel Margin="16,10,14,13">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" CornerRadius="9" Padding="9,1,9,2" VerticalAlignment="Center"
+                                            Background="{DynamicResource SystemFillColorSuccessBackgroundBrush}"
+                                            Visibility="{Binding JeZvolena, Converter={StaticResource BoolNaViditelnost}}">
+                                        <TextBlock Text="používa sa" FontSize="11.5" />
+                                    </Border>
+                                    <TextBlock Text="{Binding Nazov}" FontFamily="{StaticResource PismoNadpisov}" FontSize="16" FontWeight="SemiBold" />
+                                </DockPanel>
+                                <TextBlock Text="{Binding Popis}" Style="{StaticResource Popis}" FontSize="12.5" Margin="0,3,0,0" />
+                                <TextBlock Text="{Binding Pisma}" Style="{StaticResource Popis}" FontSize="11.5" Margin="0,5,0,0" Opacity="0.85" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- náhľad na skutočnom dokumente -->
+        <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}">
+            <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="24,12,28,4">
+                    <TextBlock Text="Ukážka na dokumente" Style="{StaticResource Popis}" FontSize="13" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <ComboBox x:Name="Ukazky" MinWidth="360" MaxWidth="620" HorizontalAlignment="Left" SelectionChanged="Ukazky_SelectionChanged"
+                              ToolTip="Šablóna sa ukáže na vybranom dokumente – nič sa neukladá, kým nepotvrdíte Použiť" />
+                </DockPanel>
+                <v:EditorDokumentu x:Name="Editor" JeUprava="False" Margin="8,0,12,0" TextPrazdneho="Dokument nemá text." />
+            </DockPanel>
+        </Border>
+    </DockPanel>
+</Window>

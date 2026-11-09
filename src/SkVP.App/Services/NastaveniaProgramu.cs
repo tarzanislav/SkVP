@@ -95,6 +95,7 @@ public static class NastaveniaProgramu
         "tlac.pdf" => "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)",
         "tlac.obojstranne" => "obojstranná tlač",
         _ when kluc.StartsWith("vzhlad.", StringComparison.Ordinal) => "vzhľad",
+        VzhladDokumentov.Kluc => SkupinaSablona,
         _ when kluc.StartsWith("program.jazyk", StringComparison.Ordinal) => "jazyk programu",
         _ when kluc.StartsWith("uprava.", StringComparison.Ordinal) => "úprava osnov (Word / editor)",
         _ when kluc.StartsWith("zaloha.", StringComparison.Ordinal) => "zálohovanie (frekvencia, počet, priečinok)",
@@ -109,6 +110,7 @@ public static class NastaveniaProgramu
     };
 
     public const string SkupinaLogo = "logo školy";
+    public const string SkupinaSablona = "vzhľad osnov (šablóna)";
     public const string SkupinaCasti = "úvodné a záverečné časti učebných osnov (zapnuté / vypnuté)";
     public const string SkupinaPata = "text dole na úvodnej strane";
     public const string SkupinaKalendar = "kalendár a úlohy (zobrazenie, prehľad dňa, upozornenia, navrhované úlohy)";
@@ -119,7 +121,7 @@ public static class NastaveniaProgramu
     {
         "údaje o organizácii", SkupinaLogo, "školský vzdelávací program (názov, druh školy, platnosť)",
         "úvodná strana, hlavička, päta a údaje o škole v zostavách", SkupinaPata, "voľby tlače a zostáv",
-        "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)", "obojstranná tlač", "vzhľad", "jazyk programu",
+        "nastavenia PDF (šifrovanie, heslo, viac strán na list, brožúra…)", "obojstranná tlač", "vzhľad", SkupinaSablona, "jazyk programu",
         SkupinaCasti, "úprava osnov (Word / editor)", "diktovanie (spôsob a model reči)", "dashboard (bloky, miesto počasia, skryté výroky)",
         "Novinky a prázdniny (kraj)", SkupinaKalendar, SkupinaTypy, "zálohovanie (frekvencia, počet, priečinok)", "aktualizácie",
     };
@@ -259,6 +261,7 @@ public static class NastaveniaProgramu
             }
         }
 
+        VzhladDokumentov.Obnov();
         return pocet;
     }
 }

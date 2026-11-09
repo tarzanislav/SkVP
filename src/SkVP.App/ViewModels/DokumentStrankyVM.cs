@@ -152,50 +152,17 @@ public sealed partial class DokumentStrankyVM : ObservableObject, IDisposable
     private void PrevziatZWordu() => Hlavny.SkontrolujWord(ObjektId);
 
     /// <summary>
-    /// Jednotný vzhľad dokumentu (ako osnovy programu) – najprv náhľad, po potvrdení sa uloží a pôvodná verzia
-    /// sa zarchivuje.
+    /// Vzhľad osnov – šablóna vzhľadu všetkých dokumentov s náhľadom na tomto dokumente; voliteľne upratanie textu
+    /// (tohto alebo všetkých dokumentov, pôvodné verzie sa zarchivujú).
     /// </summary>
     [RelayCommand]
-    private void JednotnyVzhlad()
+    private void Vzhlad()
     {
         UlozTeraz();
         JeUprava = false;
-        if (JeVoWorde)
-        {
-            Dialogy.Info("Dokument je práve otvorený vo Worde. Dokončite úpravu vo Worde a zatvorte ho, potom môžete zmeniť jeho vzhľad.");
-            return;
-        }
-
-        var povodny = Nacitaj();
-        if (DokumentOsnovy.DlzkaTextu(povodny.Bloky) == 0)
-        {
-            Dialogy.Info("Dokument zatiaľ nemá text – jednotný vzhľad má už od začiatku.");
-            return;
-        }
-
-        var okno = new Views.JednotnyVzhladWindow(povodny, _nazovSuboru(), Farba?.Invoke() ?? "#3B5BDB") { Owner = Dialogy.Vlastnik };
-        if (okno.ShowDialog() != true)
-        {
-            return;
-        }
-
-        try
-        {
-            if (_dokumenty.UlozBloky(ObjektId, okno.Prepracovany.Bloky, "Pred jednotným vzhľadom"))
-            {
-                Hlavny.OznamPrepisanie(ObjektId);
-            }
-
-            StavUlozenia = $"Jednotný vzhľad {DateTime.Now:H:mm}";
-        }
-        catch (Exception ex)
-        {
-            Dialogy.Chyba("Jednotný vzhľad sa nepodarilo uložiť.", ex);
-        }
+        new Views.VzhladOsnovWindow(Hlavny, ObjektId) { Owner = Dialogy.Vlastnik }.ShowDialog();
+        OnPropertyChanged(nameof(PocetVerzii));
     }
-
-    /// <summary>Farba oblasti dokumentu (na náhľad).</summary>
-    public Func<string>? Farba { get; set; }
 
     private void PriZmeneDokumentu(long id)
     {
