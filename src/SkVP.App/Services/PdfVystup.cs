@@ -768,15 +768,16 @@ public static class PdfVystup
     {
         var sekcia = sadzba.Sekcia;
         var farba = Farba(oblast.Farba);
+        var sablona = VzhladDokumentov.Aktivna;
         var oblastText = sekcia.AddParagraph($"{oblast.Nazov}  •  {predmet.Cislo}");
         oblastText.Style = StylOblastMala;
         oblastText.Format.PageBreakBefore = novaStrana;
-        oblastText.Format.Font.Color = farba;
+        oblastText.Format.Font.Color = Farba(sablona.FarbaZahlavia(oblast.Farba));
 
         var nadpis = sekcia.AddParagraph();
         nadpis.Style = StylPredmet;
         nadpis.Format.Borders.Bottom.Width = Unit.FromPoint(1.5);
-        nadpis.Format.Borders.Bottom.Color = farba;
+        nadpis.Format.Borders.Bottom.Color = Farba(sablona.FarbaPredmetu(oblast.Farba));
         nadpis.Format.Borders.DistanceFromBottom = Unit.FromPoint(6);
         nadpis.AddBookmark(Zalozka(predmet.Id));
         nadpis.AddText(predmet.Nazov);
@@ -963,6 +964,8 @@ public static class PdfVystup
             tabulka.Borders.Right.Visible = false;
         }
 
+        // rám tabuľky zarovno s okrajmi textu (MigraDoc inak posunie tabuľku doľava o vnútorný okraj bunky)
+        tabulka.Rows.LeftIndent = Unit.FromPoint(vodorovne ? 5 : 4);
         tabulka.LeftPadding = Unit.FromPoint(vodorovne ? 5 : 4);
         tabulka.RightPadding = Unit.FromPoint(vodorovne ? 5 : 4);
         tabulka.TopPadding = Unit.FromPoint(vodorovne ? 4 : 3);

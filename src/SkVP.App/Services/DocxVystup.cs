@@ -444,7 +444,8 @@ public static class DocxVystup
         List<(RozlozenieStrany Rozlozenie, List<Blok> Bloky)> obsah, CastiZostavy casti, Stav stav)
     {
         var farba = Hex(oblast.Farba);
-        var oblastText = Odsek($"{oblast.Nazov}  •  {predmet.Cislo}", "SkvpOblastMala", farba);
+        var sablona = VzhladDokumentov.Aktivna;
+        var oblastText = Odsek($"{oblast.Nazov}  •  {predmet.Cislo}", "SkvpOblastMala", Bez(sablona.FarbaZahlavia(oblast.Farba)));
         if (novaStrana)
         {
             oblastText.ParagraphProperties!.PageBreakBefore = new PageBreakBefore();
@@ -454,7 +455,7 @@ public static class DocxVystup
 
         var nadpis = new Paragraph(new ParagraphProperties(
             new ParagraphStyleId { Val = "Heading2" },
-            new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 12, Color = farba, Space = 6 })));
+            new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 12, Color = Bez(sablona.FarbaPredmetu(oblast.Farba)), Space = 6 })));
         nadpis.Append(Beh(predmet.Nazov));
         telo.Append(nadpis);
 

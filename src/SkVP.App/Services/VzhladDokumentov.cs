@@ -135,6 +135,13 @@ public sealed record SablonaVzhladu(
     /// <summary>Farba čiary alebo pásika pri nadpise 1.</summary>
     public string FarbaOzdoby(string? oblast) => Farba == FarbaNadpisov.Tmava ? Atrament : Zakladna(oblast);
 
+    /// <summary>Čiara pod názvom predmetu v zostave (pri šablóne s farbami oblastí farba oblasti).</summary>
+    public string FarbaPredmetu(string? oblast) =>
+        Farba == FarbaNadpisov.Oblast ? oblast ?? VzhladDokumentov.PredvolenaOblast : FarbaOzdoby(oblast);
+
+    /// <summary>Riadok „oblasť • číslo“ nad názvom predmetu v zostave.</summary>
+    public string FarbaZahlavia(string? oblast) => Farba == FarbaNadpisov.Tmava ? "#6B7280" : FarbaPredmetu(oblast);
+
     /// <summary>Podklad pásu nadpisu (<see cref="OzdobaNadpisu.Pas"/>).</summary>
     public string PodkladNadpisu(string? oblast) => VzhladDokumentov.Zmiesaj(Zakladna(oblast), Biela, 0.84);
 
