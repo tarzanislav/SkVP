@@ -1081,15 +1081,15 @@ internal static class Samotest
         File.WriteAllBytes(Path.Combine(povodny, "Staré", "Druhý predmet.docx"), povodnaOsnova);
         File.WriteAllBytes(Path.Combine(povodny, "Staré", "Archív", "Druhý predmet.docx"), povodnaOsnova);
         var akoPovodne = Path.Combine(export, "Ako pri importe");
-        var vysledok = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
+        var akoPriImporte = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
         var fyzikaPdf = Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium.pdf");
         var druhyDocx = Path.Combine(akoPovodne, "Staré", "Druhý predmet.docx");
-        Over(vysledok.Subory.Count == volby.Predmety.Count && File.Exists(fyzikaPdf) && File.ReadAllBytes(fyzikaPdf).AsSpan(0, 5).SequenceEqual("%PDF-"u8)
-             && File.Exists(druhyDocx) && vysledok.PodlaImportu == 2,
-            $"export ako pri importe: priečinky, pôvodné názvy a formáty ({string.Join(", ", vysledok.Subory.Select(c => Path.GetRelativePath(akoPovodne, c)).Take(4))})");
+        Over(akoPriImporte.Subory.Count == volby.Predmety.Count && File.Exists(fyzikaPdf) && File.ReadAllBytes(fyzikaPdf).AsSpan(0, 5).SequenceEqual("%PDF-"u8)
+             && File.Exists(druhyDocx) && akoPriImporte.PodlaImportu == 2,
+            $"export ako pri importe: priečinky, pôvodné názvy a formáty ({string.Join(", ", akoPriImporte.Subory.Select(c => Path.GetRelativePath(akoPovodne, c)).Take(4))})");
         OverDocx(File.ReadAllBytes(druhyDocx), "export ako pri importe: Word");
-        var znova = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
-        Over(znova.Subory.Contains(Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium (2).pdf")), "export ako pri importe: existujúce súbory sa neprepíšu");
+        var opakovany = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
+        Over(opakovany.Subory.Contains(Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium (2).pdf")), "export ako pri importe: existujúce súbory sa neprepíšu");
         var vsetkoPdf = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.VsetkoPdf, false, Path.Combine(export, "Ako pri importe PDF"));
         Over(vsetkoPdf.Subory.All(c => c.EndsWith(".pdf", StringComparison.Ordinal))
              && File.Exists(Path.Combine(export, "Ako pri importe PDF", "Prírodné vedy", $"{cislo} Fyzika 2025.pdf"))
