@@ -79,18 +79,51 @@
             <!-- ako -->
             <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-                    <TextBlock Text="Formát" FontWeight="SemiBold" Margin="0,0,0,6" />
-                    <ComboBox ItemsSource="{Binding Formaty}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedValue="{Binding Format}" />
+                    <StackPanel Visibility="{Binding InyAkoPriImporte, Converter={StaticResource BoolNaViditelnost}}">
+                        <TextBlock Text="Formát" FontWeight="SemiBold" Margin="0,0,0,6" />
+                        <ComboBox ItemsSource="{Binding Formaty}" SelectedValuePath="Key" DisplayMemberPath="Value" SelectedValue="{Binding Format}" />
+                    </StackPanel>
                     <Button Content="Nastavenia PDF…" HorizontalAlignment="Left" Padding="10,4" Margin="0,8,0,0" Command="{Binding NastaveniaPdfCommand}"
                             Visibility="{Binding JePdf, Converter={StaticResource BoolNaViditelnost}}"
                             ToolTip="Šifrovanie, heslo, zákazy, sivá, zosvetlenie, 2 – 8 strán na list, brožúra" />
 
                     <TextBlock Text="Súbory" FontWeight="SemiBold" Margin="0,18,0,6" />
-                    <RadioButton Content="Jeden dokument so všetkými osnovami" GroupName="Subory"
-                                 IsChecked="{Binding Jednotlivo, Converter={StaticResource InverzBool}}" />
+                    <RadioButton Content="Jeden dokument so všetkými osnovami" GroupName="Subory" IsChecked="{Binding JedenDokument}" />
                     <RadioButton GroupName="Subory" IsChecked="{Binding Jednotlivo}" Margin="0,4,0,0">
                         <TextBlock TextWrapping="Wrap" Text="Každý predmet zvlášť – „05 Fyzika 2026“ v priečinku oblasti" />
                     </RadioButton>
+                    <RadioButton GroupName="Subory" IsChecked="{Binding AkoPriImporte}" Margin="0,4,0,0">
+                        <TextBlock TextWrapping="Wrap" Text="Ako pri importe – rovnaké priečinky a súbory ako pôvodné osnovy, ale s úpravami z programu" />
+                    </RadioButton>
+
+                    <StackPanel Visibility="{Binding AkoPriImporte, Converter={StaticResource BoolNaViditelnost}}" Margin="22,4,0,0">
+                        <TextBlock Text="Formát súborov" FontWeight="SemiBold" Margin="0,10,0,6" />
+                        <RadioButton GroupName="FormatImportu" IsChecked="{Binding FormatAkoPovodne}">
+                            <TextBlock TextWrapping="Wrap" Text="ako pôvodné – Word zostane Word, PDF zostane PDF" />
+                        </RadioButton>
+                        <RadioButton GroupName="FormatImportu" Content="všetko Word (.docx)" IsChecked="{Binding FormatVsetkoWord}" Margin="0,4,0,0" />
+                        <RadioButton GroupName="FormatImportu" Content="všetko PDF" IsChecked="{Binding FormatVsetkoPdf}" Margin="0,4,0,0" />
+
+                        <TextBlock Text="Názvy súborov" FontWeight="SemiBold" Margin="0,12,0,6" />
+                        <RadioButton GroupName="NazvyImportu" IsChecked="{Binding PovodneNazvy}">
+                            <TextBlock TextWrapping="Wrap" Text="ako pôvodné – rovnaký názov ako importovaný súbor" />
+                        </RadioButton>
+                        <RadioButton GroupName="NazvyImportu" IsChecked="{Binding PovodneNazvy, Converter={StaticResource InverzBool}}" Margin="0,4,0,0">
+                            <TextBlock TextWrapping="Wrap" Text="ako nové – „05 Fyzika 2026“ (číslo, názov predmetu, rok)" />
+                        </RadioButton>
+
+                        <TextBlock Text="Pôvodný priečinok importu (nepovinné)" FontWeight="SemiBold" Margin="0,12,0,6" />
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Content="Zrušiť" Padding="10,3" Margin="6,0,0,0" Command="{Binding ZrusitPovodnyPriecinokCommand}"
+                                    Visibility="{Binding JePovodnyPriecinok, Converter={StaticResource BoolNaViditelnost}}" />
+                            <Button DockPanel.Dock="Right" Content="Vybrať…" Padding="10,3" Margin="6,0,0,0" Command="{Binding VybratPovodnyPriecinokCommand}" />
+                            <TextBlock Text="{Binding PovodnyPriecinokText}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                       ToolTip="{Binding PovodnyPriecinok}" />
+                        </DockPanel>
+                        <TextBlock Text="{Binding InfoImportu}" Style="{StaticResource Popis}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                        <TextBlock Style="{StaticResource Popis}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                   Text="Pôvodné súbory sa nezmenia – upravené osnovy sa uložia do priečinka, ktorý vyberiete pri exporte." />
+                    </StackPanel>
 
                     <StackPanel Visibility="{Binding JedenDokument, Converter={StaticResource BoolNaViditelnost}}">
                         <TextBlock Text="Obsah dokumentu" FontWeight="SemiBold" Margin="0,18,0,6" />

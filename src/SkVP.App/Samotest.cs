@@ -1071,9 +1071,51 @@ internal static class Samotest
         Over(jednotlivo.Count == volby.Predmety.Count && jednotlivo.Any(c => Path.GetFileName(c) == $"{cislo} Fyzika 2025.pdf"),
             $"každý predmet zvlášť s rokom v názve ({jednotlivo.Count}): {string.Join(", ", jednotlivo.Select(Path.GetFileName).Take(4))}");
 
+        // export ako pri importe: priečinky, názvy a formáty importovaných súborov
+        var druhy = model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.First(p => p.Id != fyzika.Id && p.Id != astronomia.Id);
+        InfoOsnovyService.Uloz(fyzika.Id, new InfoOsnovy(2025, DateTime.Now, "Fyzika gymnázium.pdf", null, "Prírodné vedy/Fyzika gymnázium.pdf"));
+        InfoOsnovyService.Uloz(druhy.Id, new InfoOsnovy(2024, DateTime.Now, "Druhý predmet.docx"));
+        var povodny = Path.Combine(export, "Pôvodné osnovy");
+        Directory.CreateDirectory(Path.Combine(povodny, "Staré", "Archív"));
+        var povodnaOsnova = DocxVystup.Osnova(new List<Blok> { new Odsek(new[] { new Usek("Pôvodná osnova") }) });
+        File.WriteAllBytes(Path.Combine(povodny, "Staré", "Druhý predmet.docx"), povodnaOsnova);
+        File.WriteAllBytes(Path.Combine(povodny, "Staré", "Archív", "Druhý predmet.docx"), povodnaOsnova);
+        var akoPovodne = Path.Combine(export, "Ako pri importe");
+        var vysledok = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
+        var fyzikaPdf = Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium.pdf");
+        var druhyDocx = Path.Combine(akoPovodne, "Staré", "Druhý predmet.docx");
+        Over(vysledok.Subory.Count == volby.Predmety.Count && File.Exists(fyzikaPdf) && File.ReadAllBytes(fyzikaPdf).AsSpan(0, 5).SequenceEqual("%PDF-"u8)
+             && File.Exists(druhyDocx) && vysledok.PodlaImportu == 2,
+            $"export ako pri importe: priečinky, pôvodné názvy a formáty ({string.Join(", ", vysledok.Subory.Select(c => Path.GetRelativePath(akoPovodne, c)).Take(4))})");
+        OverDocx(File.ReadAllBytes(druhyDocx), "export ako pri importe: Word");
+        var znova = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
+        Over(znova.Subory.Contains(Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium (2).pdf")), "export ako pri importe: existujúce súbory sa neprepíšu");
+        var vsetkoPdf = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.VsetkoPdf, false, Path.Combine(export, "Ako pri importe PDF"));
+        Over(vsetkoPdf.Subory.All(c => c.EndsWith(".pdf", StringComparison.Ordinal))
+             && File.Exists(Path.Combine(export, "Ako pri importe PDF", "Prírodné vedy", $"{cislo} Fyzika 2025.pdf"))
+             && vsetkoPdf.Subory.Any(c => Path.GetFileName(Path.GetDirectoryName(c)!).EndsWith("Človek a príroda", StringComparison.Ordinal)),
+            "export ako pri importe: všetko PDF, nové názvy, bez pôvodného priečinka do priečinka oblasti");
+        string? chybaPriecinka = null;
+        try
+        {
+            ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.VsetkoWord, true, Path.Combine(povodny, "Nové"), povodny);
+        }
+        catch (SkvpException ex)
+        {
+            chybaPriecinka = ex.Message;
+        }
+
+        Over(chybaPriecinka is not null, "export ako pri importe: do pôvodného priečinka nie");
+        exportModel.AkoPriImporte = true;
+        Over(exportModel.JePdf && !exportModel.Jednotlivo && exportModel.InfoImportu.Contains("Priečinok aj názov súboru pozná 1 z", StringComparison.Ordinal),
+            $"okno exportu: ako pri importe ({exportModel.InfoImportu})");
+        exportModel.FormatVsetkoWord = true;
+        Over(!exportModel.JePdf, "okno exportu: všetko Word");
+
         // upratať – nový predmet a rok fyziky
         sluzba.Odstran(astronomia.Id);
         InfoOsnovyService.Uloz(fyzika.Id, InfoOsnovy.Prazdne);
+        InfoOsnovyService.Uloz(druhy.Id, InfoOsnovy.Prazdne);
         Krok("import a export v poriadku");
     }
 
@@ -1151,6 +1193,7 @@ internal static class Samotest
         Over(maturita.Count == 3 && maturita[2] - maturita[0] == 2, "Jazykom k maturite – všetky tri pod sebou");
         var rusky = new ObjektService().Oblasti().SelectMany(o => new ObjektService().Deti(o.Id)).First(p => p.Nazov == "Ruský jazyk – úroveň B1");
         Over(InfoOsnovyService.Nacitaj(rusky.Id).Uroven == "B1", "úroveň je zaznamenaná pri osnove");
+        Over(InfoOsnovyService.Nacitaj(rusky.Id).CestaZdroja == "RUJ.docx", "cesta importovaného súboru je zaznamenaná pri osnove");
 
         // budúci import už premenovaného predmetu: rovnaký predmet, úroveň sa ponúkne z názvu
         var znova = new ImportOsnovViewModel(new MainViewModel());

@@ -260,7 +260,8 @@ public static partial class ImportOsnov
     /// Uloží osnovu do predmetu: doterajšia sa zarchivuje (v databáze aj ako súbor „… – archív rok.docx“), nová dostane rok
     /// zmeny osnov a jej kópia sa uloží ako „číslo názov rok.docx“.
     /// </summary>
-    public static VysledokImportuOsnovy Importuj(SuborImportu subor, long predmetId, int rok, string? uroven = null)
+    /// <param name="cestaZdroja">cesta súboru v priečinku importu („03 Človek a príroda/Fyzika.pdf“); null = len názov súboru</param>
+    public static VysledokImportuOsnovy Importuj(SuborImportu subor, long predmetId, int rok, string? uroven = null, string? cestaZdroja = null)
     {
         var sluzba = new ObjektService();
         var predmet = sluzba.Nacitaj(predmetId) ?? throw new SkvpException("Predmet sa nenašiel.");
@@ -277,7 +278,8 @@ public static partial class ImportOsnov
 
         var dovod = $"Archivované {teraz.ToString("d. M. yyyy H:mm", CultureInfo.GetCultureInfo("sk-SK"))} (rok {teraz.Year}) – pred importom novej osnovy zo súboru {subor.NazovSuboru}";
         var zmenene = dokumenty.Uloz(predmetId, subor.Docx, dovod);
-        InfoOsnovyService.Uloz(predmetId, new InfoOsnovy(rok, teraz, subor.NazovSuboru, uroven is { Length: > 0 } ? uroven : null));
+        InfoOsnovyService.Uloz(predmetId, new InfoOsnovy(rok, teraz, subor.NazovSuboru, uroven is { Length: > 0 } ? uroven : null,
+            (cestaZdroja ?? subor.NazovSuboru).Replace('\\', '/')));
         var kopia = UlozPomocnuKopiu(Path.Combine(PriecinokOsnov, rok.ToString(CultureInfo.InvariantCulture)),
             InfoOsnovyService.NazovDokumentu(cislo, predmet.Nazov, rok), subor.Docx, volnyNazov: false);
 
@@ -300,7 +302,8 @@ public static partial class ImportOsnov
         }
     }
 
-    private static string VolnaCesta(string priecinok, string nazov, string pripona)
+    /// <summary>Cesta k súboru, ktorý ešte neexistuje („Fyzika.pdf“, inak „Fyzika (2).pdf“ …).</summary>
+    public static string VolnaCesta(string priecinok, string nazov, string pripona)
     {
         var zaklad = BezpecnyNazov(nazov);
         var cesta = Path.Combine(priecinok, zaklad + pripona);

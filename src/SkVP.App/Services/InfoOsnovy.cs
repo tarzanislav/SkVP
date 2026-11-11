@@ -6,7 +6,10 @@ using SkVP.Data;
 namespace SkVP.Services;
 
 /// <summary>Rok, od ktorého osnova platí (rok zmeny osnov), a odkiaľ bola naimportovaná.</summary>
-public sealed record InfoOsnovy(int? Rok, DateTime? Importovane, string? Zdroj, string? Uroven = null)
+/// <param name="Zdroj">názov importovaného súboru („Fyzika.pdf“)</param>
+/// <param name="CestaZdroja">cesta k importovanému súboru v priečinku importu („03 Človek a príroda/Fyzika.pdf“) –
+/// podľa nej export „ako pri importe“ zachová priečinky; pri importe pred verziou 0.1.130 chýba</param>
+public sealed record InfoOsnovy(int? Rok, DateTime? Importovane, string? Zdroj, string? Uroven = null, string? CestaZdroja = null)
 {
     public static readonly InfoOsnovy Prazdne = new(null, null, null);
 
@@ -46,6 +49,7 @@ public static class InfoOsnovyService
     private const string KlucImport = "importovane";
     private const string KlucZdroj = "zdrojImportu";
     private const string KlucUroven = "uroven";
+    private const string KlucCesta = "cestaZdroja";
 
     public static InfoOsnovy Nacitaj(long objektId)
     {
@@ -54,7 +58,8 @@ public static class InfoOsnovyService
             json[KlucRok]?.GetValue<int>(),
             json[KlucImport]?.GetValue<string>() is { } d && DateTime.TryParse(d, CultureInfo.InvariantCulture, DateTimeStyles.None, out var kedy) ? kedy : null,
             json[KlucZdroj]?.GetValue<string>(),
-            json[KlucUroven]?.GetValue<string>());
+            json[KlucUroven]?.GetValue<string>(),
+            json[KlucCesta]?.GetValue<string>());
     }
 
     public static void Uloz(long objektId, InfoOsnovy info)
@@ -64,6 +69,7 @@ public static class InfoOsnovyService
         json[KlucImport] = info.Importovane?.ToString("s", CultureInfo.InvariantCulture);
         json[KlucZdroj] = info.Zdroj;
         json[KlucUroven] = info.Uroven;
+        json[KlucCesta] = info.CestaZdroja;
         foreach (var kluc in json.Where(p => p.Value is null).Select(p => p.Key).ToList())
         {
             json.Remove(kluc);

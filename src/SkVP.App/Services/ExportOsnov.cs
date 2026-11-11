@@ -1,4 +1,5 @@
 using System.IO;
+using SkVP.Data;
 
 namespace SkVP.Services;
 
@@ -77,15 +78,144 @@ public static class ExportOsnov
     /// </summary>
     public static IReadOnlyList<string> UlozJednotlivo(VolbyZostavy volby, FormatExportu format, string priecinok)
     {
+        var subory = new List<string>();
+        foreach (var (_, _, jeden, priecinokOblasti, nazov) in PredmetyZvlast(volby))
+        {
+            subory.AddRange(Uloz(jeden, format, Path.Combine(priecinok, priecinokOblasti, nazov + Pripona(format))));
+        }
+
+        return subory;
+    }
+
+    /// <summary>
+    /// Export „ako pri importe“: každá osnova do rovnakého podpriečinka ako jej importovaný súbor, s pôvodným alebo novým
+    /// názvom („05 Fyzika 2026“), vo formáte pôvodného súboru (Word zostane Word, PDF zostane PDF) alebo všetko vo Worde
+    /// či PDF. Osnovy naimportované pred verziou, ktorá si pamätá cestu, sa nájdu podľa názvu súboru v pôvodnom
+    /// priečinku importu (ak je zadaný), inak idú do priečinka oblasti. Existujúce súbory sa neprepíšu.
+    /// </summary>
+    /// <param name="povodnyPriecinok">priečinok, z ktorého sa osnovy importovali (len sa číta); null = bez neho</param>
+    public static VysledokExportuOsnov UlozAkoPriImporte(VolbyZostavy volby, FormatPodlaImportu formaty, bool povodneNazvy, string priecinok,
+        string? povodnyPriecinok = null)
+    {
+        if (povodnyPriecinok is { Length: > 0 } && JeVnutri(priecinok, povodnyPriecinok))
+        {
+            throw new SkvpException(Preklad.T("Osnovy uložte do iného priečinka, než z ktorého ste ich importovali – pôvodné súbory musia zostať bez zmeny."));
+        }
+
+        var vPovodnom = SuboryVPriecinku(povodnyPriecinok);
+        var subory = new List<string>();
+        int podlaImportu = 0, bezImportu = 0;
+        foreach (var (oblast, predmet, jeden, priecinokOblasti, novyNazov) in PredmetyZvlast(volby))
+        {
+            var povodna = PovodnaCesta(InfoOsnovyService.Nacitaj(predmet.Id), oblast.Nazov, priecinokOblasti, vPovodnom);
+            if (povodna is null)
+            {
+                bezImportu++;
+            }
+            else
+            {
+                podlaImportu++;
+            }
+
+            var pripona = povodna is null ? "" : Path.GetExtension(povodna).ToLowerInvariant();
+            var format = formaty switch
+            {
+                FormatPodlaImportu.VsetkoWord => FormatExportu.Word,
+                FormatPodlaImportu.VsetkoPdf => FormatExportu.Pdf,
+                _ => pripona == ".pdf" ? FormatExportu.Pdf : FormatExportu.Word,
+            };
+
+            // podpriečinky ako pri importe; osnova bez importovaného súboru do priečinka oblasti
+            var casti = povodna is null
+                ? new[] { priecinokOblasti }
+                : povodna.Split('/', '\\').SkipLast(1).Select(c => ImportOsnov.BezpecnyNazov(c)).ToArray();
+            var ciel = Path.Combine(casti.Prepend(priecinok).ToArray());
+            Directory.CreateDirectory(ciel);
+            var nazov = povodneNazvy && povodna is not null ? Path.GetFileNameWithoutExtension(povodna) : novyNazov;
+            subory.AddRange(Uloz(jeden, format, ImportOsnov.VolnaCesta(ciel, nazov, Pripona(format))));
+        }
+
+        return new VysledokExportuOsnov(subory, podlaImportu, bezImportu);
+    }
+
+    /// <summary>
+    /// Cesta importovaného súboru osnovy („03 Človek a príroda/Fyzika.pdf“): zapamätaná pri importe, inak nájdená podľa
+    /// názvu v pôvodnom priečinku (pri viacerých rovnakých názvoch ten v priečinku oblasti), inak v priečinku oblasti;
+    /// null = osnova nebola importovaná zo súboru.
+    /// </summary>
+    private static string? PovodnaCesta(InfoOsnovy info, string oblast, string priecinokOblasti, IReadOnlyDictionary<string, List<string>> vPovodnom)
+    {
+        if (info.CestaZdroja is { Length: > 0 } cesta && JeBezpecna(cesta))
+        {
+            return cesta;
+        }
+
+        if (info.Zdroj is not { Length: > 0 } subor || !JeBezpecna(subor))
+        {
+            return null;
+        }
+
+        if (vPovodnom.TryGetValue(subor, out var najdene))
+        {
+            var kluc = ImportOsnov.Kluc(oblast);
+            return najdene.FirstOrDefault(c => c.Split('/').SkipLast(1).Any(p => ImportOsnov.Kluc(ImportOsnov.CistyNazov(p)) == kluc)) ?? najdene[0];
+        }
+
+        return $"{priecinokOblasti}/{Path.GetFileName(subor)}";
+    }
+
+    /// <summary>Relatívna cesta bez návratu nad priečinok („..“) a bez písmena disku.</summary>
+    private static bool JeBezpecna(string cesta) =>
+        !Path.IsPathRooted(cesta) && !cesta.Split('/', '\\').Any(c => c is ".." or ".") && cesta.IndexOfAny(Path.GetInvalidPathChars()) < 0;
+
+    /// <summary>Súbory Word a PDF v priečinku a podpriečinkoch podľa názvu (bez archívu a dočasných súborov Wordu).</summary>
+    private static Dictionary<string, List<string>> SuboryVPriecinku(string? priecinok)
+    {
+        var subory = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        if (priecinok is not { Length: > 0 } || !Directory.Exists(priecinok))
+        {
+            return subory;
+        }
+
+        foreach (var cesta in Directory.EnumerateFiles(priecinok, "*", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true }))
+        {
+            var relativna = Path.GetRelativePath(priecinok, cesta).Replace('\\', '/');
+            if (!ImportOsnov.Pripony.Contains(Path.GetExtension(cesta).ToLowerInvariant())
+                || Path.GetFileName(cesta).StartsWith("~$", StringComparison.Ordinal)
+                || relativna.Split('/').SkipLast(1).Any(c => ImportOsnov.Kluc(c).StartsWith("archiv", StringComparison.Ordinal)))
+            {
+                continue;
+            }
+
+            if (!subory.TryGetValue(Path.GetFileName(cesta), out var zoznam))
+            {
+                subory[Path.GetFileName(cesta)] = zoznam = new List<string>();
+            }
+
+            zoznam.Add(relativna);
+        }
+
+        return subory;
+    }
+
+    private static bool JeVnutri(string priecinok, string koren)
+    {
+        var cesta = Path.GetFullPath(priecinok).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var zaklad = Path.GetFullPath(koren).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        return cesta.StartsWith(zaklad, StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Každý predmet ako samostatný dokument s priečinkom oblasti a názvom „číslo názov rok“.</summary>
+    private static IEnumerable<(KapitolaOblasti Oblast, KapitolaPredmetu Predmet, CelyDokument Dokument, string PriecinokOblasti, string Nazov)>
+        PredmetyZvlast(VolbyZostavy volby)
+    {
         var celok = ZostavaOsnov.Zostav(volby with { TitulnaStrana = false, Obsah = false });
         var vsetkyOblasti = new Data.ObjektService().Oblasti();
-        var subory = new List<string>();
         foreach (var oblast in celok.Oblasti)
         {
             // úvodné časti do „00 Úvodné časti učebných osnov“, záverečné do „99 Záverečné časti učebných osnov“
             var poradieOblasti = vsetkyOblasti.FindIndex(o => o.Id == oblast.Id) + 1;
-            var priecinokOblasti = Path.Combine(priecinok, ImportOsnov.BezpecnyNazov(
-                oblast.JeOblast ? $"{poradieOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ)));
+            var priecinokOblasti = ImportOsnov.BezpecnyNazov(oblast.JeOblast ? $"{poradieOblasti:00} {oblast.Nazov}" : CastiOsnov.Priecinok(oblast.Typ));
             foreach (var predmet in oblast.Predmety)
             {
                 var jeden = ZostavaOsnov.Zostav(volby with
@@ -100,11 +230,23 @@ public static class ExportOsnov
                     NespracovanePredmety = true,
                 });
                 var rok = InfoOsnovyService.Nacitaj(predmet.Id).Rok;
-                var nazov = ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(predmet.Cislo, predmet.Nazov, rok));
-                subory.AddRange(Uloz(jeden, format, Path.Combine(priecinokOblasti, nazov + Pripona(format))));
+                yield return (oblast, predmet, jeden, priecinokOblasti,
+                    ImportOsnov.BezpecnyNazov(InfoOsnovyService.NazovDokumentu(predmet.Cislo, predmet.Nazov, rok)));
             }
         }
-
-        return subory;
     }
 }
+
+/// <summary>Formát súborov pri exporte „ako pri importe“.</summary>
+public enum FormatPodlaImportu
+{
+    /// <summary>Word zostane Word, PDF zostane PDF.</summary>
+    AkoPovodne,
+    VsetkoWord,
+    VsetkoPdf,
+}
+
+/// <summary>Výsledok exportu „ako pri importe“.</summary>
+/// <param name="PodlaImportu">osnovy uložené podľa importovaného súboru (priečinok, názov, formát)</param>
+/// <param name="BezImportu">osnovy, ktoré neboli importované zo súboru – sú v priečinku oblasti s novým názvom</param>
+public sealed record VysledokExportuOsnov(IReadOnlyList<string> Subory, int PodlaImportu, int BezImportu);

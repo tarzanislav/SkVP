@@ -290,7 +290,17 @@ public sealed partial class VolbaOblastiExportu : ObservableObject
     }
 }
 
-/// <summary>Okno exportu osnov: čo, s čím, ako (jeden dokument / každý predmet zvlášť) a v akom formáte.</summary>
+/// <summary>Ako sa osnovy exportujú do súborov.</summary>
+public enum SposobExportu
+{
+    JedenDokument,
+    Jednotlivo,
+
+    /// <summary>Rovnaké priečinky, názvy a formáty ako importované súbory.</summary>
+    AkoPriImporte,
+}
+
+/// <summary>Okno exportu osnov: čo, s čím, ako (jeden dokument / každý predmet zvlášť / ako pri importe) a v akom formáte.</summary>
 public sealed partial class ExportOsnovViewModel : ObservableObject
 {
     public ExportOsnovViewModel(MainViewModel hlavny)
@@ -314,18 +324,144 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(JePdf))]
     private FormatExportu _format = FormatExportu.Pdf;
 
-    public bool JePdf => Format != FormatExportu.Word;
+    /// <summary>Výsledok bude PDF (ponúknu sa nastavenia PDF).</summary>
+    public bool JePdf => AkoPriImporte ? FormatImportu != FormatPodlaImportu.VsetkoWord : Format != FormatExportu.Word;
 
     /// <summary>false = všetky osnovy, true = len vybrané oblasti a predmety.</summary>
     [ObservableProperty]
     private bool _len;
 
-    /// <summary>Každý predmet do samostatného súboru (inak jeden dokument).</summary>
+    /// <summary>Jeden dokument, každý predmet zvlášť, alebo ako pri importe.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(JedenDokument))]
-    private bool _jednotlivo;
+    [NotifyPropertyChangedFor(nameof(JedenDokument), nameof(Jednotlivo), nameof(AkoPriImporte), nameof(InyAkoPriImporte), nameof(JePdf),
+        nameof(InfoImportu))]
+    private SposobExportu _sposob;
 
-    public bool JedenDokument => !Jednotlivo;
+    public bool JedenDokument
+    {
+        get => Sposob == SposobExportu.JedenDokument;
+        set => Nastav(value, SposobExportu.JedenDokument);
+    }
+
+    /// <summary>Každý predmet do samostatného súboru „05 Fyzika 2026“ v priečinku oblasti.</summary>
+    public bool Jednotlivo
+    {
+        get => Sposob == SposobExportu.Jednotlivo;
+        set => Nastav(value, SposobExportu.Jednotlivo);
+    }
+
+    /// <summary>Rovnaké priečinky, názvy a formáty ako importované súbory.</summary>
+    public bool AkoPriImporte
+    {
+        get => Sposob == SposobExportu.AkoPriImporte;
+        set => Nastav(value, SposobExportu.AkoPriImporte);
+    }
+
+    public bool InyAkoPriImporte => !AkoPriImporte;
+
+    private void Nastav(bool zapnut, SposobExportu sposob)
+    {
+        if (zapnut)
+        {
+            Sposob = sposob;
+        }
+    }
+
+    /// <summary>Formát súborov pri exporte ako pri importe.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FormatAkoPovodne), nameof(FormatVsetkoWord), nameof(FormatVsetkoPdf), nameof(JePdf))]
+    private FormatPodlaImportu _formatImportu;
+
+    public bool FormatAkoPovodne
+    {
+        get => FormatImportu == FormatPodlaImportu.AkoPovodne;
+        set
+        {
+            if (value)
+            {
+                FormatImportu = FormatPodlaImportu.AkoPovodne;
+            }
+        }
+    }
+
+    public bool FormatVsetkoWord
+    {
+        get => FormatImportu == FormatPodlaImportu.VsetkoWord;
+        set
+        {
+            if (value)
+            {
+                FormatImportu = FormatPodlaImportu.VsetkoWord;
+            }
+        }
+    }
+
+    public bool FormatVsetkoPdf
+    {
+        get => FormatImportu == FormatPodlaImportu.VsetkoPdf;
+        set
+        {
+            if (value)
+            {
+                FormatImportu = FormatPodlaImportu.VsetkoPdf;
+            }
+        }
+    }
+
+    /// <summary>Názvy súborov ako importované (inak nové „05 Fyzika 2026“).</summary>
+    [ObservableProperty]
+    private bool _povodneNazvy = true;
+
+    /// <summary>Priečinok, z ktorého sa osnovy importovali (pre osnovy importované skôr, než si program pamätal cestu).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PovodnyPriecinokText), nameof(JePovodnyPriecinok))]
+    private string? _povodnyPriecinok;
+
+    public string PovodnyPriecinokText => PovodnyPriecinok ?? "nevybraný";
+
+    public bool JePovodnyPriecinok => PovodnyPriecinok is not null;
+
+    /// <summary>Koľko osnov si pamätá, odkiaľ boli importované.</summary>
+    public string InfoImportu
+    {
+        get
+        {
+            if (!AkoPriImporte)
+            {
+                return "";
+            }
+
+            var predmety = Hlavny.VsetkySkupiny.SelectMany(o => o.Predmety).Select(p => InfoOsnovyService.Nacitaj(p.Id)).ToList();
+            var sCestou = predmety.Count(i => i.CestaZdroja is { Length: > 0 });
+            var lenNazov = predmety.Count(i => i.CestaZdroja is not { Length: > 0 } && i.Zdroj is { Length: > 0 });
+            var bez = predmety.Count - sCestou - lenNazov;
+            var casti = new List<string> { $"Priečinok aj názov súboru pozná {sCestou} z {predmety.Count} osnov." };
+            if (lenNazov > 0)
+            {
+                casti.Add($"Pri {lenNazov} osnovách importovaných v staršej verzii pozná len názov súboru – vyberte pôvodný priečinok importu " +
+                          "a program podľa názvu nájde, v ktorom podpriečinku boli (inak pôjdu do priečinka oblasti).");
+            }
+
+            if (bez > 0)
+            {
+                casti.Add($"{bez} osnov nebolo importovaných zo súboru – uložia sa do priečinka oblasti ako Word s novým názvom.");
+            }
+
+            return string.Join(" ", casti);
+        }
+    }
+
+    [RelayCommand]
+    private void VybratPovodnyPriecinok()
+    {
+        if (Dialogy.VybratPriecinok("Priečinok, z ktorého ste osnovy importovali (súbory sa len prečítajú)") is { } priecinok)
+        {
+            PovodnyPriecinok = priecinok;
+        }
+    }
+
+    [RelayCommand]
+    private void ZrusitPovodnyPriecinok() => PovodnyPriecinok = null;
 
     /// <summary>Údaje o škole v zostave (spoločné s Tlač a zostavy).</summary>
     public UdajeOSkoleVZostaveVM UdajeOSkole { get; } = new();
@@ -393,7 +529,29 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
         try
         {
             IReadOnlyList<string> subory = Array.Empty<string>();
-            if (Jednotlivo)
+            string? priecinokExportu = null;
+            string? doplnok = null;
+            if (AkoPriImporte)
+            {
+                var priecinok = Dialogy.VybratPriecinok("Prázdny priečinok na upravené osnovy (ako pri importe)");
+                if (priecinok is null)
+                {
+                    return false;
+                }
+
+                if (Directory.Exists(priecinok) && Directory.EnumerateFileSystemEntries(priecinok).Any()
+                    && !Dialogy.Potvrd("Vybraný priečinok nie je prázdny. Súbory v ňom sa neprepíšu – nové súbory s rovnakým názvom dostanú číslo, napr. „Fyzika (2).pdf“.\n\nPokračovať?"))
+                {
+                    return false;
+                }
+
+                VysledokExportuOsnov? vysledok = null;
+                Dialogy.Cakaj(() => vysledok = ExportOsnov.UlozAkoPriImporte(volby, FormatImportu, PovodneNazvy, priecinok, PovodnyPriecinok));
+                subory = vysledok!.Subory;
+                priecinokExportu = priecinok;
+                doplnok = vysledok.BezImportu > 0 ? $" ({vysledok.PodlaImportu} podľa importu, {vysledok.BezImportu} v priečinkoch oblastí)" : null;
+            }
+            else if (Jednotlivo)
             {
                 var priecinok = Dialogy.VybratPriecinok("Priečinok na osnovy (každý predmet zvlášť)");
                 if (priecinok is null)
@@ -417,9 +575,13 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
             }
 
             Subory = subory;
-            Stav = subory.Count == 1 ? $"Uložené: {subory[0]}" : $"Uložené súbory: {subory.Count}";
+            Stav = (subory.Count == 1 ? $"Uložené: {subory[0]}" : $"Uložené súbory: {subory.Count}") + doplnok;
             Hlavny.Oznam(subory.Count == 1 ? $"Exportované: {Path.GetFileName(subory[0])}" : $"Exportované súbory: {subory.Count}");
-            if (subory.Count == 1)
+            if (priecinokExportu is not null)
+            {
+                Dialogy.OtvorVSysteme(priecinokExportu);
+            }
+            else if (subory.Count == 1)
             {
                 Dialogy.OtvorVSysteme(subory[0]);
             }

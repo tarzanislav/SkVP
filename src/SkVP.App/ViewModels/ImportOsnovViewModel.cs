@@ -16,7 +16,19 @@ public sealed record CielImportu(long? PredmetId, string Popis)
 /// <summary>Jeden súbor v sprievodcovi importom osnov.</summary>
 public sealed partial class PolozkaImportu : ObservableObject
 {
-    public PolozkaImportu(string cesta) => Cesta = cesta;
+    public PolozkaImportu(string cesta, string? koren = null)
+    {
+        Cesta = cesta;
+        Koren = koren;
+    }
+
+    /// <summary>Priečinok, z ktorého sa importuje (cesta súboru v ňom sa zapamätá pre export „ako pri importe“).</summary>
+    public string? Koren { get; }
+
+    /// <summary>Cesta súboru v priečinku importu („03 Človek a príroda/Fyzika.pdf“), pri jednotlivom súbore len jeho názov.</summary>
+    public string CestaVImporte => Koren is { } koren
+        ? System.IO.Path.GetRelativePath(koren, Cesta).Replace('\\', '/')
+        : System.IO.Path.GetFileName(Cesta);
 
     /// <summary>Voľby úrovne cudzieho jazyka (prázdna hodnota = bez úrovne).</summary>
     public static IReadOnlyList<KeyValuePair<string, string>> Urovne { get; } = new[]
@@ -142,7 +154,8 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
     private string _suhrn = "";
 
     /// <summary>Načíta súbory (Word hneď, PDF sa prečíta rozpoznávaním textu) a navrhne predmety.</summary>
-    public void PridajSubory(IEnumerable<string> cesty)
+    /// <param name="koren">priečinok, z ktorého súbory sú (pri importe priečinka)</param>
+    public void PridajSubory(IEnumerable<string> cesty, string? koren = null)
     {
         foreach (var cesta in cesty)
         {
@@ -151,7 +164,7 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                 continue;
             }
 
-            var polozka = new PolozkaImportu(cesta);
+            var polozka = new PolozkaImportu(cesta, koren);
             try
             {
                 SuborImportu? subor = null;
@@ -264,7 +277,7 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
             return;
         }
 
-        PridajSubory(subory);
+        PridajSubory(subory, priecinok);
     }
 
     [RelayCommand]
@@ -387,7 +400,8 @@ public sealed partial class ImportOsnovViewModel : ObservableObject
                     }
                 }
 
-                var vysledok = ImportOsnov.Importuj(p.Subor!, id, int.Parse(p.Rok.Trim(), System.Globalization.CultureInfo.InvariantCulture), p.Uroven);
+                var vysledok = ImportOsnov.Importuj(p.Subor!, id, int.Parse(p.Rok.Trim(), System.Globalization.CultureInfo.InvariantCulture), p.Uroven,
+                    p.CestaVImporte);
                 Vysledky.Add(vysledok);
                 Hlavny.PoZmeneDokumentu(id, oznamit: true);
                 p.Stav = !vysledok.Zmenene ? "Bez zmeny – osnova je rovnaká ako doteraz"
