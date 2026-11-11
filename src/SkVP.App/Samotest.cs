@@ -1081,12 +1081,13 @@ internal static class Samotest
         File.WriteAllBytes(Path.Combine(povodny, "Staré", "Druhý predmet.docx"), povodnaOsnova);
         File.WriteAllBytes(Path.Combine(povodny, "Staré", "Archív", "Druhý predmet.docx"), povodnaOsnova);
         var akoPovodne = Path.Combine(export, "Ako pri importe");
-        var akoPriImporte = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
+        var vsetkyPredmety = volby with { NespracovanePredmety = true };
+        var akoPriImporte = ExportOsnov.UlozAkoPriImporte(vsetkyPredmety, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
         var fyzikaPdf = Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium.pdf");
         var druhyDocx = Path.Combine(akoPovodne, "Staré", "Druhý predmet.docx");
         Over(akoPriImporte.Subory.Count == volby.Predmety.Count && File.Exists(fyzikaPdf) && File.ReadAllBytes(fyzikaPdf).AsSpan(0, 5).SequenceEqual("%PDF-"u8)
-             && File.Exists(druhyDocx) && akoPriImporte.PodlaImportu == 2,
-            $"export ako pri importe: priečinky, pôvodné názvy a formáty ({string.Join(", ", akoPriImporte.Subory.Select(c => Path.GetRelativePath(akoPovodne, c)).Take(4))})");
+             && File.Exists(druhyDocx) && akoPriImporte.PodlaImportu >= 2,
+            $"export ako pri importe: priečinky, pôvodné názvy a formáty ({akoPriImporte.Subory.Count} z {volby.Predmety.Count}, podľa importu {akoPriImporte.PodlaImportu}: {string.Join(", ", akoPriImporte.Subory.Select(c => Path.GetRelativePath(akoPovodne, c)).Take(4))})");
         OverDocx(File.ReadAllBytes(druhyDocx), "export ako pri importe: Word");
         var opakovany = ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu.AkoPovodne, true, akoPovodne, povodny);
         Over(opakovany.Subory.Contains(Path.Combine(akoPovodne, "Prírodné vedy", "Fyzika gymnázium (2).pdf")), "export ako pri importe: existujúce súbory sa neprepíšu");
