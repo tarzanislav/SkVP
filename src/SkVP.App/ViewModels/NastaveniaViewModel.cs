@@ -297,7 +297,7 @@ public sealed partial class NastaveniaViewModel : ObservableObject
             var vysledok = UcebnyPlanService.Vytvor(plan, nahradit);
             Hlavny.NacitajOblasti();
             Hlavny.Oznam($"Načítané: {vysledok.NoveOblasti} nových oblastí, {vysledok.NovePredmety} nových predmetov.");
-            Typ = Databaza.Citaj(UcebnyPlanService.KlucTypSkoly, Typ);
+            Typ = TitulnaStrana.BezIsced(Databaza.Citaj(UcebnyPlanService.KlucTypSkoly, Typ));
         }
         catch (SkvpException ex)
         {

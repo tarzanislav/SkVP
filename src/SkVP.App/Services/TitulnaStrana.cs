@@ -1,21 +1,24 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using SkVP.Data;
 
 namespace SkVP.Services;
 
 /// <summary>
 /// Texty úvodnej strany zostáv. Každý riadok sa dá prepísať aj vypnúť: škola, adresa, nadpis, podnadpis, druh školy
-/// a stupeň vzdelania, platnosť, vlastné riadky, zoznam oblastí a text dole na strane („Vytvorené …“).
+/// a stupeň vzdelania, platnosť, vlastné riadky, zoznam oblastí a voliteľný text dole na strane (predvolene prázdny).
 /// Patrí sem aj logo školy na úvodnej strane a hlavička ďalších strán (vľavo text, vpravo názov školy a logo) –
 /// každá časť hlavičky sa dá vypnúť zvlášť alebo celá hlavička naraz.
 /// </summary>
-public sealed class TitulnaStrana
+public sealed partial class TitulnaStrana
 {
     public const string PredvolenyPodnadpis = "Učebné osnovy";
-    public const string PredvolenaPata = "Vytvorené {datum} v programe SkVP";
 
-    /// <summary>Súčasný názov stupňa vzdelania gymnázia (školský zákon, ISCED 2011) – náhrada staršieho „ISCED 3A“.</summary>
-    public const string AktualnyStupenGymnazia = "Gymnázium – úplné stredné všeobecné vzdelanie (ISCED 344)";
+    /// <summary>Text dole na úvodnej strane v starších verziách – v dokumentoch sa už nevypíše.</summary>
+    private const string StaraPata = "v programe SkVP";
+
+    /// <summary>Súčasný názov stupňa vzdelania gymnázia podľa školského zákona (označenie ISCED sa už nepoužíva).</summary>
+    public const string AktualnyStupenGymnazia = "Gymnázium – úplné stredné všeobecné vzdelanie";
 
     private const string K = "titul.";
 
@@ -69,7 +72,7 @@ public sealed class TitulnaStrana
 
     public bool OblastiZobrazit { get; set; } = true;
 
-    /// <summary>Text dole na strane – ľubovoľný obsah (odseky, zoznamy, tabuľka), {datum} a {rok} sa doplnia.</summary>
+    /// <summary>Text dole na strane – ľubovoľný obsah (odseky, zoznamy, tabuľka), {datum} a {rok} sa doplnia; predvolene prázdny.</summary>
     public List<Blok> PataBloky { get; set; } = PredvolenaPataBloky();
 
     public bool PataZobrazit { get; set; } = true;
@@ -87,7 +90,17 @@ public sealed class TitulnaStrana
     /// <summary>Logo školy vpravo v hlavičke (za názvom školy).</summary>
     public bool LogoVHlavickeZobrazit { get; set; } = true;
 
-    public static List<Blok> PredvolenaPataBloky() => new() { new Odsek(new[] { new Usek(PredvolenaPata) }) };
+    public static List<Blok> PredvolenaPataBloky() => new();
+
+    /// <summary>
+    /// Text bez označenia ISCED, ktoré sa už nepoužíva („Gymnázium, ISCED 3A“ → „Gymnázium“, „… vzdelanie (ISCED 344)“ →
+    /// „… vzdelanie“).
+    /// </summary>
+    public static string BezIsced(string? text) =>
+        text is null ? "" : Isced().Replace(text, "").Trim().TrimEnd(',', ';', '–', '-').Trim();
+
+    [GeneratedRegex(@"\s*[,;–-]?\s*\(?\s*ISCED(\s*[0-9]+[A-Za-z]?)?\s*\)?", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]
+    private static partial Regex Isced();
 
     /// <summary>Názov dokumentu (nadpis – podnadpis), napr. „Školský vzdelávací program – Učebné osnovy“.</summary>
     public string Hlavicka => SpojNazov(Nadpis, Podnadpis);
@@ -200,9 +213,9 @@ public sealed class TitulnaStrana
 
     public IEnumerable<string> RiadkyPodNadpisom()
     {
-        if (TypZobrazit && Typ.Trim().Length > 0)
+        if (TypZobrazit && BezIsced(Typ).Length > 0)
         {
-            yield return Typ.Trim();
+            yield return BezIsced(Typ);
         }
 
         if (PlatnostZobrazit && Platnost.Trim().Length > 0)
@@ -210,11 +223,11 @@ public sealed class TitulnaStrana
             yield return Platnost.Trim();
         }
 
-        foreach (var riadok in VlastneRiadky.Replace("\r", "").Split('\n'))
+        foreach (var riadok in VlastneRiadky.Replace("\r", "").Split('\n').Select(BezIsced))
         {
-            if (riadok.Trim().Length > 0)
+            if (riadok.Length > 0)
             {
-                yield return riadok.Trim();
+                yield return riadok;
             }
         }
     }
@@ -296,7 +309,10 @@ public sealed class TitulnaStrana
         try
         {
             var dokumenty = new DokumentService();
-            return dokumenty.Existuje(id.Value) ? dokumenty.Nacitaj(id.Value).Bloky : PredvolenaPataBloky();
+            // text „Vytvorené … v programe SkVP“ zo starších verzií sa vynechá
+            return dokumenty.Existuje(id.Value)
+                ? dokumenty.Nacitaj(id.Value).Bloky.Where(b => !DokumentOsnovy.Text(new[] { b }).Contains(StaraPata, StringComparison.OrdinalIgnoreCase)).ToList()
+                : PredvolenaPataBloky();
         }
         catch (SkvpException)
         {
@@ -344,7 +360,7 @@ public sealed class TitulnaStrana
 
         // vlastný tvar adresy na úvodnej strane (napr. bez PSČ) zostane, kým sa adresa nezmení v Nastaveniach
         Databaza.Zapis(UdajeSkVP.KlucAdresa, Adresa.Trim());
-        Databaza.Zapis(UcebnyPlanService.KlucTypSkoly, Typ.Trim());
+        Databaza.Zapis(UcebnyPlanService.KlucTypSkoly, BezIsced(Typ));
         Databaza.Zapis(K + "nadpis", Nadpis.Trim());
         Databaza.Zapis(K + "podnadpis", Podnadpis.Trim());
         Databaza.Zapis(K + "platnost", Platnost.Trim());

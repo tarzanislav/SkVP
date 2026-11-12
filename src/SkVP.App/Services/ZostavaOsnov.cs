@@ -45,7 +45,7 @@ public sealed record UdajeSkVP(string Skola, string Adresa, string NazovProgramu
         Databaza.Citaj(KlucSkola, ""),
         Databaza.Citaj(KlucAdresa, ""),
         Databaza.Citaj(KlucNazov, PredvolenyNazov),
-        Databaza.Citaj(UcebnyPlanService.KlucTypSkoly, ""),
+        TitulnaStrana.BezIsced(Databaza.Citaj(UcebnyPlanService.KlucTypSkoly, "")),
         Databaza.Citaj(KlucObdobie, ""),
         NastaveniaSkoly.CestaLoga());
 }

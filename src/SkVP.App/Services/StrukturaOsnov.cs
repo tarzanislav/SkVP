@@ -191,7 +191,7 @@ public static class StrukturaOsnov
         return new UcebnyPlan
         {
             Nazov = "Vzdelávacie oblasti a predmety",
-            Typ = Databaza.Citaj(UcebnyPlanService.KlucTypSkoly),
+            Typ = TitulnaStrana.BezIsced(Databaza.Citaj(UcebnyPlanService.KlucTypSkoly)),
             // zapnuté úvodné časti, oblasti a zapnuté záverečné časti učebných osnov
             Oblasti = CastiOsnov.SkupinyVPoradi(sluzba).Select(o => new OblastPlanu
             {

@@ -106,7 +106,7 @@
                 </DockPanel>
                 <StackPanel Orientation="Horizontal" Margin="30,4,0,0">
                     <TextBlock Style="{StaticResource Popis}" VerticalAlignment="Center"
-                               Text="Namiesto staršieho „ISCED 3A“ sa dnes používa „úplné stredné všeobecné vzdelanie (ISCED 344)“." />
+                               Text="Podľa školského zákona: „Gymnázium – úplné stredné všeobecné vzdelanie“." />
                     <Button Content="Použiť" Padding="10,2" Margin="8,0,0,0" Click="AktualnyStupen_Click" />
                 </StackPanel>
 

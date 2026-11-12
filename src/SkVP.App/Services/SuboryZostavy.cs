@@ -70,7 +70,8 @@ public static class SuboryZostavy
 
     private static void Popis(PdfDocument pdf, Document dokument, string nazov)
     {
-        pdf.Info.Creator = $"SkVP {AktualizaciaService.AktualnaVerzia}";
+        // vo vlastnostiach súboru sa program nespomína – autor a názov sú škola a dokument
+        pdf.Info.Creator = dokument.Info.Author ?? "";
         if (string.IsNullOrWhiteSpace(pdf.Info.Title))
         {
             pdf.Info.Title = string.IsNullOrWhiteSpace(dokument.Info.Title) ? nazov : dokument.Info.Title;

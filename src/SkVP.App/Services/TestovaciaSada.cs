@@ -574,7 +574,7 @@ public static class TestovaciaSada
             new[] { Popis("Názov predmetu"), Hodnota(predmet) },
             new[] { Popis("Profilácia"), Hodnota(ProfilacieSady) },
             new[] { Popis("Platnosť"), Hodnota(PlatnostSady) },
-            new[] { Popis("Stupeň vzdelania"), Hodnota("úplné stredné všeobecné vzdelanie (ISCED 344)") },
+            new[] { Popis("Stupeň vzdelania"), Hodnota("úplné stredné všeobecné vzdelanie") },
         }, 2, new[] { 3.0, 7.0 });
     }
 

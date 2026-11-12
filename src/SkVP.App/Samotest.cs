@@ -117,7 +117,11 @@ internal static class Samotest
         var plan = UcebnyPlanService.Vstavany();
         Over(plan.Oblasti.Count == 7, $"vstavaný plán: 7 oblastí (je {plan.Oblasti.Count})");
         Over(plan.PocetPredmetov == 43, $"vstavaný plán: 43 predmetov (je {plan.PocetPredmetov})");
-        Over(plan.Typ == "Gymnázium, ISCED 3A", "vstavaný plán: typ školy");
+        Over(plan.Typ == "Gymnázium", "vstavaný plán: typ školy bez označenia ISCED");
+        Over(TitulnaStrana.BezIsced("Gymnázium, ISCED 3A") == "Gymnázium"
+             && TitulnaStrana.BezIsced("Gymnázium – úplné stredné všeobecné vzdelanie (ISCED 344)") == "Gymnázium – úplné stredné všeobecné vzdelanie"
+             && TitulnaStrana.BezIsced("Gymnázium ISCED 3A, 4-ročné štúdium") == "Gymnázium, 4-ročné štúdium",
+            "označenie ISCED sa z textov odstráni");
 
         // tabuľka Excel v rovnakom tvare ako tabuľka školy (nadpisy a oblasti cez zlúčené bunky A:B)
         var cesta = Path.Combine(Databaza.Priecinok, "ucebny_plan_test.xlsx");
@@ -147,14 +151,14 @@ internal static class Samotest
 
         var nacitany = UcebnyPlanService.NacitajZExcelu(cesta);
         Over(nacitany.Oblasti.Count == 7 && nacitany.PocetPredmetov == 43, "import z Excelu: 7 oblastí, 43 predmetov");
-        Over(nacitany.Typ == "Gymnázium, ISCED 3A" && nacitany.Nazov == "Vzdelávacie oblasti a predmety", "import z Excelu: nadpisy tabuľky");
+        Over(nacitany.Typ == "Gymnázium" && nacitany.Nazov == "Vzdelávacie oblasti a predmety", "import z Excelu: nadpisy tabuľky (bez ISCED)");
         Over(nacitany.Oblasti[4].Nazov == "Umenie a kultúra" && nacitany.Oblasti[4].Predmety.Single() == "Umenie a kultúra", "oblasť s jedným predmetom rovnakého názvu");
 
         var prvy = UcebnyPlanService.Vytvor(plan, nahradit: false);
         Over(prvy.NoveOblasti == 7 && prvy.NovePredmety == 43, "vytvorenie oblastí a predmetov");
         var druhy = UcebnyPlanService.Vytvor(nacitany, nahradit: false);
         Over(druhy.NoveOblasti == 0 && druhy.NovePredmety == 0 && druhy.Preskocene == 43, "opakovaný import nič nezdvojí");
-        Over(Databaza.Citaj(UcebnyPlanService.KlucTypSkoly) == "Gymnázium, ISCED 3A", "typ školy uložený v nastaveniach");
+        Over(Databaza.Citaj(UcebnyPlanService.KlucTypSkoly) == "Gymnázium", "typ školy uložený v nastaveniach");
 
         var oblasti = new ObjektService().Oblasti();
         Over(oblasti.Select(o => o.Farba).Distinct().Count() == 7, "každá oblasť má vlastnú farbu");
@@ -779,22 +783,31 @@ internal static class Samotest
 
         // texty úvodnej strany – úprava a vypnutie riadkov
         var titul = TitulnaStrana.Nacitaj();
-        Over(titul.PataZobrazit && DokumentOsnovy.Text(titul.PataNaStranu(new DateTime(2026, 10, 23))).Trim() == "Vytvorené 23. 10. 2026 v programe SkVP",
-            "predvolený text dole na úvodnej strane");
+        Over(titul.PataNaStranu(new DateTime(2026, 10, 23)).Count == 0, "úvodná strana: predvolene bez textu dole (nie „Vytvorené … v programe SkVP“)");
+        TitulnaStrana.UlozPatu(new List<Blok>
+        {
+            new Odsek(new[] { new Usek("Vytvorené {datum} v programe SkVP") }),
+            new Odsek(new[] { new Usek("Prerokované v pedagogickej rade") }),
+        }, "samotest");
+        Over(DokumentOsnovy.Text(TitulnaStrana.Nacitaj().PataNaStranu(new DateTime(2026, 10, 23))).Trim() == "Prerokované v pedagogickej rade",
+            "úvodná strana: text „v programe SkVP“ zo starších verzií sa vynechá, vlastný text zostane");
+        TitulnaStrana.UlozPatu(new List<Blok>(), "samotest");
         titul.Typ = TitulnaStrana.AktualnyStupenGymnazia;
         titul.PataZobrazit = false;
         titul.VlastneRiadky = "Schválené pedagogickou radou dňa 28. 8. 2026\n\nPrerokované so zriaďovateľom";
         titul.Podnadpis = "Učebné osnovy – testovacia verzia";
         titul.Uloz();
         var upravenyTitul = TitulnaStrana.Nacitaj();
-        Over(!upravenyTitul.PataZobrazit && upravenyTitul.RiadkyPodNadpisom().Count() == 3 && upravenyTitul.Typ.Contains("ISCED 344", StringComparison.Ordinal),
+        Over(!upravenyTitul.PataZobrazit && upravenyTitul.RiadkyPodNadpisom().Count() == 3
+             && upravenyTitul.Typ == "Gymnázium – úplné stredné všeobecné vzdelanie",
             "uložené texty úvodnej strany");
         var sTitulom = ZostavaOsnov.Zostav(new VolbyZostavy { Oblasti = new[] { plne.Oblasti[4].Id } });
         var docxTitul = Path.Combine(export, "samotest_uvodna_strana.docx");
         DocxVystup.Uloz(sTitulom, docxTitul);
         var textTitulu = DokumentOsnovy.Text(DocxCitac.Nacitaj(docxTitul).Bloky);
         Over(!textTitulu.Contains("Vytvorené", StringComparison.Ordinal) && textTitulu.Contains("Schválené pedagogickou radou", StringComparison.Ordinal)
-             && textTitulu.Contains("ISCED 344", StringComparison.Ordinal) && !textTitulu.Contains("ISCED 3A", StringComparison.Ordinal), "úvodná strana bez vypnutého riadku a s vlastnými textami");
+             && textTitulu.Contains("úplné stredné všeobecné vzdelanie", StringComparison.Ordinal) && !textTitulu.Contains("ISCED", StringComparison.Ordinal)
+             && !textTitulu.Contains("SkVP", StringComparison.Ordinal), "úvodná strana bez vypnutého riadku, bez ISCED a bez zmienky o programe");
         var vykreslenieTitulu = NahladDokumentu.Priprav(PdfVystup.Vytvor(sTitulom));
         UlozObrazokStrany(vykreslenieTitulu, 1, Path.Combine(export, "uvodna_strana_upravena.png"));
 

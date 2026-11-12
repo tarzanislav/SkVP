@@ -500,7 +500,7 @@ public static class PdfVystup
         Pata(sekcia, t, dokument.Vytvorene, z);
     }
 
-    /// <summary>Text dole na úvodnej strane (napr. „Vytvorené 23. 10. 2026 v programe SkVP“), ak je zapnutý.</summary>
+    /// <summary>Text dole na úvodnej strane (napr. schválenie pedagogickou radou), ak je zadaný a zapnutý.</summary>
     private static void Pata(Section sekcia, TitulnaStrana t, DateTime vytvorene, int z)
     {
         var bloky = t.PataNaStranu(vytvorene);

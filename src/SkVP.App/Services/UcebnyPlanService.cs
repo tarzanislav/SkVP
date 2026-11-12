@@ -27,7 +27,7 @@ public sealed record VysledokImportu(int NoveOblasti, int NovePredmety, int Pres
 /// <summary>
 /// Načítanie vzdelávacích oblastí a predmetov z tabuľky Excel. Očakávaný tvar (ako v tabuľke školy):
 /// v stĺpci A je názov oblasti (riadok bez predmetu), v stĺpci B pod ňou názvy predmetov. Riadky so samotným textom
-/// v stĺpci A, po ktorých nenasledujú predmety, sú nadpisy tabuľky (napr. „Gymnázium, ISCED 3A“).
+/// v stĺpci A, po ktorých nenasledujú predmety, sú nadpisy tabuľky (napr. „Gymnázium“).
 /// </summary>
 public sealed class UcebnyPlanService
 {
@@ -43,7 +43,9 @@ public sealed class UcebnyPlanService
     /// <summary>Učebný plán gymnázia dodaný s programom (z tabuľky školy).</summary>
     public static UcebnyPlan Vstavany()
     {
-        return ZabudovaneZdroje.Json<UcebnyPlan>("SkVP.UcebnyPlanGymnazium.json", "V programe chýba vstavaný učebný plán.");
+        var plan = ZabudovaneZdroje.Json<UcebnyPlan>("SkVP.UcebnyPlanGymnazium.json", "V programe chýba vstavaný učebný plán.");
+        plan.Typ = TitulnaStrana.BezIsced(plan.Typ);
+        return plan;
     }
 
     public static UcebnyPlan NacitajZExcelu(string cesta)
@@ -136,7 +138,7 @@ public sealed class UcebnyPlanService
         }
 
         plan.Nazov = nadpisy.ElementAtOrDefault(0);
-        plan.Typ = nadpisy.ElementAtOrDefault(1);
+        plan.Typ = TitulnaStrana.BezIsced(nadpisy.ElementAtOrDefault(1));
         if (plan.Oblasti.Count == 0)
         {
             throw new SkvpException(
