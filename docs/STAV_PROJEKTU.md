@@ -425,7 +425,7 @@ Podnet: „vytvor lepšie šablóny, tie tam ponechaj… prehľadaj internet pre
 - Samotest: 26 šablón + vlastná (PDF, Word, editor), JSON vlastnej šablóny, skupiny, prispôsobenie v okne,
   snímky `13n_vzhlad_skupina_klasicke.png`, `13o_vzhlad_prisposobenie.png`.
 
-## Export osnov „ako pri importe“ (12. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+## Export osnov „ako pri importe“ (12. 11. 2026)
 Podnet: upravené osnovy (štýly, zhustenie, úpravy v programe) uložiť do priečinkov tak, ako boli zdrojové súbory pri
 importe – s voľbou formátu (ako pôvodné / všetko Word / všetko PDF) a názvov (ako pôvodné / ako nové).
 - Import si pamätá cestu súboru v priečinku importu: `InfoOsnovy.CestaZdroja` (kľúč `cestaZdroja`,
@@ -439,6 +439,16 @@ importe – s voľbou formátu (ako pôvodné / všetko Word / všetko PDF) a n�
   prehľad, koľko osnov pozná svoj súbor; snímka `13g2_okno_export_ako_pri_importe.png`.
 - Samotest: priečinky, pôvodné názvy a formáty, starší import podľa pôvodného priečinka (archív sa preskočí), všetko PDF
   s novými názvami, neprepisovanie, ochrana pôvodného priečinka, okno exportu, zaznamenaná cesta pri importe.
+
+## Úvodná strana oblasti na jednej strane (12. 11. 2026)
+Podnet: zoznam predmetov na oddeľujúcej strane oblasti (Jazyk a komunikácia, 12 predmetov) pretiekol na druhú stranu.
+- `Services/UvodnaStranaOblasti.Pre(oblast, sablona, sirkaTextu)`: odhad výšky zoznamu (zalamovanie názvov podľa šírky
+  stĺpca a písma šablóny); najprv sa zmenší voľné miesto nad nadpisom (plné 269 b = 4,5 cm + 5 cm, najmenej 28 b), potom
+  5 stupňov písma a riadkov zoznamu (15/12,5 b → 10,5/8,5 b). Riadky zoznamu majú jednoduché riadkovanie a žiadnu medzeru
+  za odsekom (inak by sa pridalo riadkovanie a medzera šablóny).
+- PDF aj Word (vo Worde navyše `keepNext` – zoznam drží spolu, medzera nad nadpisom v rovnakom pomere).
+- Samotest: 12, 16 a 20 predmetov s dlhými názvami v šablónach Pastelový, Čitateľný a Prezentačný → počet strán =
+  úvodná strana + strana na predmet; obrázky `uvodna_strana_oblasti_12.png`, `uvodna_strana_oblasti_20.png`.
 
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
