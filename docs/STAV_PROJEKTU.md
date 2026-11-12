@@ -450,7 +450,7 @@ Podnet: zoznam predmetov na oddeľujúcej strane oblasti (Jazyk a komunikácia, 
 - Samotest: 12, 16 a 20 predmetov s dlhými názvami v šablónach Pastelový, Čitateľný a Prezentačný → počet strán =
   úvodná strana + strana na predmet; obrázky `uvodna_strana_oblasti_12.png`, `uvodna_strana_oblasti_20.png`.
 
-## Súbor s jedným predmetom bez zbytočnej strany (12. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+## Súbor s jedným predmetom bez zbytočnej strany (12. 11. 2026, vydané vo v0.1.144)
 Podnet: súbory z exportu po jednom predmete sa vo Worde pýtali na aktualizáciu polí a začínali stranou s nadpisom oblasti.
 - `VolbyZostavy.NadpisOblasti` (pri `ExportOsnov.PredmetyZvlast` = false): nadpis oblasti sa v PDF ani vo Worde nevypíše.
 - Prepnutie rozloženia na prázdnej časti ju nahradí (`Sadzba.Prepni` – odstráni prázdnu sekciu MigraDoc; `CastiZostavy.Prepni`
