@@ -425,7 +425,7 @@ Podnet: „vytvor lepšie šablóny, tie tam ponechaj… prehľadaj internet pre
 - Samotest: 26 šablón + vlastná (PDF, Word, editor), JSON vlastnej šablóny, skupiny, prispôsobenie v okne,
   snímky `13n_vzhlad_skupina_klasicke.png`, `13o_vzhlad_prisposobenie.png`.
 
-## Export osnov „ako pri importe“ (12. 11. 2026)
+## Export osnov „ako pri importe“ (12. 11. 2026, vydané vo v0.1.140)
 Podnet: upravené osnovy (štýly, zhustenie, úpravy v programe) uložiť do priečinkov tak, ako boli zdrojové súbory pri
 importe – s voľbou formátu (ako pôvodné / všetko Word / všetko PDF) a názvov (ako pôvodné / ako nové).
 - Import si pamätá cestu súboru v priečinku importu: `InfoOsnovy.CestaZdroja` (kľúč `cestaZdroja`,
@@ -440,7 +440,7 @@ importe – s voľbou formátu (ako pôvodné / všetko Word / všetko PDF) a n�
 - Samotest: priečinky, pôvodné názvy a formáty, starší import podľa pôvodného priečinka (archív sa preskočí), všetko PDF
   s novými názvami, neprepisovanie, ochrana pôvodného priečinka, okno exportu, zaznamenaná cesta pri importe.
 
-## Úvodná strana oblasti na jednej strane (12. 11. 2026)
+## Úvodná strana oblasti na jednej strane (12. 11. 2026, vydané vo v0.1.140)
 Podnet: zoznam predmetov na oddeľujúcej strane oblasti (Jazyk a komunikácia, 12 predmetov) pretiekol na druhú stranu.
 - `Services/UvodnaStranaOblasti.Pre(oblast, sablona, sirkaTextu)`: odhad výšky zoznamu (zalamovanie názvov podľa šírky
   stĺpca a písma šablóny); najprv sa zmenší voľné miesto nad nadpisom (plné 269 b = 4,5 cm + 5 cm, najmenej 28 b), potom
