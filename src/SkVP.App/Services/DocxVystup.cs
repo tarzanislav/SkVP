@@ -373,6 +373,7 @@ public static class DocxVystup
     private static void Oblast(Body telo, KapitolaOblasti oblast, bool novaStrana, bool oddelovac, Stav stav)
     {
         var farba = Hex(oblast.Farba);
+        var strana = UvodnaStranaOblasti.Pre(oblast, VzhladDokumentov.Aktivna, PdfVystup.SirkaTextuNaVysku);
         var nadpis = new Paragraph(new ParagraphProperties(
             new ParagraphStyleId { Val = "Heading1" },
             new ParagraphBorders(new LeftBorder { Val = BorderValues.Single, Size = 48, Color = farba, Space = 12 }),
@@ -382,28 +383,48 @@ public static class DocxVystup
             nadpis.ParagraphProperties!.PageBreakBefore = new PageBreakBefore();
         }
 
-        if (!oddelovac)
-        {
-            nadpis.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = "0" };
-        }
+        // na oddeľujúcej strane medzera nad nadpisom len taká, aby sa zoznam predmetov zmestil na stranu
+        var pred = oddelovac ? (int)Math.Round(Math.Min(2800, strana.MedzeraHore * 20 * 2800 / (UvodnaStranaOblasti.PlnaMedzera * 20))) : 0;
+        nadpis.ParagraphProperties!.SpacingBetweenLines = new SpacingBetweenLines { Before = pred.ToString(CultureInfo.InvariantCulture) };
 
         nadpis.Append(Beh(oblast.Nazov, farba: farba));
         telo.Append(nadpis);
 
         var popis = Odsek($"{TypObjektu.Nazov(oblast.Typ)}  •  {oblast.PocetText}", "SkvpPodnadpisOblasti");
         popis.ParagraphProperties!.Indentation = new Indentation { Left = "360" };
+        if (oddelovac)
+        {
+            popis.ParagraphProperties.SpacingBetweenLines = new SpacingBetweenLines
+            {
+                After = ((int)Math.Round(strana.MedzeraPodPopisom * 20)).ToString(CultureInfo.InvariantCulture),
+            };
+        }
+
         telo.Append(popis);
 
         if (oddelovac)
         {
-            foreach (var predmet in oblast.Predmety)
+            var odstup = ((int)Math.Round(strana.Odstup * 20 + 20)).ToString(CultureInfo.InvariantCulture);
+            var velkost = ((int)Math.Round(strana.Nazov * 2)).ToString(CultureInfo.InvariantCulture);
+            for (var i = 0; i < oblast.Predmety.Count; i++)
             {
-                var p = new Paragraph(new ParagraphProperties(
-                    new ParagraphStyleId { Val = "SkvpZoznamPredmetov" },
-                    new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka, Space = 4 })));
-                p.Append(Beh(predmet.Cislo, tucne: true, farba: farba));
-                p.Append(new Run(new TabChar()));
-                p.Append(Beh(predmet.Nazov));
+                var predmet = oblast.Predmety[i];
+                var vlastnosti = new ParagraphProperties(new ParagraphStyleId { Val = "SkvpZoznamPredmetov" });
+                if (i < oblast.Predmety.Count - 1)
+                {
+                    // celý zoznam na jednej strane
+                    vlastnosti.KeepNext = new KeepNext();
+                }
+
+                vlastnosti.ParagraphBorders = new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka, Space = 4 });
+                vlastnosti.SpacingBetweenLines = new SpacingBetweenLines { Before = odstup, After = odstup };
+                var p = new Paragraph(vlastnosti);
+                foreach (var beh in new[] { Beh(predmet.Cislo, tucne: true, farba: farba), new Run(new TabChar()), Beh(predmet.Nazov) })
+                {
+                    (beh.RunProperties ??= new RunProperties()).FontSize = new FontSize { Val = velkost };
+                    p.Append(beh);
+                }
+
                 telo.Append(p);
             }
         }

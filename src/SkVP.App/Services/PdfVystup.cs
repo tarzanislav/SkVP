@@ -196,7 +196,7 @@ public static class PdfVystup
         oblast.Font.Name = PismaDokumentu.Nadpis;
         oblast.Font.Size = 26;
         oblast.Font.Bold = true;
-        oblast.ParagraphFormat.SpaceBefore = Unit.FromCentimeter(5);
+        oblast.ParagraphFormat.SpaceBefore = 0;
         oblast.ParagraphFormat.SpaceAfter = Unit.FromPoint(10);
         oblast.ParagraphFormat.LineSpacingRule = LineSpacingRule.Single;
         oblast.ParagraphFormat.Alignment = ParagraphAlignment.Left;
@@ -660,10 +660,12 @@ public static class PdfVystup
     {
         var sekcia = sadzba.Sekcia;
         var farba = Farba(oblast.Farba);
+        var strana = UvodnaStranaOblasti.Pre(oblast, VzhladDokumentov.Aktivna, SirkaTextu.Point);
         if (oddelovac)
         {
-            // oddeľujúca strana: nadpis oblasti nižšie na strane (medzera hore na strane sa inak vynechá)
-            Medzera(sekcia, 4.5, novaStrana);
+            // oddeľujúca strana: nadpis oblasti nižšie na strane (medzera hore na strane sa inak vynechá) – len toľko,
+            // aby sa zoznam predmetov zmestil na jednu stranu
+            Medzera(sekcia, Math.Max(0.05, Unit.FromPoint(strana.MedzeraHore).Centimeter), novaStrana);
             novaStrana = false;
         }
 
@@ -675,9 +677,9 @@ public static class PdfVystup
         nadpis.Format.Borders.Left.Color = farba;
         nadpis.Format.Borders.DistanceFromLeft = Unit.FromPoint(12);
         nadpis.Format.LeftIndent = Unit.FromPoint(18);
+        nadpis.Format.SpaceBefore = 0;
         if (!oddelovac)
         {
-            nadpis.Format.SpaceBefore = 0;
             nadpis.Format.Font.Size = 20;
         }
 
@@ -689,15 +691,15 @@ public static class PdfVystup
         popis.Format.Font.Size = 10;
         popis.Format.Font.Color = Siva;
         popis.Format.LeftIndent = Unit.FromPoint(18);
-        popis.Format.SpaceAfter = Unit.FromPoint(oddelovac ? 26 : 14);
+        popis.Format.SpaceAfter = Unit.FromPoint(oddelovac ? strana.MedzeraPodPopisom : 14);
 
         if (oddelovac && oblast.Predmety.Count > 0)
         {
             // zoznam predmetov oblasti s číslom poradia a stranou
             var zoznam = sekcia.AddTable();
             zoznam.Borders.Visible = false;
-            zoznam.TopPadding = Unit.FromPoint(4);
-            zoznam.BottomPadding = Unit.FromPoint(4);
+            zoznam.TopPadding = Unit.FromPoint(strana.Odstup);
+            zoznam.BottomPadding = Unit.FromPoint(strana.Odstup);
             zoznam.AddColumn(Unit.FromPoint(46));
             zoznam.AddColumn(Unit.FromPoint(SirkaTextu.Point - 46 - 40));
             zoznam.AddColumn(Unit.FromPoint(40));
@@ -708,21 +710,21 @@ public static class PdfVystup
                 r.Borders.Bottom.Color = Linka;
                 var cislo = r.Cells[0].AddParagraph(predmet.Cislo);
                 cislo.Format.Font.Name = PismaDokumentu.Nadpis;
-                cislo.Format.Font.Size = 15;
+                cislo.Format.Font.Size = strana.Cislo;
                 cislo.Format.Font.Bold = true;
                 cislo.Format.Font.Color = farba;
                 cislo.Format.SpaceAfter = 0;
                 var nazov = r.Cells[1].AddParagraph(predmet.Nazov);
-                nazov.Format.Font.Size = 12.5;
+                nazov.Format.Font.Size = strana.Nazov;
                 nazov.Format.SpaceAfter = 0;
-                nazov.Format.SpaceBefore = Unit.FromPoint(2);
-                var strana = r.Cells[2].AddParagraph();
-                strana.Format.Alignment = ParagraphAlignment.Right;
-                strana.Format.Font.Name = PismaDokumentu.Nadpis;
-                strana.Format.Font.Size = 10;
-                strana.Format.Font.Color = Siva;
-                strana.Format.SpaceBefore = Unit.FromPoint(3);
-                strana.AddPageRefField(Zalozka(predmet.Id));
+                nazov.Format.SpaceBefore = Unit.FromPoint(Math.Max(0, (strana.Cislo - strana.Nazov) * 0.6));
+                var cisloStrany = r.Cells[2].AddParagraph();
+                cisloStrany.Format.Alignment = ParagraphAlignment.Right;
+                cisloStrany.Format.Font.Name = PismaDokumentu.Nadpis;
+                cisloStrany.Format.Font.Size = Math.Min(10, strana.Nazov);
+                cisloStrany.Format.Font.Color = Siva;
+                cisloStrany.Format.SpaceBefore = Unit.FromPoint(Math.Max(0, (strana.Cislo - Math.Min(10, strana.Nazov)) * 0.6));
+                cisloStrany.AddPageRefField(Zalozka(predmet.Id));
             }
         }
 
@@ -1185,6 +1187,12 @@ public static class PdfVystup
     // ---- pomocné ----
 
     /// <summary>Prázdny odsek pevnej výšky – posunie obsah nižšie aj na začiatku strany.</summary>
+    /// <summary>Šírka textu strany A4 na výšku (bez okrajov) v bodoch.</summary>
+    internal static double SirkaTextuNaVysku => SirkaTextu.Point;
+
+    /// <summary>Výška textu strany A4 na výšku (bez okrajov) v bodoch.</summary>
+    internal static double VyskaTextu => Unit.FromMillimeter(297).Point - Unit.FromCentimeter(2.6).Point - Unit.FromCentimeter(2.4).Point;
+
     private static void Medzera(Section sekcia, double cm, bool novaStrana)
     {
         var medzera = sekcia.AddParagraph("\u00A0");

@@ -495,6 +495,63 @@ internal static class Samotest
         Krok("rozloženie strán a jednotný vzhľad v poriadku");
         TestNepravidelnychTabuliek(zmiesana);
         TestSablonVzhladu();
+        TestUvodnejStranyOblasti();
+    }
+
+    /// <summary>
+    /// Úvodná strana oblasti: zoznam predmetov sa zmestí na jednu stranu aj pri 12 – 20 predmetoch s dlhými názvami
+    /// a v šablónach s veľkým písmom (počet strán = úvodná strana + strana na každý predmet).
+    /// </summary>
+    private static void TestUvodnejStranyOblasti()
+    {
+        var zaklad = ZostavaOsnov.Zostav(new VolbyZostavy());
+        var volby = new VolbyZostavy
+        {
+            Oblasti = new[] { zaklad.Oblasti.First(o => o.JeOblast && o.Predmety.Count > 0).Id }, TitulnaStrana = false, Obsah = false,
+            OddelovacOblasti = true, CharakteristikyOblasti = false, NespracovanePredmety = true,
+        };
+        var zostava = ZostavaOsnov.Zostav(volby);
+        var oblast = zostava.Oblasti[0];
+        var nazvy = new[]
+        {
+            "Konverzácia v anglickom jazyku - profilácia šport, informatika, steam – úroveň B2", "Anglický jazyk – úroveň B2",
+            "Jazykom k maturite - nemecký jazyk – úroveň B2", "Seminár zo slovenského jazyka a literatúry", "Ruský jazyk – úroveň B1",
+        };
+        var chyby = new List<string>();
+        foreach (var pocet in new[] { 12, 16, 20 })
+        {
+            var predmety = Enumerable.Range(0, pocet).Select(i => oblast.Predmety[0] with
+            {
+                Id = 900_000 + i, Poradie = i + 1, Nazov = nazvy[i % nazvy.Length],
+                Obsah = new List<Blok> { new Odsek(new[] { new Usek("Text osnovy.") }) },
+            }).ToList();
+            var dokument = zostava with { Oblasti = new List<KapitolaOblasti> { oblast with { Predmety = predmety, Charakteristika = new List<Blok>() } } };
+            foreach (var id in new[] { VzhladDokumentov.IdPredvolenej, "citatelny", "prezentacny" })
+            {
+                using var docasna = VzhladDokumentov.Docasne(VzhladDokumentov.Podla(id));
+                var vykreslenie = NahladDokumentu.Priprav(PdfVystup.Vytvor(dokument));
+                var strany = NahladDokumentu.PocetStran(vykreslenie);
+                if (strany != pocet + 1)
+                {
+                    chyby.Add($"{pocet} predmetov, {id}: {strany} strán");
+                }
+
+                if (pocet == 12 && id == VzhladDokumentov.IdPredvolenej)
+                {
+                    UlozObrazokStrany(vykreslenie, 1, Path.Combine(Databaza.PriecinokDokumentov, "uvodna_strana_oblasti_12.png"));
+                    OverDocx(DocxVystup.Data(dokument), "úvodná strana oblasti vo Worde");
+                }
+
+                if (pocet == 20 && id == "citatelny")
+                {
+                    UlozObrazokStrany(vykreslenie, 1, Path.Combine(Databaza.PriecinokDokumentov, "uvodna_strana_oblasti_20.png"));
+                }
+            }
+        }
+
+        Over(chyby.Count == 0, "úvodná strana oblasti: zoznam 12, 16 aj 20 predmetov na jednej strane" + (chyby.Count == 0 ? "" : $" – {string.Join("; ", chyby)}"));
+        var male = UvodnaStranaOblasti.Pre(oblast with { Predmety = oblast.Predmety.Take(3).ToList() }, VzhladDokumentov.Vsetky[0], PdfVystup.SirkaTextuNaVysku);
+        Over(male.MedzeraHore == UvodnaStranaOblasti.PlnaMedzera && male.Nazov == 12.5, "úvodná strana oblasti: pri malom počte predmetov pôvodný vzhľad");
     }
 
     /// <summary>
