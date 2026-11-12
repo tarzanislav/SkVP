@@ -838,7 +838,7 @@ internal static class Samotest
         UlozObrazokStrany(NahladDokumentu.Priprav(PdfVystup.Vytvor(dokumentSTabulkou)), 1, Path.Combine(export, "uvodna_strana_tabulka.png"));
         TitulnaStrana.Predvolene();
         Over(TitulnaStrana.Nacitaj().PataZobrazit && TitulnaStrana.Nacitaj().Podnadpis == "Učebné osnovy"
-             && TitulnaStrana.Nacitaj().PataBloky.Count == 1, "predvolené texty úvodnej strany");
+             && TitulnaStrana.Nacitaj().PataBloky.Count == 0, "predvolené texty úvodnej strany (text dole prázdny)");
 
         var docx = Path.Combine(export, "samotest_cele_osnovy.docx");
         DocxVystup.Uloz(plne, docx);
