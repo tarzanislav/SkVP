@@ -1108,7 +1108,8 @@ internal static class Samotest
 
         Over(chybaPriecinka is not null, "export ako pri importe: do pôvodného priečinka nie");
         exportModel.AkoPriImporte = true;
-        Over(exportModel.JePdf && !exportModel.Jednotlivo && exportModel.InfoImportu.Contains("Priečinok aj názov súboru pozná 1 z", StringComparison.Ordinal),
+        Over(exportModel.JePdf && !exportModel.Jednotlivo && exportModel.InfoImportu.Contains("Priečinok aj názov súboru pozná", StringComparison.Ordinal)
+             && exportModel.InfoImportu.Contains("Pri 1 osnove importovanej", StringComparison.Ordinal),
             $"okno exportu: ako pri importe ({exportModel.InfoImportu})");
         exportModel.FormatVsetkoWord = true;
         Over(!exportModel.JePdf, "okno exportu: všetko Word");

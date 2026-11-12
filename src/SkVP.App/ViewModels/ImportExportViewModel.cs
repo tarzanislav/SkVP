@@ -438,13 +438,15 @@ public sealed partial class ExportOsnovViewModel : ObservableObject
             var casti = new List<string> { $"Priečinok aj názov súboru pozná {sCestou} z {predmety.Count} osnov." };
             if (lenNazov > 0)
             {
-                casti.Add($"Pri {lenNazov} osnovách importovaných v staršej verzii pozná len názov súboru – vyberte pôvodný priečinok importu " +
-                          "a program podľa názvu nájde, v ktorom podpriečinku boli (inak pôjdu do priečinka oblasti).");
+                casti.Add(Preklad.Pocet(lenNazov, "Pri {0} osnove importovanej", "Pri {0} osnovách importovaných", "Pri {0} osnovách importovaných")
+                          + " v staršej verzii pozná len názov súboru – vyberte pôvodný priečinok importu a program podľa názvu nájde, " +
+                          "v ktorom podpriečinku boli (inak pôjdu do priečinka oblasti).");
             }
 
             if (bez > 0)
             {
-                casti.Add($"{bez} osnov nebolo importovaných zo súboru – uložia sa do priečinka oblasti ako Word s novým názvom.");
+                casti.Add(Preklad.Pocet(bez, "{0} osnova nebola importovaná zo súboru – uloží sa", "{0} osnovy neboli importované zo súboru – uložia sa",
+                    "{0} osnov nebolo importovaných zo súboru – uložia sa") + " do priečinka oblasti s novým názvom.");
             }
 
             return string.Join(" ", casti);
