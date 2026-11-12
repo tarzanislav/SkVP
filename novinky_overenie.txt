@@ -1,0 +1,96 @@
+﻿svp-dodatok-6	Potvrdene	https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/	údaj je na stránke uvedený
+svp-revizia-osnov-ai	Potvrdene	https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/	údaj je na stránke uvedený
+svp-platny	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+svp-platny	Potvrdene	https://www.statpedu.sk/sk/svp/inovovany-statny-vzdelavaci-program/inovovany-svp-gymnazia-so-stvorrocnym-patrocnym-vzdelavacim-programom/	údaj je na stránke uvedený
+svp-ai-ss-2027	Potvrdene	https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/	údaj je na stránke uvedený
+svp-kurikularna-zs	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+svp-kurikularna-zs	Dostupne	https://www.minedu.sk/kurikularna-reforma/	zdroj je dostupný
+svp-zverejnenie-skvp	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+tvvp-ai	Potvrdene	https://www.minedu.sk/ai-gramotnost-prichadza-na-gymnazia-ministerstvo-meni-statny-vzdelavaci-program/	údaj je na stránke uvedený
+tvvp-prazdniny	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+tvvp-prazdniny	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+tvvp-maturitne-rocniky	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+tvvp-maturitne-rocniky	Potvrdene	https://nivam.sk/pre-skoly/maturitne-skusky/	údaj je na stránke uvedený
+tvvp-specifikacie	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+tvvp-specifikacie	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ciele-katalog	Potvrdene	https://nivam.sk/pre-skoly/maturitne-skusky/	údaj je na stránke uvedený
+ciele-katalog	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita/o-maturite	údaj je na stránke uvedený
+ciele-ms-obsah	Potvrdene	https://nivam.sk/pre-skoly/maturitne-skusky/	údaj je na stránke uvedený
+ciele-ms-obsah	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ciele-cudzie-jazyky	Potvrdene	https://nivam.sk/pre-skoly/maturitne-skusky/	údaj je na stránke uvedený
+ciele-specifikacie-2027	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ciele-specifikacie-2027	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-zber-udajov	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027	údaj je na stránke uvedený
+ms-zber-udajov	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-zber-udajov	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-zmena-eformy	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-zmeny-databazy	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027	údaj je na stránke uvedený
+ms-gs-sjl	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-gs-mat	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-ec-sjl	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ms-ec-sjl	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-ec-cj	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ms-ec-cj	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-ec-mat	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ms-ec-mat	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-ec-sjsl	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ms-ec-sjsl	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-nahradny-april	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ms-nahradny-april	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-opravny-prihlaska	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-opravny-dni	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-september	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita	údaj je na stránke uvedený
+ms-september	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+ms-ematurita	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ms-ematurita	Potvrdene	https://www2.nucem.sk/sk/merania/narodne-merania/maturita/roky/2026-2027	údaj je na stránke uvedený
+ms-rozsah-predmetov	Potvrdene	https://www.minedu.sk/44151-sk/stredne-skoly/	údaj je na stránke uvedený
+ms-dodatocna	Dostupne	https://www2.nucem.sk/dl/6553/Z%C3%A1kladn%C3%A9%20inform%C3%A1cie%20MS%202027_final.pdf	zdroj je dostupný
+ps-zverejnenie-ss	Dostupne	https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf	zdroj je dostupný
+ps-prihlasky	Potvrdene	https://eprihlasky.iedu.sk/	údaj je na stránke uvedený
+ps-prihlasky	Dostupne	https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf	zdroj je dostupný
+ps-talentove-1	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-talentove-1	Potvrdene	https://www.minedu.sk/pre-skolsky-rok-20272028/	údaj je na stránke uvedený
+ps-sportove	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-talentove-2	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-netalentove-1	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-netalentove-2	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-dalsi-termin	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-zverejnenie-vysledkov	Dostupne	https://www.minedu.sk/data/att/161/36571.5bc5c8.pdf	zdroj je dostupný
+ps-jednotna-skuska	Potvrdene	https://www.minedu.sk/44151-sk/stredne-skoly/	údaj je na stránke uvedený
+ps-poradie-odborov	Potvrdene	https://www.minedu.sk/44151-sk/stredne-skoly/	údaj je na stránke uvedený
+ps-poradie-odborov	Dostupne	https://static.slov-lex.sk/pdf/SK/ZZ/2008/245/ZZ_2008_245_20260901.pdf	zdroj je dostupný
+t9-prihlasovanie	Potvrdene	https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/	údaj je na stránke uvedený
+t9-prihlasovanie	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+t9-riadny	Potvrdene	https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/	údaj je na stránke uvedený
+t9-riadny	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+t9-nahradny	Potvrdene	https://www.minedu.sk/testovanie-9-v-skolskom-roku-2026-2027/	údaj je na stránke uvedený
+t9-nahradny	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+sr-zaciatok	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-jesenne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-jesenne	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+pr-vianocne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-vianocne	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+sr-polrok	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-polrocne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-polrocne	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+pr-jarne-bb	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-jarne-bb	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+pr-jarne-ke	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-jarne-ke	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+pr-jarne-ba	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-jarne-ba	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+pr-velkonocne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-velkonocne	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+sr-zaverecna	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+sr-koniec	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-letne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr-letne	Dostupne	https://www.minedu.sk/data/att/2da/36701.feb2b6.docx	zdroj je dostupný
+pr27-jesenne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-vianocne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-polrocne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-jarne-ke	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-jarne-ba	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-jarne-bb	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-velkonocne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr27-letne	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
+pr28-prehlad	Dostupne	https://www.minedu.sk/data/att/a96/36583.42ace6.pdf	zdroj je dostupný
