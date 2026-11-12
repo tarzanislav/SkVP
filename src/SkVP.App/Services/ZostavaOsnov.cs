@@ -19,6 +19,9 @@ public sealed record VolbyZostavy
     /// <summary>Oddeľujúca strana pred každou oblasťou (názov oblasti a zoznam jej predmetov).</summary>
     public bool OddelovacOblasti { get; init; } = true;
 
+    /// <summary>Nadpis oblasti pred jej predmetmi (pri exporte každého predmetu do samostatného súboru nie).</summary>
+    public bool NadpisOblasti { get; init; } = true;
+
     /// <summary>Oddeľujúca strana pred každým predmetom (názov predmetu).</summary>
     public bool OddelovacPredmetu { get; init; }
 

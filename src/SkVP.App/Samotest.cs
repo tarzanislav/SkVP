@@ -1128,6 +1128,34 @@ internal static class Samotest
         Over(jednotlivo.Count == volby.Predmety.Count && jednotlivo.Any(c => Path.GetFileName(c) == $"{cislo} Fyzika 2025.pdf"),
             $"každý predmet zvlášť s rokom v názve ({jednotlivo.Count}): {string.Join(", ", jednotlivo.Select(Path.GetFileName).Take(4))}");
 
+        // súbor s jedným predmetom: bez nadpisu oblasti, bez prázdnej strany pred osnovou na šírku, Word sa nepýta na polia
+        var jedenWord = ExportOsnov.UlozJednotlivo(volby with { NespracovanePredmety = true }, FormatExportu.Word, Path.Combine(export, "Export jednotlivo Word"));
+        using (var wordJedneho = WordprocessingDocument.Open(jedenWord[0], false))
+        {
+            var telo = wordJedneho.MainDocumentPart!.Document!.Body!;
+            Over(wordJedneho.MainDocumentPart.DocumentSettingsPart!.Settings!.GetFirstChild<W.UpdateFieldsOnOpen>() is null
+                 && !telo.Descendants<W.ParagraphStyleId>().Any(styl => styl.Val == "Heading1"),
+                "súbor s jedným predmetom: bez nadpisu oblasti a bez otázky na aktualizáciu polí");
+        }
+
+        var jedenPredmet = ZostavaOsnov.Zostav(volby with
+        {
+            Predmety = new[] { volby.Predmety.First() }, TitulnaStrana = false, Obsah = false, OddelovacOblasti = false,
+            CharakteristikyOblasti = false, NadpisOblasti = false, NespracovanePredmety = true,
+        });
+        var naSirkuOblast = jedenPredmet.Oblasti[0];
+        jedenPredmet = jedenPredmet with
+        {
+            Oblasti = new List<KapitolaOblasti> { naSirkuOblast with { Predmety = new List<KapitolaPredmetu> { naSirkuOblast.Predmety[0] with { Obsah = OsnovaNaSirku() } } } },
+        };
+        var vykreslenieJedneho = NahladDokumentu.Priprav(PdfVystup.Vytvor(jedenPredmet));
+        using (var wordJedneho = WordprocessingDocument.Open(new MemoryStream(DocxVystup.Data(jedenPredmet)), false))
+        {
+            var prvyOdsek = wordJedneho.MainDocumentPart!.Document!.Body!.Elements<W.Paragraph>().First();
+            Over(NahladDokumentu.StranaNaSirku(vykreslenieJedneho, 1) && prvyOdsek.ParagraphProperties?.SectionProperties is null,
+                $"súbor s osnovou na šírku začína hneď osnovou na šírku (PDF {NahladDokumentu.PocetStran(vykreslenieJedneho)} strán)");
+        }
+
         // export ako pri importe: priečinky, názvy a formáty importovaných súborov
         var druhy = model.Oblasti.First(o => o.Nazov == "Človek a príroda").Predmety.First(p => p.Id != fyzika.Id && p.Id != astronomia.Id);
         InfoOsnovyService.Uloz(fyzika.Id, new InfoOsnovy(2025, DateTime.Now, "Fyzika gymnázium.pdf", null, "Prírodné vedy/Fyzika gymnázium.pdf"));

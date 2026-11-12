@@ -62,6 +62,9 @@ public static class DocxVystup
         private readonly Dictionary<string, (string? Hlavicka, string Pata)> _odkazy = new();
         private bool _prva = true;
 
+        /// <summary>Počet prvkov tela na začiatku aktuálnej časti (−1 = časť už má obsah, napr. úvodnú stranu).</summary>
+        private int _zaciatokCasti = telo.ChildElements.Count == 0 ? 0 : -1;
+
         public RozlozenieStrany Rozlozenie { get; private set; } = RozlozenieStrany.A4NaVysku;
 
         /// <summary>Prepne rozloženie strany. True = začala sa nová časť (a tým aj nová strana).</summary>
@@ -72,7 +75,13 @@ public static class DocxVystup
                 return false;
             }
 
-            telo.Append(new Paragraph(new ParagraphProperties(Vlastnosti())));
+            // prázdna časť (na začiatku súboru s jedným predmetom) sa len prestaví – inak by z nej bola prázdna strana
+            if (telo.ChildElements.Count != _zaciatokCasti)
+            {
+                telo.Append(new Paragraph(new ParagraphProperties(Vlastnosti())));
+                _zaciatokCasti = telo.ChildElements.Count;
+            }
+
             Rozlozenie = nove;
             stav.SirkaTextu = SirkaTextuZostavy(nove);
             return true;
@@ -153,9 +162,15 @@ public static class DocxVystup
         stav.Cislovanie.Numbering = ZakladCislovania();
 
         var nastavenia = hlavna.AddNewPart<DocumentSettingsPart>();
-        nastavenia.Settings = new Settings(
-            new DefaultTabStop { Val = 709 },
-            new UpdateFieldsOnOpen { Val = true },
+        // aktualizácia polí pri otvorení (Word sa na ňu pýta) len pri obsahu a zozname predmetov s číslami strán
+        var volbyDokumentu = dokument.Volby;
+        nastavenia.Settings = new Settings(new DefaultTabStop { Val = 709 });
+        if (volbyDokumentu.Obsah || (volbyDokumentu.NadpisOblasti && volbyDokumentu.OddelovacOblasti))
+        {
+            nastavenia.Settings.Append(new UpdateFieldsOnOpen { Val = true });
+        }
+
+        nastavenia.Settings.Append(
             new Compatibility(new CompatibilitySetting
             {
                 Name = CompatSettingNameValues.CompatibilityMode,
@@ -191,9 +206,14 @@ public static class DocxVystup
         foreach (var oblast in dokument.Oblasti)
         {
             // oblasť je vždy na výšku; nová časť sama začína novou stranou
-            var prepnute = casti.Prepni(RozlozenieStrany.A4NaVysku);
-            Oblast(telo, oblast, !prvy && !prepnute, volby.OddelovacOblasti, stav);
-            prvy = false;
+            var prepnute = false;
+            if (volby.NadpisOblasti)
+            {
+                prepnute = casti.Prepni(RozlozenieStrany.A4NaVysku);
+                Oblast(telo, oblast, !prvy && !prepnute, volby.OddelovacOblasti, stav);
+                prvy = false;
+            }
+
             for (var i = 0; i < oblast.Predmety.Count; i++)
             {
                 var predmet = oblast.Predmety[i];

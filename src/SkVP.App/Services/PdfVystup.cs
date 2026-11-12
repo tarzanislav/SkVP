@@ -59,12 +59,20 @@ public static class PdfVystup
             HlavickaAPata(Sekcia, dokument, SirkaTextu);
         }
 
-        /// <summary>Prepne rozloženie strany. True = začala sa nová časť (a tým aj nová strana).</summary>
+        /// <summary>
+        /// Prepne rozloženie strany. True = začala sa nová časť (a tým aj nová strana). Prázdna časť sa nahradí – inak by
+        /// z nej bola prázdna strana (napr. osnova na šírku na začiatku súboru s jedným predmetom).
+        /// </summary>
         public bool Prepni(RozlozenieStrany rozlozenie)
         {
             if (rozlozenie.Zhodne(Rozlozenie))
             {
                 return false;
+            }
+
+            if (Sekcia.Elements.Count == 0)
+            {
+                doc.Sections.RemoveObjectAt(doc.Sections.Count - 1);
             }
 
             Zacni(rozlozenie);
@@ -149,9 +157,14 @@ public static class PdfVystup
         foreach (var oblast in dokument.Oblasti)
         {
             // oblasť je vždy na výšku; nová časť sama začína novou stranou
-            var prepnute = sadzba.Prepni(RozlozenieStrany.A4NaVysku);
-            Oblast(sadzba, oblast, !prvy && !prepnute, volby.OddelovacOblasti);
-            prvy = false;
+            var prepnute = false;
+            if (volby.NadpisOblasti)
+            {
+                prepnute = sadzba.Prepni(RozlozenieStrany.A4NaVysku);
+                Oblast(sadzba, oblast, !prvy && !prepnute, volby.OddelovacOblasti);
+                prvy = false;
+            }
+
             for (var i = 0; i < oblast.Predmety.Count; i++)
             {
                 var predmet = oblast.Predmety[i];

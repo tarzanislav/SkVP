@@ -227,6 +227,7 @@ public static class ExportOsnov
                     OddelovacOblasti = false,
                     OddelovacPredmetu = false,
                     CharakteristikyOblasti = false,
+                    NadpisOblasti = false,
                     NespracovanePredmety = true,
                 });
                 var rok = InfoOsnovyService.Nacitaj(predmet.Id).Rok;
