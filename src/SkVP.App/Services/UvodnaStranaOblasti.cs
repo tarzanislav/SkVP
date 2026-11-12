@@ -67,7 +67,7 @@ public sealed record UvodnaStranaOblasti(double MedzeraHore, double MedzeraPodPo
         var sirokePismo = sablona.PismoTextu is "Verdana" or "Tahoma" or "Trebuchet MS" or "Arial" or "Segoe UI";
         var znakovNaRiadok = Math.Max(10, (sirkaTextu - SirkaCisiel) / (velkost * (sirokePismo ? 0.56 : 0.5)));
         var riadkov = Math.Max(1, Math.Ceiling(nazov.Length * 1.08 / znakovNaRiadok));
-        var vyskaRiadka = velkost * 1.2 * Math.Max(1, sablona.Riadkovanie);
-        return Math.Max(cislo * 1.25, riadkov * vyskaRiadka + 2) + 2 * odstup + 1;
+        // riadky zoznamu majú jednoduché riadkovanie (nie riadkovanie textu šablóny)
+        return Math.Max(cislo * 1.3, riadkov * velkost * 1.25 + (cislo - velkost) * 0.6) + 2 * odstup + 1;
     }
 }

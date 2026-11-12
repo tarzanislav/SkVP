@@ -417,7 +417,7 @@ public static class DocxVystup
                 }
 
                 vlastnosti.ParagraphBorders = new ParagraphBorders(new BottomBorder { Val = BorderValues.Single, Size = 4, Color = Linka, Space = 4 });
-                vlastnosti.SpacingBetweenLines = new SpacingBetweenLines { Before = odstup, After = odstup };
+                vlastnosti.SpacingBetweenLines = new SpacingBetweenLines { Before = odstup, After = odstup, Line = "240", LineRule = LineSpacingRuleValues.Auto };
                 var p = new Paragraph(vlastnosti);
                 foreach (var beh in new[] { Beh(predmet.Cislo, tucne: true, farba: farba), new Run(new TabChar()), Beh(predmet.Nazov) })
                 {

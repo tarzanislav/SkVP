@@ -714,15 +714,19 @@ public static class PdfVystup
                 cislo.Format.Font.Bold = true;
                 cislo.Format.Font.Color = farba;
                 cislo.Format.SpaceAfter = 0;
+                cislo.Format.LineSpacingRule = LineSpacingRule.Single;
                 var nazov = r.Cells[1].AddParagraph(predmet.Nazov);
                 nazov.Format.Font.Size = strana.Nazov;
                 nazov.Format.SpaceAfter = 0;
+                nazov.Format.LineSpacingRule = LineSpacingRule.Single;
                 nazov.Format.SpaceBefore = Unit.FromPoint(Math.Max(0, (strana.Cislo - strana.Nazov) * 0.6));
                 var cisloStrany = r.Cells[2].AddParagraph();
                 cisloStrany.Format.Alignment = ParagraphAlignment.Right;
                 cisloStrany.Format.Font.Name = PismaDokumentu.Nadpis;
                 cisloStrany.Format.Font.Size = Math.Min(10, strana.Nazov);
                 cisloStrany.Format.Font.Color = Siva;
+                cisloStrany.Format.SpaceAfter = 0;
+                cisloStrany.Format.LineSpacingRule = LineSpacingRule.Single;
                 cisloStrany.Format.SpaceBefore = Unit.FromPoint(Math.Max(0, (strana.Cislo - Math.Min(10, strana.Nazov)) * 0.6));
                 cisloStrany.AddPageRefField(Zalozka(predmet.Id));
             }
