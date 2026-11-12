@@ -458,6 +458,16 @@ Podnet: súbory z exportu po jednom predmete sa vo Worde pýtali na aktualizáci
 - Word: `UpdateFieldsOnOpen` len pri obsahu alebo oddeľujúcej strane oblasti (čísla strán predmetov).
 - Samotest: súbor s jedným predmetom bez nadpisu oblasti a bez aktualizácie polí, osnova na šírku od 1. strany (PDF aj Word).
 
+## Bez ISCED a bez „Vytvorené … v programe SkVP“ (12. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+Podnet: v žiadnom dokumente (zostava aj súbory po jednom predmete) nesmie byť označenie ISCED (už sa nepoužíva) ani
+zmienka, kedy a v akom programe dokument vznikol.
+- `TitulnaStrana.BezIsced` (regex) – druh školy a riadky úvodnej strany; aplikuje sa pri načítaní `UdajeSkVP`, štruktúre
+  osnov, nastaveniach, vstavanom učebnom pláne (JSON už bez ISCED) a importe plánu z Excelu; `AktualnyStupenGymnazia` =
+  „Gymnázium – úplné stredné všeobecné vzdelanie“.
+- Text dole na úvodnej strane je predvolene prázdny; uložený text so „v programe SkVP“ zo starších verzií sa pri načítaní
+  vynechá (vlastný text zostane).
+- Vlastnosti PDF: Creator = autor (škola), program sa nespomína.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
