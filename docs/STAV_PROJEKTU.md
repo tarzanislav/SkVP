@@ -425,6 +425,21 @@ Podnet: „vytvor lepšie šablóny, tie tam ponechaj… prehľadaj internet pre
 - Samotest: 26 šablón + vlastná (PDF, Word, editor), JSON vlastnej šablóny, skupiny, prispôsobenie v okne,
   snímky `13n_vzhlad_skupina_klasicke.png`, `13o_vzhlad_prisposobenie.png`.
 
+## Export osnov „ako pri importe“ (12. 11. 2026, na vetve vyvoj/etapa1, nevydané)
+Podnet: upravené osnovy (štýly, zhustenie, úpravy v programe) uložiť do priečinkov tak, ako boli zdrojové súbory pri
+importe – s voľbou formátu (ako pôvodné / všetko Word / všetko PDF) a názvov (ako pôvodné / ako nové).
+- Import si pamätá cestu súboru v priečinku importu: `InfoOsnovy.CestaZdroja` (kľúč `cestaZdroja`,
+  „03 Človek a príroda/Fyzika.pdf“; pri jednotlivom súbore len názov), `PolozkaImportu.Koren/CestaVImporte`.
+- `ExportOsnov.UlozAkoPriImporte(volby, FormatPodlaImportu, povodneNazvy, priecinok, povodnyPriecinok)`: podpriečinky
+  podľa cesty importu; osnovy zo staršieho importu (len `Zdroj`) sa nájdu podľa názvu v pôvodnom priečinku (pri
+  viacerých rovnakých názvoch ten v priečinku oblasti), inak priečinok oblasti; osnovy bez importu do priečinka oblasti
+  s novým názvom (Word). Existujúce súbory sa neprepíšu (`ImportOsnov.VolnaCesta` – „(2)“), do pôvodného priečinka
+  importu sa ukladať nedá. Výsledok `VysledokExportuOsnov` (podľa importu / bez importu).
+- Okno exportu: tretia voľba „Ako pri importe“ (`SposobExportu`), formát a názvy súborov, pôvodný priečinok importu,
+  prehľad, koľko osnov pozná svoj súbor; snímka `13g2_okno_export_ako_pri_importe.png`.
+- Samotest: priečinky, pôvodné názvy a formáty, starší import podľa pôvodného priečinka (archív sa preskočí), všetko PDF
+  s novými názvami, neprepisovanie, ochrana pôvodného priečinka, okno exportu, zaznamenaná cesta pri importe.
+
 ## Plánované (z celkového zadania používateľa)
 6. Priečinky: zdrojový (len čítať) → pracovný → výstupný; rozpoznanie predmetu v dokumente, premenovanie „01 Názov predmetu“,
    prevod PDF → Word vlastnými prostriedkami (bez Wordu); archivácia starých osnov s rokom v názve a záznamom.
