@@ -2539,6 +2539,9 @@ internal static class Samotest
         exportOkno.Show();
         Pumpuj();
         Snimka(exportOkno, "13g_okno_export");
+        ((ExportOsnovViewModel)exportOkno.DataContext).AkoPriImporte = true;
+        Pumpuj();
+        Snimka(exportOkno, "13g2_okno_export_ako_pri_importe");
         exportOkno.Close();
         var importModel = new ImportOsnovViewModel(model);
         var vzor = Path.Combine(Databaza.PriecinokDokumentov, "05 Biológia 2026.docx");
